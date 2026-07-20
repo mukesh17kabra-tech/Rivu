@@ -1,0 +1,12 @@
+-- AlterTable
+ALTER TABLE "Shop" ADD COLUMN     "backgroundColor" TEXT NOT NULL DEFAULT '#ffffff',
+ADD COLUMN     "borderRadius" INTEGER NOT NULL DEFAULT 8,
+ADD COLUMN     "displayStyle" TEXT NOT NULL DEFAULT 'list',
+ADD COLUMN     "fontFamily" TEXT NOT NULL DEFAULT 'inherit',
+ADD COLUMN     "gridColumns" INTEGER NOT NULL DEFAULT 3,
+ADD COLUMN     "primaryColor" TEXT NOT NULL DEFAULT '#111111',
+ADD COLUMN     "rewardEnabled" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "rewardType" TEXT NOT NULL DEFAULT 'percentage',
+ADD COLUMN     "rewardValue" DOUBLE PRECISION NOT NULL DEFAULT 10,
+ADD COLUMN     "starColor" TEXT NOT NULL DEFAULT '#f5b400',
+ADD COLUMN     "textColor" TEXT NOT NULL DEFAULT '#333333';
