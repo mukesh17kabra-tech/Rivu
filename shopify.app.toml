@@ -6,7 +6,7 @@
 # https://partners.shopify.com
 
 name = "Rivu"
-client_id = "2135e06e19ed7ba1e0303c3a1f48116a"
+client_id = "your_shopify_api_key"
 application_url = "https://rivu-one.vercel.app"
 embedded = true
 
@@ -22,10 +22,15 @@ redirect_urls = [
   "https://rivu-one.vercel.app/api/auth/callback"
 ]
 
-# NOTE: no [[webhooks.subscriptions]] block — this app doesn't listen for
-# any Shopify webhooks (unlike the restock-alert app's inventory webhook).
+[webhooks]
+api_version = "2024-10"
+
+# No [[webhooks.subscriptions]] entries — this app doesn't listen for any
+# Shopify webhooks (unlike the restock-alert app's inventory webhook).
 # Reviews come in through the app's own /api/reviews/submit endpoint, not
-# a Shopify-triggered webhook.
+# a Shopify-triggered event. The [webhooks] block itself is still required
+# by the Shopify CLI even with zero subscriptions — omitting it entirely
+# (as the previous version of this file did) fails validation.
 
 # NOTE: no [app_proxy] section — same reasoning as the restock-alert app's
 # toml: an empty/commented-out [app_proxy] header is treated by the CLI as
