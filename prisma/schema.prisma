@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Shop {
+  id          String   @id @default(cuid())
+  shopDomain  String   @unique
+  accessToken String
+  plan        String   @default("free")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reviews Review[]
+}
+
+// A single customer review, either submitted through our own storefront
+// widget or imported later from another source. Merchant approves before
+// it shows publicly on the product page or becomes eligible for a UGC card.
+model Review {
+  id          String   @id @default(cuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  productId    String // Shopify product GID
+  productTitle String
+  productImageUrl String? // used as the background/photo in generated UGC cards
+
+  rating      Int      // 1-5
+  body        String   @db.Text
+  customerName String
+  photoUrl    String?  @db.Text // optional customer-submitted photo (stored as base64 data URI for simplicity)
+
+  approved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  ugcCards UgcCard[]
+
+  @@index([shopId, productId])
+  @@index([shopId, approved])
+}
+
+// A generated social-media graphic for a specific review + template combo.
+// Cached so re-downloading/re-sharing doesn't regenerate the image.
+model UgcCard {
+  id        String   @id @default(cuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  template  String   // e.g. "quote-minimal", "story-bold", "square-photo"
+  format    String   // "story" (1080x1920) | "post" (1080x1080)
+  imageUrl  String   // stored asset URL (Vercel Blob or similar)
+
+  createdAt DateTime @default(now())
+
+  @@index([reviewId])
+}

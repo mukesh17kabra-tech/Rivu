@@ -1,0 +1,42 @@
+# Shopify app configuration — used by the Shopify CLI (`shopify app dev`,
+# `shopify app deploy`) if you manage this app with the CLI instead of (or
+# alongside) the Partner Dashboard UI.
+#
+# Replace the placeholder values below with your real app's details from
+# https://partners.shopify.com
+
+name = "Rivu"
+client_id = "2135e06e19ed7ba1e0303c3a1f48116a"
+application_url = "https://rivu-one.vercel.app"
+embedded = true
+
+[access_scopes]
+# Matches the scope requested in lib/shopify.ts getInstallUrl()
+# Only read_products is needed — this app just needs to list products
+# (for the QR code generator page) and read titles/images. No write
+# access, no inventory/webhook access needed like the restock-alert app.
+scopes = "read_products"
+
+[auth]
+redirect_urls = [
+  "https://rivu-one.vercel.app/api/auth/callback"
+]
+
+# NOTE: no [[webhooks.subscriptions]] block — this app doesn't listen for
+# any Shopify webhooks (unlike the restock-alert app's inventory webhook).
+# Reviews come in through the app's own /api/reviews/submit endpoint, not
+# a Shopify-triggered webhook.
+
+# NOTE: no [app_proxy] section — same reasoning as the restock-alert app's
+# toml: an empty/commented-out [app_proxy] header is treated by the CLI as
+# "this feature is configured" and then demands url/subpath/prefix. Since
+# the widget and review page call the Vercel domain directly (CORS-enabled
+# API routes), no app proxy is needed. Add the section back only if you
+# want that routing style, with all fields filled in.
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+include_config_on_deploy = true
