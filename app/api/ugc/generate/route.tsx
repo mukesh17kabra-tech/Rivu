@@ -2,7 +2,7 @@ import { ImageResponse } from "@vercel/og";
 import { db } from "@/lib/db";
 import { NextRequest } from "next/server";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 // Renders a review as a downloadable social-media graphic. Called like:
 // /api/ugc/generate?reviewId=xxx&template=quote-minimal&format=story
