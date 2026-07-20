@@ -1,25 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import QRCode from "qrcode";
 
+// GET /api/qrcode?shop=...
 // GET /api/qrcode?shop=...&productId=...&productTitle=...&productImage=...
-// Returns a PNG QR code that, when scanned, opens the public review page
-// for that exact product. Meant to be printed on a card inside the
-// package, or shown on a thank-you screen after checkout.
+//
+// Without productId: generates ONE generic QR for the whole store — the
+// recommended option for packaging, since printing a different QR per
+// product doesn't scale. Scanning it asks the customer for their email,
+// looks up what they bought, then shows the review flow for that.
+//
+// With productId: generates a QR for one specific product (skips the
+// email step) — useful for a thank-you page shown right after checkout,
+// where the product is already known.
 export async function GET(req: NextRequest) {
   const shop = req.nextUrl.searchParams.get("shop");
   const productId = req.nextUrl.searchParams.get("productId");
   const productTitle = req.nextUrl.searchParams.get("productTitle") || "";
   const productImage = req.nextUrl.searchParams.get("productImage") || "";
 
-  if (!shop || !productId) {
-    return NextResponse.json({ error: "Missing shop or productId" }, { status: 400 });
+  if (!shop) {
+    return NextResponse.json({ error: "Missing shop" }, { status: 400 });
   }
 
   const reviewUrl = new URL(`${process.env.HOST}/review`);
   reviewUrl.searchParams.set("shop", shop);
-  reviewUrl.searchParams.set("productId", productId);
-  reviewUrl.searchParams.set("productTitle", productTitle);
-  if (productImage) reviewUrl.searchParams.set("productImage", productImage);
+  if (productId) {
+    reviewUrl.searchParams.set("productId", productId);
+    reviewUrl.searchParams.set("productTitle", productTitle);
+    if (productImage) reviewUrl.searchParams.set("productImage", productImage);
+  }
 
   const pngBuffer = await QRCode.toBuffer(reviewUrl.toString(), {
     type: "png",

@@ -13,10 +13,10 @@ export default async function ReviewPage({
 }) {
   const { shop, productId, productTitle, productImage } = await searchParams;
 
-  if (!shop || !productId) {
+  if (!shop) {
     return (
       <main className="min-h-screen bg-white flex items-center justify-center p-6">
-        <p className="text-sm text-gray-500">Missing shop or product information.</p>
+        <p className="text-sm text-gray-500">Missing store information.</p>
       </main>
     );
   }
@@ -34,7 +34,7 @@ export default async function ReviewPage({
     <ReviewFlow
       shop={shop}
       productId={productId}
-      productTitle={productTitle || "this product"}
+      productTitle={productTitle}
       productImage={productImage}
     />
   );

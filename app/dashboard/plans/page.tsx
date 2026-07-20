@@ -110,6 +110,7 @@ function PlanCard({
       {href && ctaLabel && !current && (
         <a
           href={href}
+          target="_top"
           className={`mt-5 inline-block rounded-md px-4 py-2 text-center text-sm font-medium transition-colors ${
             highlight ? "bg-emerald-400 text-black hover:bg-emerald-300" : "bg-white/10 text-white hover:bg-white/20"
           }`}

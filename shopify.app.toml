@@ -6,8 +6,8 @@
 # https://partners.shopify.com
 
 name = "Rivu"
-client_id = "2135e06e19ed7ba1e0303c3a1f48116a"
-application_url = "https://rivu-one.vercel.app"
+client_id = "your_shopify_api_key"
+application_url = "https://your-rivu-app.vercel.app"
 embedded = true
 
 [access_scopes]
@@ -15,11 +15,11 @@ embedded = true
 # Only read_products is needed — this app just needs to list products
 # (for the QR code generator page) and read titles/images. No write
 # access, no inventory/webhook access needed like the restock-alert app.
-scopes = "read_products"
+scopes = "read_products,read_orders"
 
 [auth]
 redirect_urls = [
-  "https://rivu-one.vercel.app/api/auth/callback"
+  "https://your-rivu-app.vercel.app/api/auth/callback"
 ]
 
 [webhooks]
@@ -44,3 +44,4 @@ embedded = false
 
 [build]
 automatically_update_urls_on_dev = true
+include_config_on_deploy = true

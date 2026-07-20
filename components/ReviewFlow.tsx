@@ -2,17 +2,32 @@
 
 import { useState } from "react";
 
+type Product = { productId: string; productTitle: string };
+
 export function ReviewFlow({
   shop,
-  productId,
-  productTitle,
+  productId: initialProductId,
+  productTitle: initialProductTitle,
   productImage,
 }: {
   shop: string;
-  productId: string;
-  productTitle: string;
+  productId?: string;
+  productTitle?: string;
   productImage?: string;
 }) {
+  // If a specific product was already given (old per-product QR still
+  // supported), skip straight past the email/product-picker step.
+  const [step, setStep] = useState<"email" | "pick-product" | "review">(
+    initialProductId ? "review" : "email"
+  );
+  const [email, setEmail] = useState("");
+  const [lookupError, setLookupError] = useState("");
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  const [productId, setProductId] = useState(initialProductId || "");
+  const [productTitle, setProductTitle] = useState(initialProductTitle || "");
+
   const [rating, setRating] = useState(0);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
@@ -21,6 +36,42 @@ export function ReviewFlow({
   const [photoDataUrl, setPhotoDataUrl] = useState<string | undefined>();
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+
+  async function handleEmailSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLookupLoading(true);
+    setLookupError("");
+    try {
+      const res = await fetch("/api/orders/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shop, email }),
+      });
+      const data = await res.json();
+      if (res.ok && data.products?.length) {
+        setProducts(data.products);
+        if (data.products.length === 1) {
+          setProductId(data.products[0].productId);
+          setProductTitle(data.products[0].productTitle);
+          setStep("review");
+        } else {
+          setStep("pick-product");
+        }
+      } else {
+        setLookupError(data.error || "Couldn't find an order with that email.");
+      }
+    } catch {
+      setLookupError("Network error, please try again.");
+    } finally {
+      setLookupLoading(false);
+    }
+  }
+
+  function pickProduct(p: Product) {
+    setProductId(p.productId);
+    setProductTitle(p.productTitle);
+    setStep("review");
+  }
 
   async function pickRating(stars: number) {
     setRating(stars);
@@ -45,9 +96,6 @@ export function ReviewFlow({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Resize/compress client-side before turning into a data URI, so we
-    // don't send huge base64 payloads (keeps things fast, avoids hitting
-    // serverless function body-size limits).
     const img = new Image();
     const reader = new FileReader();
     reader.onload = () => {
@@ -99,6 +147,62 @@ export function ReviewFlow({
     }
   }
 
+  // ---- Step 1: email (generic QR, no product known yet) ----
+  if (step === "email") {
+    return (
+      <main className="min-h-screen bg-white px-5 py-8">
+        <div className="mx-auto max-w-sm">
+          <h1 className="mb-1 text-lg font-semibold text-gray-900">Leave a review</h1>
+          <p className="mb-6 text-sm text-gray-500">
+            Enter the email you used to order — we&apos;ll pull up what you bought.
+          </p>
+          <form onSubmit={handleEmailSubmit} className="space-y-4">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@email.com"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            />
+            {lookupError && <p className="text-sm text-red-500">{lookupError}</p>}
+            <button
+              type="submit"
+              disabled={lookupLoading}
+              className="w-full rounded-md bg-black py-3 text-sm font-medium text-white disabled:opacity-60"
+            >
+              {lookupLoading ? "Looking up your order..." : "Continue"}
+            </button>
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+  // ---- Step 2: pick which product (if the order had more than one) ----
+  if (step === "pick-product") {
+    return (
+      <main className="min-h-screen bg-white px-5 py-8">
+        <div className="mx-auto max-w-sm">
+          <h1 className="mb-1 text-lg font-semibold text-gray-900">What would you like to review?</h1>
+          <p className="mb-6 text-sm text-gray-500">You bought a few things — pick one to start.</p>
+          <div className="space-y-2">
+            {products.map((p) => (
+              <button
+                key={p.productId}
+                onClick={() => pickProduct(p)}
+                className="w-full rounded-md border border-gray-200 px-3 py-3 text-left text-sm text-gray-800 hover:border-gray-400"
+              >
+                {p.productTitle}
+              </button>
+            ))}
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ---- Step 3: done ----
   if (status === "done") {
     return (
       <main className="min-h-screen bg-white flex items-center justify-center p-6">
@@ -113,6 +217,7 @@ export function ReviewFlow({
     );
   }
 
+  // ---- Step 3: rating + suggestions + submit ----
   return (
     <main className="min-h-screen bg-white px-5 py-8">
       <div className="mx-auto max-w-md">
@@ -126,7 +231,6 @@ export function ReviewFlow({
         <h1 className="mb-1 text-lg font-semibold text-gray-900">{productTitle}</h1>
         <p className="mb-6 text-sm text-gray-500">How would you rate it?</p>
 
-        {/* Star selector */}
         <div className="mb-6 flex gap-2">
           {[1, 2, 3, 4, 5].map((star) => (
             <button

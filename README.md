@@ -32,7 +32,7 @@ as scanning a code and tapping a suggestion.
 ## Setup
 1. Create a Neon Postgres project → copy `DATABASE_URL` / `DIRECT_URL`
 2. Create a Shopify Partner app → copy `SHOPIFY_API_KEY` / `SHOPIFY_API_SECRET`
-   — required scope: `read_products`
+   — required scopes: `read_products,read_orders`
 3. `npm install`
 4. `npx prisma migrate dev --name init`
 5. Deploy to Vercel, set all env vars from `.env.example`
