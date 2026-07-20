@@ -1,14 +1,16 @@
 import { db } from "@/lib/db";
 import { ReviewCard } from "@/components/ReviewCard";
 import { NavBar } from "@/components/NavBar";
+import { resolveShop } from "@/lib/shop-context";
 import type { Review } from "@prisma/client";
 
 export default async function ReviewsDashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ shop?: string }>;
+  searchParams: Promise<{ shop?: string; host?: string }>;
 }) {
-  const { shop } = await searchParams;
+  const { shop: shopParam, host } = await searchParams;
+  const shop = resolveShop(shopParam, host);
 
   if (!shop) {
     return <div className="p-8 text-sm text-gray-500">Missing shop parameter.</div>;
@@ -39,7 +41,7 @@ export default async function ReviewsDashboard({
           <h1 className="mt-1 text-2xl font-semibold tracking-tight">{shopRecord.shopDomain}</h1>
         </header>
 
-        <NavBar shop={shop} active="reviews" />
+        <NavBar shop={shop} host={host} active="reviews" />
 
         <section className="mb-12">
           <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-white/50">

@@ -2,15 +2,21 @@ import Link from "next/link";
 
 export function NavBar({
   shop,
+  host,
   active,
 }: {
   shop: string;
+  host?: string | null;
   active: "reviews" | "qrcodes" | "plans";
 }) {
+  const qs = new URLSearchParams({ shop });
+  if (host) qs.set("host", host);
+  const query = qs.toString();
+
   const items: { key: typeof active; label: string; href: string }[] = [
-    { key: "reviews", label: "Reviews", href: `/dashboard/reviews?shop=${shop}` },
-    { key: "qrcodes", label: "QR codes", href: `/dashboard/qrcodes?shop=${shop}` },
-    { key: "plans", label: "Plans", href: `/dashboard/plans?shop=${shop}` },
+    { key: "reviews", label: "Reviews", href: `/dashboard/reviews?${query}` },
+    { key: "qrcodes", label: "QR codes", href: `/dashboard/qrcodes?${query}` },
+    { key: "plans", label: "Plans", href: `/dashboard/plans?${query}` },
   ];
 
   return (

@@ -1,4 +1,26 @@
-export default function Home() {
+import { redirect } from "next/navigation";
+import { resolveShop } from "@/lib/shop-context";
+
+// This is the App URL Shopify opens when a merchant clicks the app in
+// their Admin sidebar. If we can determine the shop (from `shop` or by
+// decoding `host`), send the merchant straight to the Reviews dashboard
+// instead of showing this plain instructional page.
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ shop?: string; host?: string }>;
+}) {
+  const { shop: shopParam, host } = await searchParams;
+  const shop = resolveShop(shopParam, host);
+
+  if (shop) {
+    const params = new URLSearchParams({ shop });
+    if (host) params.set("host", host);
+    redirect(`/dashboard/reviews?${params.toString()}`);
+  }
+
+  // Only shown if someone opens the bare Vercel URL directly with no
+  // shop/host param — e.g. you, testing, not a merchant inside Shopify Admin.
   return (
     <main className="min-h-screen bg-[#0B0D0F] text-[#E7E9EA] flex items-center justify-center">
       <div className="max-w-md text-center px-6">

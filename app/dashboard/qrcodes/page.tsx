@@ -1,13 +1,15 @@
 import { db } from "@/lib/db";
 import { getProducts } from "@/lib/shopify";
 import { NavBar } from "@/components/NavBar";
+import { resolveShop } from "@/lib/shop-context";
 
 export default async function QRCodesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ shop?: string }>;
+  searchParams: Promise<{ shop?: string; host?: string }>;
 }) {
-  const { shop } = await searchParams;
+  const { shop: shopParam, host } = await searchParams;
+  const shop = resolveShop(shopParam, host);
 
   if (!shop) {
     return <div className="p-8 text-sm text-gray-500">Missing shop parameter.</div>;
@@ -38,7 +40,7 @@ export default async function QRCodesPage({
           </p>
         </header>
 
-        <NavBar shop={shop} active="qrcodes" />
+        <NavBar shop={shop} host={host} active="qrcodes" />
 
         {fetchError ? (
           <p className="rounded-lg border border-red-400/30 bg-red-400/[0.06] p-4 text-sm text-red-300">
