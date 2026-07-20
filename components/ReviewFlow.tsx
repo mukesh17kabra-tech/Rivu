@@ -36,6 +36,7 @@ export function ReviewFlow({
   const [photoDataUrl, setPhotoDataUrl] = useState<string | undefined>();
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [discountCode, setDiscountCode] = useState<string | undefined>();
 
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -136,6 +137,7 @@ export function ReviewFlow({
       });
       const data = await res.json();
       if (res.ok) {
+        setDiscountCode(data.discountCode);
         setStatus("done");
       } else {
         setStatus("error");
@@ -209,9 +211,15 @@ export function ReviewFlow({
         <div className="max-w-sm text-center">
           <p className="text-2xl mb-2">🎉</p>
           <h1 className="text-lg font-semibold mb-2">Thanks for your review!</h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 mb-4">
             It&apos;ll appear on the product page once approved.
           </p>
+          {discountCode && (
+            <div className="rounded-lg border border-dashed border-gray-300 p-4">
+              <p className="mb-1 text-xs text-gray-500">Here&apos;s a thank-you discount:</p>
+              <p className="text-lg font-mono font-semibold tracking-wide">{discountCode}</p>
+            </div>
+          )}
         </div>
       </main>
     );

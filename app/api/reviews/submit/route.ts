@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { createReviewRewardDiscount } from "@/lib/shopify";
 
 const schema = z.object({
   shop: z.string().min(1),
@@ -53,5 +54,22 @@ export async function POST(req: NextRequest) {
     data: { shopId: shopRecord.id, approved: false, ...data },
   });
 
-  return withCors(NextResponse.json({ success: true }));
+  // Optional: reward the reviewer with a one-time discount code
+  // immediately, regardless of approval status — the review itself is
+  // genuine regardless of whether it ends up published.
+  let discountCode: string | undefined;
+  if (shopRecord.rewardEnabled) {
+    try {
+      discountCode = await createReviewRewardDiscount(shop, shopRecord.accessToken, {
+        type: shopRecord.rewardType as "percentage" | "fixed_amount",
+        value: shopRecord.rewardValue,
+      });
+    } catch (err) {
+      console.error(`[reviews/submit] Failed to create reward discount for ${shop}:`, err);
+      // Don't fail the whole review submission just because the reward
+      // discount couldn't be created — the review itself still saved fine.
+    }
+  }
+
+  return withCors(NextResponse.json({ success: true, discountCode }));
 }

@@ -16,6 +16,25 @@ model Shop {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Widget design customization — lets merchants match their store's
+  // branding instead of a fixed look, and choose how reviews are laid out.
+  displayStyle    String @default("list")    // "list" | "grid" | "carousel"
+  gridColumns     Int    @default(3)          // only used when displayStyle = "grid"
+  primaryColor    String @default("#111111")  // buttons, "write a review" CTA
+  starColor       String @default("#f5b400")
+  backgroundColor String @default("#ffffff")
+  textColor       String @default("#333333")
+  borderRadius    Int    @default(8)          // px, applied to cards/buttons
+  fontFamily      String @default("inherit")
+
+  // Optional reward for leaving a review — merchant toggles this on and
+  // picks a discount type/value. When enabled, every review submission
+  // generates a one-time Shopify discount code shown right on the
+  // "thanks for your review" screen (no email needed).
+  rewardEnabled Boolean @default(false)
+  rewardType    String  @default("percentage") // "percentage" | "fixed_amount"
+  rewardValue   Float   @default(10)            // e.g. 10 = 10% or $10 depending on type
+
   reviews Review[]
 }
 

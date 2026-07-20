@@ -3,7 +3,7 @@ const API_VERSION = "2024-10";
 export function getInstallUrl(shop: string, state: string) {
   // read_orders is needed so the QR review flow can look up what a
   // customer bought using just their email — no per-product QR needed.
-  const scopes = "read_products,read_orders";
+  const scopes = "read_products,read_orders,write_discounts";
   const redirectUri = `${process.env.HOST}/api/auth/callback`;
   const clientId = process.env.SHOPIFY_API_KEY;
   return (
@@ -74,4 +74,61 @@ export async function getProductsFromOrdersByEmail(
     productId: String(productId),
     productTitle,
   }));
+}
+
+// Creates a one-time-use discount code as a thank-you for leaving a
+// review. Uses the legacy Price Rule + Discount Code REST resources,
+// which are simple and reliable for this single-code-at-a-time use case.
+export async function createReviewRewardDiscount(
+  shop: string,
+  accessToken: string,
+  params: { type: "percentage" | "fixed_amount"; value: number }
+) {
+  const code = `REVIEW-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+  const priceRuleRes = await fetch(`https://${shop}/admin/api/${API_VERSION}/price_rules.json`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Access-Token": accessToken,
+    },
+    body: JSON.stringify({
+      price_rule: {
+        title: `Review reward — ${code}`,
+        target_type: "line_item",
+        target_selection: "all",
+        allocation_method: "across",
+        value_type: params.type,
+        value: params.type === "percentage" ? `-${params.value}` : `-${params.value}`,
+        customer_selection: "all",
+        usage_limit: 1,
+        starts_at: new Date().toISOString(),
+      },
+    }),
+  });
+
+  if (!priceRuleRes.ok) {
+    throw new Error(`Failed to create price rule: ${priceRuleRes.status} ${await priceRuleRes.text()}`);
+  }
+
+  const priceRuleData = await priceRuleRes.json();
+  const priceRuleId = priceRuleData.price_rule.id;
+
+  const discountRes = await fetch(
+    `https://${shop}/admin/api/${API_VERSION}/price_rules/${priceRuleId}/discount_codes.json`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": accessToken,
+      },
+      body: JSON.stringify({ discount_code: { code } }),
+    }
+  );
+
+  if (!discountRes.ok) {
+    throw new Error(`Failed to create discount code: ${discountRes.status} ${await discountRes.text()}`);
+  }
+
+  return code;
 }

@@ -15,7 +15,7 @@ embedded = true
 # Only read_products is needed — this app just needs to list products
 # (for the QR code generator page) and read titles/images. No write
 # access, no inventory/webhook access needed like the restock-alert app.
-scopes = "read_products,read_orders"
+scopes = "read_products,read_orders,write_discounts"
 
 [auth]
 redirect_urls = [

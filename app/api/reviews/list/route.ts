@@ -54,6 +54,16 @@ export async function GET(req: NextRequest) {
     NextResponse.json({
       reviews,
       summary: { total, average, breakdown: counts },
+      design: {
+        displayStyle: shopRecord.displayStyle,
+        gridColumns: shopRecord.gridColumns,
+        primaryColor: shopRecord.primaryColor,
+        starColor: shopRecord.starColor,
+        backgroundColor: shopRecord.backgroundColor,
+        textColor: shopRecord.textColor,
+        borderRadius: shopRecord.borderRadius,
+        fontFamily: shopRecord.fontFamily,
+      },
     })
   );
 }

@@ -85,3 +85,50 @@ scheme.
 Add another `if (template === "...")` branch in
 `app/api/ugc/generate/route.tsx` — each is just JSX + inline styles
 (Satori, which `@vercel/og` uses, supports a subset of CSS).
+
+## Design customization (Judge.me-style widget theming)
+
+Merchants control the storefront widget's look from `/dashboard/design` —
+no code editing needed:
+
+- **Layout**: list (stacked), grid (2-5 columns), or carousel (horizontal scroll)
+- **Colors**: primary/CTA color, star color, card background, text color
+- **Corner roundness** and **font family**
+
+Settings are stored on the `Shop` row (`displayStyle`, `gridColumns`,
+`primaryColor`, `starColor`, `backgroundColor`, `textColor`,
+`borderRadius`, `fontFamily`) and read by `/api/reviews/list` alongside
+the actual reviews — both `public/widget.js` (standalone script tag) and
+`extensions/rivu-reviews/assets/rivu-widget.js` (theme app extension)
+apply these settings live, so there's no rebuild/redeploy needed when a
+merchant changes their design — it updates the moment they hit Save.
+
+## Rating badge for product cards
+
+A separate, lightweight block — `Rivu Rating Badge` — shows just the
+average stars + review count (no form). Add it via **Add block → Apps →
+Rivu Rating Badge** on:
+- Product card sections (collection/search pages) — shows rating at a
+  glance before the customer even opens the product
+- The bottom of the product page, if you want the compact version instead
+  of (or alongside) the full `Rivu Reviews` block
+
+Uses `/api/reviews/summary` (average + count only, no full review text —
+much lighter than the full reviews list, safe to add to every card on a
+collection page without a performance hit).
+
+## Review reward (optional discount for reviewers)
+
+Merchants can enable an automatic discount code shown to every customer
+right after they submit a review, from `/dashboard/design` → "Review
+reward" section:
+- Toggle on/off
+- Percentage off or fixed-amount off
+- Any value
+
+Implementation: `lib/shopify.ts` → `createReviewRewardDiscount()` creates
+a one-time-use Shopify discount code (via Price Rule + Discount Code REST
+resources) the moment a review is submitted — shown directly on the
+"thanks for your review" screen, no email needed. Requires the
+`write_discounts` scope (already added to `shopify.app.toml` and
+`lib/shopify.ts`).

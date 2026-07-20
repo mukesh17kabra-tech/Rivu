@@ -1,23 +1,16 @@
 /**
- * Review Widget — supports list, grid, and carousel layouts, plus full
- * color/font customization set by the merchant in the app dashboard
- * (/dashboard/design). Add this to your product template:
- *
- * <div id="review-widget"
- *      data-shop="{{ shop.permanent_domain }}"
- *      data-product-id="{{ product.id }}"
- *      data-product-title="{{ product.title | escape }}"
- *      data-product-image="{{ product.featured_image | image_url: width: 800 }}">
- * </div>
- * <script src="https://YOUR-APP-DOMAIN.vercel.app/widget.js" async></script>
+ * Rivu Reviews Widget — Theme App Extension version.
+ * Loaded automatically by blocks/reviews.liquid when a merchant adds the
+ * "Rivu Reviews" app block via the theme editor. API_BASE comes from a
+ * data attribute (set in the liquid block) instead of the script's own
+ * src, since Shopify serves this from its own asset CDN.
+ * Supports list, grid, and carousel layouts, plus full color/font
+ * customization set by the merchant in the app dashboard (/dashboard/design).
  */
 (function () {
-  const API_BASE = document.currentScript?.src
-    ? new URL(document.currentScript.src).origin
-    : "";
-
   async function render(el) {
-    const { shop, productId, productTitle, productImage } = el.dataset;
+    const { shop, productId, productTitle, productImage, apiBase } = el.dataset;
+    const API_BASE = apiBase || "";
 
     el.innerHTML = `<p style="font-size:14px;color:#888;">Loading reviews...</p>`;
 
@@ -179,5 +172,5 @@
     });
   }
 
-  document.querySelectorAll("#review-widget").forEach(render);
+  document.querySelectorAll(".rivu-review-widget").forEach(render);
 })();

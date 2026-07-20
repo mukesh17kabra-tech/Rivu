@@ -1,0 +1,33 @@
+{% comment %}
+  Rivu Rating Badge — a lightweight block showing just the average star
+  rating + review count. Unlike the full "Rivu Reviews" block (which shows
+  the whole review list + form), this is meant for product CARDS on
+  collection/search pages, or a compact spot on the product page.
+  Add via: Add block → Apps → Rivu Rating Badge
+{% endcomment %}
+
+<div
+  id="rivu-rating-badge-{{ block.id }}"
+  class="rivu-rating-badge"
+  data-shop="{{ shop.permanent_domain }}"
+  data-product-id="{{ product.id }}"
+  data-api-base="{{ block.settings.api_base }}"
+  {{ block.shopify_attributes }}
+></div>
+<script src="{{ 'rivu-rating-badge.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Rivu Rating Badge",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "api_base",
+      "label": "App URL",
+      "default": "https://rivu-one.vercel.app",
+      "info": "Leave as-is unless instructed otherwise by the app developer."
+    }
+  ]
+}
+{% endschema %}
