@@ -56,6 +56,8 @@ export default async function SettingsPage({
             reminderEnabled: shopRecord.reminderEnabled,
             reminderDelayDays: shopRecord.reminderDelayDays,
             fromEmail: shopRecord.fromEmail || "",
+            emailSubject: shopRecord.emailSubject,
+            emailBodyTemplate: shopRecord.emailBodyTemplate,
           }}
         />
       </div>

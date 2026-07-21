@@ -225,3 +225,32 @@ When filling out Shopify's Protected Customer Data form, these three
 features are what let you honestly answer "Yes" to: telling merchants
 what data you process, respecting consent/opt-out decisions, and having
 a retention period.
+
+## UGC image generation — fixed to use next/og
+
+`app/api/ugc/generate/route.tsx` now imports `ImageResponse` from
+**`next/og`** (Next.js's own built-in export) instead of the raw
+`@vercel/og` package. The raw package can fail at runtime in some Vercel
+serverless environments (native binary / platform mismatches for its PNG
+renderer) even though it type-checks and builds fine locally — `next/og`
+is Next.js's officially supported wrapper for exactly this use case and
+avoids that class of failure. `@vercel/og` has been removed from
+`package.json` since it's no longer used.
+
+Star ratings in generated images are drawn as inline SVG shapes, not text
+characters (★/☆) — Satori (the rendering engine both packages use) often
+can't render those glyphs without an explicitly embedded font, which was
+silently breaking image generation before this fix.
+
+## Editable email template (Email Requests settings)
+
+`/dashboard/settings` → Email Requests now has editable **Subject** and
+**Body template** fields (previously the reminder email's wording was
+hardcoded). Supports variables:
+- `{{first_name}}` — customer's name
+- `{{shop_name}}` — store domain
+- `{{review_link}}` — direct link to leave a review for that product
+- `{{product_name}}` — the purchased product's title
+
+`lib/email.ts` substitutes these before sending; the review link is
+automatically turned into a clickable button in the resulting email.

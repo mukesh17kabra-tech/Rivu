@@ -27,6 +27,8 @@ type ShopSettings = {
   reminderEnabled: boolean;
   reminderDelayDays: number;
   fromEmail: string;
+  emailSubject: string;
+  emailBodyTemplate: string;
 };
 
 const TABS = [
@@ -98,6 +100,8 @@ export function SettingsTabs({
                 reminderEnabled: shopRecord.reminderEnabled,
                 reminderDelayDays: shopRecord.reminderDelayDays,
                 fromEmail: shopRecord.fromEmail,
+                emailSubject: shopRecord.emailSubject,
+                emailBodyTemplate: shopRecord.emailBodyTemplate,
               }}
             />
             <div className="border-t border-white/10 pt-8">

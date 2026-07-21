@@ -10,6 +10,8 @@ const schema = z.object({
     (val) => (val === "" ? null : val),
     z.string().email().nullable()
   ),
+  emailSubject: z.string().min(1).max(200),
+  emailBodyTemplate: z.string().min(1).max(5000),
 });
 
 export async function POST(req: NextRequest) {

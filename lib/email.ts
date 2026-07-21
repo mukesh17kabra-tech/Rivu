@@ -19,32 +19,68 @@ export async function sendReviewReminderEmail(params: {
   to: string;
   customerName: string;
   productTitle: string;
+  shopName: string;
   productImageUrl?: string;
   reviewUrl: string;
   unsubscribeUrl: string;
   replyToEmail?: string; // merchant's own address — customer sees/replies here, but "From" stays on our verified domain
+  subjectTemplate: string;
+  bodyTemplate: string;
 }) {
-  const { to, customerName, productTitle, productImageUrl, reviewUrl, unsubscribeUrl, replyToEmail } = params;
+  const {
+    to,
+    customerName,
+    productTitle,
+    shopName,
+    productImageUrl,
+    reviewUrl,
+    unsubscribeUrl,
+    replyToEmail,
+    subjectTemplate,
+    bodyTemplate,
+  } = params;
+
+  // Merchant-editable subject/body, with {{variable}} placeholders filled
+  // in — matches the variables shown in the app's Email Requests settings:
+  // {{first_name}}, {{shop_name}}, {{review_link}}, {{product_name}}
+  const fillTemplate = (text: string) =>
+    text
+      .replace(/\{\{\s*first_name\s*\}\}/g, customerName || "there")
+      .replace(/\{\{\s*shop_name\s*\}\}/g, shopName)
+      .replace(/\{\{\s*review_link\s*\}\}/g, reviewUrl)
+      .replace(/\{\{\s*product_name\s*\}\}/g, productTitle);
+
+  const subject = fillTemplate(subjectTemplate);
+  const bodyText = fillTemplate(bodyTemplate);
+
+  // Convert the plain-text template (with \n line breaks, as edited in a
+  // <textarea>) into simple HTML, turning the review link into a clickable
+  // button and preserving line breaks otherwise.
+  const bodyHtml = bodyText
+    .split("\n")
+    .map((line) =>
+      line.includes(reviewUrl)
+        ? line.replace(
+            reviewUrl,
+            `</p><a href="${reviewUrl}" style="display:inline-block;padding:12px 20px;background:#111;color:#fff;text-decoration:none;border-radius:6px;margin:8px 0;">Leave a review</a><p>`
+          )
+        : line
+    )
+    .join("<br/>");
 
   return getResend().emails.send({
     from: process.env.EMAIL_FROM || "reviews@yourapp.com",
     replyTo: replyToEmail || undefined,
     to,
-    subject: `How's your ${productTitle} working out?`,
+    subject,
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2>We'd love your feedback</h2>
-        <p>Hi ${customerName || "there"}, you recently picked up:</p>
         ${
           productImageUrl
-            ? `<img src="${productImageUrl}" style="width:100%;max-width:300px;border-radius:8px;margin:12px 0;" />`
+            ? `<img src="${productImageUrl}" style="width:100%;max-width:300px;border-radius:8px;margin:0 0 12px;" />`
             : ""
         }
-        <p><strong>${productTitle}</strong></p>
-        <p>Got a minute to share how it's going? It really helps other shoppers.</p>
-        <a href="${reviewUrl}" style="display:inline-block;padding:12px 20px;background:#111;color:#fff;text-decoration:none;border-radius:6px;margin-top:8px;">
-          Leave a review
-        </a>
+        <p>${bodyHtml}</p>
         <p style="color:#999;font-size:12px;margin-top:32px;">
           Don't want these emails? <a href="${unsubscribeUrl}" style="color:#999;">Unsubscribe</a>
         </p>

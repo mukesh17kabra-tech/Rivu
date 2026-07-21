@@ -6,6 +6,8 @@ type ReminderSettings = {
   reminderEnabled: boolean;
   reminderDelayDays: number;
   fromEmail: string;
+  emailSubject: string;
+  emailBodyTemplate: string;
 };
 
 export function ReminderForm({ shop, initial }: { shop: string; initial: ReminderSettings }) {
@@ -86,6 +88,42 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
             that product.
           </p>
         </div>
+      )}
+
+      {settings.reminderEnabled && (
+        <>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-white/70">Email subject</label>
+            <input
+              type="text"
+              value={settings.emailSubject}
+              onChange={(e) => {
+                setSettings((s) => ({ ...s, emailSubject: e.target.value }));
+                setSaved(false);
+              }}
+              className="w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-white/70">Email body template</label>
+            <textarea
+              value={settings.emailBodyTemplate}
+              onChange={(e) => {
+                setSettings((s) => ({ ...s, emailBodyTemplate: e.target.value }));
+                setSaved(false);
+              }}
+              className="w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white min-h-[140px] font-mono"
+            />
+            <p className="mt-2 text-xs text-white/40">
+              Available variables:{" "}
+              <code className="text-emerald-300">{"{{first_name}}"}</code>,{" "}
+              <code className="text-emerald-300">{"{{shop_name}}"}</code>,{" "}
+              <code className="text-emerald-300">{"{{review_link}}"}</code>,{" "}
+              <code className="text-emerald-300">{"{{product_name}}"}</code>
+            </p>
+          </div>
+        </>
       )}
 
       <button

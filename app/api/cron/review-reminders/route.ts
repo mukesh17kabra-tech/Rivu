@@ -53,10 +53,13 @@ export async function GET(req: NextRequest) {
           to: req.customerEmail,
           customerName: req.customerName || "there",
           productTitle: req.productTitle,
+          shopName: shop.shopDomain,
           productImageUrl: req.productImageUrl || undefined,
           reviewUrl,
           unsubscribeUrl,
           replyToEmail: shop.fromEmail || undefined,
+          subjectTemplate: shop.emailSubject,
+          bodyTemplate: shop.emailBodyTemplate,
         });
         await db.pendingReviewRequest.update({
           where: { id: req.id },

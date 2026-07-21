@@ -53,6 +53,8 @@ model Shop {
   reminderEnabled   Boolean @default(false)
   reminderDelayDays Int     @default(7) // days after order before sending
   fromEmail         String? // merchant's own address, used as Reply-To on reminder emails (actual "From" always stays on the app's own verified sending domain)
+  emailSubject      String  @default("How did you like your purchase?")
+  emailBodyTemplate String  @default("Hi {{first_name}},\n\nThank you for your recent order. We'd love to hear your feedback!\n\nLeave a review here: {{review_link}}\n\nThanks,\n{{shop_name}}") @db.Text
 
   reviews          Review[]
   reminderRequests PendingReviewRequest[]
