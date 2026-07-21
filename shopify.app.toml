@@ -6,7 +6,7 @@
 # https://partners.shopify.com
 
 name = "Rivu"
-client_id = "your_shopify_api_key"
+client_id = "2135e06e19ed7ba1e0303c3a1f48116a"
 application_url = "https://rivu-one.vercel.app"
 embedded = true
 
