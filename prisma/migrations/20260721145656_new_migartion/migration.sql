@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Shop" ADD COLUMN     "formAlign" TEXT NOT NULL DEFAULT 'left',
+ADD COLUMN     "formMaxWidth" INTEGER NOT NULL DEFAULT 420;
