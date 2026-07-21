@@ -7,7 +7,7 @@ export function NavBar({
 }: {
   shop: string;
   host?: string | null;
-  active: "home" | "reviews" | "qrcodes" | "settings";
+  active: "home" | "reviews" | "qrcodes" | "plans" | "settings";
 }) {
   const qs = new URLSearchParams({ shop });
   if (host) qs.set("host", host);
@@ -17,6 +17,7 @@ export function NavBar({
     { key: "home", label: "Dashboard", href: `/dashboard/home?${query}` },
     { key: "reviews", label: "Reviews", href: `/dashboard/reviews?${query}` },
     { key: "qrcodes", label: "QR codes", href: `/dashboard/qrcodes?${query}` },
+    { key: "plans", label: "Plans", href: `/dashboard/plans?${query}` },
     { key: "settings", label: "Settings", href: `/dashboard/settings?${query}` },
   ];
 

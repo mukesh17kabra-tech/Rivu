@@ -4,7 +4,6 @@ import { useState } from "react";
 import { DesignForm } from "@/components/DesignForm";
 import { RewardForm } from "@/components/RewardForm";
 import { ReminderForm } from "@/components/ReminderForm";
-import { PlanCards } from "@/components/PlanCards";
 
 type ShopSettings = {
   plan: string;
@@ -34,7 +33,6 @@ const TABS = [
   { key: "installation", label: "Installation" },
   { key: "widget", label: "Widget Settings" },
   { key: "email", label: "Email Requests" },
-  { key: "billing", label: "Plan & Billing" },
 ] as const;
 
 export function SettingsTabs({
@@ -119,7 +117,6 @@ export function SettingsTabs({
           </div>
         )}
 
-        {tab === "billing" && <PlanCards shop={shop} currentPlan={shopRecord.plan} />}
       </div>
     </div>
   );
