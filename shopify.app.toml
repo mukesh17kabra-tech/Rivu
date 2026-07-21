@@ -7,7 +7,7 @@
 
 name = "Rivu"
 client_id = "2135e06e19ed7ba1e0303c3a1f48116a"
-application_url = "https://https://rivu-one.vercel.app"
+application_url = "https://rivu-one.vercel.app"
 embedded = true
 
 [access_scopes]
@@ -19,7 +19,7 @@ scopes = "read_products,read_orders,write_discounts"
 
 [auth]
 redirect_urls = [
-  "https://https://rivu-one.vercel.app/api/auth/callback"
+  "https://rivu-one.vercel.app/api/auth/callback"
 ]
 
 [webhooks]
@@ -44,4 +44,3 @@ embedded = false
 
 [build]
 automatically_update_urls_on_dev = true
-include_config_on_deploy = true
