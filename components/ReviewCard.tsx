@@ -89,7 +89,7 @@ export function ReviewCard({
               className="rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
             >
               {TEMPLATES.map((t) => (
-                <option key={t.value} value={t.value}>
+                <option key={t.value} value={t.value} style={{ color: "#000" }}>
                   {t.label}
                 </option>
               ))}
@@ -100,7 +100,7 @@ export function ReviewCard({
               className="rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
             >
               {FORMATS.map((f) => (
-                <option key={f.value} value={f.value}>
+                <option key={f.value} value={f.value} style={{ color: "#000" }}>
                   {f.label}
                 </option>
               ))}
@@ -111,13 +111,22 @@ export function ReviewCard({
             alt="UGC preview"
             className="w-full max-w-[220px] rounded-md border border-white/10"
           />
-          <a
-            href={imageUrl}
-            download={`review-${review.id}.png`}
-            className="inline-block rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20"
-          >
-            Download image
-          </a>
+          <div className="flex gap-2">
+            <a
+              href={imageUrl}
+              download={`review-${review.id}.png`}
+              className="inline-block rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20"
+            >
+              Download image
+            </a>
+            <button
+              onClick={() => moderate("reject")}
+              disabled={busy}
+              className="inline-block rounded-md bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-300 hover:bg-red-500/20 disabled:opacity-60"
+            >
+              Delete review
+            </button>
+          </div>
         </div>
       )}
     </div>

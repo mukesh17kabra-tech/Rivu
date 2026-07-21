@@ -27,5 +27,5 @@ export async function GET(req: NextRequest) {
   const params = new URLSearchParams({ shop });
   if (host) params.set("host", host);
 
-  return NextResponse.redirect(`${process.env.HOST}/dashboard/reviews?${params.toString()}`);
+  return NextResponse.redirect(`${process.env.HOST}/dashboard/home?${params.toString()}`);
 }

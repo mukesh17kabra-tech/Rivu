@@ -7,17 +7,17 @@ export function NavBar({
 }: {
   shop: string;
   host?: string | null;
-  active: "reviews" | "qrcodes" | "plans" | "design";
+  active: "home" | "reviews" | "qrcodes" | "settings";
 }) {
   const qs = new URLSearchParams({ shop });
   if (host) qs.set("host", host);
   const query = qs.toString();
 
   const items: { key: typeof active; label: string; href: string }[] = [
+    { key: "home", label: "Dashboard", href: `/dashboard/home?${query}` },
     { key: "reviews", label: "Reviews", href: `/dashboard/reviews?${query}` },
-    { key: "design", label: "Design", href: `/dashboard/design?${query}` },
     { key: "qrcodes", label: "QR codes", href: `/dashboard/qrcodes?${query}` },
-    { key: "plans", label: "Plans", href: `/dashboard/plans?${query}` },
+    { key: "settings", label: "Settings", href: `/dashboard/settings?${query}` },
   ];
 
   return (

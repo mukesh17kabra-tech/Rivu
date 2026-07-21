@@ -93,15 +93,18 @@
           .join("")
       : "";
 
+    const rootTextAlign = design.formAlign === "center" ? "center" : design.formAlign === "right" ? "right" : "left";
+    const summaryJustify = design.formAlign === "center" ? "center" : design.formAlign === "right" ? "flex-end" : "flex-start";
+
     const summaryHtml = summary.total
       ? `
-      <div style="display:flex;align-items:center;gap:20px;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;justify-content:${summaryJustify};gap:20px;margin-bottom:18px;">
         <div style="text-align:center;">
           <div style="font-size:30px;font-weight:700;color:${design.textColor};line-height:1;">${summary.average}</div>
           <div style="color:${design.starColor};font-size:13px;margin-top:2px;">${"★".repeat(Math.round(summary.average))}${"☆".repeat(5 - Math.round(summary.average))}</div>
           <div style="font-size:11px;color:${design.textColor};opacity:0.55;margin-top:2px;">${summary.total} review${summary.total === 1 ? "" : "s"}</div>
         </div>
-        <div style="flex:1;">${breakdownHtml}</div>
+        <div style="flex:1;max-width:280px;">${breakdownHtml}</div>
       </div>`
       : "";
 
@@ -125,7 +128,7 @@
     const listOuterStyle = design.displayStyle === "carousel" ? "position:relative;padding:0 20px;" : "";
 
     el.innerHTML = `
-      <div class="rv-root" style="font-family:${design.fontFamily};max-width:100%;color:${design.textColor};">
+      <div class="rv-root" style="font-family:${design.fontFamily};max-width:100%;color:${design.textColor};text-align:${rootTextAlign};">
         <h3 style="font-size:16px;margin:0 0 10px;font-weight:600;">Customer Reviews</h3>
         ${summaryHtml}
         <div style="${listOuterStyle}">

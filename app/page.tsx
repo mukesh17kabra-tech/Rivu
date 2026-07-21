@@ -16,7 +16,7 @@ export default async function Home({
   if (shop) {
     const params = new URLSearchParams({ shop });
     if (host) params.set("host", host);
-    redirect(`/dashboard/reviews?${params.toString()}`);
+    redirect(`/dashboard/home?${params.toString()}`);
   }
 
   // Only shown if someone opens the bare Vercel URL directly with no

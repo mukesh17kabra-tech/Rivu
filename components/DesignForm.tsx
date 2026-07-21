@@ -162,7 +162,7 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
             className="w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
           >
             {FONT_OPTIONS.map((f) => (
-              <option key={f.value} value={f.value}>
+              <option key={f.value} value={f.value} style={{ color: "#000" }}>
                 {f.label}
               </option>
             ))}
