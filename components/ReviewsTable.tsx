@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useState } from "react";
+import { ShareButtons } from "@/components/ShareButtons";
 
 type Review = {
   id: string;
@@ -183,6 +184,7 @@ export function ReviewsTable({ shop, reviews: initial }: { shop: string; reviews
                               Download image
                             </a>
                           </div>
+                          <ShareButtons imageUrl={imageUrl} reviewId={review.id} />
                         </div>
                         <img
                           src={imageUrl}

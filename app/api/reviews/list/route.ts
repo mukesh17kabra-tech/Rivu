@@ -67,6 +67,7 @@ export async function GET(req: NextRequest) {
         fontFamily: shopRecord.fontFamily,
         formAlign: shopRecord.formAlign,
         formMaxWidth: shopRecord.formMaxWidth,
+        widgetMaxWidth: shopRecord.widgetMaxWidth,
         showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
       },
     })

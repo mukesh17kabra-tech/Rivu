@@ -61,6 +61,14 @@ export async function GET(req: NextRequest) {
     return new Response("Review not found", { status: 404 });
   }
 
+  let logoUrl: string | null = null;
+  try {
+    const shop = await db.shop.findUnique({ where: { id: review.shopId }, select: { logoUrl: true } });
+    logoUrl = shop?.logoUrl || null;
+  } catch {
+    // Non-critical — just skip the watermark if this lookup fails.
+  }
+
   const size =
     format === "story" ? { width: 1080, height: 1920 } : { width: 1080, height: 1080 };
 
@@ -69,6 +77,14 @@ export async function GET(req: NextRequest) {
   // for Satori's child-counting even further, on top of explicit display.
   const quotedBody = `\u201C${review.body}\u201D`;
   const byline = `\u2014 ${review.customerName}`;
+
+  const logoWatermark = logoUrl ? (
+    <img
+      src={logoUrl}
+      width={80}
+      style={{ position: "absolute", bottom: 24, right: 24, borderRadius: 6 }}
+    />
+  ) : null;
 
   try {
     if (template === "story-bold") {
@@ -86,6 +102,7 @@ export async function GET(req: NextRequest) {
               padding: "80px",
               color: "white",
               fontFamily: "sans-serif",
+              position: "relative",
             }}
           >
             <div style={{ display: "flex", marginBottom: 40 }}>
@@ -104,6 +121,7 @@ export async function GET(req: NextRequest) {
               {quotedBody}
             </div>
             <div style={{ display: "flex", fontSize: 36, opacity: 0.7 }}>{byline}</div>
+            {logoWatermark}
           </div>
         ),
         size
@@ -124,6 +142,7 @@ export async function GET(req: NextRequest) {
             background: "#ffffff",
             padding: "100px",
             fontFamily: "sans-serif",
+            position: "relative",
           }}
         >
           <div style={{ display: "flex", marginBottom: 32 }}>
@@ -145,6 +164,7 @@ export async function GET(req: NextRequest) {
           <div style={{ display: "flex", fontSize: 28, color: "#999", marginTop: 12 }}>
             {review.productTitle}
           </div>
+          {logoWatermark}
         </div>
       ),
       size

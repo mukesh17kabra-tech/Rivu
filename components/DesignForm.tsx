@@ -15,6 +15,7 @@ type DesignSettings = {
   fontFamily: string;
   formAlign: "left" | "center" | "right";
   formMaxWidth: number;
+  widgetMaxWidth: number;
   showSuggestionsOnWebsite: boolean;
   showSuggestionsOnQr: boolean;
 };
@@ -170,6 +171,26 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
         </div>
 
         <div className="border-t border-white/10 pt-5">
+          <p className="mb-3 text-sm font-medium text-white/70">Overall widget size</p>
+          <label className="mb-2 block text-xs font-medium text-white/50">
+            Container max width: {settings.widgetMaxWidth}px
+          </label>
+          <input
+            type="range"
+            min={320}
+            max={900}
+            step={20}
+            value={settings.widgetMaxWidth}
+            onChange={(e) => update("widgetMaxWidth", Number(e.target.value))}
+            className="w-full"
+          />
+          <p className="mt-2 text-xs text-white/40">
+            Controls how much horizontal space the whole widget (summary, review list, and
+            button) takes up — increase this if it looks too narrow on your page.
+          </p>
+        </div>
+
+        <div className="border-t border-white/10 pt-5">
           <p className="mb-3 text-sm font-medium text-white/70">
             &quot;Write a review&quot; form position
           </p>
@@ -190,7 +211,7 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
             ))}
           </div>
           <label className="mb-2 block text-xs font-medium text-white/50">
-            Max width: {settings.formMaxWidth}px
+            Form max width: {settings.formMaxWidth}px
           </label>
           <input
             type="range"

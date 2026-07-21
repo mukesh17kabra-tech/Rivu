@@ -33,6 +33,11 @@ model Shop {
   // configurable instead of hardcoded, since it needs to fit their theme.
   formAlign    String @default("left")  // "left" | "center" | "right"
   formMaxWidth Int    @default(420)      // px
+  widgetMaxWidth Int  @default(480)      // px — overall widget container (summary + review list), separate from the form's own width
+
+  // Store logo shown on generated UGC graphics (small watermark, bottom
+  // corner) — stored as a base64 data URI, same pattern as review photos.
+  logoUrl String? @db.Text
 
   // Whether to show the auto-suggestion picker (with refresh) when
   // writing a review — configurable separately for the storefront widget

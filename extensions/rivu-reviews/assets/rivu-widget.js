@@ -33,6 +33,7 @@
       fontFamily: "inherit",
       formAlign: "left",
       formMaxWidth: 420,
+      widgetMaxWidth: 480,
       showSuggestionsOnWebsite: true,
     };
 
@@ -79,12 +80,12 @@
       ? summary.breakdown
           .map(
             (b) => `
-        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:${design.textColor};opacity:0.65;margin:3px 0;">
-          <span style="width:36px;">${b.star} star</span>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;margin:3px 0;">
+          <span style="width:36px;color:${design.textColor};opacity:0.65;">${b.star} star</span>
           <div style="flex:1;height:6px;background:rgba(0,0,0,0.08);border-radius:3px;overflow:hidden;">
             <div style="width:${b.percentage}%;height:100%;background:${design.starColor};"></div>
           </div>
-          <span style="width:30px;text-align:right;">${b.percentage}%</span>
+          <span style="width:30px;text-align:right;color:${design.textColor};opacity:0.65;">${b.percentage}%</span>
         </div>`
           )
           .join("")
@@ -117,15 +118,19 @@
         : "18px 0 0 0";
     const formTextAlign = design.formAlign === "center" ? "center" : "left";
 
-    const carouselArrows = design.displayStyle === "carousel"
-      ? `
+    const carouselArrows =
+      design.displayStyle === "carousel" && reviews.length > design.carouselVisible
+        ? `
       <button class="rv-arrow rv-arrow-prev" style="position:absolute;left:-4px;top:50%;transform:translateY(-50%);background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;cursor:pointer;color:${design.arrowColor};font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,0.1);z-index:1;">‹</button>
       <button class="rv-arrow rv-arrow-next" style="position:absolute;right:-4px;top:50%;transform:translateY(-50%);background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;cursor:pointer;color:${design.arrowColor};font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,0.1);z-index:1;">›</button>`
-      : "";
+        : "";
     const listOuterStyle = design.displayStyle === "carousel" ? "position:relative;padding:0 20px;" : "";
 
+    const widgetContainerMargin =
+      design.formAlign === "center" ? "0 auto" : design.formAlign === "right" ? "0 0 0 auto" : "0";
+
     el.innerHTML = `
-      <div class="rv-root" style="font-family:${design.fontFamily};max-width:100%;color:${design.textColor};text-align:${rootTextAlign};">
+      <div class="rv-root" style="font-family:${design.fontFamily};max-width:${design.widgetMaxWidth}px;width:100%;margin:${widgetContainerMargin};color:${design.textColor};text-align:${rootTextAlign};">
         <h3 style="font-size:16px;margin:0 0 10px;font-weight:600;">Customer Reviews</h3>
         ${summaryHtml}
         <div style="${listOuterStyle}">
@@ -137,7 +142,8 @@
           Write a review
         </button>
 
-        <div class="rv-form-wrap" style="display:none;margin:${formMargin};padding:24px;border:1px solid rgba(0,0,0,0.08);border-radius:${r}px;max-width:${design.formMaxWidth}px;text-align:${formTextAlign};">
+        <div class="rv-form-wrap" style="display:none;position:relative;margin:${formMargin};padding:24px;border:1px solid rgba(0,0,0,0.08);border-radius:${r}px;max-width:${design.formMaxWidth}px;text-align:${formTextAlign};">
+          <button class="rv-form-close" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:18px;line-height:1;cursor:pointer;color:#999;padding:4px;">✕</button>
           <p style="margin:0 0 4px;font-size:14px;font-weight:600;">How would you rate it?</p>
           <div class="rv-stars" style="display:flex;gap:6px;justify-content:${design.formAlign === "center" ? "center" : "flex-start"};margin:10px 0 16px;">
             ${[1, 2, 3, 4, 5]
@@ -196,6 +202,7 @@
 
     const toggle = el.querySelector(".rv-toggle");
     const formWrap = el.querySelector(".rv-form-wrap");
+    const formClose = el.querySelector(".rv-form-close");
     const form = el.querySelector(".rv-form");
     const status = el.querySelector(".rv-status");
     const starButtons = [...el.querySelectorAll(".rv-star")];
@@ -213,6 +220,10 @@
 
     toggle.addEventListener("click", () => {
       formWrap.style.display = formWrap.style.display === "none" ? "block" : "none";
+    });
+
+    formClose.addEventListener("click", () => {
+      formWrap.style.display = "none";
     });
 
     function paintStars() {

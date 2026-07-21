@@ -4,6 +4,7 @@ import { useState } from "react";
 import { DesignForm } from "@/components/DesignForm";
 import { RewardForm } from "@/components/RewardForm";
 import { ReminderForm } from "@/components/ReminderForm";
+import { LogoUpload } from "@/components/LogoUpload";
 
 type ShopSettings = {
   plan: string;
@@ -19,6 +20,7 @@ type ShopSettings = {
   fontFamily: string;
   formAlign: "left" | "center" | "right";
   formMaxWidth: number;
+  widgetMaxWidth: number;
   showSuggestionsOnWebsite: boolean;
   showSuggestionsOnQr: boolean;
   rewardEnabled: boolean;
@@ -29,6 +31,7 @@ type ShopSettings = {
   fromEmail: string;
   emailSubject: string;
   emailBodyTemplate: string;
+  logoUrl: string;
 };
 
 const TABS = [
@@ -71,25 +74,31 @@ export function SettingsTabs({
         {tab === "installation" && <InstallationTab shop={shop} />}
 
         {tab === "widget" && (
-          <DesignForm
-            shop={shop}
-            initial={{
-              displayStyle: shopRecord.displayStyle,
-              gridColumns: shopRecord.gridColumns,
-              carouselVisible: shopRecord.carouselVisible,
-              arrowColor: shopRecord.arrowColor,
-              primaryColor: shopRecord.primaryColor,
-              starColor: shopRecord.starColor,
-              backgroundColor: shopRecord.backgroundColor,
-              textColor: shopRecord.textColor,
-              borderRadius: shopRecord.borderRadius,
-              fontFamily: shopRecord.fontFamily,
-              formAlign: shopRecord.formAlign,
-              formMaxWidth: shopRecord.formMaxWidth,
-              showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
-              showSuggestionsOnQr: shopRecord.showSuggestionsOnQr,
-            }}
-          />
+          <div className="space-y-8">
+            <DesignForm
+              shop={shop}
+              initial={{
+                displayStyle: shopRecord.displayStyle,
+                gridColumns: shopRecord.gridColumns,
+                carouselVisible: shopRecord.carouselVisible,
+                arrowColor: shopRecord.arrowColor,
+                primaryColor: shopRecord.primaryColor,
+                starColor: shopRecord.starColor,
+                backgroundColor: shopRecord.backgroundColor,
+                textColor: shopRecord.textColor,
+                borderRadius: shopRecord.borderRadius,
+                fontFamily: shopRecord.fontFamily,
+                formAlign: shopRecord.formAlign,
+                formMaxWidth: shopRecord.formMaxWidth,
+                widgetMaxWidth: shopRecord.widgetMaxWidth,
+                showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
+                showSuggestionsOnQr: shopRecord.showSuggestionsOnQr,
+              }}
+            />
+            <div className="border-t border-white/10 pt-8">
+              <LogoUpload shop={shop} initialLogoUrl={shopRecord.logoUrl} />
+            </div>
+          </div>
         )}
 
         {tab === "email" && (

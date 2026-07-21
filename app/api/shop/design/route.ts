@@ -16,6 +16,7 @@ const schema = z.object({
   fontFamily: z.string().min(1).max(100),
   formAlign: z.enum(["left", "center", "right"]),
   formMaxWidth: z.number().int().min(280).max(600),
+  widgetMaxWidth: z.number().int().min(320).max(900),
   showSuggestionsOnWebsite: z.boolean(),
   showSuggestionsOnQr: z.boolean(),
 });

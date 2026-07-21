@@ -48,6 +48,7 @@ export default async function SettingsPage({
             fontFamily: shopRecord.fontFamily,
             formAlign: shopRecord.formAlign as "left" | "center" | "right",
             formMaxWidth: shopRecord.formMaxWidth,
+            widgetMaxWidth: shopRecord.widgetMaxWidth,
             showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
             showSuggestionsOnQr: shopRecord.showSuggestionsOnQr,
             rewardEnabled: shopRecord.rewardEnabled,
@@ -58,6 +59,7 @@ export default async function SettingsPage({
             fromEmail: shopRecord.fromEmail || "",
             emailSubject: shopRecord.emailSubject,
             emailBodyTemplate: shopRecord.emailBodyTemplate,
+            logoUrl: shopRecord.logoUrl || "",
           }}
         />
       </div>
