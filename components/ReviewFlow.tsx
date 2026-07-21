@@ -30,6 +30,7 @@ export function ReviewFlow({
 
   const [rating, setRating] = useState(0);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [body, setBody] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -77,6 +78,7 @@ export function ReviewFlow({
   async function pickRating(stars: number) {
     setRating(stars);
     setBody("");
+    setShowSuggestions(true);
     await loadSuggestions(stars);
   }
 
@@ -255,35 +257,56 @@ export function ReviewFlow({
 
         {rating > 0 && (
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-sm font-medium text-gray-700">Pick a suggestion (or write your own)</p>
-                <button
-                  type="button"
-                  onClick={() => loadSuggestions(rating)}
-                  disabled={loadingSuggestions}
-                  className="text-xs font-medium text-blue-600 disabled:opacity-50"
-                >
-                  {loadingSuggestions ? "Loading..." : "🔄 Refresh"}
-                </button>
+            {showSuggestions && (
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-sm font-medium text-gray-700">Pick a suggestion (or write your own)</p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => loadSuggestions(rating)}
+                      disabled={loadingSuggestions}
+                      className="text-xs font-medium text-blue-600 disabled:opacity-50"
+                    >
+                      {loadingSuggestions ? "Loading..." : "🔄 Refresh"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowSuggestions(false)}
+                      className="text-xs font-medium text-gray-400 hover:text-gray-600"
+                    >
+                      ✕ Close
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setBody(s)}
+                      className={`w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
+                        body === s
+                          ? "border-blue-500 bg-blue-50 text-gray-900"
+                          : "border-gray-200 text-gray-600 hover:border-gray-300"
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="space-y-2">
-                {suggestions.map((s, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setBody(s)}
-                    className={`w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
-                      body === s
-                        ? "border-blue-500 bg-blue-50 text-gray-900"
-                        : "border-gray-200 text-gray-600 hover:border-gray-300"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
+            )}
+
+            {!showSuggestions && (
+              <button
+                type="button"
+                onClick={() => setShowSuggestions(true)}
+                className="text-xs font-medium text-blue-600"
+              >
+                Show suggestions again
+              </button>
+            )}
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">Your review</label>
