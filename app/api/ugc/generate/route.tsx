@@ -5,11 +5,17 @@ import { NextRequest } from "next/server";
 export const runtime = "nodejs";
 
 // Renders a row of 5 star shapes as inline SVG — NOT text characters
-// (★/☆). Satori (which @vercel/og uses to render JSX to an image) relies
-// on font glyph coverage for text, and its default font often can't
-// render star unicode characters — that silently breaks the whole image
-// generation, showing as a broken <img> on the frontend. SVG shapes have
-// no such dependency.
+// (★/☆). Satori (which next/og uses to render JSX to an image) relies on
+// font glyph coverage for text, and its default font often can't render
+// star unicode characters — that silently breaks image generation.
+// SVG shapes have no such dependency.
+//
+// IMPORTANT: every single <div> below has an explicit `display` set
+// (flex, in all cases) — Satori throws "Expected <div> to have explicit
+// display..." for ANY div it considers to have more than one child node,
+// and its counting doesn't always match React's own child-counting
+// intuition (e.g. text + an interpolated expression counts as 2 nodes).
+// Setting display explicitly everywhere sidesteps the ambiguity entirely.
 function renderStars(rating: number, color: string, emptyColor: string, size = 48) {
   return (
     <div style={{ display: "flex", gap: 6 }}>
@@ -32,7 +38,7 @@ function renderStars(rating: number, color: string, emptyColor: string, size = 4
 // /api/ugc/generate?reviewId=xxx&template=quote-minimal&format=story
 //
 // No AI image generation, no external design tool — just server-rendered
-// HTML/CSS turned into a PNG via Satori (what @vercel/og wraps). Fully free,
+// HTML/CSS turned into a PNG via Satori (what next/og uses). Fully free,
 // no per-image API cost.
 export async function GET(req: NextRequest) {
   const reviewId = req.nextUrl.searchParams.get("reviewId");
@@ -58,10 +64,13 @@ export async function GET(req: NextRequest) {
   const size =
     format === "story" ? { width: 1080, height: 1920 } : { width: 1080, height: 1080 };
 
+  // Pre-build plain strings so each JSX text node is a single string, not
+  // text + expression + text (multiple child nodes) — reduces ambiguity
+  // for Satori's child-counting even further, on top of explicit display.
+  const quotedBody = `\u201C${review.body}\u201D`;
+  const byline = `\u2014 ${review.customerName}`;
+
   try {
-    // Two starter templates. More can be added the same way — just another
-    // branch returning different JSX/styling. Kept plain inline styles since
-    // Satori (what @vercel/og uses) only supports a subset of CSS.
     if (template === "story-bold") {
       return new ImageResponse(
         (
@@ -79,22 +88,22 @@ export async function GET(req: NextRequest) {
               fontFamily: "sans-serif",
             }}
           >
-            <div style={{ marginBottom: 40 }}>{renderStars(review.rating, "#facc15", "#4b5563", 64)}</div>
+            <div style={{ display: "flex", marginBottom: 40 }}>
+              {renderStars(review.rating, "#facc15", "#4b5563", 64)}
+            </div>
             <div
               style={{
+                display: "flex",
                 fontSize: 56,
                 lineHeight: 1.4,
                 textAlign: "center",
                 fontWeight: 600,
-                display: "flex",
                 marginBottom: 60,
               }}
             >
-              &ldquo;{review.body}&rdquo;
+              {quotedBody}
             </div>
-            <div style={{ fontSize: 36, opacity: 0.7, display: "flex" }}>
-              — {review.customerName}
-            </div>
+            <div style={{ display: "flex", fontSize: 36, opacity: 0.7 }}>{byline}</div>
           </div>
         ),
         size
@@ -117,21 +126,23 @@ export async function GET(req: NextRequest) {
             fontFamily: "sans-serif",
           }}
         >
-          <div style={{ marginBottom: 32 }}>{renderStars(review.rating, "#f5b400", "#e5e5e5", 48)}</div>
+          <div style={{ display: "flex", marginBottom: 32 }}>
+            {renderStars(review.rating, "#f5b400", "#e5e5e5", 48)}
+          </div>
           <div
             style={{
+              display: "flex",
               fontSize: 52,
               lineHeight: 1.5,
               color: "#111",
               fontWeight: 500,
-              display: "flex",
               marginBottom: 48,
             }}
           >
             {review.body}
           </div>
-          <div style={{ fontSize: 32, color: "#666", display: "flex" }}>{review.customerName}</div>
-          <div style={{ fontSize: 28, color: "#999", marginTop: 12, display: "flex" }}>
+          <div style={{ display: "flex", fontSize: 32, color: "#666" }}>{review.customerName}</div>
+          <div style={{ display: "flex", fontSize: 28, color: "#999", marginTop: 12 }}>
             {review.productTitle}
           </div>
         </div>
