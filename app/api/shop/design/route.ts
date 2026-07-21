@@ -14,6 +14,8 @@ const schema = z.object({
   textColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   borderRadius: z.number().int().min(0).max(24),
   fontFamily: z.string().min(1).max(100),
+  formAlign: z.enum(["left", "center", "right"]),
+  formMaxWidth: z.number().int().min(280).max(600),
   showSuggestionsOnWebsite: z.boolean(),
   showSuggestionsOnQr: z.boolean(),
 });

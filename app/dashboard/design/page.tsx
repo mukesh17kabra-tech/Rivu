@@ -49,6 +49,8 @@ export default async function DesignPage({
             textColor: shopRecord.textColor,
             borderRadius: shopRecord.borderRadius,
             fontFamily: shopRecord.fontFamily,
+            formAlign: shopRecord.formAlign as "left" | "center" | "right",
+            formMaxWidth: shopRecord.formMaxWidth,
             showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
             showSuggestionsOnQr: shopRecord.showSuggestionsOnQr,
           }}

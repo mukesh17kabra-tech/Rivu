@@ -13,6 +13,8 @@ type DesignSettings = {
   textColor: string;
   borderRadius: number;
   fontFamily: string;
+  formAlign: "left" | "center" | "right";
+  formMaxWidth: number;
   showSuggestionsOnWebsite: boolean;
   showSuggestionsOnQr: boolean;
 };
@@ -165,6 +167,40 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="border-t border-white/10 pt-5">
+          <p className="mb-3 text-sm font-medium text-white/70">
+            &quot;Write a review&quot; form position
+          </p>
+          <label className="mb-2 block text-xs font-medium text-white/50">Alignment</label>
+          <div className="mb-4 flex gap-2">
+            {(["left", "center", "right"] as const).map((align) => (
+              <button
+                key={align}
+                onClick={() => update("formAlign", align)}
+                className={`flex-1 rounded-md border px-3 py-2 text-sm capitalize transition-colors ${
+                  settings.formAlign === align
+                    ? "border-emerald-400 bg-emerald-400/10 text-white"
+                    : "border-white/10 text-white/50 hover:border-white/30"
+                }`}
+              >
+                {align}
+              </button>
+            ))}
+          </div>
+          <label className="mb-2 block text-xs font-medium text-white/50">
+            Max width: {settings.formMaxWidth}px
+          </label>
+          <input
+            type="range"
+            min={280}
+            max={600}
+            step={20}
+            value={settings.formMaxWidth}
+            onChange={(e) => update("formMaxWidth", Number(e.target.value))}
+            className="w-full"
+          />
         </div>
 
         <div className="border-t border-white/10 pt-5">

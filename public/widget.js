@@ -34,6 +34,8 @@
       textColor: "#333333",
       borderRadius: 8,
       fontFamily: "inherit",
+      formAlign: "left",
+      formMaxWidth: 420,
       showSuggestionsOnWebsite: true,
     };
 
@@ -107,6 +109,14 @@
       ? reviews.map(reviewCard).join("")
       : `<p style="font-size:14px;color:${design.textColor};opacity:0.55;">No reviews yet — be the first!</p>`;
 
+    const formMargin =
+      design.formAlign === "center"
+        ? "18px auto 0"
+        : design.formAlign === "right"
+        ? "18px 0 0 auto"
+        : "18px 0 0 0";
+    const formTextAlign = design.formAlign === "center" ? "center" : "left";
+
     const carouselArrows = design.displayStyle === "carousel"
       ? `
       <button class="rv-arrow rv-arrow-prev" style="position:absolute;left:-4px;top:50%;transform:translateY(-50%);background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;cursor:pointer;color:${design.arrowColor};font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,0.1);z-index:1;">‹</button>
@@ -127,9 +137,9 @@
           Write a review
         </button>
 
-        <div class="rv-form-wrap" style="display:none;margin:18px auto 0;padding:24px;border:1px solid rgba(0,0,0,0.08);border-radius:${r}px;max-width:420px;text-align:center;">
+        <div class="rv-form-wrap" style="display:none;margin:${formMargin};padding:24px;border:1px solid rgba(0,0,0,0.08);border-radius:${r}px;max-width:${design.formMaxWidth}px;text-align:${formTextAlign};">
           <p style="margin:0 0 4px;font-size:14px;font-weight:600;">How would you rate it?</p>
-          <div class="rv-stars" style="display:flex;gap:6px;justify-content:center;margin:10px 0 16px;">
+          <div class="rv-stars" style="display:flex;gap:6px;justify-content:${design.formAlign === "center" ? "center" : "flex-start"};margin:10px 0 16px;">
             ${[1, 2, 3, 4, 5]
               .map(
                 (n) =>
@@ -169,7 +179,7 @@
             <button type="submit" style="margin-top:6px;padding:12px 18px;background:${design.primaryColor};color:#fff;border:none;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-weight:600;cursor:pointer;">
               Submit review
             </button>
-            <p class="rv-status" style="margin:0;font-size:13px;text-align:center;"></p>
+            <p class="rv-status" style="margin:0;font-size:13px;text-align:${formTextAlign};"></p>
           </form>
         </div>
       </div>

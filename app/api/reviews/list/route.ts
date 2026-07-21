@@ -65,6 +65,8 @@ export async function GET(req: NextRequest) {
         textColor: shopRecord.textColor,
         borderRadius: shopRecord.borderRadius,
         fontFamily: shopRecord.fontFamily,
+        formAlign: shopRecord.formAlign,
+        formMaxWidth: shopRecord.formMaxWidth,
         showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
       },
     })

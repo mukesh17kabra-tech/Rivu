@@ -8,9 +8,16 @@ const schema = z.object({
   productId: z.string().min(1),
   productTitle: z.string().min(1),
   // Empty string (e.g. a product with no image) should be treated as
-  // "not provided", not as an invalid URL.
+  // "not provided", not as an invalid URL. Shopify's Liquid image_url
+  // filter often returns protocol-relative URLs (starting with "//" with
+  // no "https:" prefix) — the URL validator rejects those, so we add the
+  // protocol back before validating.
   productImageUrl: z.preprocess(
-    (val) => (val === "" ? undefined : val),
+    (val) => {
+      if (val === "" || val === undefined || val === null) return undefined;
+      if (typeof val === "string" && val.startsWith("//")) return `https:${val}`;
+      return val;
+    },
     z.string().url().optional()
   ),
   rating: z.number().int().min(1).max(5),

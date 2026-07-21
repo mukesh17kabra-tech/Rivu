@@ -29,6 +29,11 @@ model Shop {
   borderRadius    Int    @default(8)          // px, applied to cards/buttons
   fontFamily      String @default("inherit")
 
+  // Controls where/how big the "write a review" form appears — merchant
+  // configurable instead of hardcoded, since it needs to fit their theme.
+  formAlign    String @default("left")  // "left" | "center" | "right"
+  formMaxWidth Int    @default(420)      // px
+
   // Whether to show the auto-suggestion picker (with refresh) when
   // writing a review — configurable separately for the storefront widget
   // vs. the QR-scan flow, since merchants may want one but not the other.
