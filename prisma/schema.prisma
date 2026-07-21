@@ -20,12 +20,20 @@ model Shop {
   // branding instead of a fixed look, and choose how reviews are laid out.
   displayStyle    String @default("list")    // "list" | "grid" | "carousel"
   gridColumns     Int    @default(3)          // only used when displayStyle = "grid"
+  carouselVisible Int    @default(1)          // cards visible at once, carousel only
+  arrowColor      String @default("#111111")  // carousel prev/next arrow color
   primaryColor    String @default("#111111")  // buttons, "write a review" CTA
   starColor       String @default("#f5b400")
   backgroundColor String @default("#ffffff")
   textColor       String @default("#333333")
   borderRadius    Int    @default(8)          // px, applied to cards/buttons
   fontFamily      String @default("inherit")
+
+  // Whether to show the auto-suggestion picker (with refresh) when
+  // writing a review — configurable separately for the storefront widget
+  // vs. the QR-scan flow, since merchants may want one but not the other.
+  showSuggestionsOnWebsite Boolean @default(true)
+  showSuggestionsOnQr      Boolean @default(true)
 
   // Optional reward for leaving a review — merchant toggles this on and
   // picks a discount type/value. When enabled, every review submission
@@ -35,7 +43,38 @@ model Shop {
   rewardType    String  @default("percentage") // "percentage" | "fixed_amount"
   rewardValue   Float   @default(10)            // e.g. 10 = 10% or $10 depending on type
 
-  reviews Review[]
+  // Automated "leave a review" reminder emails, sent a configurable delay
+  // after purchase if the customer hasn't already reviewed that product.
+  reminderEnabled   Boolean @default(false)
+  reminderDelayDays Int     @default(7) // days after order before sending
+  fromEmail         String? // merchant's own address, used as Reply-To on reminder emails (actual "From" always stays on the app's own verified sending domain)
+
+  reviews          Review[]
+  reminderRequests PendingReviewRequest[]
+}
+
+// One row per (order, product) pair that's a candidate for a review
+// reminder email. Created when an order webhook fires; the reminder cron
+// checks these against elapsed time and whether a review already exists
+// for that email+product before sending.
+model PendingReviewRequest {
+  id              String    @id @default(cuid())
+  shopId          String
+  shop            Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  orderId         String
+  productId       String
+  productTitle    String
+  productImageUrl String?
+  customerEmail   String
+  customerName    String?
+
+  purchasedAt    DateTime
+  reminderSentAt DateTime?
+  reviewed       Boolean   @default(false) // set true once this email reviews this product
+
+  @@unique([shopId, orderId, productId])
+  @@index([shopId, reminderSentAt, reviewed])
 }
 
 // A single customer review, either submitted through our own storefront
@@ -53,6 +92,7 @@ model Review {
   rating      Int      // 1-5
   body        String   @db.Text
   customerName String
+  customerEmail String? // used to prevent duplicate reminder emails once someone reviews
   photoUrl    String?  @db.Text // optional customer-submitted photo (stored as base64 data URI for simplicity)
 
   approved    Boolean  @default(false)

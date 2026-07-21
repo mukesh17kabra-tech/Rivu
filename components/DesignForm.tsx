@@ -5,12 +5,16 @@ import { useState } from "react";
 type DesignSettings = {
   displayStyle: "list" | "grid" | "carousel";
   gridColumns: number;
+  carouselVisible: number;
+  arrowColor: string;
   primaryColor: string;
   starColor: string;
   backgroundColor: string;
   textColor: string;
   borderRadius: number;
   fontFamily: string;
+  showSuggestionsOnWebsite: boolean;
+  showSuggestionsOnQr: boolean;
 };
 
 const FONT_OPTIONS = [
@@ -90,6 +94,29 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
           </div>
         )}
 
+        {settings.displayStyle === "carousel" && (
+          <>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-white/70">
+                Cards visible at once: {settings.carouselVisible}
+              </label>
+              <input
+                type="range"
+                min={1}
+                max={4}
+                value={settings.carouselVisible}
+                onChange={(e) => update("carouselVisible", Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <ColorField
+              label="Arrow color"
+              value={settings.arrowColor}
+              onChange={(v) => update("arrowColor", v)}
+            />
+          </>
+        )}
+
         <ColorField
           label="Primary color (buttons, CTA)"
           value={settings.primaryColor}
@@ -138,6 +165,28 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="border-t border-white/10 pt-5">
+          <p className="mb-3 text-sm font-medium text-white/70">Show review suggestions</p>
+          <label className="mb-2 flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={settings.showSuggestionsOnWebsite}
+              onChange={(e) => update("showSuggestionsOnWebsite", e.target.checked)}
+              className="h-4 w-4 accent-emerald-400"
+            />
+            <span className="text-sm text-white/80">On the website (product page widget)</span>
+          </label>
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={settings.showSuggestionsOnQr}
+              onChange={(e) => update("showSuggestionsOnQr", e.target.checked)}
+              className="h-4 w-4 accent-emerald-400"
+            />
+            <span className="text-sm text-white/80">On the QR-scan review page</span>
+          </label>
         </div>
 
         <button

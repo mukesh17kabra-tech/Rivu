@@ -16,6 +16,9 @@ const schema = z.object({
   rating: z.number().int().min(1).max(5),
   body: z.string().min(10).max(2000),
   customerName: z.string().min(1).max(100),
+  // Optional — used only to prevent a second reminder email once someone
+  // has reviewed, not required for the review itself.
+  customerEmail: z.preprocess((val) => (val === "" ? undefined : val), z.string().email().optional()),
   // Either a real URL or a base64 data URI (data:image/...) from the
   // storefront's photo upload input.
   photoUrl: z.preprocess(
@@ -44,6 +47,8 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
+    console.error("[reviews/submit] Validation failed. Raw body:", JSON.stringify(body));
+    console.error("[reviews/submit] Zod errors:", JSON.stringify(parsed.error.flatten()));
     return withCors(
       NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 })
     );
@@ -61,6 +66,21 @@ export async function POST(req: NextRequest) {
   await db.review.create({
     data: { shopId: shopRecord.id, approved: false, ...data },
   });
+
+  // Prevent further reminder emails for this product once this email has
+  // reviewed it — even if their review was for a different order of the
+  // same product.
+  if (data.customerEmail) {
+    await db.pendingReviewRequest.updateMany({
+      where: {
+        shopId: shopRecord.id,
+        productId: data.productId,
+        customerEmail: data.customerEmail,
+        reviewed: false,
+      },
+      data: { reviewed: true },
+    });
+  }
 
   // Optional: reward the reviewer with a one-time discount code
   // immediately, regardless of approval status — the review itself is

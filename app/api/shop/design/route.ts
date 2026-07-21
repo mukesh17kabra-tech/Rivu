@@ -6,12 +6,16 @@ const schema = z.object({
   shop: z.string().min(1),
   displayStyle: z.enum(["list", "grid", "carousel"]),
   gridColumns: z.number().int().min(2).max(5),
+  carouselVisible: z.number().int().min(1).max(4),
+  arrowColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   starColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   backgroundColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   textColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   borderRadius: z.number().int().min(0).max(24),
   fontFamily: z.string().min(1).max(100),
+  showSuggestionsOnWebsite: z.boolean(),
+  showSuggestionsOnQr: z.boolean(),
 });
 
 export async function POST(req: NextRequest) {

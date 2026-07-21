@@ -3,6 +3,7 @@ import { NavBar } from "@/components/NavBar";
 import { resolveShop } from "@/lib/shop-context";
 import { DesignForm } from "@/components/DesignForm";
 import { RewardForm } from "@/components/RewardForm";
+import { ReminderForm } from "@/components/ReminderForm";
 
 export default async function DesignPage({
   searchParams,
@@ -40,12 +41,16 @@ export default async function DesignPage({
           initial={{
             displayStyle: shopRecord.displayStyle as "list" | "grid" | "carousel",
             gridColumns: shopRecord.gridColumns,
+            carouselVisible: shopRecord.carouselVisible,
+            arrowColor: shopRecord.arrowColor,
             primaryColor: shopRecord.primaryColor,
             starColor: shopRecord.starColor,
             backgroundColor: shopRecord.backgroundColor,
             textColor: shopRecord.textColor,
             borderRadius: shopRecord.borderRadius,
             fontFamily: shopRecord.fontFamily,
+            showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
+            showSuggestionsOnQr: shopRecord.showSuggestionsOnQr,
           }}
         />
 
@@ -62,6 +67,22 @@ export default async function DesignPage({
               rewardEnabled: shopRecord.rewardEnabled,
               rewardType: shopRecord.rewardType as "percentage" | "fixed_amount",
               rewardValue: shopRecord.rewardValue,
+            }}
+          />
+        </div>
+
+        <div className="mt-12 border-t border-white/10 pt-10">
+          <h2 className="mb-1 text-lg font-semibold">Automated review reminders</h2>
+          <p className="mb-6 text-sm text-white/50 max-w-xl">
+            Like a Klaviyo post-purchase flow — automatically email customers asking for a
+            review a set number of days after they buy, unless they've already left one.
+          </p>
+          <ReminderForm
+            shop={shop}
+            initial={{
+              reminderEnabled: shopRecord.reminderEnabled,
+              reminderDelayDays: shopRecord.reminderDelayDays,
+              fromEmail: shopRecord.fromEmail || "",
             }}
           />
         </div>

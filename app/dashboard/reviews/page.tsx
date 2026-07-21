@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { ReviewCard } from "@/components/ReviewCard";
 import { NavBar } from "@/components/NavBar";
+import { ImportExportBar } from "@/components/ImportExportBar";
 import { resolveShop } from "@/lib/shop-context";
 import type { Review } from "@prisma/client";
 
@@ -42,6 +43,8 @@ export default async function ReviewsDashboard({
         </header>
 
         <NavBar shop={shop} host={host} active="reviews" />
+
+        <ImportExportBar shop={shop} />
 
         <section className="mb-12">
           <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-white/50">

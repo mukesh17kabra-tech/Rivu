@@ -31,6 +31,7 @@ export function ReviewFlow({
   const [rating, setRating] = useState(0);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [suggestionsAllowed, setSuggestionsAllowed] = useState(true);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [body, setBody] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -79,7 +80,21 @@ export function ReviewFlow({
     setRating(stars);
     setBody("");
     setShowSuggestions(true);
-    await loadSuggestions(stars);
+
+    // Check whether this shop wants suggestions shown on the QR flow —
+    // reuses the reviews/list endpoint's design payload (cheap, cached by
+    // the browser within the session).
+    try {
+      const res = await fetch(
+        `/api/reviews/list?shop=${encodeURIComponent(shop)}&productId=${encodeURIComponent(productId)}`
+      );
+      const data = await res.json();
+      const allowed = data.design?.showSuggestionsOnQr ?? true;
+      setSuggestionsAllowed(allowed);
+      if (allowed) await loadSuggestions(stars);
+    } catch {
+      await loadSuggestions(stars);
+    }
   }
 
   async function loadSuggestions(stars: number) {
@@ -134,6 +149,7 @@ export function ReviewFlow({
           rating,
           body,
           customerName: customerName || "Anonymous",
+          customerEmail: email || undefined,
           photoUrl: photoDataUrl,
         }),
       });
@@ -257,7 +273,7 @@ export function ReviewFlow({
 
         {rating > 0 && (
           <form onSubmit={handleSubmit} className="space-y-5">
-            {showSuggestions && (
+            {showSuggestions && suggestionsAllowed && (
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-sm font-medium text-gray-700">Pick a suggestion (or write your own)</p>
@@ -298,7 +314,7 @@ export function ReviewFlow({
               </div>
             )}
 
-            {!showSuggestions && (
+            {!showSuggestions && suggestionsAllowed && (
               <button
                 type="button"
                 onClick={() => setShowSuggestions(true)}

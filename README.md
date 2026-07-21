@@ -132,3 +132,52 @@ resources) the moment a review is submitted — shown directly on the
 "thanks for your review" screen, no email needed. Requires the
 `write_discounts` scope (already added to `shopify.app.toml` and
 `lib/shopify.ts`).
+
+## Bulk CSV import/export
+
+- **Export** — `/dashboard/reviews` → "Export all reviews (CSV)" downloads
+  every review (pending + approved) for the shop
+- **Import** — same page → "Import reviews (CSV)" file picker. Expected
+  columns (case/spacing-insensitive): `productId`, `productTitle`,
+  `rating`, `body`, `customerName`, `photoUrl` (optional), `approved`
+  (optional, defaults to `true` — assumes pre-vetted reviews from another
+  platform). Invalid rows are skipped and reported, valid ones are
+  imported immediately.
+
+Use this to migrate existing reviews from another app (Judge.me, Loox,
+etc.) — export from there, reshape into these columns, import here.
+
+## Automated review reminders (Klaviyo-style post-purchase flow)
+
+Configured at `/dashboard/design` → "Automated review reminders":
+- Toggle on/off
+- Choose how many days after purchase to send the reminder
+
+**How it works end to end:**
+1. `app/api/webhooks/orders` receives Shopify's `orders/create` webhook,
+   creates one `PendingReviewRequest` row per line item (product +
+   customer email + purchase date)
+2. `app/api/cron/review-reminders` runs daily (see `vercel.json`), finds
+   requests where the delay has elapsed, `reviewed = false`, and no
+   reminder has been sent yet — sends an email via Resend
+   (`lib/email.ts`) with a direct link to that product's review page
+3. If the customer leaves a review (email must match what they ordered
+   with, entered in the optional email field on the storefront widget, or
+   automatically known via the QR flow's email-lookup step),
+   `app/api/reviews/submit` marks their pending request `reviewed = true`
+   — no further reminders for that product
+
+Requires a Resend account (`RESEND_API_KEY`, `EMAIL_FROM`) and a
+`CRON_SECRET` to protect the cron endpoint — see `.env.example`.
+
+## Design/UX refinements
+
+- Widget's "write a review" form is now centered, larger, and the photo
+  upload is a styled button with a preview thumbnail instead of a bare
+  file input
+- Suggestions panel has a "✕ Close" button (in addition to "🔄 Refresh")
+  so customers who don't want AI-style suggestions can dismiss them and
+  write their own review directly — available separately for the website
+  widget and the QR-scan flow via the toggles in `/dashboard/design`
+- Carousel layout now has prev/next arrow buttons (color customizable)
+  and a "cards visible at once" setting (1-4)

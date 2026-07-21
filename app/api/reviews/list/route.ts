@@ -57,12 +57,15 @@ export async function GET(req: NextRequest) {
       design: {
         displayStyle: shopRecord.displayStyle,
         gridColumns: shopRecord.gridColumns,
+        carouselVisible: shopRecord.carouselVisible,
+        arrowColor: shopRecord.arrowColor,
         primaryColor: shopRecord.primaryColor,
         starColor: shopRecord.starColor,
         backgroundColor: shopRecord.backgroundColor,
         textColor: shopRecord.textColor,
         borderRadius: shopRecord.borderRadius,
         fontFamily: shopRecord.fontFamily,
+        showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
       },
     })
   );
