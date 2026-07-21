@@ -25,11 +25,25 @@ redirect_urls = [
 [webhooks]
 api_version = "2024-10"
 
-# Powers the automated review-reminder feature: tracks what a customer
-# bought so we know what to remind them to review later.
-[[webhooks.subscriptions]]
-topics = ["orders/create"]
-uri = "/api/webhooks/orders"
+# The orders/create webhook is temporarily NOT subscribed here — it
+# requires Shopify's "Protected Customer Data" approval first (orders
+# contain customer email/name/address, which Shopify restricts access to
+# until you explicitly request and get approved for it). See:
+# https://shopify.dev/docs/apps/launch/protected-customer-data
+#
+# Request this from the Dev/Partner Dashboard: App → API access →
+# Protected customer data → request access, describing that you need
+# order + line item data to send review-request reminders post-purchase.
+#
+# Once approved, uncomment this and redeploy — until then, the automated
+# reminder-email feature (app/api/webhooks/orders,
+# app/api/cron/review-reminders) simply won't receive new orders to track,
+# but the rest of the app (widget, QR flow, UGC cards, billing) is
+# unaffected.
+#
+# [[webhooks.subscriptions]]
+# topics = ["orders/create"]
+# uri = "/api/webhooks/orders"
 
 # NOTE: no [app_proxy] section — same reasoning as the restock-alert app's
 # toml: an empty/commented-out [app_proxy] header is treated by the CLI as

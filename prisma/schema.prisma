@@ -51,6 +51,7 @@ model Shop {
 
   reviews          Review[]
   reminderRequests PendingReviewRequest[]
+  reminderUnsubscribes ReminderUnsubscribe[]
 }
 
 // One row per (order, product) pair that's a candidate for a review
@@ -75,6 +76,18 @@ model PendingReviewRequest {
 
   @@unique([shopId, orderId, productId])
   @@index([shopId, reminderSentAt, reviewed])
+}
+
+// One row per (shop, email) that has clicked "unsubscribe" on a reminder
+// email — checked before sending any future reminder to that address.
+model ReminderUnsubscribe {
+  id            String   @id @default(cuid())
+  shopId        String
+  shop          Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  customerEmail String
+  createdAt     DateTime @default(now())
+
+  @@unique([shopId, customerEmail])
 }
 
 // A single customer review, either submitted through our own storefront

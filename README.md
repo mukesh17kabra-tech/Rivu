@@ -51,6 +51,15 @@ as scanning a code and tapping a suggestion.
    ```
 
 ## How the QR review flow works
+
+⚠️ Same **Protected Customer Data** consideration as the reminder feature
+below — looking up a customer's order by email (`getProductsFromOrdersByEmail`
+in `lib/shopify.ts`) reads customer order data via the Admin API, which
+Shopify may also gate behind the same approval on a live/production store
+even though `read_orders` scope is already granted. It may work
+unrestricted on development stores during testing. Request Protected
+Customer Data access (see the "Automated review reminders" section below
+for exact steps) to be safe before relying on this for real merchants.
 1. Merchant downloads a QR code for a product from `/dashboard/qrcodes`
    and prints it on a packing slip, thank-you card, or receipt
 2. Customer scans it → opens `/review?shop=...&productId=...&productTitle=...`
@@ -149,6 +158,20 @@ etc.) — export from there, reshape into these columns, import here.
 
 ## Automated review reminders (Klaviyo-style post-purchase flow)
 
+⚠️ **Requires Shopify's "Protected Customer Data" approval before the
+`orders/create` webhook can be subscribed** — orders contain customer
+email/name/address, which Shopify restricts by default even with
+`read_orders` scope granted. Request it from the Dev/Partner Dashboard:
+**App → API access → Protected customer data** → describe that you need
+order + line item data to send post-purchase review reminders, and
+submit for approval. This can take some time to review.
+
+Until approved, the `[[webhooks.subscriptions]]` entry for `orders/create`
+in `shopify.app.toml` is commented out so `shopify app deploy` succeeds —
+the rest of the app works fine without it; only the automated reminder
+emails won't have new orders to track until this is approved and the
+webhook is re-enabled.
+
 Configured at `/dashboard/design` → "Automated review reminders":
 - Toggle on/off
 - Choose how many days after purchase to send the reminder
@@ -181,3 +204,24 @@ Requires a Resend account (`RESEND_API_KEY`, `EMAIL_FROM`) and a
   widget and the QR-scan flow via the toggles in `/dashboard/design`
 - Carousel layout now has prev/next arrow buttons (color customizable)
   and a "cards visible at once" setting (1-4)
+
+## Privacy, unsubscribe, and data retention (for Shopify's Protected Customer Data approval)
+
+Added to support Shopify's Protected Customer Data application questions:
+
+- **Privacy Policy** — public page at `/privacy` explaining what data is
+  collected, why, how long it's kept, and how to opt out. Link this from
+  your app listing / merchant-facing docs.
+- **Unsubscribe** — every review-reminder email includes an unsubscribe
+  link (`/api/unsubscribe?shop=...&email=...`). One click permanently
+  stops reminders to that address for that store (`ReminderUnsubscribe`
+  table). Checked before every send in the reminder cron.
+- **Data retention** — `app/api/cron/data-retention` runs daily (see
+  `vercel.json`), deleting `PendingReviewRequest` rows older than 90 days
+  that never resulted in a review — avoids holding onto customer
+  email/name/purchase data indefinitely once it's no longer useful.
+
+When filling out Shopify's Protected Customer Data form, these three
+features are what let you honestly answer "Yes" to: telling merchants
+what data you process, respecting consent/opt-out decisions, and having
+a retention period.

@@ -21,9 +21,10 @@ export async function sendReviewReminderEmail(params: {
   productTitle: string;
   productImageUrl?: string;
   reviewUrl: string;
+  unsubscribeUrl: string;
   replyToEmail?: string; // merchant's own address — customer sees/replies here, but "From" stays on our verified domain
 }) {
-  const { to, customerName, productTitle, productImageUrl, reviewUrl, replyToEmail } = params;
+  const { to, customerName, productTitle, productImageUrl, reviewUrl, unsubscribeUrl, replyToEmail } = params;
 
   return getResend().emails.send({
     from: process.env.EMAIL_FROM || "reviews@yourapp.com",
@@ -44,6 +45,9 @@ export async function sendReviewReminderEmail(params: {
         <a href="${reviewUrl}" style="display:inline-block;padding:12px 20px;background:#111;color:#fff;text-decoration:none;border-radius:6px;margin-top:8px;">
           Leave a review
         </a>
+        <p style="color:#999;font-size:12px;margin-top:32px;">
+          Don't want these emails? <a href="${unsubscribeUrl}" style="color:#999;">Unsubscribe</a>
+        </p>
       </div>
     `,
   });

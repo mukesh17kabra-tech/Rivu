@@ -26,8 +26,27 @@ export async function GET(req: NextRequest) {
       },
     });
 
+    // Load this shop's unsubscribe list once, check against it in memory
+    // rather than a query per pending request.
+    const unsubscribed = await db.reminderUnsubscribe.findMany({
+      where: { shopId: shop.id },
+      select: { customerEmail: true },
+    });
+    const unsubscribedEmails = new Set(unsubscribed.map((u: { customerEmail: string }) => u.customerEmail));
+
     for (const req of due) {
+      if (unsubscribedEmails.has(req.customerEmail)) {
+        // Respect opt-out — mark as "sent" (skipped) so we don't keep
+        // re-checking it every day.
+        await db.pendingReviewRequest.update({
+          where: { id: req.id },
+          data: { reminderSentAt: new Date() },
+        });
+        continue;
+      }
+
       const reviewUrl = `${process.env.HOST}/review?shop=${encodeURIComponent(shop.shopDomain)}&productId=${req.productId}&productTitle=${encodeURIComponent(req.productTitle)}${req.productImageUrl ? `&productImage=${encodeURIComponent(req.productImageUrl)}` : ""}`;
+      const unsubscribeUrl = `${process.env.HOST}/api/unsubscribe?shop=${encodeURIComponent(shop.shopDomain)}&email=${encodeURIComponent(req.customerEmail)}`;
 
       try {
         await sendReviewReminderEmail({
@@ -36,6 +55,7 @@ export async function GET(req: NextRequest) {
           productTitle: req.productTitle,
           productImageUrl: req.productImageUrl || undefined,
           reviewUrl,
+          unsubscribeUrl,
           replyToEmail: shop.fromEmail || undefined,
         });
         await db.pendingReviewRequest.update({
