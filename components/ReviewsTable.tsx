@@ -18,18 +18,41 @@ type Review = {
 const TEMPLATES = [
   { value: "quote-minimal", label: "Minimal (white)" },
   { value: "story-bold", label: "Bold (dark)" },
+  { value: "pastel-card", label: "Pastel card" },
+  { value: "gradient-pop", label: "Gradient pop" },
+  { value: "polaroid", label: "Polaroid style" },
+  { value: "receipt", label: "Receipt style" },
+  { value: "bordered-classic", label: "Bordered classic" },
+  { value: "big-quote", label: "Big quote marks" },
 ];
 const FORMATS = [
   { value: "post", label: "Square post (1080×1080)" },
   { value: "story", label: "Story (1080×1920)" },
 ];
 
-export function ReviewsTable({ shop, reviews: initial }: { shop: string; reviews: Review[] }) {
+const PLAN_TEMPLATE_COUNTS: Record<string, number> = {
+  free: 1,
+  starter: 2,
+  growth: Infinity,
+  pro: Infinity,
+};
+
+export function ReviewsTable({
+  shop,
+  reviews: initial,
+  plan,
+}: {
+  shop: string;
+  reviews: Review[];
+  plan: string;
+}) {
   const [reviews, setReviews] = useState(initial);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [ugcOpenId, setUgcOpenId] = useState<string | null>(null);
   const [template, setTemplate] = useState(TEMPLATES[0].value);
   const [format, setFormat] = useState(FORMATS[0].value);
+
+  const allowedTemplateCount = PLAN_TEMPLATE_COUNTS[plan] ?? 1;
 
   async function toggleApproved(review: Review) {
     setBusyId(review.id);
@@ -158,11 +181,19 @@ export function ReviewsTable({ shop, reviews: initial }: { shop: string; reviews
                             onChange={(e) => setTemplate(e.target.value)}
                             className="rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
                           >
-                            {TEMPLATES.map((t) => (
-                              <option key={t.value} value={t.value} style={{ color: "#000" }}>
-                                {t.label}
-                              </option>
-                            ))}
+                            {TEMPLATES.map((t, i) => {
+                              const locked = i >= allowedTemplateCount;
+                              return (
+                                <option
+                                  key={t.value}
+                                  value={t.value}
+                                  disabled={locked}
+                                  style={{ color: locked ? "#999" : "#000" }}
+                                >
+                                  {locked ? `🔒 ${t.label} (upgrade to unlock)` : t.label}
+                                </option>
+                              );
+                            })}
                           </select>
                           <select
                             value={format}
@@ -175,6 +206,16 @@ export function ReviewsTable({ shop, reviews: initial }: { shop: string; reviews
                               </option>
                             ))}
                           </select>
+                          {allowedTemplateCount < TEMPLATES.length && (
+                            <p className="text-[11px] text-yellow-300/80">
+                              {TEMPLATES.length - allowedTemplateCount} more template
+                              {TEMPLATES.length - allowedTemplateCount === 1 ? "" : "s"} available on
+                              a higher plan.{" "}
+                              <a href={`/dashboard/plans?shop=${shop}`} className="underline">
+                                Upgrade
+                              </a>
+                            </p>
+                          )}
                           <div>
                             <a
                               href={imageUrl}
@@ -189,7 +230,7 @@ export function ReviewsTable({ shop, reviews: initial }: { shop: string; reviews
                         <img
                           src={imageUrl}
                           alt="UGC preview"
-                          className="w-full max-w-[200px] rounded-md border border-white/10"
+                          className="w-full max-w-[320px] rounded-md border border-white/10"
                         />
                       </div>
                     </td>
