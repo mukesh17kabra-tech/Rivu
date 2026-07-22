@@ -59,6 +59,8 @@ export default async function DashboardHome({
 
         <OnboardingChecklist shop={shop} host={host} />
 
+        <MilestoneBar total={total} />
+
         <section className="mb-8 grid grid-cols-4 gap-4">
           <Stat label="Total Reviews" value={total} />
           <Stat label="Average Rating" value={average} suffix=" ★" />
@@ -106,6 +108,32 @@ export default async function DashboardHome({
         </section>
       </div>
     </main>
+  );
+}
+
+function MilestoneBar({ total }: { total: number }) {
+  const MILESTONES = [10, 25, 50, 100, 250, 500, 1000];
+  const next = MILESTONES.find((m) => m > total) ?? MILESTONES[MILESTONES.length - 1] * 2;
+  const prev = [...MILESTONES].reverse().find((m) => m <= total) ?? 0;
+  const progress = Math.min(100, Math.round(((total - prev) / (next - prev)) * 100));
+
+  return (
+    <section className="mb-8 rounded-lg border border-white/10 bg-white/[0.02] p-5">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-sm font-medium text-white">
+          🎉 {total} review{total === 1 ? "" : "s"} collected
+        </p>
+        <p className="text-xs text-white/40">
+          {next - total} more to reach {next}
+        </p>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+        <div
+          className="h-full rounded-full bg-emerald-400 transition-all"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </section>
   );
 }
 

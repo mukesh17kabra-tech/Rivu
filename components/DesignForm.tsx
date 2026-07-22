@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 
 type DesignSettings = {
-  displayStyle: "list" | "grid" | "carousel";
+  displayStyle: "list" | "grid" | "carousel" | "split";
   gridColumns: number;
   carouselVisible: number;
   arrowColor: string;
@@ -16,8 +17,11 @@ type DesignSettings = {
   formAlign: "left" | "center" | "right";
   formMaxWidth: number;
   widgetMaxWidth: number;
+  widgetTitle: string;
+  topSpacing: number;
   showSuggestionsOnWebsite: boolean;
   showSuggestionsOnQr: boolean;
+  suggestionLanguage: string;
 };
 
 const FONT_OPTIONS = [
@@ -65,7 +69,7 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
         <div>
           <label className="mb-2 block text-sm font-medium text-white/70">Layout</label>
           <div className="flex gap-2">
-            {(["list", "grid", "carousel"] as const).map((style) => (
+            {(["list", "grid", "carousel", "split"] as const).map((style) => (
               <button
                 key={style}
                 onClick={() => update("displayStyle", style)}
@@ -171,6 +175,40 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
         </div>
 
         <div className="border-t border-white/10 pt-5">
+          <label className="mb-2 block text-sm font-medium text-white/70">Widget heading text</label>
+          <input
+            type="text"
+            value={settings.widgetTitle}
+            onChange={(e) => update("widgetTitle", e.target.value)}
+            className="w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
+            maxLength={100}
+          />
+          <p className="mt-2 text-xs text-white/40">
+            Shown above the review list — change to whatever fits your store&apos;s voice
+            (e.g. &quot;What our customers say&quot;).
+          </p>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-white/70">
+            Top spacing: {settings.topSpacing}px
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={120}
+            step={4}
+            value={settings.topSpacing}
+            onChange={(e) => update("topSpacing", Number(e.target.value))}
+            className="w-full"
+          />
+          <p className="mt-2 text-xs text-white/40">
+            Space above the widget — increase if it looks too squeezed against content
+            above it on your page.
+          </p>
+        </div>
+
+        <div className="border-t border-white/10 pt-5">
           <p className="mb-3 text-sm font-medium text-white/70">Overall widget size</p>
           <label className="mb-2 block text-xs font-medium text-white/50">
             Container max width: {settings.widgetMaxWidth}px
@@ -235,7 +273,7 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
             />
             <span className="text-sm text-white/80">On the website (product page widget)</span>
           </label>
-          <label className="flex items-center gap-3">
+          <label className="mb-4 flex items-center gap-3">
             <input
               type="checkbox"
               checked={settings.showSuggestionsOnQr}
@@ -244,6 +282,23 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
             />
             <span className="text-sm text-white/80">On the QR-scan review page</span>
           </label>
+
+          <label className="mb-2 block text-xs font-medium text-white/50">Suggestion language</label>
+          <div className="grid grid-cols-2 gap-2">
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => update("suggestionLanguage", lang.code)}
+                className={`rounded-md border px-3 py-2 text-sm transition-colors ${
+                  settings.suggestionLanguage === lang.code
+                    ? "border-emerald-400 bg-emerald-400/10 text-white"
+                    : "border-white/10 text-white/50 hover:border-white/30"
+                }`}
+              >
+                {lang.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <button

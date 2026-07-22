@@ -8,7 +8,7 @@ import { LogoUpload } from "@/components/LogoUpload";
 
 type ShopSettings = {
   plan: string;
-  displayStyle: "list" | "grid" | "carousel";
+  displayStyle: "list" | "grid" | "carousel" | "split";
   gridColumns: number;
   carouselVisible: number;
   arrowColor: string;
@@ -21,8 +21,11 @@ type ShopSettings = {
   formAlign: "left" | "center" | "right";
   formMaxWidth: number;
   widgetMaxWidth: number;
+  widgetTitle: string;
+  topSpacing: number;
   showSuggestionsOnWebsite: boolean;
   showSuggestionsOnQr: boolean;
+  suggestionLanguage: string;
   rewardEnabled: boolean;
   rewardType: "percentage" | "fixed_amount";
   rewardValue: number;
@@ -32,6 +35,7 @@ type ShopSettings = {
   emailSubject: string;
   emailBodyTemplate: string;
   logoUrl: string;
+  logoSize: number;
 };
 
 const TABS = [
@@ -91,12 +95,19 @@ export function SettingsTabs({
                 formAlign: shopRecord.formAlign,
                 formMaxWidth: shopRecord.formMaxWidth,
                 widgetMaxWidth: shopRecord.widgetMaxWidth,
+                widgetTitle: shopRecord.widgetTitle,
+                topSpacing: shopRecord.topSpacing,
                 showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
                 showSuggestionsOnQr: shopRecord.showSuggestionsOnQr,
+                suggestionLanguage: shopRecord.suggestionLanguage,
               }}
             />
             <div className="border-t border-white/10 pt-8">
-              <LogoUpload shop={shop} initialLogoUrl={shopRecord.logoUrl} />
+              <LogoUpload
+                shop={shop}
+                initialLogoUrl={shopRecord.logoUrl}
+                initialLogoSize={shopRecord.logoSize}
+              />
             </div>
           </div>
         )}

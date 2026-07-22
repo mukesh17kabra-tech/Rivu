@@ -254,3 +254,35 @@ hardcoded). Supports variables:
 
 `lib/email.ts` substitutes these before sending; the review link is
 automatically turned into a clickable button in the resulting email.
+
+## New features (this round)
+
+- **Split layout** — new `displayStyle: "split"` option: rating summary +
+  percentage bar on the left, full review list on the right. Set via
+  Settings → Widget Settings → Layout.
+- **Editable widget heading** — "Customer Reviews" text is now merchant-
+  editable (Settings → Widget Settings → "Widget heading text").
+- **Top spacing control** — adjustable space above the widget, since some
+  themes butt it right up against other page content.
+- **Rating bar color bug fixed** — the percentage bar was rendering
+  washed-out/invisible because `opacity` was set on the whole row
+  (including the colored fill), not just the text labels. Also added a
+  defensive fallback so any missing/empty design setting can't silently
+  break the widget's inline styles again.
+- **Video reviews** — customers can attach a short video instead of (or
+  as well as) a photo when submitting a review. Stored as a base64 data
+  URI like photos, size-capped client-side (~8MB) with a friendly warning.
+- **"Top Reviewer" streak badge** — customers with 3+ approved reviews
+  (matched by email) get a small badge next to their name in the widget.
+- **Multi-language suggestions** — `lib/review-suggestions.ts` now has
+  full English and Hindi (हिन्दी) template sets. Merchants pick the
+  language from Settings → Widget Settings → "Suggestion language".
+- **Milestone progress bar** — Dashboard now shows progress toward the
+  next review-count milestone (10/25/50/100/250/500/1000).
+- **Configurable logo watermark size** — the UGC card watermark logo size
+  is now a slider in Settings (60–300px) instead of a fixed 80px.
+- **Instagram/WhatsApp direct share** — `ShareButtons` component uses the
+  Web Share API (`navigator.share` with files) so customers/merchants can
+  share a UGC card directly to whatever apps are installed on their phone
+  — no Meta app review or Facebook App ID needed, since it's just the
+  browser's native OS share sheet.

@@ -101,7 +101,7 @@ export function ReviewFlow({
     setLoadingSuggestions(true);
     try {
       const res = await fetch(
-        `/api/reviews/suggestions?rating=${stars}&productTitle=${encodeURIComponent(productTitle)}`
+        `/api/reviews/suggestions?rating=${stars}&productTitle=${encodeURIComponent(productTitle)}&shop=${encodeURIComponent(shop)}`
       );
       const data = await res.json();
       setSuggestions(data.suggestions || []);

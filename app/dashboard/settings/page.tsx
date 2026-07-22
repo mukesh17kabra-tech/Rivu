@@ -36,7 +36,7 @@ export default async function SettingsPage({
           initialTab={tab || "installation"}
           shopRecord={{
             plan: shopRecord.plan,
-            displayStyle: shopRecord.displayStyle as "list" | "grid" | "carousel",
+            displayStyle: shopRecord.displayStyle as "list" | "grid" | "carousel" | "split",
             gridColumns: shopRecord.gridColumns,
             carouselVisible: shopRecord.carouselVisible,
             arrowColor: shopRecord.arrowColor,
@@ -49,8 +49,11 @@ export default async function SettingsPage({
             formAlign: shopRecord.formAlign as "left" | "center" | "right",
             formMaxWidth: shopRecord.formMaxWidth,
             widgetMaxWidth: shopRecord.widgetMaxWidth,
+            widgetTitle: shopRecord.widgetTitle,
+            topSpacing: shopRecord.topSpacing,
             showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
             showSuggestionsOnQr: shopRecord.showSuggestionsOnQr,
+            suggestionLanguage: shopRecord.suggestionLanguage,
             rewardEnabled: shopRecord.rewardEnabled,
             rewardType: shopRecord.rewardType as "percentage" | "fixed_amount",
             rewardValue: shopRecord.rewardValue,
@@ -60,6 +63,7 @@ export default async function SettingsPage({
             emailSubject: shopRecord.emailSubject,
             emailBodyTemplate: shopRecord.emailBodyTemplate,
             logoUrl: shopRecord.logoUrl || "",
+            logoSize: shopRecord.logoSize,
           }}
         />
       </div>

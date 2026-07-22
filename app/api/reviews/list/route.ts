@@ -27,11 +27,33 @@ export async function GET(req: NextRequest) {
       rating: true,
       body: true,
       customerName: true,
+      customerEmail: true,
       photoUrl: true,
+      videoUrl: true,
       createdAt: true,
     },
     take: 50,
   });
+
+  // Streak/"Top Reviewer" badge: count how many approved reviews (across
+  // any product in this shop) each reviewer's email has, so the widget can
+  // show a small badge next to repeat reviewers. Cheap enough to compute
+  // per-request at this scale (small per-shop review volumes).
+  const emails = [
+    ...new Set(reviews.map((r: { customerEmail: string | null }) => r.customerEmail).filter(Boolean)),
+  ] as string[];
+  const reviewCounts: { customerEmail: string | null; _count: { customerEmail: number } }[] = emails.length
+    ? await db.review.groupBy({
+        by: ["customerEmail"],
+        where: { shopId: shopRecord.id, approved: true, customerEmail: { in: emails } },
+        _count: { customerEmail: true },
+      })
+    : [];
+  const countByEmail = new Map(reviewCounts.map((r) => [r.customerEmail, r._count.customerEmail]));
+  const reviewsWithBadge = reviews.map((r: { customerEmail: string | null }) => ({
+    ...r,
+    isTopReviewer: r.customerEmail ? (countByEmail.get(r.customerEmail) || 0) >= 3 : false,
+  }));
 
   // Rating breakdown for the percentage bar — computed over ALL approved
   // reviews for this product, not just the 50 returned above.
@@ -52,7 +74,7 @@ export async function GET(req: NextRequest) {
 
   return withCors(
     NextResponse.json({
-      reviews,
+      reviews: reviewsWithBadge,
       summary: { total, average, breakdown: counts },
       design: {
         displayStyle: shopRecord.displayStyle,
@@ -68,6 +90,8 @@ export async function GET(req: NextRequest) {
         formAlign: shopRecord.formAlign,
         formMaxWidth: shopRecord.formMaxWidth,
         widgetMaxWidth: shopRecord.widgetMaxWidth,
+        widgetTitle: shopRecord.widgetTitle,
+        topSpacing: shopRecord.topSpacing,
         showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
       },
     })

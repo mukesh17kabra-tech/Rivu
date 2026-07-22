@@ -37,6 +37,16 @@ const schema = z.object({
       })
       .optional()
   ),
+  // Same pattern as photoUrl but for video data URIs (data:video/...).
+  videoUrl: z.preprocess(
+    (val) => (val === "" || val === undefined || val === null ? undefined : val),
+    z
+      .string()
+      .refine((val) => val.startsWith("http") || val.startsWith("data:video/"), {
+        message: "videoUrl must be a URL or a video data URI",
+      })
+      .optional()
+  ),
 });
 
 function withCors(res: NextResponse) {

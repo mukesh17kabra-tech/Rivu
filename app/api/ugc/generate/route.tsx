@@ -62,9 +62,14 @@ export async function GET(req: NextRequest) {
   }
 
   let logoUrl: string | null = null;
+  let logoSize = 140;
   try {
-    const shop = await db.shop.findUnique({ where: { id: review.shopId }, select: { logoUrl: true } });
+    const shop = await db.shop.findUnique({
+      where: { id: review.shopId },
+      select: { logoUrl: true, logoSize: true },
+    });
     logoUrl = shop?.logoUrl || null;
+    logoSize = shop?.logoSize || 140;
   } catch {
     // Non-critical — just skip the watermark if this lookup fails.
   }
@@ -81,7 +86,7 @@ export async function GET(req: NextRequest) {
   const logoWatermark = logoUrl ? (
     <img
       src={logoUrl}
-      width={80}
+      width={logoSize}
       style={{ position: "absolute", bottom: 24, right: 24, borderRadius: 6 }}
     />
   ) : null;

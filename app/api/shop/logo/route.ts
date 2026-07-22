@@ -11,6 +11,7 @@ const schema = z.object({
       .refine((val) => val.startsWith("data:image/"), { message: "Must be an image data URI" })
       .nullable()
   ),
+  logoSize: z.number().int().min(60).max(300).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -20,11 +21,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const { shop, logoUrl } = parsed.data;
+  const { shop, logoUrl, logoSize } = parsed.data;
 
   await db.shop.update({
     where: { shopDomain: shop },
-    data: { logoUrl },
+    data: { logoUrl, ...(logoSize !== undefined ? { logoSize } : {}) },
   });
 
   return NextResponse.json({ success: true });

@@ -18,7 +18,7 @@ model Shop {
 
   // Widget design customization — lets merchants match their store's
   // branding instead of a fixed look, and choose how reviews are laid out.
-  displayStyle    String @default("list")    // "list" | "grid" | "carousel"
+  displayStyle    String @default("list")    // "list" | "grid" | "carousel" | "split"
   gridColumns     Int    @default(3)          // only used when displayStyle = "grid"
   carouselVisible Int    @default(1)          // cards visible at once, carousel only
   arrowColor      String @default("#111111")  // carousel prev/next arrow color
@@ -34,16 +34,20 @@ model Shop {
   formAlign    String @default("left")  // "left" | "center" | "right"
   formMaxWidth Int    @default(420)      // px
   widgetMaxWidth Int  @default(480)      // px — overall widget container (summary + review list), separate from the form's own width
+  widgetTitle  String @default("Customer Reviews") // merchant-editable heading text above the widget
+  topSpacing   Int    @default(24)       // px — space above the widget, since themes often butt it right up against other content
 
   // Store logo shown on generated UGC graphics (small watermark, bottom
   // corner) — stored as a base64 data URI, same pattern as review photos.
-  logoUrl String? @db.Text
+  logoUrl  String? @db.Text
+  logoSize Int     @default(140) // px, width of the watermark on generated graphics
 
   // Whether to show the auto-suggestion picker (with refresh) when
   // writing a review — configurable separately for the storefront widget
   // vs. the QR-scan flow, since merchants may want one but not the other.
   showSuggestionsOnWebsite Boolean @default(true)
   showSuggestionsOnQr      Boolean @default(true)
+  suggestionLanguage       String  @default("en") // "en" | "hi" — language of the pre-written review suggestions
 
   // Optional reward for leaving a review — merchant toggles this on and
   // picks a discount type/value. When enabled, every review submission
@@ -119,6 +123,7 @@ model Review {
   customerName String
   customerEmail String? // used to prevent duplicate reminder emails once someone reviews
   photoUrl    String?  @db.Text // optional customer-submitted photo (stored as base64 data URI for simplicity)
+  videoUrl    String?  @db.Text // optional customer-submitted video (stored as base64 data URI, kept short/low-res)
 
   approved    Boolean  @default(false)
   createdAt   DateTime @default(now())

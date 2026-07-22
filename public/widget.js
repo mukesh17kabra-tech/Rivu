@@ -23,7 +23,7 @@
 
     let reviews = [];
     let summary = { total: 0, average: 0, breakdown: [] };
-    let design = {
+    const DEFAULT_DESIGN = {
       displayStyle: "list",
       gridColumns: 3,
       carouselVisible: 1,
@@ -37,8 +37,11 @@
       formAlign: "left",
       formMaxWidth: 420,
       widgetMaxWidth: 480,
+      widgetTitle: "Customer Reviews",
+      topSpacing: 24,
       showSuggestionsOnWebsite: true,
     };
+    let design = { ...DEFAULT_DESIGN };
 
     try {
       const res = await fetch(
@@ -48,7 +51,15 @@
         const data = await res.json();
         reviews = data.reviews || [];
         summary = data.summary || summary;
-        design = { ...design, ...(data.design || {}) };
+        // Merge fetched design over defaults, but fall back to the default
+        // for any individual field that's missing/empty/falsy — protects
+        // against a blank string silently breaking inline CSS (e.g. an
+        // empty starColor making the whole `background:` declaration
+        // invalid, which browsers just ignore, leaving no visible color).
+        const fetched = data.design || {};
+        for (const key in DEFAULT_DESIGN) {
+          design[key] = fetched[key] || DEFAULT_DESIGN[key];
+        }
       }
     } catch {
       // Fall back to defaults + empty state below.
@@ -61,12 +72,16 @@
       const carouselStyle = design.displayStyle === "carousel"
         ? `min-width:${carouselCardWidth};flex-shrink:0;`
         : "";
+      const badge = rev.isTopReviewer
+        ? `<span style="display:inline-block;margin-left:6px;padding:1px 6px;background:${design.primaryColor};color:#fff;border-radius:10px;font-size:10px;vertical-align:middle;">⭐ Top Reviewer</span>`
+        : "";
       return `
         <div class="rv-card" style="${cardStyle}${carouselStyle}">
           <div style="color:${design.starColor};margin-bottom:6px;font-size:14px;">${"★".repeat(rev.rating)}${"☆".repeat(5 - rev.rating)}</div>
           <p style="margin:0 0 8px;line-height:1.5;">${rev.body}</p>
-          ${rev.photoUrl ? `<img src="${rev.photoUrl}" style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:0 0 8px;" />` : ""}
-          <p style="margin:0;opacity:0.55;font-size:12px;">${rev.customerName}</p>
+          ${rev.videoUrl ? `<video src="${rev.videoUrl}" controls style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:0 0 8px;"></video>` : ""}
+          ${!rev.videoUrl && rev.photoUrl ? `<img src="${rev.photoUrl}" style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:0 0 8px;" />` : ""}
+          <p style="margin:0;opacity:0.55;font-size:12px;">${rev.customerName}${badge}</p>
         </div>`;
     }
 
@@ -77,6 +92,12 @@
     } else if (design.displayStyle === "carousel") {
       listWrapperStyle = "display:flex;gap:12px;overflow-x:auto;scroll-behavior:smooth;padding-bottom:8px;";
       carouselCardWidth = `calc(${100 / design.carouselVisible}% - ${(12 * (design.carouselVisible - 1)) / design.carouselVisible}px)`;
+    } else if (design.displayStyle === "split") {
+      // "split" is handled by a completely different outer layout further
+      // down (two columns: summary+bar on the left, reviews on the right)
+      // — this style string is only used for the review list itself
+      // (right column), which stays a simple vertical stack.
+      listWrapperStyle = "display:flex;flex-direction:column;gap:12px;max-height:520px;overflow-y:auto;";
     }
 
     const breakdownHtml = summary.total
@@ -129,17 +150,28 @@
         : "";
     const listOuterStyle = design.displayStyle === "carousel" ? "position:relative;padding:0 20px;" : "";
 
-    const widgetContainerMargin =
-      design.formAlign === "center" ? "0 auto" : design.formAlign === "right" ? "0 0 0 auto" : "0";
-
-    el.innerHTML = `
-      <div class="rv-root" style="font-family:${design.fontFamily};max-width:${design.widgetMaxWidth}px;width:100%;margin:${widgetContainerMargin};color:${design.textColor};text-align:${rootTextAlign};">
-        <h3 style="font-size:16px;margin:0 0 10px;font-weight:600;">Customer Reviews</h3>
+    // "split" layout: summary + rating bar on the left, full review list
+    // on the right — a different look from the single-column styles above.
+    const isSplit = design.displayStyle === "split";
+    const bodyHtml = isSplit
+      ? `
+        <div style="display:flex;gap:32px;flex-wrap:wrap;">
+          <div style="flex:0 0 220px;">${summaryHtml}</div>
+          <div style="flex:1;min-width:240px;position:relative;">
+            <div class="rv-list" style="${listWrapperStyle}">${reviewsHtml}</div>
+          </div>
+        </div>`
+      : `
         ${summaryHtml}
         <div style="${listOuterStyle}">
           ${carouselArrows}
           <div class="rv-list" style="${listWrapperStyle}">${reviewsHtml}</div>
-        </div>
+        </div>`;
+
+    el.innerHTML = `
+      <div class="rv-root" style="font-family:${design.fontFamily};max-width:${design.widgetMaxWidth}px;width:100%;margin-top:${design.topSpacing}px;margin-left:${design.formAlign === "left" ? "0" : "auto"};margin-right:${design.formAlign === "right" ? "0" : "auto"};color:${design.textColor};text-align:${rootTextAlign};">
+        <h3 style="font-size:16px;margin:0 0 10px;font-weight:600;">${design.widgetTitle}</h3>
+        ${bodyHtml}
 
         <button class="rv-toggle" style="margin-top:18px;padding:9px 16px;background:transparent;color:${design.primaryColor};border:1.5px solid ${design.primaryColor};border-radius:${r}px;font-size:13px;font-weight:500;cursor:pointer;">
           Write a review
@@ -185,6 +217,16 @@
               <img class="rv-photo-preview" style="display:none;max-width:90px;border-radius:6px;margin-top:8px;" />
             </div>
 
+            <div>
+              <label style="font-size:13px;opacity:0.7;display:block;margin-bottom:6px;">Or add a short video (optional)</label>
+              <label class="rv-video-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:13px;cursor:pointer;color:#555;">
+                🎥 <span class="rv-video-label">Choose a video</span>
+                <input type="file" name="video" accept="video/*" style="display:none;" />
+              </label>
+              <p class="rv-video-hint" style="margin:4px 0 0;font-size:11px;opacity:0.5;">Keep it short (under ~15 seconds) for a quick upload.</p>
+              <video class="rv-video-preview" controls style="display:none;max-width:160px;border-radius:6px;margin-top:8px;"></video>
+            </div>
+
             <button type="submit" style="margin-top:6px;padding:12px 18px;background:${design.primaryColor};color:#fff;border:none;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-weight:600;cursor:pointer;">
               Submit review
             </button>
@@ -217,9 +259,13 @@
     const photoInput = form.querySelector('[name="photo"]');
     const photoLabel = el.querySelector(".rv-photo-label");
     const photoPreview = el.querySelector(".rv-photo-preview");
+    const videoInput = form.querySelector('[name="video"]');
+    const videoLabel = el.querySelector(".rv-video-label");
+    const videoPreview = el.querySelector(".rv-video-preview");
 
     let selectedRating = 0;
     let photoDataUrl;
+    let videoDataUrl;
 
     toggle.addEventListener("click", () => {
       formWrap.style.display = formWrap.style.display === "none" ? "block" : "none";
@@ -240,7 +286,7 @@
       suggestionsBox.innerHTML = `<p style="font-size:12px;opacity:0.5;margin:0;">Loading...</p>`;
       try {
         const res = await fetch(
-          `${API_BASE}/api/reviews/suggestions?rating=${selectedRating}&productTitle=${encodeURIComponent(productTitle)}`
+          `${API_BASE}/api/reviews/suggestions?rating=${selectedRating}&productTitle=${encodeURIComponent(productTitle)}&shop=${encodeURIComponent(shop)}`
         );
         const data = await res.json();
         const suggestions = data.suggestions || [];
@@ -309,6 +355,26 @@
       reader.readAsDataURL(file);
     });
 
+    videoInput.addEventListener("change", () => {
+      const file = videoInput.files?.[0];
+      if (!file) return;
+      // No client-side re-encoding for video (unlike photos) — just warn
+      // if it's large, since we're storing this as a base64 data URI.
+      if (file.size > 8 * 1024 * 1024) {
+        alert("That video is a bit large — please choose one under ~8MB, or a shorter clip.");
+        videoInput.value = "";
+        return;
+      }
+      videoLabel.textContent = file.name.length > 20 ? file.name.slice(0, 18) + "..." : file.name;
+      const reader = new FileReader();
+      reader.onload = () => {
+        videoDataUrl = reader.result;
+        videoPreview.src = videoDataUrl;
+        videoPreview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    });
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!selectedRating) {
@@ -337,6 +403,7 @@
             customerName,
             customerEmail,
             photoUrl: photoDataUrl,
+            videoUrl: videoDataUrl,
           }),
         });
         const data = await res.json();
