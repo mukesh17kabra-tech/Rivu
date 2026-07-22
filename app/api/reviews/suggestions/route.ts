@@ -20,9 +20,14 @@ export async function GET(req: NextRequest) {
   if (shop) {
     const shopRecord = await db.shop.findUnique({
       where: { shopDomain: shop },
-      select: { suggestionLanguage: true },
+      select: { suggestionLanguage: true, plan: true },
     });
-    if (shopRecord) language = shopRecord.suggestionLanguage;
+    // Non-English suggestion languages are a Starter+ feature — Free plan
+    // always gets English regardless of what's saved, so this can't be
+    // bypassed by just calling the API directly.
+    if (shopRecord && shopRecord.plan !== "free") {
+      language = shopRecord.suggestionLanguage;
+    }
   }
 
   const suggestions = getSuggestions(rating, productTitle, 7, language);

@@ -4,13 +4,26 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
       <PlanCard
         name="Free"
         price="$0/mo"
-        perks={["25 reviews/month", "QR codes for up to 3 products", "1 UGC template"]}
+        perks={[
+          "25 reviews/month",
+          "QR codes for up to 3 products",
+          "1 UGC template",
+          "List, Grid & Split layouts",
+          "English suggestions only",
+        ]}
         current={currentPlan === "free"}
       />
       <PlanCard
         name="Starter"
         price="$4.99/mo"
-        perks={["100 reviews/month", "Unlimited product QR codes", "2 UGC templates", "7-day free trial"]}
+        perks={[
+          "100 reviews/month",
+          "Unlimited product QR codes",
+          "2 UGC templates",
+          "Photo + video reviews",
+          "10 suggestion languages",
+          "7-day free trial",
+        ]}
         href={`/api/billing/upgrade?shop=${shop}&plan=starter`}
         ctaLabel="Upgrade to Starter"
         current={currentPlan === "starter"}
@@ -18,7 +31,16 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
       <PlanCard
         name="Growth"
         price="$9.99/mo"
-        perks={["500 reviews/month", "Unlimited product QR codes", "All UGC templates", "7-day free trial"]}
+        perks={[
+          "500 reviews/month",
+          "Unlimited product QR codes",
+          "All 8 UGC templates",
+          "Photo + video reviews",
+          "\"Top Reviewer\" streak badges",
+          "Direct share to Instagram/WhatsApp",
+          "Automated review-reminder emails",
+          "7-day free trial",
+        ]}
         href={`/api/billing/upgrade?shop=${shop}&plan=growth`}
         ctaLabel="Upgrade to Growth"
         current={currentPlan === "growth"}
@@ -26,7 +48,18 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
       <PlanCard
         name="Pro"
         price="$19.99/mo"
-        perks={["Unlimited reviews", "Unlimited product QR codes", "All UGC templates", "Priority support", "7-day free trial"]}
+        perks={[
+          "Unlimited reviews",
+          "Unlimited product QR codes",
+          "All 8 UGC templates",
+          "Photo + video reviews",
+          "\"Top Reviewer\" streak badges",
+          "Direct share to Instagram/WhatsApp",
+          "Automated review-reminder emails",
+          "Review-reward discount codes",
+          "Priority support",
+          "7-day free trial",
+        ]}
         href={`/api/billing/upgrade?shop=${shop}&plan=pro`}
         ctaLabel="Upgrade to Pro"
         highlight

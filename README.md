@@ -286,3 +286,54 @@ automatically turned into a clickable button in the resulting email.
   share a UGC card directly to whatever apps are installed on their phone
   — no Meta app review or Facebook App ID needed, since it's just the
   browser's native OS share sheet.
+
+## ⚠️ Plan feature enforcement — partial, be aware
+
+Plan cards now describe a full feature tier structure, but as of this
+update, only these are actually **enforced** in code:
+- Reviews/month cap, QR product cap (`lib/billing.ts`)
+- UGC template count (`ReviewsTable.tsx` — locks templates beyond the
+  plan's `templateCount`)
+- Suggestion language (Free plan is forced to English server-side, even
+  if a different language is saved in settings)
+
+**Not yet enforced** (available to all plans regardless of what the
+pricing cards say): video reviews, "Top Reviewer" streak badges, direct
+share buttons, automated reminder emails, review-reward discount codes.
+If you want the pricing to be accurate/defensible, these need the same
+kind of server-side gate as the UGC template count has — happy to add
+that gating in a follow-up pass.
+
+## Bug fixes (this round)
+
+- **"Bordered classic" UGC template logo overlap** — the watermark was
+  anchored to the outer padding box while the visible border sat further
+  inset, so it visually crossed the border line. Moved the watermark
+  inside the bordered box instead.
+- **Email Requests / Review reward forms too narrow** — widened from
+  `max-w-md` to `max-w-2xl`, and made the email body textarea taller.
+- **Review text not centered** — added explicit `text-align` to every
+  text element in the review card (stars, body, name), instead of relying
+  on inheriting it from the root wrapper. Shopify themes often have broad
+  CSS rules (e.g. `p { text-align: left; }`) that can override inherited
+  alignment — explicit inline styles always win regardless of theme CSS.
+- **Rating bar "no color" reports** — confirmed via inspecting the live
+  DOM that the fix from the previous round is correct
+  (`background:#f5b400` renders at the right width). What looked like
+  "no color" in a screenshot was the browser DevTools' own blue
+  hover-highlight overlay sitting on top of the element, not an actual
+  rendering bug.
+
+## ⚠️ Plan enforcement gap (important, read before launch)
+
+Only `reviewsPerMonthCap`, `qrProductCap`, `templateCount`, and
+`suggestionLanguage` are actually server-side enforced right now. The
+pricing page lists video reviews, streak badges, share buttons, reminder
+emails, and reward codes as tier-differentiated features, but **none of
+these are currently gated by plan in the code** — they work identically
+on every tier. If you want the pricing to be accurate/defensible, add
+plan checks to: `app/api/reviews/submit` (video/photo gating),
+`app/api/cron/review-reminders` (skip if plan lacks reminders),
+`app/api/shop/reward` (block enabling on lower tiers), and the
+share/streak-badge rendering in `public/widget.js` /
+`extensions/rivu-reviews/assets/rivu-widget.js`.

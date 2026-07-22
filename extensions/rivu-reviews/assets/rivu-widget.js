@@ -66,19 +66,26 @@
     const cardStyle = `background:${design.backgroundColor};color:${design.textColor};border-radius:${r}px;padding:14px;font-size:13px;box-shadow:0 1px 3px rgba(0,0,0,0.06);`;
 
     function reviewCard(rev) {
+      const cardTextAlign = design.formAlign === "center" ? "center" : design.formAlign === "right" ? "right" : "left";
       const carouselStyle = design.displayStyle === "carousel"
         ? `min-width:${carouselCardWidth};flex-shrink:0;`
         : "";
       const badge = rev.isTopReviewer
         ? `<span style="display:inline-block;margin-left:6px;padding:1px 6px;background:${design.primaryColor};color:#fff;border-radius:10px;font-size:10px;vertical-align:middle;">⭐ Top Reviewer</span>`
         : "";
+      // Explicit text-align on every text element — Shopify themes very
+      // often have broad CSS rules like `p { text-align: left; }` which
+      // override the inherited text-align from our root wrapper, since
+      // those theme rules can have equal/higher specificity. Setting it
+      // explicitly here, inline, always wins.
+      const starJustify = cardTextAlign === "center" ? "center" : cardTextAlign === "right" ? "flex-end" : "flex-start";
       return `
-        <div class="rv-card" style="${cardStyle}${carouselStyle}">
-          <div style="color:${design.starColor};margin-bottom:6px;font-size:14px;">${"★".repeat(rev.rating)}${"☆".repeat(5 - rev.rating)}</div>
-          <p style="margin:0 0 8px;line-height:1.5;">${rev.body}</p>
+        <div class="rv-card" style="${cardStyle}${carouselStyle}text-align:${cardTextAlign};">
+          <div style="display:flex;justify-content:${starJustify};color:${design.starColor};margin-bottom:6px;font-size:14px;">${"★".repeat(rev.rating)}${"☆".repeat(5 - rev.rating)}</div>
+          <p style="margin:0 0 8px;line-height:1.5;text-align:${cardTextAlign};">${rev.body}</p>
           ${rev.videoUrl ? `<video src="${rev.videoUrl}" controls style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:0 0 8px;"></video>` : ""}
           ${!rev.videoUrl && rev.photoUrl ? `<img src="${rev.photoUrl}" style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:0 0 8px;" />` : ""}
-          <p style="margin:0;opacity:0.55;font-size:12px;">${rev.customerName}${badge}</p>
+          <p style="margin:0;opacity:0.55;font-size:12px;text-align:${cardTextAlign};">${rev.customerName}${badge}</p>
         </div>`;
     }
 
@@ -129,7 +136,7 @@
 
     const reviewsHtml = reviews.length
       ? reviews.map(reviewCard).join("")
-      : `<p style="font-size:14px;color:${design.textColor};opacity:0.55;">No reviews yet — be the first!</p>`;
+      : `<p style="font-size:14px;color:${design.textColor};opacity:0.55;text-align:${rootTextAlign};">No reviews yet — be the first!</p>`;
 
     const formMargin =
       design.formAlign === "center"
@@ -167,7 +174,7 @@
 
     el.innerHTML = `
       <div class="rv-root" style="font-family:${design.fontFamily};max-width:${design.widgetMaxWidth}px;width:100%;margin-top:${design.topSpacing}px;margin-left:${design.formAlign === "left" ? "0" : "auto"};margin-right:${design.formAlign === "right" ? "0" : "auto"};color:${design.textColor};text-align:${rootTextAlign};">
-        <h3 style="font-size:16px;margin:0 0 10px;font-weight:600;">${design.widgetTitle}</h3>
+        <h3 style="font-size:16px;margin:0 0 10px;font-weight:600;text-align:${rootTextAlign};">${design.widgetTitle}</h3>
         ${bodyHtml}
 
         <button class="rv-toggle" style="margin-top:18px;padding:9px 16px;background:transparent;color:${design.primaryColor};border:1.5px solid ${design.primaryColor};border-radius:${r}px;font-size:13px;font-weight:500;cursor:pointer;">

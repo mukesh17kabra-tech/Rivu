@@ -29,7 +29,7 @@ export function RewardForm({ shop, initial }: { shop: string; initial: RewardSet
   }
 
   return (
-    <div className="max-w-md space-y-5 rounded-lg border border-white/10 bg-white/[0.02] p-6">
+    <div className="max-w-3xl space-y-5 rounded-lg border border-white/10 bg-white/[0.02] p-6">
       <label className="flex items-center gap-3">
         <input
           type="checkbox"

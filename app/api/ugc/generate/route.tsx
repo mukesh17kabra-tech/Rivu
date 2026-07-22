@@ -92,12 +92,12 @@ export async function GET(req: NextRequest) {
   const customerName = review.customerName;
   const productTitle = review.productTitle;
 
-  function logoWatermark(color = "#fff", opacity = 1) {
+  function logoWatermark(color = "#fff", opacity = 1, inset = 24) {
     return logoUrl ? (
       <img
         src={logoUrl}
         width={logoSize}
-        style={{ position: "absolute", bottom: 24, right: 24, borderRadius: 6, opacity }}
+        style={{ position: "absolute", bottom: inset, right: inset, borderRadius: 6, opacity }}
       />
     ) : null;
   }
@@ -395,7 +395,7 @@ export async function GET(req: NextRequest) {
               {customerName.toUpperCase()}
             </div>
           </div>
-          {logoWatermark("#000")}
+          {logoWatermark("#000", 1, 44)}
         </div>
       );
     } else if (template === "big-quote") {

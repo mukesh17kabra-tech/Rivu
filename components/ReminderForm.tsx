@@ -31,7 +31,7 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
   }
 
   return (
-    <div className="max-w-md space-y-5 rounded-lg border border-white/10 bg-white/[0.02] p-6">
+    <div className="max-w-3xl space-y-5 rounded-lg border border-white/10 bg-white/[0.02] p-6">
       <div>
         <label className="mb-2 block text-sm font-medium text-white/70">
           Your email (customer replies go here)
@@ -113,7 +113,7 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
                 setSettings((s) => ({ ...s, emailBodyTemplate: e.target.value }));
                 setSaved(false);
               }}
-              className="w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white min-h-[140px] font-mono"
+              className="w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white min-h-[280px] font-mono"
             />
             <p className="mt-2 text-xs text-white/40">
               Available variables:{" "}
