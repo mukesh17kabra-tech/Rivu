@@ -7,7 +7,8 @@ const LANGUAGE_CODES = SUPPORTED_LANGUAGES.map((l) => l.code) as [string, ...str
 
 const schema = z.object({
   shop: z.string().min(1),
-  displayStyle: z.enum(["list", "grid", "carousel", "split"]),
+  displayStyle: z.enum(["list", "grid", "carousel"]),
+  splitSummary: z.boolean(),
   gridColumns: z.number().int().min(2).max(5),
   carouselVisible: z.number().int().min(1).max(4),
   arrowColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),

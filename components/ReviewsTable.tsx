@@ -8,6 +8,7 @@ type Review = {
   productId: string;
   productTitle: string;
   rating: number;
+  reviewTitle: string | null;
   body: string;
   customerName: string;
   customerEmail: string | null;
@@ -126,6 +127,11 @@ export function ReviewsTable({
                   </td>
                   <td className="max-w-[220px] px-4 py-3 text-white/70">
                     <p className="truncate">{review.productTitle}</p>
+                    {review.reviewTitle && (
+                      <p className="mt-1 max-w-[220px] truncate text-xs font-medium italic text-white/60">
+                        {review.reviewTitle}
+                      </p>
+                    )}
                     <p className="mt-1 max-w-[220px] truncate text-xs text-white/40">{review.body}</p>
                   </td>
                   <td className="px-4 py-3 text-yellow-400 whitespace-nowrap">

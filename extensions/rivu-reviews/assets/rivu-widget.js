@@ -1,7 +1,9 @@
 /**
- * Review Widget — supports list, grid, and carousel layouts, plus full
- * color/font customization set by the merchant in the app dashboard
- * (/dashboard/design). Add this to your product template:
+ * Review Widget — premium design with avatar-initial circles, review
+ * titles, "Read more" truncation, and an elegant serif big-rating number
+ * (inspired by top review apps like Judge.me/Okendo). Supports list,
+ * grid, and carousel layouts, plus full color/font customization set by
+ * the merchant in the app dashboard.
  *
  * <div id="review-widget"
  *      data-shop="{{ shop.permanent_domain }}"
@@ -12,6 +14,43 @@
  * <script src="https://YOUR-APP-DOMAIN.vercel.app/widget.js" async></script>
  */
 (function () {
+  // Global styles injected once per page (not per widget instance):
+  // hides native scrollbars on carousels (our own arrow buttons are the
+  // intended navigation), plus a subtle serif font stack for the big
+  // rating number to match a premium review-app look.
+  if (!document.getElementById("rv-global-styles")) {
+    const styleTag = document.createElement("style");
+    styleTag.id = "rv-global-styles";
+    styleTag.textContent = `
+      .rv-list::-webkit-scrollbar { display: none; }
+      .rv-list { scrollbar-width: none; -ms-overflow-style: none; }
+      .rv-big-rating { font-family: Georgia, 'Times New Roman', serif; }
+      .rv-avatar { font-family: Georgia, 'Times New Roman', serif; }
+    `;
+    document.head.appendChild(styleTag);
+  }
+
+  // Deterministic avatar background color from the reviewer's name, so
+  // the same person always gets the same color (not random per render).
+  const AVATAR_PALETTE = ["#7c3aed", "#0891b2", "#dc2626", "#ea580c", "#16a34a", "#2563eb", "#c026d3", "#0d9488"];
+  function avatarColor(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return AVATAR_PALETTE[Math.abs(hash) % AVATAR_PALETTE.length];
+  }
+  function initials(name) {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  function formatDate(iso) {
+    try {
+      return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+    } catch {
+      return "";
+    }
+  }
+
   async function render(el) {
     const { shop, productId, productTitle, productImage, apiBase } = el.dataset;
     const API_BASE = apiBase || "";
@@ -22,6 +61,7 @@
     let summary = { total: 0, average: 0, breakdown: [] };
     const DEFAULT_DESIGN = {
       displayStyle: "list",
+      splitSummary: false,
       gridColumns: 3,
       carouselVisible: 1,
       arrowColor: "#111111",
@@ -48,14 +88,14 @@
         const data = await res.json();
         reviews = data.reviews || [];
         summary = data.summary || summary;
-        // Merge fetched design over defaults, but fall back to the default
-        // for any individual field that's missing/empty/falsy — protects
-        // against a blank string silently breaking inline CSS (e.g. an
-        // empty starColor making the whole `background:` declaration
-        // invalid, which browsers just ignore, leaving no visible color).
+        // Merge fetched design over defaults, but only fall back for
+        // truly missing values (undefined/null/empty string) — NOT for
+        // legitimate falsy values like `false` or `0`, which a naive
+        // `fetched[key] || default` would incorrectly override.
         const fetched = data.design || {};
         for (const key in DEFAULT_DESIGN) {
-          design[key] = fetched[key] || DEFAULT_DESIGN[key];
+          const val = fetched[key];
+          design[key] = val === undefined || val === null || val === "" ? DEFAULT_DESIGN[key] : val;
         }
       }
     } catch {
@@ -63,7 +103,7 @@
     }
 
     const r = design.borderRadius;
-    const cardStyle = `background:${design.backgroundColor};color:${design.textColor};border-radius:${r}px;padding:14px;font-size:13px;box-shadow:0 1px 3px rgba(0,0,0,0.06);`;
+    const cardStyle = `background:${design.backgroundColor};color:${design.textColor};border-radius:${r}px;padding:18px;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.04);`;
 
     function reviewCard(rev) {
       const cardTextAlign = design.formAlign === "center" ? "center" : design.formAlign === "right" ? "right" : "left";
@@ -71,49 +111,58 @@
         ? `min-width:${carouselCardWidth};flex-shrink:0;`
         : "";
       const badge = rev.isTopReviewer
-        ? `<span style="display:inline-block;margin-left:6px;padding:1px 6px;background:${design.primaryColor};color:#fff;border-radius:10px;font-size:10px;vertical-align:middle;">⭐ Top Reviewer</span>`
+        ? `<span style="display:inline-block;margin-left:6px;padding:1px 6px;background:${design.primaryColor};color:#fff;border-radius:10px;font-size:9px;vertical-align:middle;white-space:nowrap;">⭐ Top Reviewer</span>`
         : "";
-      // Explicit text-align on every text element — Shopify themes very
-      // often have broad CSS rules like `p { text-align: left; }` which
-      // override the inherited text-align from our root wrapper, since
-      // those theme rules can have equal/higher specificity. Setting it
-      // explicitly here, inline, always wins.
       const starJustify = cardTextAlign === "center" ? "center" : cardTextAlign === "right" ? "flex-end" : "flex-start";
+      const headerJustify = cardTextAlign === "center" ? "center" : "flex-start";
+
+      // "Read more" truncation for long review bodies — CSS-only clamp
+      // plus a JS toggle button. Kept simple: a max-height + fade, click
+      // to expand (no external libraries).
+      const isLong = rev.body.length > 220;
+      const bodyId = `rv-body-${rev.id}`;
+
       return `
-        <div class="rv-card" style="${cardStyle}${carouselStyle}text-align:${cardTextAlign};">
-          <div style="display:flex;justify-content:${starJustify};color:${design.starColor};margin-bottom:6px;font-size:14px;">${"★".repeat(rev.rating)}${"☆".repeat(5 - rev.rating)}</div>
-          <p style="margin:0 0 8px;line-height:1.5;text-align:${cardTextAlign};">${rev.body}</p>
-          ${rev.videoUrl ? `<video src="${rev.videoUrl}" controls style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:0 0 8px;"></video>` : ""}
-          ${!rev.videoUrl && rev.photoUrl ? `<img src="${rev.photoUrl}" style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:0 0 8px;" />` : ""}
-          <p style="margin:0;opacity:0.55;font-size:12px;text-align:${cardTextAlign};">${rev.customerName}${badge}</p>
+        <div class="rv-card" style="${cardStyle}${carouselStyle}">
+          <div style="display:flex;align-items:center;justify-content:${headerJustify};gap:10px;margin-bottom:10px;">
+            <div class="rv-avatar" style="width:34px;height:34px;border-radius:50%;background:${avatarColor(rev.customerName)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;">${initials(rev.customerName)}</div>
+            <div style="text-align:${cardTextAlign};">
+              <p style="margin:0;font-size:13px;font-weight:600;">${rev.customerName}${badge}</p>
+              <p style="margin:0;font-size:11px;opacity:0.5;">${formatDate(rev.createdAt)}</p>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:${starJustify};color:${design.starColor};margin-bottom:8px;font-size:13px;">${"★".repeat(rev.rating)}${"☆".repeat(5 - rev.rating)}</div>
+          ${rev.reviewTitle ? `<p style="margin:0 0 6px;font-size:14px;font-weight:600;font-style:italic;text-align:${cardTextAlign};">${rev.reviewTitle}</p>` : ""}
+          <p id="${bodyId}" class="rv-body-text" data-full="${rev.body.replace(/"/g, "&quot;")}" style="margin:0 0 6px;line-height:1.55;text-align:${cardTextAlign};${isLong ? "max-height:4.7em;overflow:hidden;position:relative;" : ""}">${rev.body}</p>
+          ${isLong ? `<button type="button" class="rv-read-more" data-target="${bodyId}" style="background:none;border:none;padding:0;margin:0 0 8px;font-size:12px;font-weight:600;color:${design.primaryColor};cursor:pointer;text-align:${cardTextAlign};display:block;">Read more</button>` : ""}
+          ${rev.videoUrl ? `<video src="${rev.videoUrl}" controls style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:6px 0 0;"></video>` : ""}
+          ${!rev.videoUrl && rev.photoUrl ? `<img src="${rev.photoUrl}" style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:6px 0 0;" />` : ""}
         </div>`;
     }
 
-    let listWrapperStyle = "display:flex;flex-direction:column;gap:12px;";
+    let listWrapperStyle = "display:flex;flex-direction:column;gap:14px;";
     let carouselCardWidth = null;
+    const carouselNeedsScroll = reviews.length > design.carouselVisible;
     if (design.displayStyle === "grid") {
-      listWrapperStyle = `display:grid;grid-template-columns:repeat(${design.gridColumns},1fr);gap:12px;`;
+      listWrapperStyle = `display:grid;grid-template-columns:repeat(${design.gridColumns},1fr);gap:14px;`;
     } else if (design.displayStyle === "carousel") {
-      listWrapperStyle = "display:flex;gap:12px;overflow-x:auto;scroll-behavior:smooth;padding-bottom:8px;";
-      carouselCardWidth = `calc(${100 / design.carouselVisible}% - ${(12 * (design.carouselVisible - 1)) / design.carouselVisible}px)`;
-    } else if (design.displayStyle === "split") {
-      // "split" is handled by a completely different outer layout further
-      // down (two columns: summary+bar on the left, reviews on the right)
-      // — this style string is only used for the review list itself
-      // (right column), which stays a simple vertical stack.
-      listWrapperStyle = "display:flex;flex-direction:column;gap:12px;max-height:520px;overflow-y:auto;";
+      listWrapperStyle = `display:flex;gap:14px;${carouselNeedsScroll ? "overflow-x:auto;" : "overflow:visible;"}scroll-behavior:smooth;padding-bottom:4px;`;
+      carouselCardWidth = `calc(${100 / design.carouselVisible}% - ${(14 * (design.carouselVisible - 1)) / design.carouselVisible}px)`;
+    }
+    if (design.splitSummary) {
+      listWrapperStyle += "max-height:560px;overflow-y:auto;";
     }
 
     const breakdownHtml = summary.total
       ? summary.breakdown
           .map(
             (b) => `
-        <div style="display:flex;align-items:center;gap:8px;font-size:12px;margin:3px 0;">
-          <span style="width:36px;color:${design.textColor};opacity:0.65;">${b.star} star</span>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;margin:4px 0;">
+          <span style="width:34px;color:${design.textColor};opacity:0.65;">${b.star}★</span>
           <div style="flex:1;height:6px;background:rgba(0,0,0,0.08);border-radius:3px;overflow:hidden;">
-            <div style="width:${b.percentage}%;height:100%;background:${design.starColor};"></div>
+            <div style="width:${b.percentage}%;height:100%;background:${design.starColor};border-radius:3px;"></div>
           </div>
-          <span style="width:30px;text-align:right;color:${design.textColor};opacity:0.65;">${b.percentage}%</span>
+          <span style="width:32px;text-align:right;color:${design.textColor};opacity:0.65;">${b.percentage}%</span>
         </div>`
           )
           .join("")
@@ -124,13 +173,13 @@
 
     const summaryHtml = summary.total
       ? `
-      <div style="display:flex;align-items:center;justify-content:${summaryJustify};gap:20px;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;justify-content:${summaryJustify};gap:24px;margin-bottom:22px;flex-wrap:wrap;">
         <div style="text-align:center;">
-          <div style="font-size:30px;font-weight:700;color:${design.textColor};line-height:1;">${summary.average}</div>
-          <div style="color:${design.starColor};font-size:13px;margin-top:2px;">${"★".repeat(Math.round(summary.average))}${"☆".repeat(5 - Math.round(summary.average))}</div>
-          <div style="font-size:11px;color:${design.textColor};opacity:0.55;margin-top:2px;">${summary.total} review${summary.total === 1 ? "" : "s"}</div>
+          <div class="rv-big-rating" style="font-size:44px;font-weight:700;color:${design.textColor};line-height:1;">${summary.average}</div>
+          <div style="color:${design.starColor};font-size:14px;margin-top:4px;">${"★".repeat(Math.round(summary.average))}${"☆".repeat(5 - Math.round(summary.average))}</div>
+          <div style="font-size:12px;color:${design.textColor};opacity:0.55;margin-top:4px;">${summary.total} review${summary.total === 1 ? "" : "s"}</div>
         </div>
-        <div style="flex:1;max-width:280px;">${breakdownHtml}</div>
+        <div style="flex:1;min-width:180px;max-width:300px;">${breakdownHtml}</div>
       </div>`
       : "";
 
@@ -154,14 +203,12 @@
         : "";
     const listOuterStyle = design.displayStyle === "carousel" ? "position:relative;padding:0 20px;" : "";
 
-    // "split" layout: summary + rating bar on the left, full review list
-    // on the right — a different look from the single-column styles above.
-    const isSplit = design.displayStyle === "split";
-    const bodyHtml = isSplit
+    const bodyHtml = design.splitSummary
       ? `
-        <div style="display:flex;gap:32px;flex-wrap:wrap;">
-          <div style="flex:0 0 220px;">${summaryHtml}</div>
+        <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;">
+          <div style="flex:0 0 220px;position:sticky;top:16px;">${summaryHtml}</div>
           <div style="flex:1;min-width:240px;position:relative;">
+            ${design.displayStyle === "carousel" ? carouselArrows : ""}
             <div class="rv-list" style="${listWrapperStyle}">${reviewsHtml}</div>
           </div>
         </div>`
@@ -174,28 +221,29 @@
 
     el.innerHTML = `
       <div class="rv-root" style="font-family:${design.fontFamily};max-width:${design.widgetMaxWidth}px;width:100%;margin-top:${design.topSpacing}px;margin-left:${design.formAlign === "left" ? "0" : "auto"};margin-right:${design.formAlign === "right" ? "0" : "auto"};color:${design.textColor};text-align:${rootTextAlign};">
-        <h3 style="font-size:16px;margin:0 0 10px;font-weight:600;text-align:${rootTextAlign};">${design.widgetTitle}</h3>
+        <p style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.5;margin:0 0 6px;text-align:${rootTextAlign};">${design.widgetTitle}</p>
         ${bodyHtml}
 
-        <button class="rv-toggle" style="margin-top:18px;padding:9px 16px;background:transparent;color:${design.primaryColor};border:1.5px solid ${design.primaryColor};border-radius:${r}px;font-size:13px;font-weight:500;cursor:pointer;">
-          Write a review
+        <button class="rv-toggle" style="margin-top:20px;padding:11px 22px;background:${design.primaryColor};color:#fff;border:none;border-radius:${r}px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+          Write a Review
         </button>
 
-        <div class="rv-form-wrap" style="display:none;position:relative;margin:${formMargin};padding:24px;border:1px solid rgba(0,0,0,0.08);border-radius:${r}px;max-width:${design.formMaxWidth}px;text-align:${formTextAlign};">
-          <button class="rv-form-close" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:18px;line-height:1;cursor:pointer;color:#999;padding:4px;">✕</button>
-          <p style="margin:0 0 4px;font-size:14px;font-weight:600;">How would you rate it?</p>
-          <div class="rv-stars" style="display:flex;gap:6px;justify-content:${design.formAlign === "center" ? "center" : "flex-start"};margin:10px 0 16px;">
+        <div class="rv-form-wrap" style="display:none;position:relative;margin:${formMargin};padding:26px;background:${design.backgroundColor};border:1px solid rgba(0,0,0,0.06);border-radius:${r}px;max-width:${design.formMaxWidth}px;text-align:${formTextAlign};box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+          <button class="rv-form-close" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:18px;line-height:1;cursor:pointer;color:#999;padding:4px;">✕</button>
+          <p style="margin:0 0 4px;font-size:16px;font-weight:700;">How would you rate it?</p>
+          <p style="margin:0 0 4px;font-size:12px;opacity:0.5;">Tap a star to get started</p>
+          <div class="rv-stars" style="display:flex;gap:8px;justify-content:${design.formAlign === "center" ? "center" : "flex-start"};margin:12px 0 18px;">
             ${[1, 2, 3, 4, 5]
               .map(
                 (n) =>
-                  `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:0;cursor:pointer;font-size:32px;line-height:1;color:#d9d9d9;">★</button>`
+                  `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:0;cursor:pointer;font-size:34px;line-height:1;color:#d9d9d9;transition:color 0.15s;">★</button>`
               )
               .join("")}
           </div>
 
           <div class="rv-suggestions-wrap" style="display:none;text-align:left;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-              <p style="margin:0;font-size:13px;font-weight:500;opacity:0.7;">Pick a suggestion or write your own</p>
+              <p style="margin:0;font-size:13px;font-weight:600;opacity:0.7;">Pick a suggestion or write your own</p>
               <div style="display:flex;gap:12px;">
                 <button type="button" class="rv-refresh" style="background:none;border:none;font-size:12px;color:${design.primaryColor};cursor:pointer;padding:0;">🔄 Refresh</button>
                 <button type="button" class="rv-close-suggestions" style="background:none;border:none;font-size:12px;color:#999;cursor:pointer;padding:0;">✕ Close</button>
@@ -204,16 +252,20 @@
             <div class="rv-suggestions" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
           </div>
 
-          <form class="rv-form" style="display:flex;flex-direction:column;gap:10px;text-align:left;">
-            <textarea name="body" required minlength="10" placeholder="Your review"
-                      style="padding:11px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;min-height:90px;font-family:inherit;resize:vertical;"></textarea>
-            <input type="text" name="customerName" required placeholder="Your name"
-                   style="padding:11px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-family:inherit;" />
-            <input type="email" name="customerEmail" placeholder="Your email (optional)"
-                   style="padding:11px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-family:inherit;" />
+          <form class="rv-form" style="display:flex;flex-direction:column;gap:12px;text-align:left;">
+            <div style="display:flex;gap:10px;">
+              <input type="text" name="customerName" required placeholder="Your name"
+                     style="flex:1;padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-family:inherit;" />
+              <input type="email" name="customerEmail" placeholder="Email (optional)"
+                     style="flex:1;padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-family:inherit;" />
+            </div>
+            <input type="text" name="reviewTitle" maxlength="150" placeholder="Give your review a title (optional)"
+                   style="padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-family:inherit;font-weight:600;" />
+            <textarea name="body" required minlength="10" placeholder="What did you like or dislike? How has this worked for you?"
+                      style="padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;min-height:100px;font-family:inherit;resize:vertical;"></textarea>
 
             <div>
-              <label style="font-size:13px;opacity:0.7;display:block;margin-bottom:6px;">Add a photo (optional)</label>
+              <label style="font-size:12px;opacity:0.6;display:block;margin-bottom:6px;">Add a photo (optional)</label>
               <label class="rv-photo-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:13px;cursor:pointer;color:#555;">
                 📷 <span class="rv-photo-label">Choose a photo</span>
                 <input type="file" name="photo" accept="image/*" style="display:none;" />
@@ -222,17 +274,17 @@
             </div>
 
             <div>
-              <label style="font-size:13px;opacity:0.7;display:block;margin-bottom:6px;">Or add a short video (optional)</label>
+              <label style="font-size:12px;opacity:0.6;display:block;margin-bottom:6px;">Or add a short video (optional)</label>
               <label class="rv-video-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:13px;cursor:pointer;color:#555;">
                 🎥 <span class="rv-video-label">Choose a video</span>
                 <input type="file" name="video" accept="video/*" style="display:none;" />
               </label>
-              <p class="rv-video-hint" style="margin:4px 0 0;font-size:11px;opacity:0.5;">Keep it short (under ~15 seconds) for a quick upload.</p>
+              <p style="margin:4px 0 0;font-size:11px;opacity:0.5;">Keep it short (under ~15 seconds).</p>
               <video class="rv-video-preview" controls style="display:none;max-width:160px;border-radius:6px;margin-top:8px;"></video>
             </div>
 
-            <button type="submit" style="margin-top:6px;padding:12px 18px;background:${design.primaryColor};color:#fff;border:none;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-weight:600;cursor:pointer;">
-              Submit review
+            <button type="submit" style="margin-top:6px;padding:13px 18px;background:${design.primaryColor};color:#fff;border:none;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+              Submit Review
             </button>
             <p class="rv-status" style="margin:0;font-size:13px;text-align:${formTextAlign};"></p>
           </form>
@@ -240,11 +292,22 @@
       </div>
     `;
 
+    // "Read more" toggles — simple expand-in-place.
+    el.querySelectorAll(".rv-read-more").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = el.querySelector(`#${btn.dataset.target}`);
+        if (!target) return;
+        target.style.maxHeight = "none";
+        target.style.overflow = "visible";
+        btn.style.display = "none";
+      });
+    });
+
     const rvList = el.querySelector(".rv-list");
     const prevArrow = el.querySelector(".rv-arrow-prev");
     const nextArrow = el.querySelector(".rv-arrow-next");
     if (prevArrow && nextArrow && rvList) {
-      const scrollAmount = () => rvList.clientWidth / design.carouselVisible + 12;
+      const scrollAmount = () => rvList.clientWidth / design.carouselVisible + 14;
       prevArrow.addEventListener("click", () => rvList.scrollBy({ left: -scrollAmount(), behavior: "smooth" }));
       nextArrow.addEventListener("click", () => rvList.scrollBy({ left: scrollAmount(), behavior: "smooth" }));
     }
@@ -297,7 +360,7 @@
         suggestionsBox.innerHTML = suggestions
           .map(
             (s) =>
-              `<button type="button" class="rv-suggestion" style="text-align:left;padding:8px 10px;border:1px solid #e5e5e5;border-radius:6px;background:#fafafa;font-size:12px;cursor:pointer;color:#333;">${s}</button>`
+              `<button type="button" class="rv-suggestion" style="text-align:left;padding:9px 11px;border:1px solid #e5e5e5;border-radius:6px;background:#fafafa;font-size:12px;cursor:pointer;color:#333;">${s}</button>`
           )
           .join("");
         suggestionsBox.querySelectorAll(".rv-suggestion").forEach((btn) => {
@@ -362,8 +425,6 @@
     videoInput.addEventListener("change", () => {
       const file = videoInput.files?.[0];
       if (!file) return;
-      // No client-side re-encoding for video (unlike photos) — just warn
-      // if it's large, since we're storing this as a base64 data URI.
       if (file.size > 8 * 1024 * 1024) {
         alert("That video is a bit large — please choose one under ~8MB, or a shorter clip.");
         videoInput.value = "";
@@ -388,6 +449,7 @@
       }
       const customerName = form.customerName.value;
       const customerEmail = form.customerEmail.value;
+      const reviewTitle = form.reviewTitle.value;
       const bodyText = form.body.value;
 
       status.textContent = "Submitting...";
@@ -403,6 +465,7 @@
             productTitle,
             productImageUrl: productImage || undefined,
             rating: selectedRating,
+            reviewTitle,
             body: bodyText,
             customerName,
             customerEmail,

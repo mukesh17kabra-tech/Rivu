@@ -21,6 +21,7 @@ const schema = z.object({
     z.string().url().optional()
   ),
   rating: z.number().int().min(1).max(5),
+  reviewTitle: z.preprocess((val) => (val === "" ? undefined : val), z.string().max(150).optional()),
   body: z.string().min(10).max(2000),
   customerName: z.string().min(1).max(100),
   // Optional — used only to prevent a second reminder email once someone

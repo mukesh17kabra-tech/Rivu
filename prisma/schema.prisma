@@ -18,7 +18,8 @@ model Shop {
 
   // Widget design customization — lets merchants match their store's
   // branding instead of a fixed look, and choose how reviews are laid out.
-  displayStyle    String @default("list")    // "list" | "grid" | "carousel" | "split"
+  displayStyle    String @default("list")    // "list" | "grid" | "carousel" — shape of the review list itself
+  splitSummary    Boolean @default(false)     // when true, shows summary+rating-bar in a sticky left column, review list (in whatever displayStyle) on the right
   gridColumns     Int    @default(3)          // only used when displayStyle = "grid"
   carouselVisible Int    @default(1)          // cards visible at once, carousel only
   arrowColor      String @default("#111111")  // carousel prev/next arrow color
@@ -119,6 +120,7 @@ model Review {
   productImageUrl String? // used as the background/photo in generated UGC cards
 
   rating      Int      // 1-5
+  reviewTitle String?  // optional short headline, e.g. "Bought the full bag after loving it in the sampler"
   body        String   @db.Text
   customerName String
   customerEmail String? // used to prevent duplicate reminder emails once someone reviews

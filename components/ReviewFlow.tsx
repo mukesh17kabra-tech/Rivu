@@ -34,6 +34,7 @@ export function ReviewFlow({
   const [suggestionsAllowed, setSuggestionsAllowed] = useState(true);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [body, setBody] = useState("");
+  const [reviewTitle, setReviewTitle] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [photoDataUrl, setPhotoDataUrl] = useState<string | undefined>();
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
@@ -147,6 +148,7 @@ export function ReviewFlow({
           productTitle,
           productImageUrl: productImage,
           rating,
+          reviewTitle: reviewTitle || undefined,
           body,
           customerName: customerName || "Anonymous",
           customerEmail: email || undefined,
@@ -323,6 +325,20 @@ export function ReviewFlow({
                 Show suggestions again
               </button>
             )}
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Give your review a title (optional)
+              </label>
+              <input
+                type="text"
+                maxLength={150}
+                value={reviewTitle}
+                onChange={(e) => setReviewTitle(e.target.value)}
+                placeholder="Sum it up in a few words"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-medium"
+              />
+            </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">Your review</label>

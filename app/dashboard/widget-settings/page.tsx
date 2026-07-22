@@ -35,7 +35,8 @@ export default async function WidgetSettingsPage({
           <DesignForm
             shop={shop}
             initial={{
-              displayStyle: shopRecord.displayStyle as "list" | "grid" | "carousel" | "split",
+              displayStyle: shopRecord.displayStyle as "list" | "grid" | "carousel",
+              splitSummary: shopRecord.splitSummary,
               gridColumns: shopRecord.gridColumns,
               carouselVisible: shopRecord.carouselVisible,
               arrowColor: shopRecord.arrowColor,

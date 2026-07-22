@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
     select: {
       id: true,
       rating: true,
+      reviewTitle: true,
       body: true,
       customerName: true,
       customerEmail: true,
@@ -85,6 +86,7 @@ export async function GET(req: NextRequest) {
       summary: { total, average, breakdown: counts },
       design: {
         displayStyle: shopRecord.displayStyle,
+        splitSummary: shopRecord.splitSummary,
         gridColumns: shopRecord.gridColumns,
         carouselVisible: shopRecord.carouselVisible,
         arrowColor: shopRecord.arrowColor,

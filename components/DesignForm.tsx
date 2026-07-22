@@ -4,7 +4,8 @@ import { useState } from "react";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 
 type DesignSettings = {
-  displayStyle: "list" | "grid" | "carousel" | "split";
+  displayStyle: "list" | "grid" | "carousel";
+  splitSummary: boolean;
   gridColumns: number;
   carouselVisible: number;
   arrowColor: string;
@@ -68,7 +69,7 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
           <label className="mb-2 block text-sm font-medium text-white/70">Layout</label>
           <div className="mb-3 flex gap-2">
-            {(["list", "grid", "carousel", "split"] as const).map((style) => (
+            {(["list", "grid", "carousel"] as const).map((style) => (
               <button
                 key={style}
                 onClick={() => update("displayStyle", style)}
@@ -114,6 +115,22 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
               />
             </div>
           )}
+
+          <label className="mt-3 flex items-center gap-2 border-t border-white/10 pt-3">
+            <input
+              type="checkbox"
+              checked={settings.splitSummary}
+              onChange={(e) => update("splitSummary", e.target.checked)}
+              className="h-4 w-4 accent-emerald-400"
+            />
+            <span className="text-sm text-white/80">
+              Split view — sticky rating summary beside the review list
+            </span>
+          </label>
+          <p className="mt-1 text-xs text-white/40">
+            Combines with any layout above (list, grid, or carousel) — the summary stays in
+            place on the left while the reviews scroll on the right.
+          </p>
         </div>
 
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
