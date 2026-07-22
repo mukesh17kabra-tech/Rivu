@@ -398,3 +398,106 @@ UI lock is just a courtesy, not the actual security boundary.
   `background-clip: text` tricks that don't render reliably across the
   storefront widget and the UGC image-generation pipeline (Satori), so
   this was intentionally scoped to background-type fields only.
+
+## This round's fixes (continued)
+
+- **401 errors on order lookup** — now shown as friendly messages
+  ("We're having trouble looking up your order right now" / "We
+  couldn't find any order placed with this email") instead of raw
+  "Failed to fetch orders: 401" leaking to customers. Note: the
+  underlying 401 itself is very likely the **Protected Customer Data**
+  approval still being pending (see the "How the QR review flow works"
+  section above) — the friendly error doesn't fix that root cause, it
+  just avoids showing a scary raw error while it's pending.
+- **Widget Settings layout** — Rating Badge text and Logo upload are now
+  side by side (2-column row) instead of stacked.
+- **Free plan copy fixed** — no longer mentions "Split" layout, matching
+  actual enforcement (Free = List/Grid only).
+- **Growth plan languages** — now a curated 6 (English, Hindi, Spanish,
+  French, Arabic, Chinese) instead of all 10 — enforced server-side via
+  `ALLOWED_LANGUAGES_BY_PLAN` in `lib/review-suggestions.ts`, used by
+  both the merchant's own language picker and the customer-facing
+  storefront dropdown (which now only shows languages the shop's actual
+  plan allows, fetched fresh each time rather than hardcoded).
+- **Refresh suggestions now genuinely cycles** — fetches a larger pool
+  (12 items) once per rating+language, then "Refresh" advances through
+  unseen batches client-side instead of re-fetching (which could return
+  a reshuffled version of the same small set, looking identical to the
+  customer). Wraps back to the start once exhausted.
+- **Installation guide de-duplicated** — removed from the Dashboard
+  (was a full onboarding checklist there too); Dashboard now just shows
+  a single link to the dedicated Installation page when there are zero
+  reviews yet. The "⚠️ after any app update, run shopify app deploy"
+  callout was also removed from the Installation page per request.
+- **QR code + scan option now in reminder emails** — every automated
+  review-reminder email includes the actual QR code image alongside the
+  "Leave a review" button/link.
+- **Store logo on the review page** — shown at the top of the
+  email-lookup step (`/review`) for branding.
+- **Support contact** — added to `/dashboard/plans` (support email +
+  note that Pro gets priority replies). A full custom AI chatbot wasn't
+  built — that's a separate project requiring its own LLM API key,
+  hosting, and cost. A free live-chat embed (Tawk.to, Crisp, etc.) is a
+  more realistic near-term option if you want something chat-like
+  without building it from scratch.
+
+## Known limitation: QR scan can feel slow to open
+
+This is most likely due to **serverless cold starts** — Vercel functions
+and Neon's database connections both "sleep" after inactivity and take
+a moment to wake up on the first request. This isn't something the code
+itself can eliminate on Vercel's free/Hobby tier; options if it becomes
+a real problem: upgrade Vercel/Neon to paid tiers (which reduce or
+remove cold-start delay), or ensure the Vercel deployment region and
+Neon database region are geographically close (mismatched regions add
+extra network latency on top of the cold start).
+
+## Support contact
+
+`/dashboard/plans` now has a "Need help?" footer with a support email
+link — **replace the placeholder `support@yourdomain.com` with your real
+address** before launch.
+
+A full custom AI chatbot wasn't built here — that's a genuinely separate
+project (needs its own LLM API key, hosting, and ongoing cost). The
+practical alternative: embed a free live-chat widget like Tawk.to or
+Crisp (a `<script>` tag you paste into `app/layout.tsx` or the dashboard
+pages) — these give a chat-bubble UI that looks similar to a chatbot,
+where you personally reply from a dashboard/app, at zero/low cost.
+
+## QR-scan slowness (partial diagnosis, not fully fixed)
+
+If scanning the QR code feels slow to open, the most likely causes are:
+1. **Vercel cold starts** — serverless functions "sleep" after inactivity;
+   the first request after a while takes longer to spin up. This affects
+   all Vercel Hobby/Pro deployments, not just this app.
+2. **Neon database region mismatch** — if your Neon database and Vercel
+   deployment are in different geographic regions, every DB query adds
+   network latency. Check both are in the same/nearby region.
+3. The `/review` page itself does only one DB query (shop lookup) before
+   rendering, so the page's own logic isn't the bottleneck — the delay is
+   almost certainly infrastructure warm-up, not application code.
+
+No further code changes were made for this specific item — it's an
+infrastructure/hosting characteristic rather than a bug to patch.
+
+## Support chat (merchant-to-developer messaging, not an AI chatbot)
+
+A lightweight two-way message log between merchants and you:
+
+- **Merchants** see a floating 💬 button on every dashboard page (bottom
+  right) — click it, type a message, hit Send. It's stored per-shop.
+- **You** view and reply from `/developer/support?key=YOUR_SECRET_KEY` —
+  shows every shop that's messaged, with unread counts, click into any
+  shop to see the full conversation and reply.
+- Protected by `SUPPORT_SECRET_KEY` (set in Vercel env vars) — anyone
+  without the exact key gets an "Unauthorized"/"Invalid key" response,
+  no message content is exposed.
+
+This is intentionally simple (no AI, no third-party chat service) — just
+a database-backed inbox. If you want something that feels more like a
+live chatbot with instant notifications, a free tool like Tawk.to or
+Crisp (embedded via a script tag) would need less building and include
+things this doesn't (browser/mobile push notifications when a merchant
+messages you, canned replies, etc.) — worth considering as an upgrade
+path later if this gets used a lot.

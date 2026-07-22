@@ -97,6 +97,7 @@
     };
     let design = { ...DEFAULT_DESIGN };
     let plan = "free";
+    let availableLanguages = [{ code: "en", label: "English" }];
 
     try {
       const res = await fetch(
@@ -107,6 +108,7 @@
         reviews = data.reviews || [];
         summary = data.summary || summary;
         plan = data.plan || "free";
+        availableLanguages = data.availableLanguages || [{ code: "en", label: "English" }];
         // Merge fetched design over defaults, but only fall back for
         // truly missing values (undefined/null/empty string) — NOT for
         // legitimate falsy values like `false` or `0`, which a naive
@@ -464,51 +466,70 @@
       if (tapHint) tapHint.style.display = "none";
     }
 
+    let suggestionPool = [];
+    let suggestionPoolKey = ""; // "rating|lang" — refetch only when this changes
+    let suggestionBatchStart = 0;
+    const BATCH_SIZE = 6;
+
+    function renderSuggestionBatch() {
+      const batch = suggestionPool.slice(suggestionBatchStart, suggestionBatchStart + BATCH_SIZE);
+      suggestionsBox.innerHTML = batch
+        .map(
+          (s) =>
+            `<button type="button" class="rv-suggestion" style="text-align:left;padding:9px 11px;border:1px solid #e5e5e5;border-radius:6px;background:#fafafa;font-size:12px;cursor:pointer;color:#333;">${s}</button>`
+        )
+        .join("");
+      suggestionsBox.querySelectorAll(".rv-suggestion").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          bodyTextarea.value = btn.textContent;
+          suggestionsBox.querySelectorAll(".rv-suggestion").forEach((b) => {
+            b.style.borderColor = "#e5e5e5";
+            b.style.background = "#fafafa";
+          });
+          btn.style.borderColor = design.primaryColor;
+          btn.style.background = "#fff";
+        });
+      });
+    }
+
     async function loadSuggestions() {
       const lang = langPicker ? langPicker.value : "";
-      suggestionsBox.innerHTML = `<p style="font-size:12px;opacity:0.5;margin:0;">Loading...</p>`;
-      try {
-        const res = await fetch(
-          `${API_BASE}/api/reviews/suggestions?rating=${selectedRating}&productTitle=${encodeURIComponent(productTitle)}&shop=${encodeURIComponent(shop)}${lang ? `&lang=${lang}` : ""}`
-        );
-        const data = await res.json();
-        const suggestions = data.suggestions || [];
-        suggestionsBox.innerHTML = suggestions
-          .map(
-            (s) =>
-              `<button type="button" class="rv-suggestion" style="text-align:left;padding:9px 11px;border:1px solid #e5e5e5;border-radius:6px;background:#fafafa;font-size:12px;cursor:pointer;color:#333;">${s}</button>`
-          )
-          .join("");
-        suggestionsBox.querySelectorAll(".rv-suggestion").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            bodyTextarea.value = btn.textContent;
-            suggestionsBox.querySelectorAll(".rv-suggestion").forEach((b) => {
-              b.style.borderColor = "#e5e5e5";
-              b.style.background = "#fafafa";
-            });
-            btn.style.borderColor = design.primaryColor;
-            btn.style.background = "#fff";
-          });
-        });
-      } catch {
-        suggestionsBox.innerHTML = "";
+      const key = `${selectedRating}|${lang}`;
+
+      // Only hit the API when the rating or language actually changed —
+      // "Refresh" just advances to the next unseen batch from the
+      // already-fetched pool, which is both faster and guarantees a
+      // genuinely different set of suggestions each time (instead of the
+      // same small batch getting reshuffled and looking identical).
+      if (key !== suggestionPoolKey) {
+        suggestionsBox.innerHTML = `<p style="font-size:12px;opacity:0.5;margin:0;">Loading...</p>`;
+        try {
+          const res = await fetch(
+            `${API_BASE}/api/reviews/suggestions?rating=${selectedRating}&productTitle=${encodeURIComponent(productTitle)}&shop=${encodeURIComponent(shop)}${lang ? `&lang=${lang}` : ""}`
+          );
+          const data = await res.json();
+          suggestionPool = data.suggestions || [];
+          suggestionPoolKey = key;
+          suggestionBatchStart = 0;
+        } catch {
+          suggestionsBox.innerHTML = "";
+          return;
+        }
+      } else {
+        // Advance to the next batch; if we've reached the end of the
+        // pool, loop back to the start (re-shuffled server-side data
+        // stays as-is, so this just cycles through what we already have).
+        suggestionBatchStart += BATCH_SIZE;
+        if (suggestionBatchStart >= suggestionPool.length) suggestionBatchStart = 0;
       }
+
+      renderSuggestionBatch();
     }
 
     if (langPicker) {
-      const LANGS = [
-        { code: "en", label: "English" },
-        { code: "hi", label: "हिन्दी" },
-        { code: "es", label: "Español" },
-        { code: "fr", label: "Français" },
-        { code: "de", label: "Deutsch" },
-        { code: "pt", label: "Português" },
-        { code: "ar", label: "العربية" },
-        { code: "zh", label: "中文" },
-        { code: "ja", label: "日本語" },
-        { code: "id", label: "Bahasa Indonesia" },
-      ];
-      langPicker.innerHTML = LANGS.map((l) => `<option value="${l.code}">${l.label}</option>`).join("");
+      langPicker.innerHTML = availableLanguages
+        .map((l) => `<option value="${l.code}">${l.label}</option>`)
+        .join("");
       langPicker.addEventListener("change", () => {
         if (selectedRating) loadSuggestions();
       });

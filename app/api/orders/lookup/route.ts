@@ -31,11 +31,25 @@ export async function POST(req: NextRequest) {
     const products = await getProductsFromOrdersByEmail(shop, shopRecord.accessToken, email);
     if (products.length === 0) {
       return withCors(
-        NextResponse.json({ error: "We couldn't find an order with that email." }, { status: 404 })
+        NextResponse.json(
+          { error: "We couldn't find any order placed with this email. Please double-check and try again." },
+          { status: 404 }
+        )
       );
     }
     return withCors(NextResponse.json({ products }));
   } catch (err) {
-    return withCors(NextResponse.json({ error: (err as Error).message }, { status: 500 }));
+    // Log the real error server-side for debugging, but never show the
+    // customer a raw "401"/"403" — that's meaningless to them and looks
+    // broken. This usually means the store's Protected Customer Data
+    // access isn't approved yet, or the access token needs refreshing —
+    // both are store-side issues, not something the customer did wrong.
+    console.error(`[orders/lookup] Failed for ${shop}:`, err);
+    return withCors(
+      NextResponse.json(
+        { error: "We're having trouble looking up your order right now. Please try again in a moment." },
+        { status: 500 }
+      )
+    );
   }
 }

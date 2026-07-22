@@ -100,6 +100,7 @@ model Shop {
   reviews          Review[]
   reminderRequests PendingReviewRequest[]
   reminderUnsubscribes ReminderUnsubscribe[]
+  supportMessages      SupportMessage[]
 }
 
 // One row per (order, product) pair that's a candidate for a review
@@ -181,4 +182,22 @@ model UgcCard {
   createdAt DateTime @default(now())
 
   @@index([reviewId])
+}
+
+// Simple merchant-to-developer support messaging — not an AI chatbot,
+// just a lightweight two-way message log per shop. Merchants send a
+// message from the app dashboard; you view/reply from a secret-key
+// protected page at /developer/support.
+model SupportMessage {
+  id            String   @id @default(cuid())
+  shopId        String
+  shop          Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  message       String   @db.Text
+  fromDeveloper Boolean  @default(false) // false = merchant sent it, true = your reply
+  read          Boolean  @default(false) // whether you've seen this merchant message yet (only meaningful when fromDeveloper=false)
+
+  createdAt     DateTime @default(now())
+
+  @@index([shopId, createdAt])
 }

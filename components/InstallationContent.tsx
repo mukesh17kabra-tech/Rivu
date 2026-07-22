@@ -65,17 +65,6 @@ export function InstallationContent({ shop }: { shop: string }) {
 <script src="https://your-app.vercel.app/widget.js" async></script>`}
         </pre>
       </div>
-
-      <div className="border-t border-yellow-400/20 pt-8">
-        <h3 className="mb-2 text-sm font-semibold text-yellow-200">⚠️ Important — after any app update</h3>
-        <p className="text-sm text-white/60">
-          Pushing code to Vercel updates the app itself, but the theme block&apos;s script
-          (loaded from Shopify&apos;s own CDN) only updates when you run{" "}
-          <code className="rounded bg-black/40 px-1 py-0.5 text-emerald-300">shopify app deploy</code>{" "}
-          from your project folder. If a fix isn&apos;t showing up on your storefront, this is
-          usually why — run that command and try again.
-        </p>
-      </div>
     </div>
   );
 }

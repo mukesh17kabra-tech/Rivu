@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import { NavBar } from "@/components/NavBar";
 import { resolveShop } from "@/lib/shop-context";
-import { OnboardingChecklist } from "@/components/OnboardingChecklist";
 
 export default async function DashboardHome({
   searchParams,
@@ -57,7 +56,17 @@ export default async function DashboardHome({
 
         <NavBar shop={shop} host={host} active="home" />
 
-        <OnboardingChecklist shop={shop} host={host} />
+        {total === 0 && (
+          <section className="mb-8 rounded-lg border border-white/10 bg-white/[0.02] p-5">
+            <p className="text-sm text-white">👋 New here? Set up the widget on your storefront:</p>
+            <a
+              href={`/dashboard/installation?shop=${shop}${host ? `&host=${host}` : ""}`}
+              className="mt-2 inline-block rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300"
+            >
+              Go to Installation guide →
+            </a>
+          </section>
+        )}
 
         <MilestoneBar total={total} />
 

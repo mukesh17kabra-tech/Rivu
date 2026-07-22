@@ -333,6 +333,16 @@ export const SUPPORTED_LANGUAGES = [
   { code: "id", label: "Bahasa Indonesia" },
 ] as const;
 
+// Growth gets a curated 6-language subset (broad global coverage without
+// giving away the full 10 that Pro pays for); Free is English-only; Pro
+// gets everything. Used both to gate the merchant's own default-language
+// picker and the customer-facing storefront dropdown.
+export const ALLOWED_LANGUAGES_BY_PLAN: Record<string, string[]> = {
+  free: ["en"],
+  growth: ["en", "hi", "es", "fr", "ar", "zh"],
+  pro: SUPPORTED_LANGUAGES.map((l) => l.code),
+};
+
 const LANGUAGES: Record<string, TemplateSet> = {
   en: TEMPLATES_EN,
   hi: TEMPLATES_HI,

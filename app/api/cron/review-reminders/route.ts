@@ -47,6 +47,7 @@ export async function GET(req: NextRequest) {
 
       const reviewUrl = `${process.env.HOST}/review?shop=${encodeURIComponent(shop.shopDomain)}&productId=${req.productId}&productTitle=${encodeURIComponent(req.productTitle)}${req.productImageUrl ? `&productImage=${encodeURIComponent(req.productImageUrl)}` : ""}`;
       const unsubscribeUrl = `${process.env.HOST}/api/unsubscribe?shop=${encodeURIComponent(shop.shopDomain)}&email=${encodeURIComponent(req.customerEmail)}`;
+      const qrCodeUrl = `${process.env.HOST}/api/qrcode?shop=${encodeURIComponent(shop.shopDomain)}&productId=${req.productId}&productTitle=${encodeURIComponent(req.productTitle)}${req.productImageUrl ? `&productImage=${encodeURIComponent(req.productImageUrl)}` : ""}`;
 
       try {
         await sendReviewReminderEmail({
@@ -57,6 +58,7 @@ export async function GET(req: NextRequest) {
           productImageUrl: req.productImageUrl || undefined,
           reviewUrl,
           unsubscribeUrl,
+          qrCodeUrl,
           replyToEmail: shop.fromEmail || undefined,
           subjectTemplate: shop.emailSubject,
           bodyTemplate: shop.emailBodyTemplate,

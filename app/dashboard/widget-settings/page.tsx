@@ -71,10 +71,8 @@ export default async function WidgetSettingsPage({
               suggestionLanguage: shopRecord.suggestionLanguage,
             }}
           />
-          <div className="border-t border-white/10 pt-8">
+          <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">
             <RatingBadgeForm shop={shop} initialTemplate={shopRecord.ratingBadgeTemplate} />
-          </div>
-          <div className="border-t border-white/10 pt-8">
             <LogoUpload
               shop={shop}
               initialLogoUrl={shopRecord.logoUrl || ""}

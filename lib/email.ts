@@ -23,6 +23,7 @@ export async function sendReviewReminderEmail(params: {
   productImageUrl?: string;
   reviewUrl: string;
   unsubscribeUrl: string;
+  qrCodeUrl: string; // PNG URL (from /api/qrcode) — customer can scan on a phone instead of clicking the link
   replyToEmail?: string; // merchant's own address — customer sees/replies here, but "From" stays on our verified domain
   subjectTemplate: string;
   bodyTemplate: string;
@@ -35,6 +36,7 @@ export async function sendReviewReminderEmail(params: {
     productImageUrl,
     reviewUrl,
     unsubscribeUrl,
+    qrCodeUrl,
     replyToEmail,
     subjectTemplate,
     bodyTemplate,
@@ -81,6 +83,10 @@ export async function sendReviewReminderEmail(params: {
             : ""
         }
         <p>${bodyHtml}</p>
+        <div style="text-align:center;margin:24px 0;padding:20px;background:#fafafa;border-radius:8px;">
+          <p style="margin:0 0 10px;font-size:13px;color:#666;">Or scan this code with your phone to leave a review:</p>
+          <img src="${qrCodeUrl}" alt="Scan to review" style="width:140px;height:140px;" />
+        </div>
         <p style="color:#999;font-size:12px;margin-top:32px;">
           Don't want these emails? <a href="${unsubscribeUrl}" style="color:#999;">Unsubscribe</a>
         </p>

@@ -7,7 +7,7 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
         perks={[
           "25 reviews/month",
           "Photo reviews (up to 1)",
-          "List & Grid layouts (plus Split with either)",
+          "List & Grid layouts",
           "QR codes for up to 10 products",
           "1 UGC template",
           "English suggestions only",

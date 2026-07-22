@@ -27,7 +27,7 @@ export const PLANS = {
     photoReviewCap: 2,
     videoReviewCap: 1,
     reminderMonthlyCap: 50,
-    languageCount: Infinity, // all 10 languages
+    languageCount: 6, // 6 curated languages — see ALLOWED_LANGUAGES_BY_PLAN in lib/review-suggestions.ts
     brandingRemoved: true, // "Powered by Rivu" hidden on paid plans
   },
   pro: {

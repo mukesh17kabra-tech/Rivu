@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { ALLOWED_LANGUAGES_BY_PLAN, SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 
 function withCors(res: NextResponse) {
   res.headers.set("Access-Control-Allow-Origin", "*");
@@ -85,6 +86,9 @@ export async function GET(req: NextRequest) {
       reviews: reviewsWithBadge,
       summary: { total, average, breakdown: counts },
       plan: shopRecord.plan,
+      availableLanguages: SUPPORTED_LANGUAGES.filter((l) =>
+        (ALLOWED_LANGUAGES_BY_PLAN[shopRecord.plan] || ALLOWED_LANGUAGES_BY_PLAN.free).includes(l.code)
+      ),
       design: {
         displayStyle: shopRecord.displayStyle,
         splitSummary: shopRecord.splitSummary,

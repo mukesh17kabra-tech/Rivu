@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSuggestions } from "@/lib/review-suggestions";
+import { getSuggestions, ALLOWED_LANGUAGES_BY_PLAN } from "@/lib/review-suggestions";
 import { db } from "@/lib/db";
 
 function withCors(res: NextResponse) {
@@ -23,17 +23,18 @@ export async function GET(req: NextRequest) {
       where: { shopDomain: shop },
       select: { suggestionLanguage: true, plan: true },
     });
-    // Non-English suggestion languages are a paid-plan feature — Free
-    // plan always gets English regardless of what's requested, so this
-    // can't be bypassed by just calling the API directly with &lang=hi.
-    if (shopRecord && shopRecord.plan !== "free") {
+    if (shopRecord) {
+      const allowed = ALLOWED_LANGUAGES_BY_PLAN[shopRecord.plan] || ALLOWED_LANGUAGES_BY_PLAN.free;
       // Customer's own explicit choice (from the storefront dropdown, if
       // the merchant enabled that) takes priority over the merchant's
-      // saved default language.
-      language = explicitLang || shopRecord.suggestionLanguage;
+      // saved default — but only if the shop's plan actually allows that
+      // language. This can't be bypassed by calling the API directly with
+      // &lang=ja on a Growth plan that only has 6 languages, for example.
+      const requested = explicitLang || shopRecord.suggestionLanguage;
+      language = allowed.includes(requested) ? requested : allowed[0];
     }
   }
 
-  const suggestions = getSuggestions(rating, productTitle, 7, language);
+  const suggestions = getSuggestions(rating, productTitle, 12, language);
   return withCors(NextResponse.json({ suggestions }));
 }

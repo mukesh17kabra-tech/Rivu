@@ -36,6 +36,7 @@ export default async function ReviewPage({
       productId={productId}
       productTitle={productTitle}
       productImage={productImage}
+      storeLogoUrl={shopRecord.logoUrl || undefined}
     />
   );
 }

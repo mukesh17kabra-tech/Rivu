@@ -9,11 +9,13 @@ export function ReviewFlow({
   productId: initialProductId,
   productTitle: initialProductTitle,
   productImage,
+  storeLogoUrl,
 }: {
   shop: string;
   productId?: string;
   productTitle?: string;
   productImage?: string;
+  storeLogoUrl?: string;
 }) {
   // If a specific product was already given (old per-product QR still
   // supported), skip straight past the email/product-picker step.
@@ -174,6 +176,9 @@ export function ReviewFlow({
     return (
       <main className="min-h-screen bg-white px-5 py-8">
         <div className="mx-auto max-w-sm">
+          {storeLogoUrl && (
+            <img src={storeLogoUrl} alt="Store logo" className="mb-4 h-10 object-contain" />
+          )}
           <h1 className="mb-1 text-lg font-semibold text-gray-900">Leave a review</h1>
           <p className="mb-6 text-sm text-gray-500">
             Enter the email you used to order — we&apos;ll pull up what you bought.
