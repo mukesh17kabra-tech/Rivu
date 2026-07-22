@@ -337,3 +337,43 @@ plan checks to: `app/api/reviews/submit` (video/photo gating),
 `app/api/shop/reward` (block enabling on lower tiers), and the
 share/streak-badge rendering in `public/widget.js` /
 `extensions/rivu-reviews/assets/rivu-widget.js`.
+
+## Smart import from Judge.me / Loox / Stamped / Yotpo (and other apps)
+
+`/api/reviews/import` now auto-detects common column-name variants used
+by popular review apps' own CSV exports (Judge.me, Loox, Stamped.io,
+Yotpo, and generic formats) — merchants can export their existing
+reviews from those apps and upload the file directly, without manually
+renaming any columns. See `FIELD_ALIASES` in the route for the exact
+list of recognized column names per field.
+
+**Not supported, intentionally**: pulling reviews automatically from
+Amazon, Flipkart, or similar marketplaces. Those platforms don't offer
+an official API for arbitrary sellers to export review data, and
+scraping their pages would violate their Terms of Service — risking the
+merchant's seller account. If a merchant has reviews from such a
+platform they have the rights to reuse, they can still manually format
+them into the CSV template and import that way; there's no "one-click
+Amazon import" button, and there shouldn't be.
+
+## Plan-based design gating (properly enforced server-side)
+
+`lib/plan-gating.ts` defines which widget customizations are locked per
+plan, and `app/api/shop/design/route.ts` **actually enforces it** —
+looks up the shop's real plan and clamps any locked field back to its
+default before saving, regardless of what the client sends. This can't
+be bypassed by calling the API directly with a crafted payload.
+
+| Feature | Free | Growth | Pro |
+|---|---|---|---|
+| Layout | List, Grid | + Masonry, Split (any layout) | + Carousel |
+| Colors | Primary, Star, Card bg, Text | + Range bar, Arrow | same as Growth |
+| Heading size/weight/position | ❌ fixed default | ✅ | ✅ |
+| Review text size/position | ❌ fixed default | ✅ | ✅ |
+| Customer language picker | ❌ | ✅ | ✅ |
+| Basic sizing (widths, spacing, border, form alignment, widget heading *text*) | ✅ available to everyone | ✅ | ✅ |
+
+`components/DesignForm.tsx` mirrors this with disabled/greyed-out
+controls and "🔒 Upgrade" hints so merchants see the restriction before
+they even try to save — but the real enforcement is server-side, so the
+UI lock is just a courtesy, not the actual security boundary.

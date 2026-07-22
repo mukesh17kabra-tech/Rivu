@@ -81,10 +81,16 @@
       formMaxWidth: 420,
       widgetMaxWidth: 480,
       widgetTitle: "Customer Reviews",
+      headingFontSize: 11,
+      headingBold: false,
+      headingAlign: "left",
       topSpacing: 24,
+      showBorder: true,
+      letCustomerPickLanguage: false,
       showSuggestionsOnWebsite: true,
     };
     let design = { ...DEFAULT_DESIGN };
+    let plan = "free";
 
     try {
       const res = await fetch(
@@ -94,6 +100,7 @@
         const data = await res.json();
         reviews = data.reviews || [];
         summary = data.summary || summary;
+        plan = data.plan || "free";
         // Merge fetched design over defaults, but only fall back for
         // truly missing values (undefined/null/empty string) — NOT for
         // legitimate falsy values like `false` or `0`, which a naive
@@ -242,10 +249,33 @@
           <div class="rv-list" style="${listWrapperStyle}">${reviewsHtml}</div>
         </div>`;
 
+    const headingAlignValue = design.headingAlign === "center" ? "center" : design.headingAlign === "right" ? "right" : "left";
+    const borderStyle = design.showBorder
+      ? `border:1px solid rgba(0,0,0,0.08);border-radius:${r}px;padding:20px;`
+      : "";
+
+    // "Powered by Rivu" — shown only on the Free plan (removed on paid
+    // plans as a perk). Uses window.open so the click doesn't accidentally
+    // navigate the shopper away from the product page in the same tab.
+    const brandingHtml =
+      plan === "free"
+        ? `<p style="margin-top:14px;font-size:10px;opacity:0.4;text-align:${rootTextAlign};">
+             Powered by <a href="https://rivu-one.vercel.app" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Rivu</a>
+           </p>`
+        : "";
+
+    // Lets shoppers choose which language they want to write their review
+    // in — only shown if the merchant enabled it (paid-plan feature) and
+    // there's more than just English available to pick from.
+    const languageDropdownHtml = design.letCustomerPickLanguage
+      ? `<select class="rv-lang-picker" style="margin-bottom:12px;padding:8px 10px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:12px;font-family:inherit;"></select>`
+      : "";
+
     el.innerHTML = `
-      <div class="rv-root" style="font-family:${design.fontFamily};max-width:${design.widgetMaxWidth}px;width:100%;margin-top:${design.topSpacing}px;margin-left:${design.formAlign === "left" ? "0" : "auto"};margin-right:${design.formAlign === "right" ? "0" : "auto"};color:${design.textColor};text-align:${rootTextAlign};">
-        <p style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.5;margin:0 0 6px;text-align:${rootTextAlign};">${design.widgetTitle}</p>
+      <div class="rv-root" style="font-family:${design.fontFamily};max-width:${design.widgetMaxWidth}px;width:100%;margin-top:${design.topSpacing}px;margin-left:${design.formAlign === "left" ? "0" : "auto"};margin-right:${design.formAlign === "right" ? "0" : "auto"};color:${design.textColor};text-align:${rootTextAlign};${borderStyle}">
+        <p style="font-size:${design.headingFontSize}px;font-weight:${design.headingBold ? 700 : 400};letter-spacing:0.06em;text-transform:uppercase;opacity:0.6;margin:0 0 6px;text-align:${headingAlignValue};">${design.widgetTitle}</p>
         ${bodyHtml}
+        ${brandingHtml}
 
         <button class="rv-toggle" style="margin-top:20px;padding:11px 22px;background:${design.primaryColor};color:#fff;border:none;border-radius:${r}px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
           Write a Review
@@ -256,6 +286,7 @@
             <button class="rv-form-close" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#999;padding:4px;">✕</button>
             <p style="margin:0 0 4px;font-size:19px;font-weight:700;text-align:center;font-family:Georgia,serif;">Write a Review</p>
             <p style="margin:0 0 4px;font-size:12px;opacity:0.5;text-align:center;">Share your honest experience</p>
+            ${languageDropdownHtml ? `<div style="text-align:center;margin-top:10px;">${languageDropdownHtml}</div>` : ""}
             <div class="rv-stars" style="display:flex;gap:8px;justify-content:center;margin:16px 0 6px;">
               ${[1, 2, 3, 4, 5]
                 .map(
@@ -347,6 +378,7 @@
     const starButtons = [...el.querySelectorAll(".rv-star")];
     const tapHint = el.querySelector(".rv-tap-hint");
     const suggestionsWrap = el.querySelector(".rv-suggestions-wrap");
+    const langPicker = el.querySelector(".rv-lang-picker");
     const suggestionsBox = el.querySelector(".rv-suggestions");
     const refreshBtn = el.querySelector(".rv-refresh");
     const closeSuggestionsBtn = el.querySelector(".rv-close-suggestions");
@@ -386,10 +418,11 @@
     }
 
     async function loadSuggestions() {
+      const lang = langPicker ? langPicker.value : "";
       suggestionsBox.innerHTML = `<p style="font-size:12px;opacity:0.5;margin:0;">Loading...</p>`;
       try {
         const res = await fetch(
-          `${API_BASE}/api/reviews/suggestions?rating=${selectedRating}&productTitle=${encodeURIComponent(productTitle)}&shop=${encodeURIComponent(shop)}`
+          `${API_BASE}/api/reviews/suggestions?rating=${selectedRating}&productTitle=${encodeURIComponent(productTitle)}&shop=${encodeURIComponent(shop)}${lang ? `&lang=${lang}` : ""}`
         );
         const data = await res.json();
         const suggestions = data.suggestions || [];
@@ -413,6 +446,25 @@
       } catch {
         suggestionsBox.innerHTML = "";
       }
+    }
+
+    if (langPicker) {
+      const LANGS = [
+        { code: "en", label: "English" },
+        { code: "hi", label: "हिन्दी" },
+        { code: "es", label: "Español" },
+        { code: "fr", label: "Français" },
+        { code: "de", label: "Deutsch" },
+        { code: "pt", label: "Português" },
+        { code: "ar", label: "العربية" },
+        { code: "zh", label: "中文" },
+        { code: "ja", label: "日本語" },
+        { code: "id", label: "Bahasa Indonesia" },
+      ];
+      langPicker.innerHTML = LANGS.map((l) => `<option value="${l.code}">${l.label}</option>`).join("");
+      langPicker.addEventListener("change", () => {
+        if (selectedRating) loadSuggestions();
+      });
     }
 
     starButtons.forEach((btn) => {

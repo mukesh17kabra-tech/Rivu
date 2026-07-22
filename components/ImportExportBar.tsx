@@ -48,12 +48,13 @@ export function ImportExportBar({ shop }: { shop: string }) {
       </a>
 
       <label className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 cursor-pointer">
-        {importing ? "Importing..." : "Import reviews (CSV)"}
+        {importing ? "Importing..." : "Import from Judge.me / Loox / Stamped / Yotpo / CSV"}
         <input type="file" accept=".csv" onChange={handleImport} disabled={importing} className="hidden" />
       </label>
 
       <span className="text-xs text-white/40">
-        CSV columns: productId, productTitle, rating, body, customerName, photoUrl (optional)
+        Just export your reviews as CSV from any of those apps and upload it here — column
+        names are detected automatically, no need to rename anything.
       </span>
 
       {result && (

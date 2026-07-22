@@ -16,6 +16,7 @@ export const PLANS = {
     videoReviewCap: 0,
     reminderMonthlyCap: 0, // no automated reminders on Free
     languageCount: 1, // English only
+    brandingRemoved: false, // Free plan shows "Powered by Rivu" on the widget
   },
   growth: {
     name: "Growth",
@@ -26,7 +27,8 @@ export const PLANS = {
     photoReviewCap: 2,
     videoReviewCap: 1,
     reminderMonthlyCap: 50,
-    languageCount: 6,
+    languageCount: Infinity, // all 10 languages
+    brandingRemoved: true, // "Powered by Rivu" hidden on paid plans
   },
   pro: {
     name: "Pro",
@@ -38,6 +40,7 @@ export const PLANS = {
     videoReviewCap: 2,
     reminderMonthlyCap: Infinity,
     languageCount: Infinity, // all 10
+    brandingRemoved: true,
   },
 } as const;
 

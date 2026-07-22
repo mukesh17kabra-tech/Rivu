@@ -43,7 +43,21 @@ model Shop {
   formMaxWidth Int    @default(420)      // px
   widgetMaxWidth Int  @default(480)      // px — overall widget container (summary + review list), separate from the form's own width
   widgetTitle  String @default("Customer Reviews") // merchant-editable heading text above the widget
+  headingFontSize Int    @default(11)   // px — the small uppercase label above the widget
+  headingBold     Boolean @default(false)
+  headingAlign    String  @default("left") // "left" | "center" | "right" — independent from the review-card text alignment
   topSpacing   Int    @default(24)       // px — space above the widget, since themes often butt it right up against other content
+  showBorder   Boolean @default(true)   // subtle border around the whole widget — helps it stand out against a plain white theme background
+
+  // Lets shoppers pick their own language for suggestions on the
+  // storefront widget itself (a dropdown) — separate from
+  // suggestionLanguage above, which is just the merchant's own default.
+  letCustomerPickLanguage Boolean @default(false)
+
+  // Customizable text template for the compact "Rivu Rating Badge" block
+  // (used on product cards / near the title) — {rating} is replaced with
+  // the actual star icons for that product's average rating.
+  ratingBadgeTemplate String @default("{rating} rating for this product")
 
   // Store logo shown on generated UGC graphics (small watermark, bottom
   // corner) — stored as a base64 data URI, same pattern as review photos.

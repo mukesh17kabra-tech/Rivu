@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
       average,
       starColor: shopRecord.starColor,
       textColor: shopRecord.textColor,
+      ratingBadgeTemplate: shopRecord.ratingBadgeTemplate,
     })
   );
 }

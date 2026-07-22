@@ -3,6 +3,7 @@ import { NavBar } from "@/components/NavBar";
 import { resolveShop } from "@/lib/shop-context";
 import { DesignForm } from "@/components/DesignForm";
 import { LogoUpload } from "@/components/LogoUpload";
+import { RatingBadgeForm } from "@/components/RatingBadgeForm";
 
 export default async function WidgetSettingsPage({
   searchParams,
@@ -34,6 +35,7 @@ export default async function WidgetSettingsPage({
         <div className="space-y-8">
           <DesignForm
             shop={shop}
+            plan={shopRecord.plan as "free" | "growth" | "pro"}
             initial={{
               displayStyle: shopRecord.displayStyle as "list" | "grid" | "carousel" | "masonry",
               splitSummary: shopRecord.splitSummary,
@@ -53,12 +55,20 @@ export default async function WidgetSettingsPage({
               formMaxWidth: shopRecord.formMaxWidth,
               widgetMaxWidth: shopRecord.widgetMaxWidth,
               widgetTitle: shopRecord.widgetTitle,
+              headingFontSize: shopRecord.headingFontSize,
+              headingBold: shopRecord.headingBold,
+              headingAlign: shopRecord.headingAlign as "left" | "center" | "right",
               topSpacing: shopRecord.topSpacing,
+              showBorder: shopRecord.showBorder,
+              letCustomerPickLanguage: shopRecord.letCustomerPickLanguage,
               showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
               showSuggestionsOnQr: shopRecord.showSuggestionsOnQr,
               suggestionLanguage: shopRecord.suggestionLanguage,
             }}
           />
+          <div className="border-t border-white/10 pt-8">
+            <RatingBadgeForm shop={shop} initialTemplate={shopRecord.ratingBadgeTemplate} />
+          </div>
           <div className="border-t border-white/10 pt-8">
             <LogoUpload
               shop={shop}

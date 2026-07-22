@@ -22,7 +22,12 @@ type DesignSettings = {
   formMaxWidth: number;
   widgetMaxWidth: number;
   widgetTitle: string;
+  headingFontSize: number;
+  headingBold: boolean;
+  headingAlign: "left" | "center" | "right";
   topSpacing: number;
+  showBorder: boolean;
+  letCustomerPickLanguage: boolean;
   showSuggestionsOnWebsite: boolean;
   showSuggestionsOnQr: boolean;
   suggestionLanguage: string;
@@ -40,10 +45,22 @@ const SAMPLE_REVIEWS = [
   { rating: 4, body: "Really good quality, delivery was a bit slow though.", customerName: "Rohan M." },
 ];
 
-export function DesignForm({ shop, initial }: { shop: string; initial: DesignSettings }) {
+export function DesignForm({
+  shop,
+  plan,
+  initial,
+}: {
+  shop: string;
+  plan: "free" | "growth" | "pro";
+  initial: DesignSettings;
+}) {
   const [settings, setSettings] = useState<DesignSettings>(initial);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [lockedMsg, setLockedMsg] = useState<string[]>([]);
+
+  const isFree = plan === "free";
+  const isPro = plan === "pro";
 
   function update<K extends keyof DesignSettings>(key: K, value: DesignSettings[K]) {
     setSettings((s) => ({ ...s, [key]: value }));
@@ -53,11 +70,16 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
   async function handleSave() {
     setSaving(true);
     try {
-      await fetch("/api/shop/design", {
+      const res = await fetch("/api/shop/design", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ shop, ...settings }),
       });
+      const data = await res.json();
+      if (data.lockedFields?.length) {
+        setLockedMsg(data.lockedFields);
+        setTimeout(() => setLockedMsg([]), 4000);
+      }
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } finally {
@@ -72,19 +94,29 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
           <label className="mb-2 block text-sm font-medium text-white/70">Layout</label>
           <div className="mb-3 flex gap-2">
-            {(["list", "grid", "carousel", "masonry"] as const).map((style) => (
-              <button
-                key={style}
-                onClick={() => update("displayStyle", style)}
-                className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
-                  settings.displayStyle === style
-                    ? "border-emerald-400 bg-emerald-400/10 text-white"
-                    : "border-white/10 text-white/50 hover:border-white/30"
-                }`}
-              >
-                {style}
-              </button>
-            ))}
+            {(["list", "grid", "carousel", "masonry"] as const).map((style) => {
+              const locked =
+                (isFree && (style === "masonry" || style === "carousel")) ||
+                (!isPro && style === "carousel");
+              return (
+                <button
+                  key={style}
+                  onClick={() => !locked && update("displayStyle", style)}
+                  disabled={locked}
+                  title={locked ? `Upgrade to unlock ${style}` : undefined}
+                  className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
+                    locked
+                      ? "cursor-not-allowed border-white/5 text-white/25"
+                      : settings.displayStyle === style
+                      ? "border-emerald-400 bg-emerald-400/10 text-white"
+                      : "border-white/10 text-white/50 hover:border-white/30"
+                  }`}
+                >
+                  {locked ? "🔒 " : ""}
+                  {style}
+                </button>
+              );
+            })}
           </div>
 
           {(settings.displayStyle === "grid" || settings.displayStyle === "masonry") && (
@@ -123,16 +155,18 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
             <input
               type="checkbox"
               checked={settings.splitSummary}
+              disabled={isFree}
               onChange={(e) => update("splitSummary", e.target.checked)}
-              className="h-4 w-4 accent-emerald-400"
+              className="h-4 w-4 accent-emerald-400 disabled:opacity-40"
             />
-            <span className="text-sm text-white/80">
-              Split view — sticky rating summary beside the review list
+            <span className={`text-sm ${isFree ? "text-white/30" : "text-white/80"}`}>
+              {isFree ? "🔒 " : ""}Split view — sticky rating summary beside the review list
             </span>
           </label>
           <p className="mt-1 text-xs text-white/40">
-            Combines with any layout above (list, grid, or carousel) — the summary stays in
-            place on the left while the reviews scroll on the right.
+            {isFree
+              ? "Upgrade to Growth or Pro to unlock split view."
+              : "Combines with any layout above — the summary stays in place while the reviews scroll."}
           </p>
         </div>
 
@@ -208,11 +242,11 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
         <div className="grid grid-cols-5 gap-4">
           <ColorField label="Primary" value={settings.primaryColor} onChange={(v) => update("primaryColor", v)} />
           <ColorField label="Star" value={settings.starColor} onChange={(v) => update("starColor", v)} />
-          <ColorField label="Range bar" value={settings.rangeColor} onChange={(v) => update("rangeColor", v)} />
+          <ColorField label="Range bar" value={settings.rangeColor} onChange={(v) => update("rangeColor", v)} locked={isFree} />
           <ColorField label="Card bg" value={settings.backgroundColor} onChange={(v) => update("backgroundColor", v)} />
           <ColorField label="Text" value={settings.textColor} onChange={(v) => update("textColor", v)} />
           {settings.displayStyle === "carousel" && (
-            <ColorField label="Arrow" value={settings.arrowColor} onChange={(v) => update("arrowColor", v)} />
+            <ColorField label="Arrow" value={settings.arrowColor} onChange={(v) => update("arrowColor", v)} locked={isFree} />
           )}
         </div>
       </div>
@@ -251,9 +285,54 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
             type="text"
             value={settings.widgetTitle}
             onChange={(e) => update("widgetTitle", e.target.value)}
-            className="mb-4 w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
+            className="mb-3 w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
             maxLength={100}
           />
+          <div className={`mb-3 grid grid-cols-3 gap-3 ${isFree ? "pointer-events-none opacity-40" : ""}`}>
+            <div>
+              <label className="mb-1 block text-xs text-white/50">
+                {isFree ? "🔒 " : ""}Size: {settings.headingFontSize}px
+              </label>
+              <input
+                type="range"
+                min={9}
+                max={24}
+                value={settings.headingFontSize}
+                onChange={(e) => update("headingFontSize", Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-white/50">Weight</label>
+              <button
+                onClick={() => update("headingBold", !settings.headingBold)}
+                className={`w-full rounded-md border px-2 py-1.5 text-xs transition-colors ${
+                  settings.headingBold
+                    ? "border-emerald-400 bg-emerald-400/10 text-white font-bold"
+                    : "border-white/10 text-white/50 hover:border-white/30"
+                }`}
+              >
+                {settings.headingBold ? "Bold" : "Regular"}
+              </button>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-white/50">Position</label>
+              <select
+                value={settings.headingAlign}
+                onChange={(e) => update("headingAlign", e.target.value as "left" | "center" | "right")}
+                className="w-full rounded-md border border-white/15 bg-white/[0.03] px-2 py-1.5 text-xs text-white"
+              >
+                <option value="left" style={{ color: "#000" }}>Left</option>
+                <option value="center" style={{ color: "#000" }}>Center</option>
+                <option value="right" style={{ color: "#000" }}>Right</option>
+              </select>
+            </div>
+          </div>
+          {isFree && (
+            <p className="mb-3 text-xs text-yellow-300/70">
+              Heading size/weight/position customization needs Growth or Pro.
+            </p>
+          )}
           <label className="mb-1 block text-xs text-white/50">
             Top spacing: {settings.topSpacing}px
           </label>
@@ -266,42 +345,62 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
             onChange={(e) => update("topSpacing", Number(e.target.value))}
             className="w-full"
           />
+          <label className="mt-3 flex items-center gap-2 border-t border-white/10 pt-3">
+            <input
+              type="checkbox"
+              checked={settings.showBorder}
+              onChange={(e) => update("showBorder", e.target.checked)}
+              className="h-4 w-4 accent-emerald-400"
+            />
+            <span className="text-sm text-white/80">Show border around widget</span>
+          </label>
+          <p className="mt-1 text-xs text-white/40">
+            Helps the widget stand out against a plain background — recommended if your
+            theme's page background is also white.
+          </p>
         </div>
       </div>
 
       {/* Review text appearance */}
-      <div className="grid grid-cols-2 gap-6 rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <div>
-          <label className="mb-1 block text-xs text-white/50">
-            Review text size: {settings.reviewTextSize}px
-          </label>
-          <input
-            type="range"
-            min={11}
-            max={20}
-            value={settings.reviewTextSize}
-            onChange={(e) => update("reviewTextSize", Number(e.target.value))}
-            className="w-full"
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs text-white/50">Review text position</label>
-          <div className="flex gap-1">
-            {(["left", "center", "right"] as const).map((align) => (
-              <button
-                key={align}
-                onClick={() => update("reviewTextAlign", align)}
-                className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
-                  settings.reviewTextAlign === align
-                    ? "border-emerald-400 bg-emerald-400/10 text-white"
-                    : "border-white/10 text-white/50 hover:border-white/30"
-                }`}
-              >
-                {align}
-              </button>
-            ))}
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <div className={`grid grid-cols-2 gap-6 ${isFree ? "pointer-events-none opacity-40" : ""}`}>
+          <div>
+            <label className="mb-1 block text-xs text-white/50">
+              {isFree ? "🔒 " : ""}Review text size: {settings.reviewTextSize}px
+            </label>
+            <input
+              type="range"
+              min={11}
+              max={20}
+              value={settings.reviewTextSize}
+              onChange={(e) => update("reviewTextSize", Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-white/50">Review text position</label>
+            <div className="flex gap-1">
+              {(["left", "center", "right"] as const).map((align) => (
+                <button
+                  key={align}
+                  onClick={() => update("reviewTextAlign", align)}
+                  className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
+                    settings.reviewTextAlign === align
+                      ? "border-emerald-400 bg-emerald-400/10 text-white"
+                      : "border-white/10 text-white/50 hover:border-white/30"
+                  }`}
+                >
+                  {align}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
+        {isFree && (
+          <p className="mt-3 text-xs text-yellow-300/70">
+            Review text size/position customization needs Growth or Pro.
+          </p>
+        )}
       </div>
 
       {/* Sizing */}
@@ -377,6 +476,24 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
             <span className="text-sm text-white/80">On QR-scan page</span>
           </label>
         </div>
+        <label className="mb-4 flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={settings.letCustomerPickLanguage}
+            disabled={isFree}
+            onChange={(e) => update("letCustomerPickLanguage", e.target.checked)}
+            className="h-4 w-4 accent-emerald-400 disabled:opacity-40"
+          />
+          <span className={`text-sm ${isFree ? "text-white/30" : "text-white/80"}`}>
+            {isFree ? "🔒 " : ""}Let customers choose their own language (shows a dropdown on the
+            review form)
+          </span>
+        </label>
+        {isFree && (
+          <p className="mb-3 -mt-2 text-xs text-yellow-300/70">
+            Also needs Growth or Pro — Free plan is English-only.
+          </p>
+        )}
         <label className="mb-2 block text-xs text-white/50">Language</label>
         <div className="grid grid-cols-5 gap-2">
           {SUPPORTED_LANGUAGES.map((lang) => (
@@ -402,6 +519,14 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>
+      {lockedMsg.length > 0 && (
+        <p className="mt-2 text-xs text-yellow-300/80">
+          Some choices need a higher plan and were kept at their default: {lockedMsg.join(", ")}.{" "}
+          <a href={`/dashboard/plans?shop=${shop}`} className="underline">
+            View plans
+          </a>
+        </p>
+      )}
     </div>
   );
 }
@@ -410,26 +535,33 @@ function ColorField({
   label,
   value,
   onChange,
+  locked = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  locked?: boolean;
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-white/50">{label}</label>
+      <label className="mb-1 block text-xs text-white/50">
+        {locked ? "🔒 " : ""}
+        {label}
+      </label>
       <div className="flex items-center gap-1.5">
         <input
           type="color"
           value={value}
+          disabled={locked}
           onChange={(e) => onChange(e.target.value)}
-          className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent"
+          className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent disabled:cursor-not-allowed disabled:opacity-40"
         />
         <input
           type="text"
           value={value}
+          disabled={locked}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full min-w-0 rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
+          className="w-full min-w-0 rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white disabled:opacity-40"
         />
       </div>
     </div>

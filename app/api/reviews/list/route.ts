@@ -84,6 +84,7 @@ export async function GET(req: NextRequest) {
     NextResponse.json({
       reviews: reviewsWithBadge,
       summary: { total, average, breakdown: counts },
+      plan: shopRecord.plan,
       design: {
         displayStyle: shopRecord.displayStyle,
         splitSummary: shopRecord.splitSummary,
@@ -103,7 +104,12 @@ export async function GET(req: NextRequest) {
         formMaxWidth: shopRecord.formMaxWidth,
         widgetMaxWidth: shopRecord.widgetMaxWidth,
         widgetTitle: shopRecord.widgetTitle,
+        headingFontSize: shopRecord.headingFontSize,
+        headingBold: shopRecord.headingBold,
+        headingAlign: shopRecord.headingAlign,
         topSpacing: shopRecord.topSpacing,
+        showBorder: shopRecord.showBorder,
+        letCustomerPickLanguage: shopRecord.letCustomerPickLanguage,
         showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
       },
     })

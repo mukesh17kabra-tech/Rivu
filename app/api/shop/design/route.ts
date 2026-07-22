@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
+import { clampDesignToPlan, PlanTier } from "@/lib/plan-gating";
 
 const LANGUAGE_CODES = SUPPORTED_LANGUAGES.map((l) => l.code) as [string, ...string[]];
 
@@ -25,7 +26,12 @@ const schema = z.object({
   formMaxWidth: z.number().int().min(280).max(600),
   widgetMaxWidth: z.number().int().min(320).max(900),
   widgetTitle: z.string().min(1).max(100),
+  headingFontSize: z.number().int().min(9).max(24),
+  headingBold: z.boolean(),
+  headingAlign: z.enum(["left", "center", "right"]),
   topSpacing: z.number().int().min(0).max(120),
+  showBorder: z.boolean(),
+  letCustomerPickLanguage: z.boolean(),
   showSuggestionsOnWebsite: z.boolean(),
   showSuggestionsOnQr: z.boolean(),
   suggestionLanguage: z.enum(LANGUAGE_CODES),
@@ -40,10 +46,22 @@ export async function POST(req: NextRequest) {
 
   const { shop, ...design } = parsed.data;
 
+  const shopRecord = await db.shop.findUnique({ where: { shopDomain: shop }, select: { plan: true } });
+  if (!shopRecord) {
+    return NextResponse.json({ error: "Shop not found" }, { status: 404 });
+  }
+
+  // Server-side enforcement — clamps any locked-for-this-plan values back
+  // to their defaults before saving, regardless of what the client sent.
+  // This can't be bypassed by calling the API directly with a crafted
+  // payload; the plan check happens here, not just in the UI.
+  const plan = (shopRecord.plan as PlanTier) || "free";
+  const { clamped, lockedFields } = clampDesignToPlan(plan, design);
+
   await db.shop.update({
     where: { shopDomain: shop },
-    data: design,
+    data: clamped,
   });
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, lockedFields });
 }
