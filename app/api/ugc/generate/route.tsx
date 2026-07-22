@@ -93,10 +93,17 @@ export async function GET(req: NextRequest) {
   const productTitle = review.productTitle;
 
   function logoWatermark(color = "#fff", opacity = 1, inset = 24) {
+    // Cap the actual rendered size — a merchant might set logoSize up to
+    // 300px (for prominent placement elsewhere), but on a 1080px canvas
+    // with borders/frames close to the edges, anything much bigger than
+    // ~100px risks visually overlapping template borders regardless of
+    // how carefully the inset math is done. This cap is purely visual
+    // (doesn't touch the saved setting), separate from the corner inset.
+    const renderSize = Math.min(logoSize, 100);
     return logoUrl ? (
       <img
         src={logoUrl}
-        width={logoSize}
+        width={renderSize}
         style={{ position: "absolute", bottom: inset, right: inset, borderRadius: 6, opacity }}
       />
     ) : null;
@@ -358,7 +365,7 @@ export async function GET(req: NextRequest) {
             justifyContent: "center",
             alignItems: "center",
             background: "#ffffff",
-            padding: "60px",
+            padding: "130px",
             fontFamily: "sans-serif",
             position: "relative",
           }}
@@ -395,7 +402,7 @@ export async function GET(req: NextRequest) {
               {customerName.toUpperCase()}
             </div>
           </div>
-          {logoWatermark("#000", 1, 44)}
+          {logoWatermark("#000", 1, 40)}
         </div>
       );
     } else if (template === "big-quote") {

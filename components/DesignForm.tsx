@@ -27,6 +27,11 @@ type DesignSettings = {
   headingAlign: "left" | "center" | "right";
   topSpacing: number;
   showBorder: boolean;
+  borderColor: string;
+  borderWidth: number;
+  borderStyle: "solid" | "dashed" | "dotted" | "double";
+  backgroundGradient: string | null;
+  primaryGradient: string | null;
   letCustomerPickLanguage: boolean;
   showSuggestionsOnWebsite: boolean;
   showSuggestionsOnQr: boolean;
@@ -240,10 +245,22 @@ export function DesignForm({
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <p className="mb-3 text-sm font-medium text-white/70">Colors</p>
         <div className="grid grid-cols-5 gap-4">
-          <ColorField label="Primary" value={settings.primaryColor} onChange={(v) => update("primaryColor", v)} />
+          <GradientBackgroundField
+            label="Primary"
+            solidValue={settings.primaryColor}
+            gradientValue={settings.primaryGradient}
+            onSolidChange={(v) => update("primaryColor", v)}
+            onGradientChange={(v) => update("primaryGradient", v)}
+          />
           <ColorField label="Star" value={settings.starColor} onChange={(v) => update("starColor", v)} />
           <ColorField label="Range bar" value={settings.rangeColor} onChange={(v) => update("rangeColor", v)} locked={isFree} />
-          <ColorField label="Card bg" value={settings.backgroundColor} onChange={(v) => update("backgroundColor", v)} />
+          <GradientBackgroundField
+            label="Card bg"
+            solidValue={settings.backgroundColor}
+            gradientValue={settings.backgroundGradient}
+            onSolidChange={(v) => update("backgroundColor", v)}
+            onGradientChange={(v) => update("backgroundGradient", v)}
+          />
           <ColorField label="Text" value={settings.textColor} onChange={(v) => update("textColor", v)} />
           {settings.displayStyle === "carousel" && (
             <ColorField label="Arrow" value={settings.arrowColor} onChange={(v) => update("arrowColor", v)} locked={isFree} />
@@ -354,7 +371,44 @@ export function DesignForm({
             />
             <span className="text-sm text-white/80">Show border around widget</span>
           </label>
-          <p className="mt-1 text-xs text-white/40">
+          {settings.showBorder && (
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              <ColorField
+                label="Border color"
+                value={settings.borderColor}
+                onChange={(v) => update("borderColor", v)}
+              />
+              <div>
+                <label className="mb-1 block text-xs text-white/50">
+                  Width: {settings.borderWidth}px
+                </label>
+                <input
+                  type="range"
+                  min={1}
+                  max={6}
+                  value={settings.borderWidth}
+                  onChange={(e) => update("borderWidth", Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-white/50">Style</label>
+                <select
+                  value={settings.borderStyle}
+                  onChange={(e) =>
+                    update("borderStyle", e.target.value as "solid" | "dashed" | "dotted" | "double")
+                  }
+                  className="w-full rounded-md border border-white/15 bg-white/[0.03] px-2 py-1.5 text-xs text-white"
+                >
+                  <option value="solid" style={{ color: "#000" }}>Solid</option>
+                  <option value="dashed" style={{ color: "#000" }}>Dashed</option>
+                  <option value="dotted" style={{ color: "#000" }}>Dotted</option>
+                  <option value="double" style={{ color: "#000" }}>Double</option>
+                </select>
+              </div>
+            </div>
+          )}
+          <p className="mt-2 text-xs text-white/40">
             Helps the widget stand out against a plain background — recommended if your
             theme's page background is also white.
           </p>
@@ -526,6 +580,94 @@ export function DesignForm({
             View plans
           </a>
         </p>
+      )}
+    </div>
+  );
+}
+
+function GradientBackgroundField({
+  label,
+  solidValue,
+  gradientValue,
+  onSolidChange,
+  onGradientChange,
+}: {
+  label: string;
+  solidValue: string;
+  gradientValue: string | null;
+  onSolidChange: (v: string) => void;
+  onGradientChange: (v: string | null) => void;
+}) {
+  const isGradient = !!gradientValue;
+
+  // Parse the two colors out of a stored linear-gradient string (best
+  // effort — falls back to sensible defaults if parsing fails, e.g. on
+  // first switch to gradient mode when there's nothing stored yet).
+  const match = gradientValue?.match(/#[0-9a-fA-F]{6}/g);
+  const colorA = match?.[0] || solidValue;
+  const colorB = match?.[1] || "#7c3aed";
+
+  function buildGradient(a: string, b: string) {
+    return `linear-gradient(135deg, ${a} 0%, ${b} 100%)`;
+  }
+
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between">
+        <label className="block text-xs text-white/50">{label}</label>
+        <div className="flex gap-1">
+          <button
+            onClick={() => onGradientChange(null)}
+            className={`rounded px-1.5 py-0.5 text-[10px] ${
+              !isGradient ? "bg-emerald-400/20 text-emerald-300" : "text-white/40"
+            }`}
+          >
+            Solid
+          </button>
+          <button
+            onClick={() => onGradientChange(buildGradient(colorA, colorB))}
+            className={`rounded px-1.5 py-0.5 text-[10px] ${
+              isGradient ? "bg-emerald-400/20 text-emerald-300" : "text-white/40"
+            }`}
+          >
+            Gradient
+          </button>
+        </div>
+      </div>
+      {isGradient ? (
+        <div className="flex items-center gap-1.5">
+          <input
+            type="color"
+            value={colorA}
+            onChange={(e) => onGradientChange(buildGradient(e.target.value, colorB))}
+            className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent"
+          />
+          <input
+            type="color"
+            value={colorB}
+            onChange={(e) => onGradientChange(buildGradient(colorA, e.target.value))}
+            className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent"
+          />
+          <div
+            className="h-8 flex-1 rounded border border-white/15"
+            style={{ background: gradientValue || undefined }}
+          />
+        </div>
+      ) : (
+        <div className="flex items-center gap-1.5">
+          <input
+            type="color"
+            value={solidValue}
+            onChange={(e) => onSolidChange(e.target.value)}
+            className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent"
+          />
+          <input
+            type="text"
+            value={solidValue}
+            onChange={(e) => onSolidChange(e.target.value)}
+            className="w-full min-w-0 rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
+          />
+        </div>
       )}
     </div>
   );

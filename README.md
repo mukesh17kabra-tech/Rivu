@@ -377,3 +377,24 @@ be bypassed by calling the API directly with a crafted payload.
 controls and "🔒 Upgrade" hints so merchants see the restriction before
 they even try to save — but the real enforcement is server-side, so the
 UI lock is just a courtesy, not the actual security boundary.
+
+## This round's fixes/additions
+
+- **Logo overlap fixed for real** — root cause was logo size (up to 300px
+  configurable) vastly exceeding the small gap (60px) reserved around
+  bordered templates. Now capped at 100px render size across all
+  templates, and `bordered-classic`'s outer padding increased to 130px
+  so a 100px logo sits comfortably without touching the border line.
+- **Photo/video lightbox** — review media now shows as a small 90×90px
+  thumbnail; clicking opens a full-screen dark overlay (Fancybox-style)
+  with the full-size image/video, closeable via ✕ or clicking outside.
+- **Hover highlight** on review cards (subtle lift + shadow).
+- **Border customization** — color, width (1-6px), and style
+  (solid/dashed/dotted/double), not just an on/off toggle.
+- **Gradient backgrounds** — Card background and Primary/button color can
+  each be set as a solid color or a two-color gradient via a toggle in
+  Widget Settings. Star color, range-bar color, text color, and arrow
+  color remain solid-only — gradient text/icon fills need
+  `background-clip: text` tricks that don't render reliably across the
+  storefront widget and the UGC image-generation pipeline (Satori), so
+  this was intentionally scoped to background-type fields only.

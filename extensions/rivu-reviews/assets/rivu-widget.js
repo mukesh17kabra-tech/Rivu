@@ -26,6 +26,10 @@
       .rv-list { scrollbar-width: none; -ms-overflow-style: none; }
       .rv-big-rating { font-family: Georgia, 'Times New Roman', serif; }
       .rv-avatar { font-family: Georgia, 'Times New Roman', serif; }
+      .rv-card { transition: box-shadow 0.15s, transform 0.15s; }
+      .rv-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-2px); }
+      .rv-media-thumb { transition: opacity 0.15s; }
+      .rv-media-thumb:hover { opacity: 0.85; }
     `;
     document.head.appendChild(styleTag);
   }
@@ -83,6 +87,11 @@
       headingAlign: "left",
       topSpacing: 24,
       showBorder: true,
+      borderColor: "#e0e0e0",
+      borderWidth: 1,
+      borderStyle: "solid",
+      backgroundGradient: null,
+      primaryGradient: null,
       letCustomerPickLanguage: false,
       showSuggestionsOnWebsite: true,
     };
@@ -113,7 +122,9 @@
     }
 
     const r = design.borderRadius;
-    const cardStyle = `background:${design.backgroundColor};color:${design.textColor};border-radius:${r}px;padding:18px;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.04);`;
+    const cardBackground = design.backgroundGradient || design.backgroundColor;
+    const buttonBackground = design.primaryGradient || design.primaryColor;
+    const cardStyle = `background:${cardBackground};color:${design.textColor};border-radius:${r}px;padding:18px;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.04);`;
 
     function reviewCard(rev) {
       const cardTextAlign = design.reviewTextAlign === "center" ? "center" : design.reviewTextAlign === "right" ? "right" : "left";
@@ -147,8 +158,13 @@
           ${rev.reviewTitle ? `<p style="margin:0 0 6px;font-size:14px;font-weight:600;font-style:italic;text-align:${cardTextAlign};">${rev.reviewTitle}</p>` : ""}
           <p id="${bodyId}" class="rv-body-text" data-full="${rev.body.replace(/"/g, "&quot;")}" style="margin:0 0 6px;line-height:1.55;font-size:${design.reviewTextSize}px;text-align:${cardTextAlign};${isLong ? "max-height:4.7em;overflow:hidden;position:relative;" : ""}">${rev.body}</p>
           ${isLong ? `<button type="button" class="rv-read-more" data-target="${bodyId}" style="background:none;border:none;padding:0;margin:0 0 8px;font-size:12px;font-weight:600;color:${design.primaryColor};cursor:pointer;text-align:${cardTextAlign};display:block;">Read more</button>` : ""}
-          ${rev.videoUrl ? `<video src="${rev.videoUrl}" controls style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:6px 0 0;"></video>` : ""}
-          ${!rev.videoUrl && rev.photoUrl ? `<img src="${rev.photoUrl}" style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:6px 0 0;" />` : ""}
+          ${rev.videoUrl ? `<div class="rv-media-thumb" data-media-url="${rev.videoUrl}" data-media-type="video" style="width:90px;height:90px;border-radius:${Math.max(r - 2, 0)}px;margin:6px 0 0;cursor:pointer;position:relative;overflow:hidden;background:#000;">
+              <video src="${rev.videoUrl}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);">
+                <span style="color:#fff;font-size:22px;">▶</span>
+              </div>
+            </div>` : ""}
+          ${!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}" style="width:90px;height:90px;object-fit:cover;border-radius:${Math.max(r - 2, 0)}px;margin:6px 0 0;cursor:pointer;" />` : ""}
         </div>`;
     }
 
@@ -248,7 +264,7 @@
 
     const headingAlignValue = design.headingAlign === "center" ? "center" : design.headingAlign === "right" ? "right" : "left";
     const borderStyle = design.showBorder
-      ? `border:1px solid rgba(0,0,0,0.08);border-radius:${r}px;padding:20px;`
+      ? `border:${design.borderWidth}px ${design.borderStyle} ${design.borderColor};border-radius:${r}px;padding:20px;`
       : "";
 
     // "Powered by Rivu" — shown only on the Free plan (removed on paid
@@ -274,9 +290,14 @@
         ${bodyHtml}
         ${brandingHtml}
 
-        <button class="rv-toggle" style="margin-top:20px;padding:11px 22px;background:${design.primaryColor};color:#fff;border:none;border-radius:${r}px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+        <button class="rv-toggle" style="margin-top:20px;padding:11px 22px;background:${buttonBackground};color:#fff;border:none;border-radius:${r}px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
           Write a Review
         </button>
+
+        <div class="rv-lightbox-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:24px;">
+          <button class="rv-lightbox-close" style="position:absolute;top:20px;right:20px;background:none;border:none;font-size:28px;line-height:1;cursor:pointer;color:#fff;padding:4px;">✕</button>
+          <div class="rv-lightbox-content" style="max-width:90vw;max-height:85vh;"></div>
+        </div>
 
         <div class="rv-modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;padding:20px;">
           <div class="rv-form-wrap" style="position:relative;width:100%;max-width:${design.formMaxWidth}px;max-height:90vh;overflow-y:auto;padding:28px;background:${design.backgroundColor};border-radius:${r}px;text-align:${formTextAlign};box-shadow:0 20px 60px rgba(0,0,0,0.3);">
@@ -336,7 +357,7 @@
               <video class="rv-video-preview" controls style="display:none;max-width:160px;border-radius:6px;margin-top:8px;"></video>
             </div>
 
-            <button type="submit" style="margin-top:6px;padding:13px 18px;background:${design.primaryColor};color:#fff;border:none;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+            <button type="submit" style="margin-top:6px;padding:13px 18px;background:${buttonBackground};color:#fff;border:none;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
               Submit Review
             </button>
             <p class="rv-status" style="margin:0;font-size:13px;text-align:center;"></p>
@@ -355,6 +376,35 @@
         target.style.overflow = "visible";
         btn.style.display = "none";
       });
+    });
+
+    // Media lightbox — click a photo/video thumbnail to see it full-size
+    // in a dark overlay (Fancybox-style), instead of the media taking up
+    // a huge amount of space inline in every review card.
+    const lightboxBackdrop = el.querySelector(".rv-lightbox-backdrop");
+    const lightboxContent = el.querySelector(".rv-lightbox-content");
+    const lightboxClose = el.querySelector(".rv-lightbox-close");
+
+    function openLightbox(url, type) {
+      lightboxContent.innerHTML =
+        type === "video"
+          ? `<video src="${url}" controls autoplay style="max-width:90vw;max-height:85vh;border-radius:8px;"></video>`
+          : `<img src="${url}" style="max-width:90vw;max-height:85vh;border-radius:8px;" />`;
+      lightboxBackdrop.style.display = "flex";
+    }
+    function closeLightbox() {
+      lightboxBackdrop.style.display = "none";
+      lightboxContent.innerHTML = "";
+    }
+
+    el.querySelectorAll(".rv-media-thumb").forEach((thumb) => {
+      thumb.addEventListener("click", () => {
+        openLightbox(thumb.dataset.mediaUrl, thumb.dataset.mediaType);
+      });
+    });
+    lightboxClose.addEventListener("click", closeLightbox);
+    lightboxBackdrop.addEventListener("click", (e) => {
+      if (e.target === lightboxBackdrop) closeLightbox();
     });
 
     const rvList = el.querySelector(".rv-list");

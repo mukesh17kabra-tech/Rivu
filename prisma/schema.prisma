@@ -48,6 +48,16 @@ model Shop {
   headingAlign    String  @default("left") // "left" | "center" | "right" — independent from the review-card text alignment
   topSpacing   Int    @default(24)       // px — space above the widget, since themes often butt it right up against other content
   showBorder   Boolean @default(true)   // subtle border around the whole widget — helps it stand out against a plain white theme background
+  borderColor  String  @default("#e0e0e0")
+  borderWidth  Int     @default(1)      // px
+  borderStyle  String  @default("solid") // "solid" | "dashed" | "dotted" | "double"
+
+  // Optional CSS gradient for background-type fields — when set (non-
+  // empty), takes priority over the plain hex backgroundColor/
+  // primaryColor above for the widget card background and the "Write a
+  // Review" button. Stored as a ready-to-use CSS gradient() string.
+  backgroundGradient String? @db.Text
+  primaryGradient    String? @db.Text
 
   // Lets shoppers pick their own language for suggestions on the
   // storefront widget itself (a dropdown) — separate from
