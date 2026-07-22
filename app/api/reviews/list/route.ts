@@ -37,19 +37,26 @@ export async function GET(req: NextRequest) {
 
   // Streak/"Top Reviewer" badge: count how many approved reviews (across
   // any product in this shop) each reviewer's email has, so the widget can
-  // show a small badge next to repeat reviewers. Cheap enough to compute
-  // per-request at this scale (small per-shop review volumes).
+  // show a small badge next to repeat reviewers. Uses a plain findMany +
+  // manual count instead of Prisma's groupBy — groupBy's TypeScript
+  // overloads are finicky about matching an explicit return-type
+  // annotation, and this is simple/cheap enough at this scale anyway.
   const emails = [
     ...new Set(reviews.map((r: { customerEmail: string | null }) => r.customerEmail).filter(Boolean)),
   ] as string[];
-  const reviewCounts: { customerEmail: string | null; _count: { customerEmail: number } }[] = emails.length
-    ? await db.review.groupBy({
-        by: ["customerEmail"],
-        where: { shopId: shopRecord.id, approved: true, customerEmail: { in: emails } },
-        _count: { customerEmail: true },
-      })
-    : [];
-  const countByEmail = new Map(reviewCounts.map((r) => [r.customerEmail, r._count.customerEmail]));
+
+  const countByEmail = new Map<string, number>();
+  if (emails.length) {
+    const allReviewsByThoseEmails = await db.review.findMany({
+      where: { shopId: shopRecord.id, approved: true, customerEmail: { in: emails } },
+      select: { customerEmail: true },
+    });
+    for (const r of allReviewsByThoseEmails as { customerEmail: string | null }[]) {
+      if (!r.customerEmail) continue;
+      countByEmail.set(r.customerEmail, (countByEmail.get(r.customerEmail) || 0) + 1);
+    }
+  }
+
   const reviewsWithBadge = reviews.map((r: { customerEmail: string | null }) => ({
     ...r,
     isTopReviewer: r.customerEmail ? (countByEmail.get(r.customerEmail) || 0) >= 3 : false,
