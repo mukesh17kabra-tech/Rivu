@@ -1,45 +1,34 @@
 export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: string }) {
   return (
-    <section className="grid grid-cols-4 gap-4">
+    <section className="grid grid-cols-3 gap-4">
       <PlanCard
         name="Free"
         price="$0/mo"
         perks={[
           "25 reviews/month",
-          "QR codes for up to 3 products",
+          "Photo reviews (up to 1)",
+          "List & Grid layouts (plus Split with either)",
+          "QR codes for up to 10 products",
           "1 UGC template",
-          "List, Grid & Split layouts",
           "English suggestions only",
         ]}
         current={currentPlan === "free"}
       />
       <PlanCard
-        name="Starter"
-        price="$4.99/mo"
-        perks={[
-          "100 reviews/month",
-          "Unlimited product QR codes",
-          "2 UGC templates",
-          "Photo + video reviews",
-          "10 suggestion languages",
-          "7-day free trial",
-        ]}
-        href={`/api/billing/upgrade?shop=${shop}&plan=starter`}
-        ctaLabel="Upgrade to Starter"
-        current={currentPlan === "starter"}
-      />
-      <PlanCard
         name="Growth"
-        price="$9.99/mo"
+        price="$5/mo"
         perks={[
           "500 reviews/month",
+          "50 reminder emails/month",
+          "List, Grid & Masonry layouts (plus Split with any)",
+          "Photo reviews (up to 2) + 1 video review",
           "Unlimited product QR codes",
-          "All 8 UGC templates",
-          "Photo + video reviews",
+          "6 suggestion languages",
+          "5 UGC templates",
           "\"Top Reviewer\" streak badges",
           "Direct share to Instagram/WhatsApp",
           "Automated review-reminder emails",
-          "7-day free trial",
+          "4-day free trial",
         ]}
         href={`/api/billing/upgrade?shop=${shop}&plan=growth`}
         ctaLabel="Upgrade to Growth"
@@ -47,18 +36,21 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
       />
       <PlanCard
         name="Pro"
-        price="$19.99/mo"
+        price="$8/mo"
         perks={[
           "Unlimited reviews",
+          "Unlimited reminder emails",
+          "All layouts — List, Grid, Masonry, Carousel (plus Split with any)",
+          "Photo reviews (up to 3) + 2 video reviews",
           "Unlimited product QR codes",
+          "All 10 suggestion languages",
           "All 8 UGC templates",
-          "Photo + video reviews",
           "\"Top Reviewer\" streak badges",
           "Direct share to Instagram/WhatsApp",
           "Automated review-reminder emails",
           "Review-reward discount codes",
           "Priority support",
-          "7-day free trial",
+          "4-day free trial",
         ]}
         href={`/api/billing/upgrade?shop=${shop}&plan=pro`}
         ctaLabel="Upgrade to Pro"

@@ -18,17 +18,24 @@ model Shop {
 
   // Widget design customization — lets merchants match their store's
   // branding instead of a fixed look, and choose how reviews are laid out.
-  displayStyle    String @default("list")    // "list" | "grid" | "carousel" — shape of the review list itself
+  displayStyle    String @default("list")    // "list" | "grid" | "carousel" | "masonry" — shape of the review list itself
   splitSummary    Boolean @default(false)     // when true, shows summary+rating-bar in a sticky left column, review list (in whatever displayStyle) on the right
-  gridColumns     Int    @default(3)          // only used when displayStyle = "grid"
+  gridColumns     Int    @default(3)          // used for "grid" columns AND "masonry" column count
   carouselVisible Int    @default(1)          // cards visible at once, carousel only
   arrowColor      String @default("#111111")  // carousel prev/next arrow color
   primaryColor    String @default("#111111")  // buttons, "write a review" CTA
-  starColor       String @default("#f5b400")
+  starColor       String @default("#f5b400")  // stars shown on individual review cards
+  rangeColor      String @default("#f5b400")  // separate color for the rating-breakdown percentage bars (summary section) — independent from starColor so merchants can style them differently
   backgroundColor String @default("#ffffff")
   textColor       String @default("#333333")
   borderRadius    Int    @default(8)          // px, applied to cards/buttons
   fontFamily      String @default("inherit")
+
+  // Review card text appearance — decoupled from the write-review form's
+  // own alignment (formAlign below), since merchants may want reviews
+  // centered but the form left-aligned, or vice versa.
+  reviewTextSize  Int    @default(14)         // px, applied to the review body text
+  reviewTextAlign String @default("left")     // "left" | "center" | "right"
 
   // Controls where/how big the "write a review" form appears — merchant
   // configurable instead of hardcoded, since it needs to fit their theme.

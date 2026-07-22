@@ -70,10 +70,13 @@
       arrowColor: "#111111",
       primaryColor: "#111111",
       starColor: "#f5b400",
+      rangeColor: "#f5b400",
       backgroundColor: "#ffffff",
       textColor: "#333333",
       borderRadius: 8,
       fontFamily: "inherit",
+      reviewTextSize: 14,
+      reviewTextAlign: "left",
       formAlign: "left",
       formMaxWidth: 420,
       widgetMaxWidth: 480,
@@ -109,9 +112,11 @@
     const cardStyle = `background:${design.backgroundColor};color:${design.textColor};border-radius:${r}px;padding:18px;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.04);`;
 
     function reviewCard(rev) {
-      const cardTextAlign = design.formAlign === "center" ? "center" : design.formAlign === "right" ? "right" : "left";
+      const cardTextAlign = design.reviewTextAlign === "center" ? "center" : design.reviewTextAlign === "right" ? "right" : "left";
       const carouselStyle = design.displayStyle === "carousel"
         ? `min-width:${carouselCardWidth};flex-shrink:0;`
+        : design.displayStyle === "masonry"
+        ? masonryCardStyle
         : "";
       const badge = rev.isTopReviewer
         ? `<span style="display:inline-block;margin-left:6px;padding:1px 6px;background:${design.primaryColor};color:#fff;border-radius:10px;font-size:9px;vertical-align:middle;white-space:nowrap;">⭐ Top Reviewer</span>`
@@ -136,7 +141,7 @@
           </div>
           <div style="display:flex;justify-content:${starJustify};color:${design.starColor};margin-bottom:8px;font-size:13px;">${"★".repeat(rev.rating)}${"☆".repeat(5 - rev.rating)}</div>
           ${rev.reviewTitle ? `<p style="margin:0 0 6px;font-size:14px;font-weight:600;font-style:italic;text-align:${cardTextAlign};">${rev.reviewTitle}</p>` : ""}
-          <p id="${bodyId}" class="rv-body-text" data-full="${rev.body.replace(/"/g, "&quot;")}" style="margin:0 0 6px;line-height:1.55;text-align:${cardTextAlign};${isLong ? "max-height:4.7em;overflow:hidden;position:relative;" : ""}">${rev.body}</p>
+          <p id="${bodyId}" class="rv-body-text" data-full="${rev.body.replace(/"/g, "&quot;")}" style="margin:0 0 6px;line-height:1.55;font-size:${design.reviewTextSize}px;text-align:${cardTextAlign};${isLong ? "max-height:4.7em;overflow:hidden;position:relative;" : ""}">${rev.body}</p>
           ${isLong ? `<button type="button" class="rv-read-more" data-target="${bodyId}" style="background:none;border:none;padding:0;margin:0 0 8px;font-size:12px;font-weight:600;color:${design.primaryColor};cursor:pointer;text-align:${cardTextAlign};display:block;">Read more</button>` : ""}
           ${rev.videoUrl ? `<video src="${rev.videoUrl}" controls style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:6px 0 0;"></video>` : ""}
           ${!rev.videoUrl && rev.photoUrl ? `<img src="${rev.photoUrl}" style="max-width:100%;border-radius:${Math.max(r - 2, 0)}px;margin:6px 0 0;" />` : ""}
@@ -145,12 +150,21 @@
 
     let listWrapperStyle = "display:flex;flex-direction:column;gap:14px;";
     let carouselCardWidth = null;
+    let masonryCardStyle = "";
     const carouselNeedsScroll = reviews.length > design.carouselVisible;
     if (design.displayStyle === "grid") {
       listWrapperStyle = `display:grid;grid-template-columns:repeat(${design.gridColumns},1fr);gap:14px;`;
     } else if (design.displayStyle === "carousel") {
       listWrapperStyle = `display:flex;gap:14px;${carouselNeedsScroll ? "overflow-x:auto;" : "overflow:visible;"}scroll-behavior:smooth;padding-bottom:4px;`;
       carouselCardWidth = `calc(${100 / design.carouselVisible}% - ${(14 * (design.carouselVisible - 1)) / design.carouselVisible}px)`;
+    } else if (design.displayStyle === "masonry") {
+      // True masonry (variable card heights packed tightly, Pinterest-
+      // style) needs either JS layout or native CSS masonry (not yet
+      // widely supported). CSS multi-column layout gives a very close
+      // visual approximation with zero JS: cards flow down each column
+      // and wrap, so cards of different heights don't leave big gaps.
+      listWrapperStyle = `column-count:${design.gridColumns};column-gap:14px;`;
+      masonryCardStyle = "break-inside:avoid;margin-bottom:14px;display:inline-block;width:100%;";
     }
     if (design.splitSummary) {
       listWrapperStyle += "max-height:560px;overflow-y:auto;";
@@ -158,16 +172,22 @@
 
     const breakdownHtml = summary.total
       ? summary.breakdown
-          .map(
-            (b) => `
+          .map((b) => {
+            // Explicit Number() + fallback to 0 — defends against any
+            // unexpected non-numeric value silently making the whole
+            // inline `width:` declaration invalid (which browsers just
+            // drop, leaving the bar looking uncolored/empty regardless
+            // of the real percentage).
+            const pct = Number(b.percentage) || 0;
+            return `
         <div style="display:flex;align-items:center;gap:8px;font-size:12px;margin:4px 0;">
           <span style="width:34px;color:${design.textColor};opacity:0.65;">${b.star}★</span>
           <div style="flex:1;height:6px;background:rgba(0,0,0,0.08);border-radius:3px;overflow:hidden;">
-            <div style="width:${b.percentage}%;height:100%;background:${design.starColor};border-radius:3px;"></div>
+            <div style="display:block;width:${pct}%;height:100%;background-color:${design.rangeColor};border-radius:3px;"></div>
           </div>
-          <span style="width:32px;text-align:right;color:${design.textColor};opacity:0.65;">${b.percentage}%</span>
-        </div>`
-          )
+          <span style="width:32px;text-align:right;color:${design.textColor};opacity:0.65;">${pct}%</span>
+        </div>`;
+          })
           .join("")
       : "";
 
@@ -231,18 +251,20 @@
           Write a Review
         </button>
 
-        <div class="rv-form-wrap" style="display:none;position:relative;margin:${formMargin};padding:26px;background:${design.backgroundColor};border:1px solid rgba(0,0,0,0.06);border-radius:${r}px;max-width:${design.formMaxWidth}px;text-align:${formTextAlign};box-shadow:0 2px 12px rgba(0,0,0,0.05);">
-          <button class="rv-form-close" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:18px;line-height:1;cursor:pointer;color:#999;padding:4px;">✕</button>
-          <p style="margin:0 0 4px;font-size:16px;font-weight:700;">How would you rate it?</p>
-          <p style="margin:0 0 4px;font-size:12px;opacity:0.5;">Tap a star to get started</p>
-          <div class="rv-stars" style="display:flex;gap:8px;justify-content:${design.formAlign === "center" ? "center" : "flex-start"};margin:12px 0 18px;">
-            ${[1, 2, 3, 4, 5]
-              .map(
-                (n) =>
-                  `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:0;cursor:pointer;font-size:34px;line-height:1;color:#d9d9d9;transition:color 0.15s;">★</button>`
-              )
-              .join("")}
-          </div>
+        <div class="rv-modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;padding:20px;">
+          <div class="rv-form-wrap" style="position:relative;width:100%;max-width:${design.formMaxWidth}px;max-height:90vh;overflow-y:auto;padding:28px;background:${design.backgroundColor};border-radius:${r}px;text-align:${formTextAlign};box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <button class="rv-form-close" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#999;padding:4px;">✕</button>
+            <p style="margin:0 0 4px;font-size:19px;font-weight:700;text-align:center;font-family:Georgia,serif;">Write a Review</p>
+            <p style="margin:0 0 4px;font-size:12px;opacity:0.5;text-align:center;">Share your honest experience</p>
+            <div class="rv-stars" style="display:flex;gap:8px;justify-content:center;margin:16px 0 6px;">
+              ${[1, 2, 3, 4, 5]
+                .map(
+                  (n) =>
+                    `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:0;cursor:pointer;font-size:36px;line-height:1;color:#d9d9d9;transition:color 0.15s;">★</button>`
+                )
+                .join("")}
+            </div>
+            <p class="rv-tap-hint" style="margin:0 0 16px;font-size:11px;opacity:0.45;text-align:center;">Tap a star to rate</p>
 
           <div class="rv-suggestions-wrap" style="display:none;text-align:left;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -257,12 +279,12 @@
 
           <form class="rv-form" style="display:flex;flex-direction:column;gap:12px;text-align:left;">
             <div style="display:flex;gap:10px;">
-              <input type="text" name="customerName" required placeholder="Your name"
+              <input type="text" name="customerName" required placeholder="Your Name *"
                      style="flex:1;padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-family:inherit;" />
-              <input type="email" name="customerEmail" placeholder="Email (optional)"
+              <input type="email" name="customerEmail" placeholder="Email (Optional)"
                      style="flex:1;padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-family:inherit;" />
             </div>
-            <input type="text" name="reviewTitle" maxlength="150" placeholder="Give your review a title (optional)"
+            <input type="text" name="reviewTitle" maxlength="150" placeholder="Review Title *"
                    style="padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-family:inherit;font-weight:600;" />
             <textarea name="body" required minlength="10" placeholder="What did you like or dislike? How has this worked for you?"
                       style="padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;min-height:100px;font-family:inherit;resize:vertical;"></textarea>
@@ -289,8 +311,9 @@
             <button type="submit" style="margin-top:6px;padding:13px 18px;background:${design.primaryColor};color:#fff;border:none;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
               Submit Review
             </button>
-            <p class="rv-status" style="margin:0;font-size:13px;text-align:${formTextAlign};"></p>
+            <p class="rv-status" style="margin:0;font-size:13px;text-align:center;"></p>
           </form>
+          </div>
         </div>
       </div>
     `;
@@ -316,11 +339,13 @@
     }
 
     const toggle = el.querySelector(".rv-toggle");
+    const backdrop = el.querySelector(".rv-modal-backdrop");
     const formWrap = el.querySelector(".rv-form-wrap");
     const formClose = el.querySelector(".rv-form-close");
     const form = el.querySelector(".rv-form");
     const status = el.querySelector(".rv-status");
     const starButtons = [...el.querySelectorAll(".rv-star")];
+    const tapHint = el.querySelector(".rv-tap-hint");
     const suggestionsWrap = el.querySelector(".rv-suggestions-wrap");
     const suggestionsBox = el.querySelector(".rv-suggestions");
     const refreshBtn = el.querySelector(".rv-refresh");
@@ -337,12 +362,19 @@
     let photoDataUrl;
     let videoDataUrl;
 
-    toggle.addEventListener("click", () => {
-      formWrap.style.display = formWrap.style.display === "none" ? "block" : "none";
-    });
+    function openModal() {
+      backdrop.style.display = "flex";
+      document.body.style.overflow = "hidden";
+    }
+    function closeModal() {
+      backdrop.style.display = "none";
+      document.body.style.overflow = "";
+    }
 
-    formClose.addEventListener("click", () => {
-      formWrap.style.display = "none";
+    toggle.addEventListener("click", openModal);
+    formClose.addEventListener("click", closeModal);
+    backdrop.addEventListener("click", (e) => {
+      if (e.target === backdrop) closeModal();
     });
 
     function paintStars() {
@@ -350,6 +382,7 @@
         const n = Number(btn.dataset.star);
         btn.style.color = n <= selectedRating ? design.starColor : "#d9d9d9";
       });
+      if (tapHint) tapHint.style.display = "none";
     }
 
     async function loadSuggestions() {
@@ -485,7 +518,7 @@
           status.style.fontWeight = data.discountCode ? "600" : "normal";
           form.reset();
           setTimeout(() => {
-            formWrap.style.display = "none";
+            closeModal();
           }, 2500);
         } else {
           status.textContent = data.error || "Something went wrong.";

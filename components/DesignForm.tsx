@@ -4,17 +4,20 @@ import { useState } from "react";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 
 type DesignSettings = {
-  displayStyle: "list" | "grid" | "carousel";
+  displayStyle: "list" | "grid" | "carousel" | "masonry";
   splitSummary: boolean;
   gridColumns: number;
   carouselVisible: number;
   arrowColor: string;
   primaryColor: string;
   starColor: string;
+  rangeColor: string;
   backgroundColor: string;
   textColor: string;
   borderRadius: number;
   fontFamily: string;
+  reviewTextSize: number;
+  reviewTextAlign: "left" | "center" | "right";
   formAlign: "left" | "center" | "right";
   formMaxWidth: number;
   widgetMaxWidth: number;
@@ -69,7 +72,7 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
           <label className="mb-2 block text-sm font-medium text-white/70">Layout</label>
           <div className="mb-3 flex gap-2">
-            {(["list", "grid", "carousel"] as const).map((style) => (
+            {(["list", "grid", "carousel", "masonry"] as const).map((style) => (
               <button
                 key={style}
                 onClick={() => update("displayStyle", style)}
@@ -84,10 +87,10 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
             ))}
           </div>
 
-          {settings.displayStyle === "grid" && (
+          {(settings.displayStyle === "grid" || settings.displayStyle === "masonry") && (
             <div className="mb-2">
               <label className="mb-1 block text-xs text-white/50">
-                Grid columns: {settings.gridColumns}
+                Columns: {settings.gridColumns}
               </label>
               <input
                 type="range"
@@ -145,6 +148,8 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
                   ? "grid gap-2"
                   : settings.displayStyle === "carousel"
                   ? "flex gap-2 overflow-x-auto"
+                  : settings.displayStyle === "masonry"
+                  ? "columns-2 gap-2"
                   : "flex flex-col gap-2"
               }
               style={
@@ -156,13 +161,20 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
               {SAMPLE_REVIEWS.map((r, i) => (
                 <div
                   key={i}
-                  className={settings.displayStyle === "carousel" ? "min-w-[160px] flex-shrink-0" : ""}
+                  className={
+                    settings.displayStyle === "carousel"
+                      ? "min-w-[160px] flex-shrink-0"
+                      : settings.displayStyle === "masonry"
+                      ? "mb-2 break-inside-avoid"
+                      : ""
+                  }
                   style={{
                     backgroundColor: settings.backgroundColor,
                     color: settings.textColor,
                     borderRadius: `${settings.borderRadius}px`,
                     padding: "10px",
-                    fontSize: "11px",
+                    fontSize: `${Math.min(settings.reviewTextSize, 13)}px`,
+                    textAlign: settings.reviewTextAlign,
                   }}
                 >
                   <div style={{ color: settings.starColor, marginBottom: "4px" }}>
@@ -193,9 +205,10 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
       {/* Colors — 4 in a row */}
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <p className="mb-3 text-sm font-medium text-white/70">Colors</p>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-5 gap-4">
           <ColorField label="Primary" value={settings.primaryColor} onChange={(v) => update("primaryColor", v)} />
           <ColorField label="Star" value={settings.starColor} onChange={(v) => update("starColor", v)} />
+          <ColorField label="Range bar" value={settings.rangeColor} onChange={(v) => update("rangeColor", v)} />
           <ColorField label="Card bg" value={settings.backgroundColor} onChange={(v) => update("backgroundColor", v)} />
           <ColorField label="Text" value={settings.textColor} onChange={(v) => update("textColor", v)} />
           {settings.displayStyle === "carousel" && (
@@ -253,6 +266,41 @@ export function DesignForm({ shop, initial }: { shop: string; initial: DesignSet
             onChange={(e) => update("topSpacing", Number(e.target.value))}
             className="w-full"
           />
+        </div>
+      </div>
+
+      {/* Review text appearance */}
+      <div className="grid grid-cols-2 gap-6 rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <div>
+          <label className="mb-1 block text-xs text-white/50">
+            Review text size: {settings.reviewTextSize}px
+          </label>
+          <input
+            type="range"
+            min={11}
+            max={20}
+            value={settings.reviewTextSize}
+            onChange={(e) => update("reviewTextSize", Number(e.target.value))}
+            className="w-full"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-white/50">Review text position</label>
+          <div className="flex gap-1">
+            {(["left", "center", "right"] as const).map((align) => (
+              <button
+                key={align}
+                onClick={() => update("reviewTextAlign", align)}
+                className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
+                  settings.reviewTextAlign === align
+                    ? "border-emerald-400 bg-emerald-400/10 text-white"
+                    : "border-white/10 text-white/50 hover:border-white/30"
+                }`}
+              >
+                {align}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

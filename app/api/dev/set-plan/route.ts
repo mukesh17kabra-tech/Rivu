@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-const VALID_PLANS = ["free", "starter", "growth", "pro"];
+const VALID_PLANS = ["free", "growth", "pro"];
 
 // ⚠️ Testing convenience only. This sets Shop.plan directly with no
 // Shopify charge created at all — the merchant is NOT billed. Useful

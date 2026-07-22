@@ -10,29 +10,34 @@ export const PLANS = {
     name: "Free",
     price: 0,
     reviewsPerMonthCap: 25,
-    qrProductCap: 3, // number of distinct products that can have a QR code at once
+    qrProductCap: 10,
     templateCount: 1,
-  },
-  starter: {
-    name: "Starter",
-    price: 4.99,
-    reviewsPerMonthCap: 100,
-    qrProductCap: Infinity,
-    templateCount: 2,
+    photoReviewCap: 1,
+    videoReviewCap: 0,
+    reminderMonthlyCap: 0, // no automated reminders on Free
+    languageCount: 1, // English only
   },
   growth: {
     name: "Growth",
-    price: 9.99,
+    price: 5,
     reviewsPerMonthCap: 500,
     qrProductCap: Infinity,
-    templateCount: Infinity, // all current + future templates
+    templateCount: 5,
+    photoReviewCap: 2,
+    videoReviewCap: 1,
+    reminderMonthlyCap: 50,
+    languageCount: 6,
   },
   pro: {
     name: "Pro",
-    price: 19.99,
+    price: 8,
     reviewsPerMonthCap: Infinity,
     qrProductCap: Infinity,
-    templateCount: Infinity,
+    templateCount: 8,
+    photoReviewCap: 3,
+    videoReviewCap: 2,
+    reminderMonthlyCap: Infinity,
+    languageCount: Infinity, // all 10
   },
 } as const;
 
@@ -61,7 +66,7 @@ export async function createRecurringCharge(
           name: `Rivu — ${plan.name} Plan`,
           price: plan.price,
           return_url: `${process.env.HOST}/api/billing/callback?shop=${shop}&plan=${planKey}`,
-          trial_days: 7,
+          trial_days: 4,
           test: process.env.SHOPIFY_BILLING_TEST_MODE === "true",
         },
       }),

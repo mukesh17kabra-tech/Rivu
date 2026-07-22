@@ -35,17 +35,20 @@ export default async function WidgetSettingsPage({
           <DesignForm
             shop={shop}
             initial={{
-              displayStyle: shopRecord.displayStyle as "list" | "grid" | "carousel",
+              displayStyle: shopRecord.displayStyle as "list" | "grid" | "carousel" | "masonry",
               splitSummary: shopRecord.splitSummary,
               gridColumns: shopRecord.gridColumns,
               carouselVisible: shopRecord.carouselVisible,
               arrowColor: shopRecord.arrowColor,
               primaryColor: shopRecord.primaryColor,
               starColor: shopRecord.starColor,
+              rangeColor: shopRecord.rangeColor,
               backgroundColor: shopRecord.backgroundColor,
               textColor: shopRecord.textColor,
               borderRadius: shopRecord.borderRadius,
               fontFamily: shopRecord.fontFamily,
+              reviewTextSize: shopRecord.reviewTextSize,
+              reviewTextAlign: shopRecord.reviewTextAlign as "left" | "center" | "right",
               formAlign: shopRecord.formAlign as "left" | "center" | "right",
               formMaxWidth: shopRecord.formMaxWidth,
               widgetMaxWidth: shopRecord.widgetMaxWidth,

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const PLANS = ["free", "starter", "growth", "pro"] as const;
+const PLANS = ["free", "growth", "pro"] as const;
 
 export function DevPlanBypass({ shop, currentPlan }: { shop: string; currentPlan: string }) {
   const [plan, setPlan] = useState(currentPlan);
