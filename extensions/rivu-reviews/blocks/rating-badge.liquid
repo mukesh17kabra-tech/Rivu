@@ -1,11 +1,13 @@
 {% comment %}
-  Rivu Rating Badge — shows average stars + review count.
-  Clicking it scrolls to the full review section.
-  Add near your product title: Customize → Product page → Add block → Apps → Rivu Rating Badge
+  Rivu Rating Badge — shows average stars near product title.
+  Clicking scrolls to the full review section below.
+  Add via: Customize → Product page → Add block → Apps → Rivu Rating Badge
+  
+  NOTE: The App Embed also auto-injects badges on collection cards.
+  On the product page, use ONLY this block (not both).
 {% endcomment %}
 
 <div
-  id="rivu-rating-badge-{{ block.id }}"
   class="rivu-rating-badge"
   data-shop="{{ shop.permanent_domain }}"
   data-product-id="{{ product.id }}"

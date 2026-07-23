@@ -76,8 +76,11 @@
   }
 
   // ── MODE 1: Explicit .rivu-rating-badge divs ─────────────────────────────
+  // Mark them so auto-inject (MODE 2) skips the same product card.
   var explicitBadges = document.querySelectorAll('.rivu-rating-badge');
   explicitBadges.forEach(function(el) {
+    if (el.dataset.rivuRendered) return;
+    el.dataset.rivuRendered = '1';
     var shop = el.getAttribute('data-shop') || GLOBAL_SHOP;
     var productId = el.getAttribute('data-product-id');
     var apiBase = el.getAttribute('data-api-base') || GLOBAL_API_BASE;
@@ -142,7 +145,8 @@
   }
 
   function injectStars(card, linkEl, data, starSize) {
-    if (card.querySelector('.rivu-auto-badge')) return;
+    // Skip if card already has an explicit badge block OR auto-badge
+    if (card.querySelector('.rivu-auto-badge') || card.querySelector('.rivu-rating-badge[data-rivu-rendered]')) return;
     var color = data.starColor || '#f5b400';
     var tc = data.textColor || '#555';
     var badge = document.createElement('div');
