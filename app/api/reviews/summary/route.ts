@@ -19,8 +19,12 @@ export async function GET(req: NextRequest) {
     return withCors(NextResponse.json({ total: 0, average: 0 }));
   }
 
+  // Match both GID ("gid://shopify/Product/123") and numeric ("123") formats
+  const numericId = productId.replace(/^gid:\/\/shopify\/Product\//, "");
+  const gidId = productId.startsWith("gid://") ? productId : `gid://shopify/Product/${productId}`;
+
   const ratings: { rating: number }[] = await db.review.findMany({
-    where: { shopId: shopRecord.id, productId, approved: true },
+    where: { shopId: shopRecord.id, productId: { in: [numericId, gidId] }, approved: true },
     select: { rating: true },
   });
 

@@ -1,191 +1,188 @@
 /**
- * Rivu Rating Badge — two modes:
+ * Rivu Rating Badge
  *
- * 1. EXPLICIT mode: Merchant adds <div class="rivu-rating-badge"> manually.
- *    Used for the "Rivu Rating Badge" Shopify block on product pages.
+ * MODE 1 — Explicit: <div class="rivu-rating-badge" data-shop="..." data-product-id="...">
+ *   Used when merchant adds the Rating Badge block on product page via theme editor.
+ *   Clicking it scrolls to the full reviews section.
  *
- * 2. AUTO-INJECT mode: Activated by data-auto-inject="true" on the script
- *    tag (set by the App Embed block). Scans the whole page for product
- *    card links (/products/HANDLE) and injects compact star badges next to
- *    each product's title — no theme modification needed, works on any theme,
- *    exactly like Judge.me / Loox / Okendo do it.
+ * MODE 2 — Auto-inject: activated by data-auto-inject="true" on the script tag.
+ *   Scans all product card links on the page and injects star badges automatically
+ *   without needing app block slots — works on any theme, just like Judge.me/Loox.
  */
 (function () {
-  // document.currentScript is null when script is deferred — use querySelector fallback.
-  // We target specifically the embed script (has data-auto-inject) so we don't
-  // accidentally pick up the reviews block script.
-  const scriptTag =
-    document.querySelector('script[data-auto-inject]') ||
-    document.querySelector('script[data-api-base][data-shop]') ||
-    document.currentScript;
-  const API_BASE = (scriptTag && scriptTag.dataset.apiBase) || "";
-  const SHOP = (scriptTag && scriptTag.dataset.shop) || "";
-  const AUTO_INJECT = scriptTag && scriptTag.dataset.autoInject === "true";
-  const EMBED_STAR_SIZE = parseInt((scriptTag && scriptTag.dataset.badgeStarSize) || "14", 10);
+  // Read config from the script tag (set by App Embed liquid block).
+  // NOTE: document.currentScript is null for deferred scripts, so we
+  // use querySelector as fallback — targets the embed script specifically.
+  var scriptEl = document.querySelector('script[data-auto-inject]');
+  var GLOBAL_API_BASE = (scriptEl && scriptEl.getAttribute('data-api-base')) || '';
+  var GLOBAL_SHOP = (scriptEl && scriptEl.getAttribute('data-shop')) || '';
+  var AUTO_INJECT = scriptEl && scriptEl.getAttribute('data-auto-inject') === 'true';
+  var CARD_STAR_SIZE = parseInt((scriptEl && scriptEl.getAttribute('data-badge-star-size')) || '14', 10);
 
-  // ── SVG star (reliable cross-browser, no font dependency) ────────────────
+  // ── SVG star — reliable, no font dependency ─────────────────────────────
   function svgStar(filled, color, size) {
-    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${filled ? color : "none"}" stroke="${color}" stroke-width="1.8" style="display:inline-block;vertical-align:middle;flex-shrink:0;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>`;
+    var fill = filled ? color : 'none';
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + fill + '" stroke="' + color + '" stroke-width="1.8" style="display:inline-block;vertical-align:middle;flex-shrink:0;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>';
   }
+
   function starsHtml(average, color, size) {
-    return [1,2,3,4,5].map(n => svgStar(n <= Math.round(average), color, size)).join("");
+    var rounded = Math.round(average);
+    var html = '';
+    for (var i = 1; i <= 5; i++) html += svgStar(i <= rounded, color, size);
+    return html;
   }
 
-  // ── Fetch average + render a badge into a container el ───────────────────
-  const cache = {};
-  async function fetchSummary(shop, productId, apiBase) {
-    const key = `${shop}|${productId}`;
-    if (cache[key]) return cache[key];
-    try {
-      const res = await fetch(
-        `${apiBase}/api/reviews/summary?shop=${encodeURIComponent(shop)}&productId=${encodeURIComponent(productId)}`
-      );
-      const data = res.ok ? await res.json() : null;
-      cache[key] = data;
-      return data;
-    } catch { return null; }
+  // ── API fetch with simple in-memory cache ────────────────────────────────
+  var cache = {};
+  function fetchSummary(shop, productId, apiBase, callback) {
+    var key = shop + '|' + productId;
+    if (cache[key]) { callback(cache[key]); return; }
+    var url = apiBase + '/api/reviews/summary?shop=' + encodeURIComponent(shop) + '&productId=' + encodeURIComponent(productId);
+    fetch(url)
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) { if (data) { cache[key] = data; callback(data); } })
+      .catch(function() {});
   }
 
-  function renderBadge(container, data, starSize, scrollTarget) {
-    if (!data || !data.total) { container.innerHTML = ""; return; }
-    const color = data.starColor || "#f5b400";
-    const tc = data.textColor || "#555";
-    const size = starSize || data.ratingBadgeStarSize || 16;
-    const template = data.ratingBadgeTemplate || "{rating}";
+  // ── Render badge into an element ──────────────────────────────────────────
+  function renderBadge(container, data, starSize, onClickScrollToReviews) {
+    if (!data || !data.total) { container.innerHTML = ''; return; }
+    var color = data.starColor || '#f5b400';
+    var tc = data.textColor || '#555';
+    var size = starSize || data.ratingBadgeStarSize || 16;
+    var template = data.ratingBadgeTemplate || '{rating}';
 
-    // Count shown only if merchant explicitly uses {count} in template
-    const starsMarkup = starsHtml(data.average, color, size);
-    const countHtml = template.includes("{count}")
-      ? ""  // already handled inline via {count} replacement below
-      : "";  // never auto-append count — merchant controls this via template
-
-    // Apply title case to the text parts of the template (not the {rating}/{count} placeholders)
     function toTitleCase(str) {
-      return str.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
+      return str.replace(/\w\S*/g, function(t) { return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase(); });
     }
 
-    const titledTemplate = template.replace(/([^{}]+)(?=\{|$)/g, (m) => toTitleCase(m));
+    // Apply title case to non-placeholder parts
+    var titled = template.replace(/([^{}]+)(?=\{|$)/g, function(m) { return toTitleCase(m); });
+    var stars = starsHtml(data.average, color, size);
+    var inner = titled.replace(/\{rating\}/g, stars).replace(/\{count\}/g, '<span style="color:' + tc + ';opacity:.75;">' + data.total + '</span>');
 
-    const inner = titledTemplate
-      .replace(/\{rating\}/g, starsMarkup)
-      .replace(/\{count\}/g, `<span style="font-size:${Math.max(size - 4, 10)}px;color:${tc};opacity:.75;margin-left:2px;">${data.total}</span>`);
-
-    container.style.cssText = "display:inline-flex;align-items:center;gap:2px;text-decoration:none;";
+    container.style.cssText = 'display:inline-flex;align-items:center;gap:3px;text-decoration:none;cursor:pointer;';
     container.innerHTML = inner;
 
-    if (scrollTarget) {
-      container.addEventListener("click", (e) => {
+    if (onClickScrollToReviews) {
+      container.addEventListener('click', function(e) {
         e.preventDefault();
-        const target = document.querySelector(".rivu-review-widget") ||
-          document.querySelector("#review-widget");
-        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        var target = document.querySelector('#rivu-review-section') ||
+                     document.querySelector('.rivu-review-widget') ||
+                     document.querySelector('#review-widget');
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
   }
 
-  // ── EXPLICIT mode: <div class="rivu-rating-badge"> ───────────────────────
-  async function renderExplicit(el) {
-    const shop = el.dataset.shop || SHOP;
-    const productId = el.dataset.productId;
-    const apiBase = el.dataset.apiBase || API_BASE;
-    const starSize = parseInt(el.dataset.starSize || "0", 10) || undefined;
+  // ── MODE 1: Explicit .rivu-rating-badge divs ─────────────────────────────
+  var explicitBadges = document.querySelectorAll('.rivu-rating-badge');
+  explicitBadges.forEach(function(el) {
+    var shop = el.getAttribute('data-shop') || GLOBAL_SHOP;
+    var productId = el.getAttribute('data-product-id');
+    var apiBase = el.getAttribute('data-api-base') || GLOBAL_API_BASE;
+    var starSize = parseInt(el.getAttribute('data-star-size') || '0', 10) || undefined;
     if (!shop || !productId) return;
-    const data = await fetchSummary(shop, productId, apiBase);
-    const wrapper = document.createElement("a");
-    wrapper.href = "#rivu-reviews";
-    el.appendChild(wrapper);
-    renderBadge(wrapper, data, starSize, true);
+    fetchSummary(shop, productId, apiBase, function(data) {
+      renderBadge(el, data, starSize, true);
+    });
+  });
+
+  // ── MODE 2: Auto-inject on product cards ─────────────────────────────────
+  if (!AUTO_INJECT || !GLOBAL_SHOP || !GLOBAL_API_BASE) return;
+
+  var productCache = {};
+  function getProductId(handle, callback) {
+    if (productCache[handle]) { callback(productCache[handle]); return; }
+    fetch('/products/' + handle + '.js')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(p) {
+        if (p && p.id) {
+          // Store both numeric and GID format — try numeric first
+          productCache[handle] = String(p.id);
+          callback(productCache[handle]);
+        }
+      })
+      .catch(function() {});
   }
 
-  document.querySelectorAll(".rivu-rating-badge").forEach(renderExplicit);
+  var injected = new Set();
 
-  // ── AUTO-INJECT mode ─────────────────────────────────────────────────────
-  // Finds every product card link on the page (href contains /products/),
-  // resolves the handle → productId via Shopify's storefront JSON endpoint,
-  // then injects a compact badge.
-  if (!AUTO_INJECT || !SHOP || !API_BASE) return;
-
-  const HANDLE_CACHE = {};
-
-  async function getProductData(handle) {
-    if (HANDLE_CACHE[handle]) return HANDLE_CACHE[handle];
-    try {
-      const res = await fetch(`/products/${handle}.js`);
-      if (!res.ok) return null;
-      const data = await res.json();
-      HANDLE_CACHE[handle] = data;
-      return data;
-    } catch { return null; }
-  }
-
-  async function injectBadge(linkEl) {
-    // Already injected?
-    if (linkEl.dataset.rivuInjected) return;
-    linkEl.dataset.rivuInjected = "1";
-
-    const href = linkEl.getAttribute("href") || "";
-    const match = href.match(/\/products\/([^?#/]+)/);
+  function injectBadgeOnCard(linkEl) {
+    var href = linkEl.getAttribute('href') || '';
+    var match = href.match(/\/products\/([^?#/]+)/);
     if (!match) return;
-    const handle = match[1];
+    var handle = match[1];
 
-    const product = await getProductData(handle);
-    if (!product) return;
-
-    // Shopify product IDs in storefront JSON come as plain integers;
-    // the reviews API uses the GID format ("gid://shopify/Product/123456")
-    const gid = `gid://shopify/Product/${product.id}`;
-
-    const summary = await fetchSummary(SHOP, gid, API_BASE);
-    if (!summary || !summary.total) return;
-
-    // Find a good place to inject — prefer a title element inside the card,
-    // fall back to injecting right after the link itself.
-    const card = linkEl.closest("[class*='card'], [class*='product-card'], [class*='product-item'], li, article") || linkEl.parentElement;
+    // Find the product card container
+    var card = linkEl.closest('li, article, [class*="card"], [class*="product-item"], [class*="grid__item"]') || linkEl.parentElement;
     if (!card) return;
 
-    // Check if we already injected a badge into this card
-    if (card.querySelector(".rivu-auto-badge")) return;
+    // Skip if already injected in this card
+    if (card.dataset.rivuBadge) return;
+    card.dataset.rivuBadge = '1';
 
-    const badge = document.createElement("div");
-    badge.className = "rivu-auto-badge";
-    badge.style.cssText = "display:flex;align-items:center;gap:2px;margin-top:3px;flex-wrap:wrap;";
+    getProductId(handle, function(numericId) {
+      // Try to match the stored productId — stored as GID in DB from QR flow,
+      // or as numeric ID from product page Liquid. We try both.
+      var gid = 'gid://shopify/Product/' + numericId;
+      
+      // First try GID format
+      fetchSummary(GLOBAL_SHOP, gid, GLOBAL_API_BASE, function(data) {
+        if (data && data.total) {
+          injectStars(card, linkEl, data, CARD_STAR_SIZE);
+        } else {
+          // Fall back to numeric ID format
+          fetchSummary(GLOBAL_SHOP, numericId, GLOBAL_API_BASE, function(data2) {
+            if (data2 && data2.total) injectStars(card, linkEl, data2, CARD_STAR_SIZE);
+          });
+        }
+      });
+    });
+  }
 
-    const color = summary.starColor || "#f5b400";
-    const tc = summary.textColor || "#555";
-    badge.innerHTML = starsHtml(summary.average, color, EMBED_STAR_SIZE) +
-      `<span style="font-size:${Math.max(EMBED_STAR_SIZE - 4, 10)}px;color:${tc};opacity:.7;margin-left:3px;vertical-align:middle;">(${summary.total})</span>`;
+  function injectStars(card, linkEl, data, starSize) {
+    if (card.querySelector('.rivu-auto-badge')) return;
+    var color = data.starColor || '#f5b400';
+    var tc = data.textColor || '#555';
+    var badge = document.createElement('div');
+    badge.className = 'rivu-auto-badge';
+    badge.style.cssText = 'display:flex;align-items:center;gap:3px;margin-top:4px;';
+    badge.innerHTML = starsHtml(data.average, color, starSize) +
+      '<span style="font-size:' + Math.max(starSize - 3, 10) + 'px;color:' + tc + ';opacity:.65;margin-left:2px;">(' + data.total + ')</span>';
 
-    // Try to insert after the product title link, or at the end of the card
-    const titleEl = card.querySelector("[class*='title'] a, [class*='name'] a, h3 a, h2 a");
-    if (titleEl && titleEl.parentElement) {
-      titleEl.parentElement.insertAdjacentElement("afterend", badge);
+    // Insert after the title/name element if possible, else after the link
+    var titleEl = card.querySelector('[class*="title"], [class*="name"], h2, h3');
+    if (titleEl) {
+      titleEl.insertAdjacentElement('afterend', badge);
     } else {
-      card.appendChild(badge);
+      linkEl.insertAdjacentElement('afterend', badge);
     }
   }
 
-  function scanAndInject() {
-    // All anchor tags pointing to /products/ URLs — these are product cards
-    document.querySelectorAll('a[href*="/products/"]').forEach(injectBadge);
+  function scanCards() {
+    document.querySelectorAll('a[href*="/products/"]:not([data-rivu-scanned])').forEach(function(link) {
+      link.dataset.rivuScanned = '1';
+      // Only inject once per unique product link
+      var href = link.getAttribute('href') || '';
+      var match = href.match(/\/products\/([^?#/]+)/);
+      if (!match) return;
+      injectBadgeOnCard(link);
+    });
   }
 
-  // Run immediately + watch for dynamically loaded content (infinite scroll, etc.)
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", scanAndInject);
+  // Run immediately and on DOM changes
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scanCards);
   } else {
-    scanAndInject();
+    scanCards();
   }
 
-  // MutationObserver for themes with lazy-loaded or dynamically added cards
-  const observer = new MutationObserver((mutations) => {
-    let hasNewNodes = false;
-    for (const m of mutations) {
-      if (m.addedNodes.length) { hasNewNodes = true; break; }
-    }
-    if (hasNewNodes) scanAndInject();
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  // Also re-scan on popstate (SPA-style navigation in some themes)
-  window.addEventListener("popstate", scanAndInject);
+  // Watch for dynamically added cards (infinite scroll, etc.)
+  if (window.MutationObserver) {
+    new MutationObserver(function(mutations) {
+      var hasNew = mutations.some(function(m) { return m.addedNodes.length > 0; });
+      if (hasNew) scanCards();
+    }).observe(document.body, { childList: true, subtree: true });
+  }
 })();

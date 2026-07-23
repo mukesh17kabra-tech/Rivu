@@ -9,9 +9,9 @@ function withCors(res: NextResponse) {
 
 export async function GET(req: NextRequest) {
   const shop = req.nextUrl.searchParams.get("shop");
-  const productId = req.nextUrl.searchParams.get("productId");
+  const productIdRaw = req.nextUrl.searchParams.get("productId");
 
-  if (!shop || !productId) {
+  if (!shop || !productIdRaw) {
     return withCors(NextResponse.json({ error: "Missing shop or productId" }, { status: 400 }));
   }
 
@@ -20,8 +20,17 @@ export async function GET(req: NextRequest) {
     return withCors(NextResponse.json({ reviews: [] }));
   }
 
+  // Build OR query to match both GID format ("gid://shopify/Product/123")
+  // and plain numeric format ("123") — Liquid {{ product.id }} gives numeric,
+  // while the QR/app flow may have stored GID format.
+  const numericId = productIdRaw.replace(/^gid:\/\/shopify\/Product\//, "");
+  const gidId = productIdRaw.startsWith("gid://") ? productIdRaw : `gid://shopify/Product/${productIdRaw}`;
+  const productIdFilter = numericId === gidId.replace("gid://shopify/Product/", "")
+    ? { productId: { in: [numericId, gidId] } }
+    : { productId: productIdRaw };
+
   const reviews = await db.review.findMany({
-    where: { shopId: shopRecord.id, productId, approved: true },
+    where: { shopId: shopRecord.id, ...productIdFilter, approved: true },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -68,7 +77,7 @@ export async function GET(req: NextRequest) {
   // Rating breakdown for the percentage bar — computed over ALL approved
   // reviews for this product, not just the 50 returned above.
   const allRatings: { rating: number }[] = await db.review.findMany({
-    where: { shopId: shopRecord.id, productId, approved: true },
+    where: { shopId: shopRecord.id, ...productIdFilter, approved: true },
     select: { rating: true },
   });
   const total = allRatings.length;

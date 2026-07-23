@@ -1,12 +1,13 @@
 {% comment %}
-  Rivu Reviews app block. Merchants add this from the theme editor
-  (Customize → Product page → Add block → Apps → Rivu Reviews) — no code
-  editing required. Shows the average rating + percentage bar and the
-  list of approved reviews, plus a "Write a review" form.
+  Rivu Reviews Block — add to your product page template via the theme
+  editor (Customize → Product page → Add block → Apps → Rivu Reviews).
+  
+  IMPORTANT: Only add this block ONCE. Adding it twice will show the
+  widget twice on the same page.
 {% endcomment %}
 
 <div
-  id="rivu-review-widget-{{ block.id }}"
+  id="rivu-review-section"
   class="rivu-review-widget"
   data-shop="{{ shop.permanent_domain }}"
   data-product-id="{{ product.id }}"
@@ -27,7 +28,7 @@
       "id": "api_base",
       "label": "App URL",
       "default": "https://rivu-one.vercel.app",
-      "info": "Leave as-is unless instructed otherwise by the app developer."
+      "info": "Do not change this unless instructed by the developer."
     }
   ]
 }

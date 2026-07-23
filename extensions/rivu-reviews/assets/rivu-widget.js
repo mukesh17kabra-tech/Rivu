@@ -7,6 +7,10 @@
  *   plan-gated
  */
 (function () {
+  const API_BASE = document.currentScript?.src
+    ? new URL(document.currentScript.src).origin
+    : "";
+
   if (!document.getElementById("rv-global-styles")) {
     const s = document.createElement("style");
     s.id = "rv-global-styles";
@@ -685,5 +689,20 @@
     }
   }
 
-  document.querySelectorAll(".rivu-review-widget").forEach(render);
+  // Render all widget instances on the page.
+  // Guard: skip any element already rendered (data-rv-rendered) to prevent
+  // double-rendering when the script tag appears more than once.
+  function renderAll() {
+    document.querySelectorAll(".rivu-review-widget").forEach(el => {
+      if (el.dataset.rvRendered) return;
+      el.dataset.rvRendered = "1";
+      render(el);
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", renderAll);
+  } else {
+    renderAll();
+  }
 })();
