@@ -184,6 +184,16 @@
       const visible = sorted.slice(0, shownCount);
       const hasMore = sorted.length > shownCount;
 
+      // List wrapper style — set based on displayStyle
+      let listWrapperStyle = "display:flex;flex-direction:column;gap:14px;";
+      if (design.displayStyle === "grid") {
+        listWrapperStyle = `display:grid;grid-template-columns:repeat(${design.gridColumns},1fr);gap:14px;`;
+      } else if (design.displayStyle === "carousel") {
+        listWrapperStyle = `display:flex;gap:14px;overflow-x:auto;scroll-behavior:smooth;padding-bottom:4px;`;
+      } else if (design.displayStyle === "masonry") {
+        listWrapperStyle = `column-count:${design.gridColumns};column-gap:14px;`;
+      }
+
       // Breakdown bars
       const breakdownHtml = summary.total ? summary.breakdown.map(b => {
         const pct = Number(b.percentage) || 0;

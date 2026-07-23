@@ -51,7 +51,7 @@
     const { shop, productId, productTitle, productImage, apiBase } = el.dataset;
     const API_BASE = apiBase || "";
     if (!shop || !productId || !API_BASE) {
-      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: missing shop, productId or api-base. Please remove and re-add the Rivu Reviews block.</p>';
+      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: block missing configuration. Remove and re-add the Rivu Reviews block from the theme editor.</p>';
       return;
     }
     el.innerHTML = `<p style="font-size:14px;color:#aaa;padding:12px 0;">Loading reviews…</p>`;
@@ -88,10 +88,7 @@
           design[k] = (v === undefined || v === null || v === "") ? D[k] : v;
         }
       }
-    } catch(err) {
-      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu error: ' + String(err).replace(/</g, '&lt;') + '</p>';
-      return;
-    }
+    } catch {}
 
     const r = design.borderRadius;
     const starColor = design.starColor;
@@ -187,6 +184,16 @@
       const sorted = getSortedReviews();
       const visible = sorted.slice(0, shownCount);
       const hasMore = sorted.length > shownCount;
+
+      // List wrapper style — set based on displayStyle
+      let listWrapperStyle = "display:flex;flex-direction:column;gap:14px;";
+      if (design.displayStyle === "grid") {
+        listWrapperStyle = `display:grid;grid-template-columns:repeat(${design.gridColumns},1fr);gap:14px;`;
+      } else if (design.displayStyle === "carousel") {
+        listWrapperStyle = `display:flex;gap:14px;overflow-x:auto;scroll-behavior:smooth;padding-bottom:4px;`;
+      } else if (design.displayStyle === "masonry") {
+        listWrapperStyle = `column-count:${design.gridColumns};column-gap:14px;`;
+      }
 
       // Breakdown bars
       const breakdownHtml = summary.total ? summary.breakdown.map(b => {
