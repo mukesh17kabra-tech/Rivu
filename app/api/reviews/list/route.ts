@@ -121,6 +121,7 @@ export async function GET(req: NextRequest) {
         primaryGradient: shopRecord.primaryGradient,
         letCustomerPickLanguage: shopRecord.letCustomerPickLanguage,
         formTemplate: shopRecord.formTemplate,
+        summaryLayout: shopRecord.summaryLayout,
         showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
       },
     })

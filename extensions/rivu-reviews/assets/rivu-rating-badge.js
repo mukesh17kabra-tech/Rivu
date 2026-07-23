@@ -11,13 +11,17 @@
  *    exactly like Judge.me / Loox / Okendo do it.
  */
 (function () {
-  // Config from the script tag itself (set by App Embed liquid)
-  const scriptTag = document.currentScript ||
-    document.querySelector('script[data-api-base][data-shop]');
-  const API_BASE = scriptTag?.dataset?.apiBase || "";
-  const SHOP = scriptTag?.dataset?.shop || "";
-  const AUTO_INJECT = scriptTag?.dataset?.autoInject === "true";
-  const EMBED_STAR_SIZE = parseInt(scriptTag?.dataset?.badgeStarSize || "14", 10);
+  // document.currentScript is null when script is deferred — use querySelector fallback.
+  // We target specifically the embed script (has data-auto-inject) so we don't
+  // accidentally pick up the reviews block script.
+  const scriptTag =
+    document.querySelector('script[data-auto-inject]') ||
+    document.querySelector('script[data-api-base][data-shop]') ||
+    document.currentScript;
+  const API_BASE = (scriptTag && scriptTag.dataset.apiBase) || "";
+  const SHOP = (scriptTag && scriptTag.dataset.shop) || "";
+  const AUTO_INJECT = scriptTag && scriptTag.dataset.autoInject === "true";
+  const EMBED_STAR_SIZE = parseInt((scriptTag && scriptTag.dataset.badgeStarSize) || "14", 10);
 
   // ── SVG star (reliable cross-browser, no font dependency) ────────────────
   function svgStar(filled, color, size) {
@@ -49,25 +53,25 @@
     const size = starSize || data.ratingBadgeStarSize || 16;
     const template = data.ratingBadgeTemplate || "{rating}";
 
-    // Title Case helper — ensures any text the merchant typed shows properly
+    // Count shown only if merchant explicitly uses {count} in template
+    const starsMarkup = starsHtml(data.average, color, size);
+    const countHtml = template.includes("{count}")
+      ? ""  // already handled inline via {count} replacement below
+      : "";  // never auto-append count — merchant controls this via template
+
+    // Apply title case to the text parts of the template (not the {rating}/{count} placeholders)
     function toTitleCase(str) {
       return str.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
     }
 
-    const starsMarkup = starsHtml(data.average, color, size);
-    // Count shown as plain "(128)" — no anchor link, no "reviews" text in the badge itself
-    const countHtml = `<span style="font-size:${Math.max(size - 4, 10)}px;color:${tc};opacity:.7;margin-left:4px;vertical-align:middle;font-family:inherit;">(${data.total})</span>`;
-
-    // Apply title case to the text parts of the template (not the {rating}/{count} placeholders)
-    const titledTemplate = template
-      .replace(/([^{}]+)(?=\{|$)/g, (m) => toTitleCase(m));
+    const titledTemplate = template.replace(/([^{}]+)(?=\{|$)/g, (m) => toTitleCase(m));
 
     const inner = titledTemplate
       .replace(/\{rating\}/g, starsMarkup)
-      .replace(/\{count\}/g, `<span style="color:${tc};opacity:.7;">${data.total}</span>`);
+      .replace(/\{count\}/g, `<span style="font-size:${Math.max(size - 4, 10)}px;color:${tc};opacity:.75;margin-left:2px;">${data.total}</span>`);
 
-    container.style.cssText = "display:inline-flex;align-items:center;gap:2px;cursor:pointer;text-decoration:none;";
-    container.innerHTML = inner + (template.includes("{count}") ? "" : countHtml);
+    container.style.cssText = "display:inline-flex;align-items:center;gap:2px;text-decoration:none;";
+    container.innerHTML = inner;
 
     if (scrollTarget) {
       container.addEventListener("click", (e) => {

@@ -64,6 +64,7 @@
       backgroundGradient:null, primaryGradient:null,
       letCustomerPickLanguage:false, showSuggestionsOnWebsite:true,
       formTemplate:"basic",
+      summaryLayout:"modern",
     };
     let design = { ...D };
     let plan = "free";
@@ -192,19 +193,75 @@
         </div>`;
       }).join("") : "";
 
-      const summaryHtml = summary.total ? `
-<div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:28px;">
-  <div style="text-align:center;flex-shrink:0;">
-    <div style="font-family:Georgia,serif;font-size:56px;font-weight:700;color:${design.textColor};line-height:1;">${summary.average}</div>
-    <div style="display:flex;justify-content:center;gap:2px;margin:6px 0 4px;">${starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 22)}</div>
-    <div style="font-size:12px;color:#999;">Based on ${summary.total} review${summary.total === 1 ? "" : "s"}</div>
+      const writeBtn = `<button class="rv-open-form-btn" style="display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Write a Review</button>`;
+
+      // ── A: Modern Card (Free+) ─────────────────────────────────────────────
+      // Orange rating box left, breakdown bars center, Write button right
+      const summaryModern = summary.total ? `
+<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px;padding:20px;background:#fff;border:1px solid #f0f0f0;border-radius:${r}px;box-shadow:0 1px 6px rgba(0,0,0,.05);">
+  <div style="display:flex;align-items:center;gap:16px;flex-shrink:0;">
+    <div style="background:${rangeColor};border-radius:10px;padding:14px 18px;text-align:center;min-width:72px;">
+      <div style="font-family:Georgia,serif;font-size:32px;font-weight:800;color:#fff;line-height:1;">${summary.average}</div>
+      <div style="display:flex;justify-content:center;gap:1px;margin-top:4px;">${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.4)", 11)}</div>
+    </div>
+    <div>
+      <div style="display:flex;gap:2px;margin-bottom:4px;">${starsHtml(Math.round(summary.average), starColor, "#e5e5e5", 18)}</div>
+      <div style="font-size:12px;color:#999;">Based on ${summary.total} review${summary.total===1?"":"s"}</div>
+    </div>
   </div>
-  <div style="flex:1;min-width:180px;">${breakdownHtml}</div>
-  <button class="rv-open-form-btn" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Write a Review</button>
-</div>` : `
-<div style="margin-bottom:20px;">
-  <button class="rv-open-form-btn" style="display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Write a Review</button>
-</div>`;
+  <div style="flex:1;min-width:160px;">${breakdownHtml}</div>
+  ${writeBtn}
+</div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
+
+      // ── B: Compact Summary + List (Growth+) ───────────────────────────────
+      // Circular ring rating, clean compact bars, reviews in a tight list
+      const summaryCompact = summary.total ? `
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;padding:16px 20px;border:1px solid #eee;border-radius:${r}px;">
+  <div style="text-align:center;flex-shrink:0;padding:12px;border-right:1px solid #eee;padding-right:20px;margin-right:4px;">
+    <div style="width:72px;height:72px;border-radius:50%;border:3px solid ${starColor};display:flex;align-items:center;justify-content:center;margin:0 auto;">
+      <div>
+        <div style="font-family:Georgia,serif;font-size:22px;font-weight:800;color:${design.textColor};line-height:1;">${summary.average}</div>
+        <div style="font-size:8px;color:#999;margin-top:2px;">out of 5</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:1px;margin-top:8px;">${starsHtml(Math.round(summary.average), starColor, "#e5e5e5", 12)}</div>
+    <div style="font-size:10px;color:#aaa;margin-top:3px;">${summary.total} reviews</div>
+  </div>
+  <div style="flex:1;min-width:120px;">${breakdownHtml}</div>
+  ${writeBtn}
+</div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
+
+      // ── C: Left Sidebar Summary (Growth+) ─────────────────────────────────
+      // Sticky left column with summary, reviews flow on right — handled in bodyHtml
+      const summarySidebar = summary.total ? `
+<div style="background:#f8f8f8;border-radius:${r}px;padding:20px;margin-bottom:20px;">
+  <div style="font-family:Georgia,serif;font-size:40px;font-weight:800;color:${design.textColor};line-height:1;">${summary.average}</div>
+  <div style="display:flex;gap:2px;margin:6px 0 4px;">${starsHtml(Math.round(summary.average), starColor, "#e5e5e5", 16)}</div>
+  <div style="font-size:12px;color:#999;margin-bottom:14px;">Based on ${summary.total} review${summary.total===1?"":"s"}</div>
+  ${breakdownHtml}
+  <div style="margin-top:14px;">${writeBtn}</div>
+</div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
+
+      // ── D: Horizontal Summary Bar (Pro) ──────────────────────────────────
+      // Compact horizontal bar — rating box, inline stars breakdown, button all in one row
+      const summaryHorizontal = summary.total ? `
+<div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;padding:14px 18px;background:${design.backgroundColor};border:1px solid #eee;border-radius:${r}px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.05);">
+  <div style="background:${rangeColor};border-radius:8px;padding:10px 14px;text-align:center;flex-shrink:0;">
+    <div style="font-family:Georgia,serif;font-size:22px;font-weight:800;color:#fff;">${summary.average}</div>
+    <div style="display:flex;gap:1px;margin-top:2px;">${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.4)", 10)}</div>
+  </div>
+  <div style="font-size:11px;color:#aaa;flex-shrink:0;">Based on<br/><strong style="color:${design.textColor};font-size:13px;">${summary.total} reviews</strong></div>
+  <div style="flex:1;display:flex;gap:8px;flex-wrap:wrap;">
+    ${summary.breakdown.slice(0,3).map(b=>`<div style="text-align:center;"><div style="font-size:10px;color:#aaa;">${b.star} Stars</div><div style="font-size:11px;font-weight:700;color:${design.textColor};">${b.percentage}</div><div style="width:40px;height:4px;background:#eee;border-radius:2px;overflow:hidden;margin:2px auto 0;"><div style="width:${Number(b.percentage)||0}%;height:100%;background:${rangeColor};border-radius:2px;"></div></div></div>`).join("")}
+  </div>
+  ${writeBtn}
+</div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
+
+      const sl = design.summaryLayout || "modern";
+      const summaryHtml = sl === "compact" ? summaryCompact
+        : sl === "sidebar" ? summarySidebar
+        : sl === "horizontal" ? summaryHorizontal
+        : summaryModern;
 
       const filtersHtml = reviews.length > 0 ? `
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(0,0,0,.08);">
@@ -230,7 +287,22 @@
         ? `<p style="margin-top:16px;font-size:10px;color:#bbb;text-align:center;">Powered by <a href="https://rivu-one.vercel.app" target="_blank" rel="noopener" style="color:#bbb;text-decoration:underline;">Rivu</a></p>`
         : "";
 
-      return `${summaryHtml}${filtersHtml}<div class="rv-list" style="display:flex;flex-direction:column;gap:14px;">${listHtml}</div>${loadMoreHtml}${poweredBy}`;
+      const reviewListHtml = `<div class="rv-list" style="${listWrapperStyle}">${listHtml}</div>`;
+
+      // Sidebar layout (C) — summary as fixed left column, reviews on right
+      if (sl === "sidebar" && summary.total) {
+        return `<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+  <div style="flex:0 0 200px;position:sticky;top:16px;">${summaryHtml}</div>
+  <div style="flex:1;min-width:260px;">
+    ${filtersHtml}
+    ${reviewListHtml}
+    ${loadMoreHtml}
+    ${poweredBy}
+  </div>
+</div>`;
+      }
+
+      return `${summaryHtml}${filtersHtml}${reviewListHtml}${loadMoreHtml}${poweredBy}`;
     }
 
     // ─── 4 form templates ─────────────────────────────────────────
@@ -287,34 +359,39 @@
 </div>`; }
 
       // ── TEMPLATE 2: CARD ──────────────────────────────────────────────────
-      // Split layout — left colored panel with brand accent, right white form area
+      // Distinct: orange/colored star rating box top, then compact inline fields
       if (template === "card") { return `
-<div style="background:#fff;border-radius:16px;overflow:hidden;font-family:inherit;display:flex;min-height:420px;">
-  <div style="background:${primary};width:36%;min-width:140px;max-width:180px;padding:32px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;position:relative;">
-    <div style="font-size:42px;margin-bottom:10px;opacity:.9;">⭐</div>
-    <p style="margin:0 0 6px;font-size:18px;font-weight:800;color:#fff;text-align:center;line-height:1.2;">Write a Review</p>
-    <p style="margin:0;font-size:11px;color:rgba(255,255,255,.75);text-align:center;">Help others make the right choice</p>
-    <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;width:100%;">
-      ${["Share your experience","Support the brand","Earn rewards"].map(t=>`<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.85);"><span style="width:5px;height:5px;border-radius:50%;background:#fff;flex-shrink:0;display:block;"></span>${t}</div>`).join("")}
+<div style="background:#fff;border-radius:16px;overflow:hidden;font-family:inherit;box-shadow:0 8px 40px rgba(0,0,0,.12);">
+  <div style="background:${primary};padding:20px 26px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <p style="margin:0 0 2px;font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px;">Write a Review</p>
+        <p style="margin:0;font-size:12px;color:rgba(255,255,255,.75);">Share your honest experience</p>
+      </div>
+      <button class="rv-form-close" style="background:rgba(255,255,255,.2);border:none;border-radius:50%;width:30px;height:30px;font-size:17px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>
+    </div>
+    <div style="margin-top:16px;background:rgba(255,255,255,.12);border-radius:12px;padding:14px 16px;">
+      <p style="margin:0 0 6px;font-size:11px;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.06em;">Tap to rate</p>
+      <div style="display:flex;gap:4px;">${starRow(32, 2, "#fff")}</div>
     </div>
   </div>
-  <div style="flex:1;padding:24px 24px 20px;position:relative;overflow-y:auto;">
-    <button class="rv-form-close" style="position:absolute;top:12px;right:14px;background:rgba(0,0,0,.06);border:none;border-radius:50%;width:26px;height:26px;font-size:15px;cursor:pointer;color:#666;">×</button>
-    <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#555;">Rate your experience</p>
-    <div style="display:flex;gap:2px;margin-bottom:14px;">${starRow(28, 2, "#f5b400")}</div>
+  <div style="padding:22px 26px;">
     ${langDropdown}
     <div class="rv-suggestions-wrap" style="display:none;"></div>
-    <form class="rv-form" style="display:flex;flex-direction:column;gap:9px;">
-      <input name="customerName" required placeholder="Your Name *" style="width:100%;padding:10px 12px;border:1px solid #eee;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;background:#fafafa;"/>
-      <input name="customerEmail" type="email" placeholder="Email (Optional)" style="width:100%;padding:10px 12px;border:1px solid #eee;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;background:#fafafa;"/>
-      <textarea name="body" required minlength="10" placeholder="What did you think?" style="padding:10px 12px;border:1px solid #eee;border-radius:8px;font-size:13px;min-height:80px;font-family:inherit;resize:vertical;background:#fafafa;"></textarea>
-      ${recBox("#f5f5f5", "#555")}
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#888;cursor:pointer;border:1px solid #e5e5e5;border-radius:6px;padding:6px 10px;">📷<input type="file" name="photo" accept="image/*" style="display:none;"/><span class="rv-photo-label">Photo</span></label>
-        <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#888;cursor:pointer;border:1px solid #e5e5e5;border-radius:6px;padding:6px 10px;">🎥<input type="file" name="video" accept="video/*" style="display:none;"/><span class="rv-video-label">Video</span></label>
-        <button type="submit" style="margin-left:auto;padding:10px 20px;background:${primary};color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">Submit</button>
+    <form class="rv-form" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <input name="customerName" required placeholder="Your Name *" style="padding:11px 14px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#e8e8e8'"/>
+        <input name="customerEmail" type="email" placeholder="Email (Optional)" style="padding:11px 14px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:14px;font-family:inherit;outline:none;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#e8e8e8'"/>
       </div>
-      <p class="rv-status" style="margin:0;font-size:12px;text-align:center;"></p>
+      <input name="reviewTitle" maxlength="150" placeholder="Review Title *" style="padding:11px 14px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;outline:none;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#e8e8e8'"/>
+      <textarea name="body" required minlength="10" placeholder="Share details of your experience..." style="padding:11px 14px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:14px;min-height:90px;font-family:inherit;resize:vertical;outline:none;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#e8e8e8'"></textarea>
+      ${recBox("#faf8ff", "#555")}
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:4px;">
+        <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#888;cursor:pointer;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 12px;">📷<input type="file" name="photo" accept="image/*" style="display:none;"/><span class="rv-photo-label">Add Photo</span></label>
+        <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#888;cursor:pointer;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 12px;">📹<input type="file" name="video" accept="video/*" style="display:none;"/><span class="rv-video-label">Add Video</span></label>
+        <button type="submit" style="margin-left:auto;padding:11px 24px;background:${primary};color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Submit Review</button>
+      </div>
+      <p class="rv-status" style="margin:0;font-size:13px;text-align:center;"></p>
     </form>
   </div>
 </div>`; }

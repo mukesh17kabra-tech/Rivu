@@ -42,6 +42,7 @@ const schema = z.object({
   suggestionLanguage: z.enum(LANGUAGE_CODES),
   enabledLanguages: z.array(z.enum(LANGUAGE_CODES)).min(1).max(10),
   formTemplate: z.enum(["basic", "card", "minimal", "dark"]),
+  summaryLayout: z.enum(["modern", "compact", "sidebar", "horizontal"]),
 });
 
 export async function POST(req: NextRequest) {

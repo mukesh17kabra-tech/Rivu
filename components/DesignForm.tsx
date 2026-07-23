@@ -38,6 +38,7 @@ type DesignSettings = {
   suggestionLanguage: string;
   enabledLanguages: string[];
   formTemplate: "basic" | "card" | "minimal" | "dark";
+  summaryLayout: "modern" | "compact" | "sidebar" | "horizontal";
 };
 
 const FONT_OPTIONS = [
@@ -624,6 +625,125 @@ export function DesignForm({
           {plan === "free"
             ? "Free plan is English-only."
             : `Pick up to ${languageCap} languages your customers can write reviews in.`}
+        </p>
+      </div>
+
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <p className="mb-4 text-sm font-medium text-white/70">Widget summary style</p>
+        <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+          {([
+            { key: "modern", label: "Modern Card", plan: "", desc: "Orange rating box, bars, button" },
+            { key: "compact", label: "Compact", plan: "Growth+", desc: "Circle rating, clean bars" },
+            { key: "sidebar", label: "Left Sidebar", plan: "Growth+", desc: "Sticky left, reviews right" },
+            { key: "horizontal", label: "Horizontal Bar", plan: "Pro only", desc: "All in one slim row" },
+          ] as const).map((item) => {
+            const locked = (isFree && item.key !== "modern") || (plan === "growth" && item.key === "horizontal");
+            const isSelected = settings.summaryLayout === item.key;
+            return (
+              <button
+                key={item.key}
+                onClick={() => !locked && update("summaryLayout", item.key)}
+                disabled={locked}
+                className={`group flex flex-col overflow-hidden rounded-lg border transition-all ${
+                  locked ? "cursor-not-allowed border-white/5 opacity-40"
+                  : isSelected ? "border-emerald-400 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]"
+                  : "border-white/10 hover:border-white/30"
+                }`}
+              >
+                {/* Mini visual preview of each summary style */}
+                <div className="w-full bg-white p-3" style={{ pointerEvents: "none", minHeight: "80px" }}>
+                  {item.key === "modern" && (
+                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                      <div style={{ background: settings.rangeColor, borderRadius: "6px", padding: "6px 8px", textAlign: "center", flexShrink: 0 }}>
+                        <div style={{ fontFamily: "Georgia,serif", fontSize: "14px", fontWeight: 700, color: "#fff" }}>4.8</div>
+                        <div style={{ color: settings.starColor, fontSize: "7px" }}>★★★★★</div>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        {[90, 8, 2].map((w, i) => (
+                          <div key={i} style={{ display: "flex", alignItems: "center", gap: "3px", marginBottom: "2px" }}>
+                            <span style={{ fontSize: "6px", color: "#aaa", width: "20px" }}>{5-i} Stars</span>
+                            <div style={{ flex: 1, height: "4px", background: "#f0f0f0", borderRadius: "2px" }}>
+                              <div style={{ width: `${w}%`, height: "100%", background: settings.rangeColor, borderRadius: "2px" }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ background: settings.primaryColor, color: "#fff", borderRadius: "4px", padding: "4px 7px", fontSize: "6px", fontWeight: 700, flexShrink: 0 }}>✏ Write</div>
+                    </div>
+                  )}
+                  {item.key === "compact" && (
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                      <div style={{ width: "36px", height: "36px", borderRadius: "50%", border: `2px solid ${settings.starColor}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <div style={{ fontFamily: "Georgia,serif", fontSize: "12px", fontWeight: 800, color: "#333" }}>4.8</div>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        {[90, 8].map((w, i) => (
+                          <div key={i} style={{ display: "flex", alignItems: "center", gap: "2px", marginBottom: "2px" }}>
+                            <div style={{ flex: 1, height: "3px", background: "#eee", borderRadius: "2px" }}>
+                              <div style={{ width: `${w}%`, height: "100%", background: settings.rangeColor, borderRadius: "2px" }} />
+                            </div>
+                          </div>
+                        ))}
+                        <div style={{ color: settings.starColor, fontSize: "8px" }}>★★★★★</div>
+                      </div>
+                    </div>
+                  )}
+                  {item.key === "sidebar" && (
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      <div style={{ width: "44px", background: "#f8f8f8", borderRadius: "4px", padding: "5px", flexShrink: 0 }}>
+                        <div style={{ fontFamily: "Georgia,serif", fontSize: "14px", fontWeight: 800, color: "#333", lineHeight: 1 }}>4.8</div>
+                        <div style={{ color: settings.starColor, fontSize: "7px", marginTop: "2px" }}>★★★★★</div>
+                        {[90, 8, 2].map((w, i) => (
+                          <div key={i} style={{ height: "3px", background: "#eee", borderRadius: "1px", marginTop: "2px", overflow: "hidden" }}>
+                            <div style={{ width: `${w}%`, height: "100%", background: settings.rangeColor }} />
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        {[1, 2].map(i => (
+                          <div key={i} style={{ background: "#f5f5f5", borderRadius: "3px", padding: "4px", marginBottom: "3px" }}>
+                            <div style={{ color: settings.starColor, fontSize: "7px" }}>★★★★★</div>
+                            <div style={{ height: "3px", background: "#ddd", borderRadius: "1px", marginTop: "2px" }} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {item.key === "horizontal" && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px", background: "#fff", border: "1px solid #eee", borderRadius: "4px", padding: "5px 7px" }}>
+                      <div style={{ background: settings.rangeColor, borderRadius: "4px", padding: "4px 5px", flexShrink: 0 }}>
+                        <div style={{ fontFamily: "Georgia,serif", fontSize: "11px", fontWeight: 700, color: "#fff" }}>4.8</div>
+                        <div style={{ color: "rgba(255,255,255,.7)", fontSize: "5px" }}>★★★★★</div>
+                      </div>
+                      <div style={{ fontSize: "6px", color: "#aaa", flexShrink: 0 }}>160<br/>reviews</div>
+                      <div style={{ flex: 1, display: "flex", gap: "3px" }}>
+                        {[5, 4, 3].map(s => (
+                          <div key={s} style={{ textAlign: "center" }}>
+                            <div style={{ fontSize: "5px", color: "#aaa" }}>{s}★</div>
+                            <div style={{ height: "3px", width: "14px", background: "#eee", borderRadius: "1px", margin: "1px auto" }}>
+                              <div style={{ width: s === 5 ? "90%" : s === 4 ? "8%" : "2%", height: "100%", background: settings.rangeColor, borderRadius: "1px" }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ background: settings.primaryColor, color: "#fff", borderRadius: "3px", padding: "3px 5px", fontSize: "5px", fontWeight: 700 }}>✏</div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center justify-between px-3 py-2 bg-white/[0.04]">
+                  <span className="text-xs font-medium text-white">
+                    {locked ? "🔒 " : isSelected ? "✓ " : ""}{item.label}
+                  </span>
+                  {item.plan && (
+                    <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50">{item.plan}</span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-3 text-xs text-white/40">
+          Free: Modern Card only · Growth: + Compact & Sidebar · Pro: All 4
         </p>
       </div>
 

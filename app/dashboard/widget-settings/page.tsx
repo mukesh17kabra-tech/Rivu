@@ -71,6 +71,7 @@ export default async function WidgetSettingsPage({
               suggestionLanguage: shopRecord.suggestionLanguage,
               enabledLanguages: shopRecord.enabledLanguages,
               formTemplate: (shopRecord.formTemplate || "basic") as "basic" | "card" | "minimal" | "dark",
+              summaryLayout: (shopRecord.summaryLayout || "modern") as "modern" | "compact" | "sidebar" | "horizontal",
             }}
           />
           <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">

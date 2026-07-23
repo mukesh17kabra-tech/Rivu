@@ -19,6 +19,7 @@ export type DesignInput = {
   letCustomerPickLanguage: boolean;
   enabledLanguages: string[];
   formTemplate: string;
+  summaryLayout: string;
   [key: string]: unknown;
 };
 
@@ -92,6 +93,17 @@ export function clampDesignToPlan<T extends DesignInput>(
       clamped.letCustomerPickLanguage = DEFAULTS.letCustomerPickLanguage;
       lockedFields.push("letCustomerPickLanguage");
     }
+  }
+
+  // Summary layout gating: Free=modern only, Growth=modern/compact/sidebar, Pro=all
+  const summaryLayoutsByPlan: Record<PlanTier, string[]> = {
+    free: ["modern"],
+    growth: ["modern", "compact", "sidebar"],
+    pro: ["modern", "compact", "sidebar", "horizontal"],
+  };
+  if (!summaryLayoutsByPlan[plan].includes(clamped.summaryLayout as string)) {
+    clamped.summaryLayout = "modern";
+    lockedFields.push("summaryLayout");
   }
 
   // Form template gating: Free=basic only, Growth=basic/card/minimal, Pro=all four

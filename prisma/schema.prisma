@@ -70,7 +70,12 @@ model Shop {
   ratingBadgeTemplate  String @default("{rating}")
   ratingBadgeStarSize  Int    @default(16)  // px — controls how big the stars appear in the rating badge block on product pages and collection cards
 
-  // Which write-a-review form style to use — plan gated:
+  // Which summary+header layout to use for the review widget:
+  // "modern"   = A — orange rating box left, breakdown bars center, button right (Free)
+  // "compact"  = B — circular rating, horizontal compact bars (Growth)
+  // "sidebar"  = C — left sidebar sticky summary, reviews on right (Growth)
+  // "horizontal" = D — horizontal summary bar, compact list below (Pro)
+  summaryLayout String @default("modern")
   // Free: "basic" only | Growth: "basic"/"card"/"minimal" | Pro: all four
   formTemplate        String @default("basic") // "basic" | "card" | "minimal" | "dark"
 
