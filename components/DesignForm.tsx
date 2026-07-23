@@ -60,10 +60,41 @@ type DesignSettings = {
 
 const FONT_OPTIONS = [
   { value: "inherit", label: "Match my theme" },
-  { value: "Georgia, serif", label: "Georgia (serif)" },
-  { value: "'Helvetica Neue', Arial, sans-serif", label: "Helvetica (sans-serif)" },
-  { value: "'Courier New', monospace", label: "Courier (monospace)" },
+  // Serif
+  { value: "Georgia, serif", label: "Georgia" },
+  { value: "'Playfair Display', Georgia, serif", label: "Playfair Display" },
+  { value: "'Merriweather', Georgia, serif", label: "Merriweather" },
+  { value: "'Lora', Georgia, serif", label: "Lora" },
+  { value: "'Cormorant Garamond', Georgia, serif", label: "Cormorant Garamond" },
+  // Sans-serif
+  { value: "'Inter', 'Helvetica Neue', Arial, sans-serif", label: "Inter" },
+  { value: "'Poppins', Arial, sans-serif", label: "Poppins" },
+  { value: "'Nunito', Arial, sans-serif", label: "Nunito" },
+  { value: "'Outfit', Arial, sans-serif", label: "Outfit" },
+  { value: "'DM Sans', Arial, sans-serif", label: "DM Sans" },
+  { value: "'Raleway', Arial, sans-serif", label: "Raleway" },
+  { value: "'Work Sans', Arial, sans-serif", label: "Work Sans" },
+  { value: "'Josefin Sans', Arial, sans-serif", label: "Josefin Sans" },
+  // Modern
+  { value: "'Jost', Arial, sans-serif", label: "Jost" },
+  { value: "'Manrope', Arial, sans-serif", label: "Manrope" },
+  { value: "'Sora', Arial, sans-serif", label: "Sora" },
+  // Monospace
+  { value: "'JetBrains Mono', 'Courier New', monospace", label: "JetBrains Mono" },
 ];
+
+// Preload Google Fonts when needed
+function loadGoogleFont(fontFamily: string) {
+  const name = fontFamily.match(/'([^']+)'/)?.[1];
+  if (!name || name === "inherit" || typeof document === "undefined") return;
+  const id = `gf-${name.replace(/\s+/g, "-")}`;
+  if (document.getElementById(id)) return;
+  const link = document.createElement("link");
+  link.id = id;
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(name)}:wght@400;600;700;800&display=swap`;
+  document.head.appendChild(link);
+}
 
 const SAMPLE_REVIEWS = [
   { rating: 5, body: "Absolutely love this product! Exceeded my expectations.", customerName: "Aisha K." },
@@ -197,95 +228,81 @@ export function DesignForm({
         </div>
 
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
-          <p className="mb-2 text-xs font-medium text-white/50">Live preview</p>
-          {/* Premium live preview */}
-          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
-            <p className="mb-2 text-xs font-medium text-white/50">Live preview</p>
-            <div
-              className="overflow-hidden rounded-lg"
-              style={{
-                backgroundColor: "#f5f5f5",
-                fontFamily: settings.fontFamily,
-                padding: "14px",
-                fontSize: "11px",
-              }}
-            >
-              {/* Mini summary row */}
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px", flexWrap: "wrap" }}>
-                <div style={{ textAlign: "center", flexShrink: 0 }}>
-                  <div style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: settings.textColor, lineHeight: 1 }}>4.8</div>
-                  <div style={{ color: settings.starColor, fontSize: "11px", marginTop: "3px" }}>★★★★★</div>
-                  <div style={{ fontSize: "9px", color: "#aaa", marginTop: "2px" }}>Based on 13 reviews</div>
-                </div>
-                <div style={{ flex: 1, minWidth: "100px" }}>
-                  {[["5 Stars", 77], ["4 Stars", 23], ["3 Stars", 0]].map(([label, pct]) => (
-                    <div key={label as string} style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
-                      <span style={{ width: "38px", fontSize: "9px", color: "#999", flexShrink: 0 }}>{label}</span>
-                      <div style={{ flex: 1, height: "5px", backgroundColor: "#e0e0e0", borderRadius: "3px", overflow: "hidden" }}>
-                        <div style={{ width: `${pct}%`, height: "100%", backgroundColor: settings.rangeColor, borderRadius: "3px" }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <button style={{ backgroundColor: settings.primaryGradient || settings.primaryColor, color: "#fff", border: "none", borderRadius: `${settings.borderRadius}px`, padding: "6px 10px", fontSize: "9px", fontWeight: 600, cursor: "default", flexShrink: 0 }}>
-                  ✏ Write a Review
-                </button>
+          <p className="mb-2 text-xs font-medium text-white/50">Live preview — updates as you change settings</p>
+          <div
+            className="overflow-auto rounded-lg"
+            style={{
+              maxHeight: "340px",
+              fontFamily: settings.fontFamily,
+              border: settings.showBorder ? `${settings.borderWidth}px ${settings.borderStyle} ${settings.borderColor}` : "none",
+              borderRadius: `${settings.borderRadius}px`,
+              padding: "14px",
+              backgroundColor: "transparent",
+            }}
+          >
+            {/* Summary block */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: "14px",
+              padding: "12px 14px", marginBottom: "10px",
+              background: settings.summaryBgColor,
+              color: settings.summaryTextColor,
+              borderRadius: `${settings.borderRadius}px`,
+              flexWrap: "wrap",
+            }}>
+              <div style={{ textAlign: "center", flexShrink: 0 }}>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: settings.summaryTextColor, lineHeight: 1 }}>4.8</div>
+                <div style={{ color: settings.starColor, fontSize: "12px", margin: "3px 0 2px" }}>{"★".repeat(5)}</div>
+                <div style={{ fontSize: "9px", color: settings.summaryTextColor, opacity: 0.6 }}>Based on 13 reviews</div>
               </div>
-
-              {/* Mini review cards */}
-              <div
-                style={
-                  settings.displayStyle === "grid"
-                    ? { display: "grid", gridTemplateColumns: `repeat(${Math.min(settings.gridColumns, 2)}, 1fr)`, gap: "6px" }
-                    : settings.displayStyle === "carousel"
-                    ? { display: "flex", gap: "6px", overflowX: "auto" }
-                    : { display: "flex", flexDirection: "column", gap: "6px" }
-                }
-              >
-                {SAMPLE_REVIEWS.map((rev, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      backgroundColor: settings.backgroundGradient || settings.backgroundColor,
-                      color: settings.textColor,
-                      borderRadius: `${settings.borderRadius}px`,
-                      padding: "8px 10px",
-                      border: "1px solid rgba(0,0,0,.06)",
-                      boxShadow: "0 1px 3px rgba(0,0,0,.05)",
-                      ...(settings.displayStyle === "carousel" ? { minWidth: "140px", flexShrink: 0 } : {}),
-                      ...(settings.displayStyle === "masonry" ? { breakInside: "avoid", marginBottom: "6px" } : {}),
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "5px" }}>
-                      {/* Avatar circle */}
-                      <div style={{
-                        width: "22px", height: "22px", borderRadius: "50%", flexShrink: 0,
-                        backgroundColor: ["#7c3aed", "#0891b2"][i % 2],
-                        color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "8px", fontWeight: 700,
-                      }}>
-                        {rev.customerName.slice(0, 2).toUpperCase()}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: "9px" }}>{rev.customerName}</div>
-                        <div style={{ fontSize: "8px", color: "#aaa" }}>{["6 days ago", "1 mo ago"][i]}</div>
-                      </div>
+              <div style={{ flex: 1, minWidth: "100px" }}>
+                {([["5 Stars", 77], ["4 Stars", 23], ["3 Stars", 0]] as [string, number][]).map(([label, pct]) => (
+                  <div key={label} style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
+                    <span style={{ width: "38px", fontSize: "8px", color: settings.summaryTextColor, opacity: 0.65, flexShrink: 0 }}>{label}</span>
+                    <div style={{ flex: 1, height: "5px", backgroundColor: "#e0e0e0", borderRadius: "3px", overflow: "hidden" }}>
+                      <div style={{ width: `${pct}%`, height: "100%", backgroundColor: settings.rangeColor, borderRadius: "3px" }} />
                     </div>
-                    <div style={{ color: settings.starColor, fontSize: "9px", marginBottom: "4px" }}>
-                      {"★".repeat(rev.rating)}{"☆".repeat(5 - rev.rating)}
-                    </div>
-                    {i === 0 && (
-                      <p style={{ margin: "0 0 3px", fontWeight: 700, fontSize: "9px", fontStyle: "italic", textAlign: "left" }}>
-                        Great product!
-                      </p>
-                    )}
-                    <p style={{ margin: 0, fontSize: "9px", lineHeight: 1.5, textAlign: "left", overflow: "hidden", maxHeight: "3em" }}>
-                      {rev.body}
-                    </p>
-                    <div style={{ fontSize: "8px", color: "#16a34a", marginTop: "4px" }}>👍 I recommend this</div>
                   </div>
                 ))}
               </div>
+              <button style={{ background: settings.primaryGradient || settings.primaryColor, color: "#fff", border: "none", borderRadius: `${settings.borderRadius}px`, padding: "7px 12px", fontSize: "9px", fontWeight: 700, cursor: "default", flexShrink: 0 }}>
+                ✏ Write a Review
+              </button>
+            </div>
+
+            {/* Filter bar */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", paddingBottom: "8px", borderBottom: `1px solid ${settings.borderColor || "#eee"}` }}>
+              <span style={{ fontSize: `${Math.max(settings.reviewCountFontSize - 2, 9)}px`, color: settings.filterTextColor, fontWeight: 500 }}>3 Reviews</span>
+              <span style={{ fontSize: "9px", color: settings.sortTextColor, border: `1px solid ${settings.sortBorderColor}`, background: settings.sortBgColor, padding: "3px 7px", borderRadius: "5px" }}>Most Recent ▾</span>
+            </div>
+
+            {/* Review cards */}
+            <div style={
+              settings.displayStyle === "grid"
+                ? { display: "grid", gridTemplateColumns: `repeat(${Math.min(settings.gridColumns, 2)}, 1fr)`, gap: "7px" }
+                : { display: "flex", flexDirection: "column", gap: "7px" }
+            }>
+              {SAMPLE_REVIEWS.map((rev, i) => (
+                <div key={i} style={{
+                  background: settings.backgroundGradient || settings.backgroundColor,
+                  borderRadius: `${settings.borderRadius}px`,
+                  padding: "9px 11px",
+                  border: "1px solid rgba(0,0,0,.06)",
+                  fontFamily: settings.fontFamily,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "5px" }}>
+                    <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: ["#7c3aed","#0891b2"][i % 2], color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "8px", fontWeight: 700, flexShrink: 0 }}>
+                      {rev.customerName.slice(0,2).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "9px", fontWeight: 700, color: settings.textColor }}>{rev.customerName}</div>
+                      <div style={{ fontSize: "8px", color: settings.reviewMetaColor }}>6 days ago</div>
+                    </div>
+                  </div>
+                  <div style={{ color: settings.starColor, fontSize: "10px", marginBottom: "4px" }}>{"★".repeat(rev.rating)}{"☆".repeat(5-rev.rating)}</div>
+                  {i === 0 && <p style={{ margin: "0 0 3px", fontSize: `${Math.max(settings.reviewTextSize - 3, 8)}px`, fontWeight: 700, fontStyle: "italic", color: settings.reviewTitleColor }}>Great product!</p>}
+                  <p style={{ margin: 0, fontSize: `${Math.max(settings.reviewTextSize - 3, 8)}px`, color: settings.reviewBodyColor, lineHeight: 1.5 }}>{rev.body.slice(0, 60)}…</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -324,7 +341,7 @@ export function DesignForm({
           <label className="mb-2 block text-sm font-medium text-white/70">Font</label>
           <select
             value={settings.fontFamily}
-            onChange={(e) => update("fontFamily", e.target.value)}
+            onChange={(e) => { update("fontFamily", e.target.value); loadGoogleFont(e.target.value); }}
             className="mb-4 w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
           >
             {FONT_OPTIONS.map((f) => (
@@ -796,7 +813,7 @@ export function DesignForm({
       {/* Review list bar — filter count text + sort dropdown */}
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <p className="mb-3 text-sm font-medium text-white/70">Review list bar</p>
-        <p className="mb-4 text-xs text-white/40">Controls the "3 Reviews" count text and "Most Recent" sort dropdown above the reviews.</p>
+        <p className="mb-4 text-xs text-white/40">Controls the "3 Reviews" count label and "Most Recent" sort dropdown above the review cards.</p>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <ColorField label='Count text color ("3 Reviews")' value={settings.filterTextColor} onChange={(v) => update("filterTextColor", v)} />
           <div>
@@ -806,9 +823,9 @@ export function DesignForm({
           </div>
         </div>
         <div className="grid grid-cols-3 gap-4">
-          <ColorField label="Sort dropdown background" value={settings.sortBgColor} onChange={(v) => update("sortBgColor", v)} />
-          <ColorField label="Sort dropdown text" value={settings.sortTextColor} onChange={(v) => update("sortTextColor", v)} />
-          <ColorField label="Sort dropdown border" value={settings.sortBorderColor} onChange={(v) => update("sortBorderColor", v)} />
+          <ColorField label="Sort button background" value={settings.sortBgColor} onChange={(v) => update("sortBgColor", v)} />
+          <ColorField label="Sort button text" value={settings.sortTextColor} onChange={(v) => update("sortTextColor", v)} />
+          <ColorField label="Sort button border" value={settings.sortBorderColor} onChange={(v) => update("sortBorderColor", v)} />
         </div>
       </div>
 

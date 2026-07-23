@@ -294,7 +294,7 @@
         : summaryModern;
 
       const filtersHtml = reviews.length > 0 ? `
-<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 0 16px;border-bottom:1px solid ${design.filterBorderColor};background:${design.filterBgColor};">
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:8px 0 14px;border-bottom:1px solid ${design.filterBorderColor};background:transparent;">
   <span style="font-size:${design.reviewCountFontSize}px;color:${design.filterTextColor};font-weight:500;">${reviews.length} Review${reviews.length === 1 ? "" : "s"}</span>
   <select class="rv-sort" style="border:1px solid ${design.sortBorderColor};border-radius:${Math.max(r-2,4)}px;padding:7px 12px;font-size:13px;font-family:inherit;cursor:pointer;background:${design.sortBgColor};color:${design.sortTextColor};box-shadow:none;outline:none;">
     <option value="newest">Most Recent</option>
