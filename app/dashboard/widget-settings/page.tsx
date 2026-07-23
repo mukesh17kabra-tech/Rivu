@@ -74,7 +74,11 @@ export default async function WidgetSettingsPage({
             }}
           />
           <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">
-            <RatingBadgeForm shop={shop} initialTemplate={shopRecord.ratingBadgeTemplate} />
+            <RatingBadgeForm
+              shop={shop}
+              initialTemplate={shopRecord.ratingBadgeTemplate}
+              initialStarSize={shopRecord.ratingBadgeStarSize}
+            />
             <LogoUpload
               shop={shop}
               initialLogoUrl={shopRecord.logoUrl || ""}

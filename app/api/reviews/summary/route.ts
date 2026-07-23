@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
       starColor: shopRecord.starColor,
       textColor: shopRecord.textColor,
       ratingBadgeTemplate: shopRecord.ratingBadgeTemplate,
+      ratingBadgeStarSize: shopRecord.ratingBadgeStarSize,
     })
   );
 }

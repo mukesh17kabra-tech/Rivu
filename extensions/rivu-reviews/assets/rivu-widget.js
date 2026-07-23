@@ -118,33 +118,47 @@
     }
 
     // ─── One review card ─────────────────────────────────────────
+    // Build a per-shop review-count map so the Verified Buyer badge is
+    // only shown to customers who have submitted 3 or more reviews (i.e.
+    // the isTopReviewer flag that the API already computes per-email).
+    // This re-uses the same flag — the badge shows when isTopReviewer=true.
     function reviewCard(rev) {
-      const ta = design.reviewTextAlign;
       const isLong = rev.body && rev.body.length > 240;
       const bodyId = `rv-b-${rev.id}`;
-      const badge = rev.isTopReviewer ? `<span style="margin-left:4px;padding:1px 6px;background:${design.primaryColor};color:#fff;border-radius:10px;font-size:10px;vertical-align:middle;">⭐ Top</span>` : "";
+      const topBadge = rev.isTopReviewer
+        ? `<span style="margin-left:4px;padding:1px 6px;background:${design.primaryColor};color:#fff;border-radius:10px;font-size:10px;vertical-align:middle;">⭐ Top</span>`
+        : "";
+      // Verified Buyer badge only for reviewers with 3+ reviews (isTopReviewer flag)
+      const verifiedBadge = rev.isTopReviewer
+        ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#2563eb;background:#eff6ff;padding:1px 7px;border-radius:20px;flex-shrink:0;"><span>✓</span> Verified Buyer</span>`
+        : "";
+      // "I recommend" — stored in rev.recommends boolean (null means not answered)
+      const recommendHtml = rev.recommends === true
+        ? `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#16a34a;margin-top:6px;"><span style="font-size:15px;">👍</span> I recommend this product</div>`
+        : rev.recommends === false
+        ? `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#dc2626;margin-top:6px;"><span style="font-size:15px;">👎</span> I don't recommend this product</div>`
+        : "";
       return `
 <div class="rv-card" style="background:${cardBg};color:${design.textColor};border-radius:${r}px;padding:20px;font-size:${design.reviewTextSize}px;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 4px rgba(0,0,0,.05);">
-  <div style="display:flex;align-items:flex-start;gap:12px;">
+  <div style="display:flex;align-items:flex-start;gap:14px;">
     <div style="flex-shrink:0;">
-      <div class="rv-avatar" style="width:38px;height:38px;border-radius:50%;background:${avatarColor(rev.customerName)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">${initials(rev.customerName)}</div>
+      <div class="rv-avatar" style="width:40px;height:40px;border-radius:50%;background:${avatarColor(rev.customerName)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">${initials(rev.customerName)}</div>
     </div>
     <div style="flex:1;min-width:0;">
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:2px;">
-        <span style="font-weight:700;font-size:14px;">${rev.customerName}</span>${badge}
-        <span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#2563eb;background:#eff6ff;padding:1px 7px;border-radius:20px;"><span>✓</span> Verified Buyer</span>
-        <span style="margin-left:auto;font-size:12px;color:#999;">${timeAgo(rev.createdAt)}</span>
+        <span style="font-weight:700;font-size:14px;">${rev.customerName}</span>
+        ${verifiedBadge}
+        ${topBadge}
+        <span style="margin-left:auto;font-size:12px;color:#999;white-space:nowrap;">${timeAgo(rev.createdAt)}</span>
       </div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:6px;">${new Date(rev.createdAt).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})}</div>
-      <div style="display:flex;gap:2px;margin-bottom:8px;">${starsHtml(rev.rating, starColor, "#e0e0e0", 16)}</div>
-      ${rev.reviewTitle ? `<p style="margin:0 0 6px;font-weight:700;font-size:15px;font-style:italic;text-align:${ta};">${rev.reviewTitle}</p>` : ""}
-      ${rev.body ? `<p id="${bodyId}" style="margin:0 0 8px;line-height:1.6;text-align:${ta};${isLong ? "max-height:4.8em;overflow:hidden;" : ""}">${rev.body}</p>` : ""}
+      <div style="font-size:12px;color:#aaa;margin-bottom:7px;">${new Date(rev.createdAt).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})}</div>
+      <div style="display:flex;gap:2px;margin-bottom:10px;">${starsHtml(rev.rating, starColor, "#e0e0e0", 16)}</div>
+      ${rev.reviewTitle ? `<p style="margin:0 0 7px;font-weight:700;font-size:16px;font-style:italic;text-align:left;line-height:1.4;">${rev.reviewTitle}</p>` : ""}
+      ${rev.body ? `<p id="${bodyId}" style="margin:0 0 8px;line-height:1.65;text-align:left;color:${design.textColor};${isLong ? "max-height:4.8em;overflow:hidden;" : ""}">${rev.body}</p>` : ""}
       ${isLong ? `<button class="rv-read-more" data-target="${bodyId}" style="background:none;border:none;padding:0;font-size:12px;font-weight:600;color:${design.primaryColor};cursor:pointer;margin-bottom:8px;">Read more</button>` : ""}
       ${rev.videoUrl ? `<div class="rv-media-thumb" data-media-url="${rev.videoUrl}" data-media-type="video" style="width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;background:#000;margin-bottom:8px;"><video src="${rev.videoUrl}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);"><span style="color:#fff;font-size:18px;">▶</span></div></div>` : ""}
-      ${!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;"/>` : ""}
-      <div style="display:flex;align-items:center;gap:4px;font-size:12px;color:#16a34a;margin-top:4px;">
-        <span style="font-size:16px;">👍</span> I recommend this product
-      </div>
+      ${!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;cursor:pointer;"/>` : ""}
+      ${recommendHtml}
     </div>
   </div>
 </div>`;
@@ -170,11 +184,11 @@
       const breakdownHtml = summary.total ? summary.breakdown.map(b => {
         const pct = Number(b.percentage) || 0;
         return `<div style="display:flex;align-items:center;gap:10px;font-size:13px;margin:4px 0;">
-          <span style="width:48px;opacity:.7;">${b.star} Stars</span>
-          <div style="flex:1;height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;">
-            <div style="width:${pct}%;height:100%;background:${rangeColor};border-radius:4px;"></div>
+          <span style="width:48px;color:${design.textColor};opacity:.65;">${b.star} Stars</span>
+          <div style="flex:1;height:8px;background-color:#f0f0f0;border-radius:4px;overflow:hidden;">
+            <div style="display:block;width:${pct}%;height:100%;background-color:${rangeColor};border-radius:4px;"></div>
           </div>
-          <span style="width:28px;text-align:right;opacity:.7;">${b.percentage}</span>
+          <span style="width:28px;text-align:right;color:${design.textColor};opacity:.65;">${b.percentage}</span>
         </div>`;
       }).join("") : "";
 
@@ -186,10 +200,10 @@
     <div style="font-size:12px;color:#999;">Based on ${summary.total} review${summary.total === 1 ? "" : "s"}</div>
   </div>
   <div style="flex:1;min-width:180px;">${breakdownHtml}</div>
-  <button class="rv-open-form-btn" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);">✏ Write a Review</button>
+  <button class="rv-open-form-btn" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Write a Review</button>
 </div>` : `
 <div style="margin-bottom:20px;">
-  <button class="rv-open-form-btn" style="display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;">✏ Write a Review</button>
+  <button class="rv-open-form-btn" style="display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Write a Review</button>
 </div>`;
 
       const filtersHtml = reviews.length > 0 ? `
@@ -224,6 +238,16 @@
       const langDropdown = design.letCustomerPickLanguage && availableLanguages.length > 1
         ? `<select class="rv-lang-picker" style="width:100%;padding:10px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;margin-bottom:8px;">${availableLanguages.map(l => `<option value="${l.code}">${l.label}</option>`).join("")}</select>`
         : "";
+
+      const isDark = template === "dark";
+      const inputBorder = isDark ? "1px solid #333" : "1px solid #ddd";
+      const inputBg = isDark ? "background:#111827;color:#fff;" : "";
+      const labelColor = isDark ? "color:#ccc;" : "color:#555;";
+
+      const recommendCheckbox = `<div style="display:flex;align-items:center;gap:8px;margin-top:4px;padding:10px;background:${isDark?"rgba(255,255,255,.05)":"#f8f9fa"};border-radius:8px;">
+        <input type="checkbox" name="recommends" id="rv-rec-cb" value="yes" style="width:16px;height:16px;accent-color:${design.primaryColor};cursor:pointer;flex-shrink:0;"/>
+        <label for="rv-rec-cb" style="font-size:13px;${labelColor}cursor:pointer;">👍 I would recommend this product to a friend</label>
+      </div>`;
 
       const stars = [1,2,3,4,5].map(n =>
         `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:2px;cursor:pointer;font-size:30px;color:#ddd;transition:color .1s;">★</button>`
@@ -443,29 +467,39 @@
       if (tapHint && selectedRating) tapHint.style.display = "none";
     }
 
-    // Suggestions
-    let sPool = [], sKey = "", sBatch = 0;
+    // Suggestions — fetch a large pool (all templates for this rating) once
+    // per rating+language combo, then client-side Fisher-Yates shuffle on
+    // every Refresh so the customer genuinely sees a new random set each
+    // time, not just the same 6 cycling in order.
+    let sPool = [], sKey = "";
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
     async function loadSuggestions() {
       const key = `${selectedRating}|${selectedLang}`;
-      if (key !== sKey) {
+      if (key !== sKey || sPool.length === 0) {
+        // Only re-fetch from server when rating or language actually changes.
         if (suggestionsWrap) suggestionsWrap.innerHTML = `<p style="font-size:12px;color:#aaa;margin:0 0 8px;">Loading suggestions…</p>`;
         try {
           const res = await fetch(`${API_BASE}/api/reviews/suggestions?rating=${selectedRating}&productTitle=${encodeURIComponent(productTitle)}&shop=${encodeURIComponent(shop)}&lang=${selectedLang}`);
           const data = await res.json();
           sPool = data.suggestions || [];
           sKey = key;
-          sBatch = 0;
         } catch { if(suggestionsWrap) suggestionsWrap.innerHTML=""; return; }
-      } else {
-        sBatch += 6;
-        if (sBatch >= sPool.length) sBatch = 0;
       }
-      renderSuggestionBatch();
+      // Fresh shuffle on EVERY call (including Refresh button), so the
+      // customer always sees 6 suggestions in a brand-new random order.
+      const shuffled = shuffleArray(sPool);
+      renderSuggestionBatch(shuffled.slice(0, 6));
     }
 
-    function renderSuggestionBatch() {
+    function renderSuggestionBatch(batch) {
       if (!suggestionsWrap) return;
-      const batch = sPool.slice(sBatch, sBatch + 6);
       const bodyTA = form && form.querySelector('[name="body"]');
       suggestionsWrap.style.display = "block";
       suggestionsWrap.innerHTML = `
@@ -523,6 +557,8 @@
         if (!selectedRating) { if(status){status.textContent="Please pick a star rating.";status.style.color="#c0392b";} return; }
         if(status){status.textContent="Submitting…";status.style.color="#666";}
         try {
+          const recommendsCb = form.querySelector('[name="recommends"]');
+          const recommends = recommendsCb ? (recommendsCb.checked ? true : null) : null;
           const res = await fetch(`${API_BASE}/api/reviews/submit`, {
             method: "POST",
             headers: {"Content-Type":"application/json"},
@@ -534,6 +570,7 @@
               body: form.body.value,
               customerName: form.customerName.value,
               customerEmail: form.customerEmail?.value || undefined,
+              recommends,
               photoUrl: photoDataUrl,
               videoUrl: videoDataUrl,
             }),

@@ -180,66 +180,95 @@ export function DesignForm({
 
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
           <p className="mb-2 text-xs font-medium text-white/50">Live preview</p>
-          <div
-            className="rounded-lg p-4"
-            style={{ backgroundColor: "#f4f4f4", fontFamily: settings.fontFamily }}
-          >
+          {/* Premium live preview */}
+          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
+            <p className="mb-2 text-xs font-medium text-white/50">Live preview</p>
             <div
-              className={
-                settings.displayStyle === "grid"
-                  ? "grid gap-2"
-                  : settings.displayStyle === "carousel"
-                  ? "flex gap-2 overflow-x-auto"
-                  : settings.displayStyle === "masonry"
-                  ? "columns-2 gap-2"
-                  : "flex flex-col gap-2"
-              }
-              style={
-                settings.displayStyle === "grid"
-                  ? { gridTemplateColumns: `repeat(${Math.min(settings.gridColumns, 2)}, 1fr)` }
-                  : undefined
-              }
-            >
-              {SAMPLE_REVIEWS.map((r, i) => (
-                <div
-                  key={i}
-                  className={
-                    settings.displayStyle === "carousel"
-                      ? "min-w-[160px] flex-shrink-0"
-                      : settings.displayStyle === "masonry"
-                      ? "mb-2 break-inside-avoid"
-                      : ""
-                  }
-                  style={{
-                    backgroundColor: settings.backgroundColor,
-                    color: settings.textColor,
-                    borderRadius: `${settings.borderRadius}px`,
-                    padding: "10px",
-                    fontSize: `${Math.min(settings.reviewTextSize, 13)}px`,
-                    textAlign: settings.reviewTextAlign,
-                  }}
-                >
-                  <div style={{ color: settings.starColor, marginBottom: "4px" }}>
-                    {"★".repeat(r.rating)}
-                    {"☆".repeat(5 - r.rating)}
-                  </div>
-                  <p style={{ margin: "0 0 6px" }}>{r.body}</p>
-                  <p style={{ margin: 0, opacity: 0.6, fontSize: "10px" }}>{r.customerName}</p>
-                </div>
-              ))}
-            </div>
-            <button
-              className="mt-3 text-xs"
+              className="overflow-hidden rounded-lg"
               style={{
-                backgroundColor: settings.primaryColor,
-                color: "#fff",
-                borderRadius: `${settings.borderRadius}px`,
-                padding: "6px 10px",
-                border: "none",
+                backgroundColor: "#f5f5f5",
+                fontFamily: settings.fontFamily,
+                padding: "14px",
+                fontSize: "11px",
               }}
             >
-              Write a review
-            </button>
+              {/* Mini summary row */}
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px", flexWrap: "wrap" }}>
+                <div style={{ textAlign: "center", flexShrink: 0 }}>
+                  <div style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: settings.textColor, lineHeight: 1 }}>4.8</div>
+                  <div style={{ color: settings.starColor, fontSize: "11px", marginTop: "3px" }}>★★★★★</div>
+                  <div style={{ fontSize: "9px", color: "#aaa", marginTop: "2px" }}>Based on 13 reviews</div>
+                </div>
+                <div style={{ flex: 1, minWidth: "100px" }}>
+                  {[["5 Stars", 77], ["4 Stars", 23], ["3 Stars", 0]].map(([label, pct]) => (
+                    <div key={label as string} style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
+                      <span style={{ width: "38px", fontSize: "9px", color: "#999", flexShrink: 0 }}>{label}</span>
+                      <div style={{ flex: 1, height: "5px", backgroundColor: "#e0e0e0", borderRadius: "3px", overflow: "hidden" }}>
+                        <div style={{ width: `${pct}%`, height: "100%", backgroundColor: settings.rangeColor, borderRadius: "3px" }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button style={{ backgroundColor: settings.primaryGradient || settings.primaryColor, color: "#fff", border: "none", borderRadius: `${settings.borderRadius}px`, padding: "6px 10px", fontSize: "9px", fontWeight: 600, cursor: "default", flexShrink: 0 }}>
+                  ✏ Write a Review
+                </button>
+              </div>
+
+              {/* Mini review cards */}
+              <div
+                style={
+                  settings.displayStyle === "grid"
+                    ? { display: "grid", gridTemplateColumns: `repeat(${Math.min(settings.gridColumns, 2)}, 1fr)`, gap: "6px" }
+                    : settings.displayStyle === "carousel"
+                    ? { display: "flex", gap: "6px", overflowX: "auto" }
+                    : { display: "flex", flexDirection: "column", gap: "6px" }
+                }
+              >
+                {SAMPLE_REVIEWS.map((rev, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      backgroundColor: settings.backgroundGradient || settings.backgroundColor,
+                      color: settings.textColor,
+                      borderRadius: `${settings.borderRadius}px`,
+                      padding: "8px 10px",
+                      border: "1px solid rgba(0,0,0,.06)",
+                      boxShadow: "0 1px 3px rgba(0,0,0,.05)",
+                      ...(settings.displayStyle === "carousel" ? { minWidth: "140px", flexShrink: 0 } : {}),
+                      ...(settings.displayStyle === "masonry" ? { breakInside: "avoid", marginBottom: "6px" } : {}),
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "5px" }}>
+                      {/* Avatar circle */}
+                      <div style={{
+                        width: "22px", height: "22px", borderRadius: "50%", flexShrink: 0,
+                        backgroundColor: ["#7c3aed", "#0891b2"][i % 2],
+                        color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: "8px", fontWeight: 700,
+                      }}>
+                        {rev.customerName.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: "9px" }}>{rev.customerName}</div>
+                        <div style={{ fontSize: "8px", color: "#aaa" }}>{["6 days ago", "1 mo ago"][i]}</div>
+                      </div>
+                    </div>
+                    <div style={{ color: settings.starColor, fontSize: "9px", marginBottom: "4px" }}>
+                      {"★".repeat(rev.rating)}{"☆".repeat(5 - rev.rating)}
+                    </div>
+                    {i === 0 && (
+                      <p style={{ margin: "0 0 3px", fontWeight: 700, fontSize: "9px", fontStyle: "italic", textAlign: "left" }}>
+                        Great product!
+                      </p>
+                    )}
+                    <p style={{ margin: 0, fontSize: "9px", lineHeight: 1.5, textAlign: "left", overflow: "hidden", maxHeight: "3em" }}>
+                      {rev.body}
+                    </p>
+                    <div style={{ fontSize: "8px", color: "#16a34a", marginTop: "4px" }}>👍 I recommend this</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -599,34 +628,127 @@ export function DesignForm({
       </div>
 
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <p className="mb-3 text-sm font-medium text-white/70">Review form style</p>
-        <div className="grid grid-cols-2 gap-2">
+        <p className="mb-4 text-sm font-medium text-white/70">Review form style</p>
+
+        {/* 4 template cards side by side — each shows a mini preview of the real form */}
+        <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
           {(["basic", "card", "minimal", "dark"] as const).map((t, i) => {
-            const labels = { basic: "Basic (clean)", card: "Card (accent)", minimal: "Minimal", dark: "Dark" };
-            const planReq = i === 0 ? "free" : i <= 2 ? "growth" : "pro";
+            const labels = { basic: "Basic", card: "Card", minimal: "Minimal", dark: "Dark" };
+            const planLabels = { basic: "", card: "Growth+", minimal: "Growth+", dark: "Pro only" };
             const locked = (isFree && i > 0) || (plan === "growth" && i >= 3);
+            const isSelected = settings.formTemplate === t;
+
+            // Mini form preview colours
+            const bg = t === "dark" ? "#1a1a2e" : "#fff";
+            const tc = t === "dark" ? "#fff" : "#222";
+            const inBorder = t === "dark" ? "#333" : "#ddd";
+            const inBg = t === "dark" ? "#111827" : "#fff";
+            const accentBg = t === "card"
+              ? (settings.primaryGradient || settings.primaryColor)
+              : t === "dark"
+              ? settings.rangeColor
+              : (settings.primaryGradient || settings.primaryColor);
+            const accentTc = t === "dark" ? "#1a1a2e" : "#fff";
+
             return (
               <button
                 key={t}
                 onClick={() => !locked && update("formTemplate", t)}
                 disabled={locked}
-                className={`rounded-md border px-3 py-2 text-sm transition-colors ${
+                className={`group relative flex flex-col overflow-hidden rounded-lg border transition-all ${
                   locked
-                    ? "cursor-not-allowed border-white/5 text-white/25"
-                    : settings.formTemplate === t
-                    ? "border-emerald-400 bg-emerald-400/10 text-white"
-                    : "border-white/10 text-white/50 hover:border-white/30"
+                    ? "cursor-not-allowed border-white/5 opacity-40"
+                    : isSelected
+                    ? "border-emerald-400 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]"
+                    : "border-white/10 hover:border-white/30"
                 }`}
               >
-                {locked ? "🔒 " : ""}{labels[t]}
-                {planReq !== "free" && (
-                  <span className="ml-1 text-[10px] opacity-50 capitalize">{planReq}+</span>
-                )}
+                {/* Mini form preview — accurate visual of each template */}
+                <div
+                  className="w-full p-2.5"
+                  style={{ backgroundColor: t === "dark" ? "#111" : "#f8f8f8", pointerEvents: "none" }}
+                >
+                  <div
+                    style={{
+                      backgroundColor: bg,
+                      borderRadius: "7px",
+                      padding: "8px",
+                      fontFamily: "sans-serif",
+                    }}
+                  >
+                    {/* Header */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "6px" }}>
+                      {t === "card" && (
+                        <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: accentBg, flexShrink: 0 }} />
+                      )}
+                      {t === "dark" && (
+                        <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: settings.rangeColor, flexShrink: 0 }} />
+                      )}
+                      <div>
+                        <p style={{ margin: 0, fontSize: "8px", fontWeight: 700, color: tc }}>Write a Review</p>
+                        <p style={{ margin: 0, fontSize: "6px", color: t === "dark" ? "#aaa" : "#999" }}>Share your experience</p>
+                      </div>
+                    </div>
+
+                    {/* Stars */}
+                    <div style={{ textAlign: t === "basic" ? "center" : "left", marginBottom: "5px" }}>
+                      {t === "basic" && <p style={{ margin: "0 0 2px", fontSize: "6px", color: "#aaa" }}>Your Rating</p>}
+                      {t !== "basic" && <p style={{ margin: "0 0 2px", fontSize: "6px", color: t === "dark" ? "#aaa" : "#555" }}>Rate your experience</p>}
+                      <span style={{ color: settings.starColor, fontSize: "11px" }}>★★★★☆</span>
+                    </div>
+
+                    {/* Fields */}
+                    <div style={{ display: "flex", gap: "3px", marginBottom: "3px" }}>
+                      <div style={{ flex: 1, height: "11px", border: `1px solid ${inBorder}`, borderRadius: "4px", background: inBg, display: "flex", alignItems: "center", paddingLeft: "4px" }}>
+                        <span style={{ fontSize: "5px", color: "#bbb" }}>Your Name *</span>
+                      </div>
+                      <div style={{ flex: 1, height: "11px", border: `1px solid ${inBorder}`, borderRadius: "4px", background: inBg, display: "flex", alignItems: "center", paddingLeft: "4px" }}>
+                        <span style={{ fontSize: "5px", color: "#bbb" }}>Email</span>
+                      </div>
+                    </div>
+                    {(t === "minimal") && (
+                      <div style={{ height: "11px", border: `1px solid ${inBorder}`, borderRadius: "4px", background: inBg, marginBottom: "3px", display: "flex", alignItems: "center", paddingLeft: "4px" }}>
+                        <span style={{ fontSize: "5px", color: "#bbb" }}>Review Title *</span>
+                      </div>
+                    )}
+                    <div style={{ height: "20px", border: `1px solid ${inBorder}`, borderRadius: "4px", background: inBg, marginBottom: "5px", display: "flex", alignItems: "flex-start", padding: "3px 4px" }}>
+                      <span style={{ fontSize: "5px", color: "#bbb" }}>Your review…</span>
+                    </div>
+
+                    {/* Submit button */}
+                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                      <div style={{
+                        background: accentBg, color: accentTc,
+                        borderRadius: "4px", padding: "3px 7px",
+                        fontSize: "6px", fontWeight: 700,
+                      }}>
+                        Submit Review
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Name + plan label */}
+                <div className={`flex items-center justify-between px-3 py-2 ${t === "dark" ? "bg-[#1a1a2e]/80" : "bg-white/[0.04]"}`}>
+                  <span className="text-xs font-medium text-white">
+                    {locked ? "🔒 " : isSelected ? "✓ " : ""}{labels[t]}
+                  </span>
+                  {planLabels[t] && (
+                    <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50">
+                      {planLabels[t]}
+                    </span>
+                  )}
+                </div>
               </button>
             );
           })}
         </div>
+
+        <p className="mt-3 text-xs text-white/40">
+          Free: Basic only · Growth: Basic, Card, Minimal · Pro: All 4 templates
+        </p>
       </div>
+
 
       <button
         onClick={handleSave}

@@ -2,8 +2,17 @@
 
 import { useState } from "react";
 
-export function RatingBadgeForm({ shop, initialTemplate }: { shop: string; initialTemplate: string }) {
+export function RatingBadgeForm({
+  shop,
+  initialTemplate,
+  initialStarSize = 16,
+}: {
+  shop: string;
+  initialTemplate: string;
+  initialStarSize?: number;
+}) {
   const [template, setTemplate] = useState(initialTemplate);
+  const [starSize, setStarSize] = useState(initialStarSize);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -13,7 +22,7 @@ export function RatingBadgeForm({ shop, initialTemplate }: { shop: string; initi
       await fetch("/api/shop/rating-badge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ shop, ratingBadgeTemplate: template }),
+        body: JSON.stringify({ shop, ratingBadgeTemplate: template, ratingBadgeStarSize: starSize }),
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
@@ -22,27 +31,54 @@ export function RatingBadgeForm({ shop, initialTemplate }: { shop: string; initi
     }
   }
 
-  const preview = template.replace(/\{rating\}/g, "★★★★☆").replace(/\{count\}/g, "128");
+  // Live preview — shows stars at the configured size
+  const starHtml = "★".repeat(4) + "☆";
+  const preview = template
+    .replace(/\{rating\}/g, starHtml)
+    .replace(/\{count\}/g, "128");
 
   return (
-    <div className="max-w-md rounded-lg border border-white/10 bg-white/[0.02] p-6">
-      <p className="mb-1 text-sm font-medium text-white">Rating Badge text</p>
+    <div className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+      <p className="mb-1 text-sm font-medium text-white">Rating Badge</p>
       <p className="mb-4 text-xs text-white/50">
-        Shown on product cards and near the product title (via the &quot;Rivu Rating
-        Badge&quot; block). Use <code className="text-emerald-300">{"{rating}"}</code> where the
-        star icons should appear, and <code className="text-emerald-300">{"{count}"}</code> for
-        the review count.
+        Compact star widget shown near the product title and on collection cards
+        (via the &quot;Rivu Rating Badge&quot; Shopify block). Clicking the badge
+        on a product page scrolls the customer down to the full review section automatically.
       </p>
+
+      <label className="mb-1 block text-xs text-white/50">Badge text template</label>
       <input
         type="text"
         value={template}
         onChange={(e) => setTemplate(e.target.value)}
         maxLength={150}
-        className="mb-3 w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
+        className="mb-2 w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
       />
       <p className="mb-4 text-xs text-white/40">
-        Preview: <span className="text-white/70">{preview}</span>
+        Use <code className="rounded bg-black/30 px-1 text-emerald-300">{"{rating}"}</code> for
+        the star icons and <code className="rounded bg-black/30 px-1 text-emerald-300">{"{count}"}</code> for
+        the review count. Preview:{" "}
+        <span className="text-yellow-300">{preview}</span>
       </p>
+
+      <label className="mb-1 block text-xs text-white/50">
+        Star size: {starSize}px
+      </label>
+      <input
+        type="range"
+        min={12}
+        max={28}
+        value={starSize}
+        onChange={(e) => setStarSize(Number(e.target.value))}
+        className="mb-3 w-full"
+      />
+
+      {/* Live size preview */}
+      <div className="mb-4 flex items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3 py-2">
+        <span style={{ fontSize: `${starSize}px`, color: "#f5b400", lineHeight: 1 }}>★★★★☆</span>
+        <span style={{ fontSize: `${Math.max(starSize - 4, 10)}px`, color: "#999" }}>128 reviews</span>
+      </div>
+
       <button
         onClick={handleSave}
         disabled={saving}

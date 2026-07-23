@@ -48,6 +48,7 @@ const schema = z.object({
       })
       .optional()
   ),
+  recommends: z.boolean().optional().nullable(),
 });
 
 function withCors(res: NextResponse) {

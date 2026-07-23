@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
       id: true,
       rating: true,
       reviewTitle: true,
+      recommends: true,
       body: true,
       customerName: true,
       customerEmail: true,
