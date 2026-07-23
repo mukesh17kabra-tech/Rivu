@@ -1,9 +1,7 @@
 {% comment %}
-  Rivu Reviews Block — add to your product page template via the theme
-  editor (Customize → Product page → Add block → Apps → Rivu Reviews).
-  
-  IMPORTANT: Only add this block ONCE. Adding it twice will show the
-  widget twice on the same page.
+  Rivu Reviews Block
+  Add once to your product page via: Customize → Product page → Add block → Apps → Rivu Reviews
+  Only add this block ONCE — adding it twice will show reviews twice.
 {% endcomment %}
 
 <div
@@ -13,7 +11,7 @@
   data-product-id="{{ product.id }}"
   data-product-title="{{ product.title | escape }}"
   data-product-image="{{ product.featured_image | image_url: width: 800 }}"
-  data-api-base="{{ block.settings.api_base }}"
+  data-api-base="https://rivu-one.vercel.app"
   {{ block.shopify_attributes }}
 ></div>
 <script src="{{ 'rivu-widget.js' | asset_url }}" defer></script>
@@ -22,14 +20,6 @@
 {
   "name": "Rivu Reviews",
   "target": "section",
-  "settings": [
-    {
-      "type": "text",
-      "id": "api_base",
-      "label": "App URL",
-      "default": "https://rivu-one.vercel.app",
-      "info": "Do not change this unless instructed by the developer."
-    }
-  ]
+  "settings": []
 }
 {% endschema %}

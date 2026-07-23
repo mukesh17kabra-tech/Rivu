@@ -1,13 +1,12 @@
 {% comment %}
-  Rivu App Embed — loads badge script globally and auto-injects stars
-  on every product card without requiring any app block slots.
-  Target: body (standard for Shopify App Embed blocks)
+  Rivu App Embed — enable this in Theme Editor → App Embeds.
+  Loads the star badge script globally and auto-injects ratings on product cards.
 {% endcomment %}
 
 <script
   src="{{ 'rivu-rating-badge.js' | asset_url }}"
-  data-api-base="{{ block.settings.api_base }}"
   data-shop="{{ shop.permanent_domain }}"
+  data-api-base="https://rivu-one.vercel.app"
   data-auto-inject="true"
   data-badge-star-size="{{ block.settings.badge_star_size }}"
   {{ block.shopify_attributes }}
@@ -18,13 +17,6 @@
   "name": "Rivu App Embed",
   "target": "body",
   "settings": [
-    {
-      "type": "text",
-      "id": "api_base",
-      "label": "App URL",
-      "default": "https://rivu-one.vercel.app",
-      "info": "Do not change unless instructed by the developer."
-    },
     {
       "type": "range",
       "id": "badge_star_size",
