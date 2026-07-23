@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "Shop" ADD COLUMN     "formBgColor" TEXT NOT NULL DEFAULT '#ffffff',
+ADD COLUMN     "formCloseColor" TEXT NOT NULL DEFAULT '#999999',
+ADD COLUMN     "formTextColor" TEXT NOT NULL DEFAULT '#1a1a2e',
+ADD COLUMN     "summaryBgColor" TEXT NOT NULL DEFAULT '#f8f8f8',
+ADD COLUMN     "summaryTextColor" TEXT NOT NULL DEFAULT '#333333',
+ADD COLUMN     "summaryWidth" INTEGER NOT NULL DEFAULT 220;
