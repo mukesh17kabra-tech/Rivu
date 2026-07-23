@@ -1,0 +1,56 @@
+{% comment %}
+  Rivu App Embed — injected once per page via Shopify's App Embeds system.
+  This script auto-injects star badges onto product cards across ALL pages
+  (collection pages, home page featured collections, search results, etc.)
+  WITHOUT requiring merchants or their theme to have explicit app block slots
+  inside product cards — exactly how Judge.me, Loox, and Okendo do it.
+
+  How it works:
+  1. On page load, the script looks for every <a> tag that links to a
+     /products/HANDLE URL (Shopify's standard product card link pattern).
+  2. It extracts the product handle, fetches the Rivu summary for that
+     product, and injects a compact star badge right after that link (or
+     inside the card's closest wrapper element).
+  3. Works on any Shopify theme — no app block slots required.
+{% endcomment %}
+
+<script
+  src="{{ 'rivu-rating-badge.js' | asset_url }}"
+  data-api-base="{{ block.settings.api_base }}"
+  data-shop="{{ shop.permanent_domain }}"
+  data-auto-inject="true"
+  defer
+></script>
+
+{% schema %}
+{
+  "name": "Rivu App Embed",
+  "target": "head",
+  "settings": [
+    {
+      "type": "text",
+      "id": "api_base",
+      "label": "App URL",
+      "default": "https://rivu-one.vercel.app",
+      "info": "Do not change unless instructed by the app developer."
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_inject_badges",
+      "label": "Auto-inject star badges on product cards",
+      "default": true,
+      "info": "Automatically shows star ratings on every product card across your store — collections, home page, search results. Works on all themes without any manual code changes."
+    },
+    {
+      "type": "range",
+      "id": "badge_star_size",
+      "label": "Star size on product cards",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "default": 14,
+      "unit": "px"
+    }
+  ]
+}
+{% endschema %}

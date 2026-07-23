@@ -67,7 +67,7 @@ model Shop {
   // Customizable text template for the compact "Rivu Rating Badge" block
   // (used on product cards / near the title) — {rating} is replaced with
   // the actual star icons for that product's average rating.
-  ratingBadgeTemplate  String @default("{rating} rating for this product")
+  ratingBadgeTemplate  String @default("{rating}")
   ratingBadgeStarSize  Int    @default(16)  // px — controls how big the stars appear in the rating badge block on product pages and collection cards
 
   // Which write-a-review form style to use — plan gated:

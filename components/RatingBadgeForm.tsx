@@ -55,9 +55,10 @@ export function RatingBadgeForm({
         className="mb-2 w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
       />
       <p className="mb-4 text-xs text-white/40">
-        Use <code className="rounded bg-black/30 px-1 text-emerald-300">{"{rating}"}</code> for
-        the star icons and <code className="rounded bg-black/30 px-1 text-emerald-300">{"{count}"}</code> for
-        the review count. Preview:{" "}
+        Default <code className="rounded bg-black/30 px-1 text-emerald-300">{"{rating}"}</code> shows just stars + count.
+        Add <code className="rounded bg-black/30 px-1 text-emerald-300">{"{count}"}</code> to include the review number inline.
+        Example: <code className="rounded bg-black/30 px-1 text-emerald-300">{"{rating} Based on {count} Reviews"}</code>.
+        Any text you add will be shown in Title Case automatically. Preview:{" "}
         <span className="text-yellow-300">{preview}</span>
       </p>
 
