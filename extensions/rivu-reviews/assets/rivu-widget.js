@@ -50,13 +50,10 @@
   async function render(el) {
     const { shop, productId, productTitle, productImage, apiBase } = el.dataset;
     const API_BASE = apiBase || "";
-
-    // Guard: can't render without these
     if (!shop || !productId || !API_BASE) {
-      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: missing shop, productId or api-base attribute. Please check the block settings.</p>';
+      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: missing shop, productId or api-base. Please remove and re-add the Rivu Reviews block.</p>';
       return;
     }
-
     el.innerHTML = `<p style="font-size:14px;color:#aaa;padding:12px 0;">Loading reviews…</p>`;
 
     let reviews = [], summary = { total: 0, average: 0, breakdown: [] };
@@ -91,9 +88,8 @@
           design[k] = (v === undefined || v === null || v === "") ? D[k] : v;
         }
       }
-    } catch(apiErr) {
-      console.error("[Rivu] API call failed:", apiErr);
-      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: could not load reviews (' + String(apiErr) + '). Check that the App URL in block settings is correct.</p>';
+    } catch(err) {
+      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu error: ' + String(err).replace(/</g, '&lt;') + '</p>';
       return;
     }
 
