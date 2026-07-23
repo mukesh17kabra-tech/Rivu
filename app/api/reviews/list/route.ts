@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
+import { runAutoMigrations } from "@/lib/db-migrate";
 
 function withCors(res: NextResponse) {
   res.headers.set("Access-Control-Allow-Origin", "*");
@@ -13,6 +14,7 @@ export async function OPTIONS() {
 
 export async function GET(req: NextRequest) {
   try {
+    await runAutoMigrations();
     const shop = req.nextUrl.searchParams.get("shop");
     const productIdRaw = req.nextUrl.searchParams.get("productId");
 

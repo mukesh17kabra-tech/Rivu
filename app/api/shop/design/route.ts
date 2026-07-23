@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { z } from "zod";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 import { clampDesignToPlan, PlanTier } from "@/lib/plan-gating";
+import { runAutoMigrations } from "@/lib/db-migrate";
 
 const LANGUAGE_CODES = SUPPORTED_LANGUAGES.map((l) => l.code) as [string, ...string[]];
 
@@ -69,6 +70,8 @@ export async function POST(req: NextRequest) {
   }
 
   const { shop, ...design } = parsed.data;
+
+  await runAutoMigrations();
 
   const shopRecord = await db.shop.findUnique({ where: { shopDomain: shop }, select: { plan: true } });
   if (!shopRecord) {

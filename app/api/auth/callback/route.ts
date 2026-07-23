@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { exchangeCodeForToken } from "@/lib/shopify";
 import { db } from "@/lib/db";
+import { runAutoMigrations } from "@/lib/db-migrate";
 
 export async function GET(req: NextRequest) {
   const shop = req.nextUrl.searchParams.get("shop");
@@ -16,6 +17,9 @@ export async function GET(req: NextRequest) {
   }
 
   const { access_token } = await exchangeCodeForToken(shop, code);
+
+  // Run auto-migrations (safe, idempotent — adds missing columns only)
+  await runAutoMigrations();
 
   await db.shop.upsert({
     where: { shopDomain: shop },
