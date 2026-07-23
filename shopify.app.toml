@@ -6,8 +6,8 @@
 # https://partners.shopify.com
 
 name = "Rivu"
-client_id = "your_shopify_api_key"
-application_url = "https://your-rivu-app.vercel.app"
+client_id = "2135e06e19ed7ba1e0303c3a1f48116a"
+application_url = "https://rivu-one.vercel.app"
 embedded = true
 
 [access_scopes]
@@ -19,7 +19,7 @@ scopes = "read_products,read_orders,write_discounts"
 
 [auth]
 redirect_urls = [
-  "https://your-rivu-app.vercel.app/api/auth/callback"
+  "https://rivu-one.vercel.app/api/auth/callback"
 ]
 
 [webhooks]
