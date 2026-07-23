@@ -17,7 +17,15 @@ export type DesignInput = {
   reviewTextSize: number;
   reviewTextAlign: string;
   letCustomerPickLanguage: boolean;
+  enabledLanguages: string[];
+  formTemplate: string;
   [key: string]: unknown;
+};
+
+const LANGUAGE_CAP_BY_PLAN: Record<PlanTier, number> = {
+  free: 1,
+  growth: 6,
+  pro: 10,
 };
 
 const DEFAULTS = {
@@ -84,6 +92,29 @@ export function clampDesignToPlan<T extends DesignInput>(
       clamped.letCustomerPickLanguage = DEFAULTS.letCustomerPickLanguage;
       lockedFields.push("letCustomerPickLanguage");
     }
+  }
+
+  // Form template gating: Free=basic only, Growth=basic/card/minimal, Pro=all four
+  const formTemplatesByPlan: Record<PlanTier, string[]> = {
+    free: ["basic"],
+    growth: ["basic", "card", "minimal"],
+    pro: ["basic", "card", "minimal", "dark"],
+  };
+  if (!formTemplatesByPlan[plan].includes(clamped.formTemplate as string)) {
+    clamped.formTemplate = "basic";
+    lockedFields.push("formTemplate");
+  }
+
+  // Language count cap applies to every plan (not just Free) — Growth
+  // can pick UP TO 6, Pro up to 10. "en" is always force-included so a
+  // shop never ends up with zero languages (e.g. if a merchant somehow
+  // unchecks everything).
+  const cap = LANGUAGE_CAP_BY_PLAN[plan];
+  const requestedLangs = Array.isArray(clamped.enabledLanguages) ? clamped.enabledLanguages : ["en"];
+  const withEnglish = requestedLangs.includes("en") ? requestedLangs : ["en", ...requestedLangs];
+  if (withEnglish.length > cap || withEnglish.length !== requestedLangs.length) {
+    clamped.enabledLanguages = withEnglish.slice(0, cap);
+    if (withEnglish.length > cap) lockedFields.push("enabledLanguages (too many for plan)");
   }
 
   // Carousel itself (regardless of Free/Growth) is Pro-only.

@@ -27,7 +27,7 @@ export const PLANS = {
     photoReviewCap: 2,
     videoReviewCap: 1,
     reminderMonthlyCap: 50,
-    languageCount: 6, // 6 curated languages — see ALLOWED_LANGUAGES_BY_PLAN in lib/review-suggestions.ts
+    languageCount: 6, // cap on how many languages the merchant can enable — see lib/plan-gating.ts LANGUAGE_CAP_BY_PLAN
     brandingRemoved: true, // "Powered by Rivu" hidden on paid plans
   },
   pro: {

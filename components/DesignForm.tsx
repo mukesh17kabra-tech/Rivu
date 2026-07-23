@@ -36,6 +36,8 @@ type DesignSettings = {
   showSuggestionsOnWebsite: boolean;
   showSuggestionsOnQr: boolean;
   suggestionLanguage: string;
+  enabledLanguages: string[];
+  formTemplate: "basic" | "card" | "minimal" | "dark";
 };
 
 const FONT_OPTIONS = [
@@ -66,6 +68,7 @@ export function DesignForm({
 
   const isFree = plan === "free";
   const isPro = plan === "pro";
+  const languageCap = plan === "free" ? 1 : plan === "growth" ? 6 : 10;
 
   function update<K extends keyof DesignSettings>(key: K, value: DesignSettings[K]) {
     setSettings((s) => ({ ...s, [key]: value }));
@@ -548,21 +551,80 @@ export function DesignForm({
             Also needs Growth or Pro — Free plan is English-only.
           </p>
         )}
-        <label className="mb-2 block text-xs text-white/50">Language</label>
+        <label className="mb-2 block text-xs text-white/50">
+          Enabled languages ({settings.enabledLanguages.length}/{languageCap})
+        </label>
         <div className="grid grid-cols-5 gap-2">
-          {SUPPORTED_LANGUAGES.map((lang) => (
-            <button
-              key={lang.code}
-              onClick={() => update("suggestionLanguage", lang.code)}
-              className={`rounded-md border px-2 py-1.5 text-xs transition-colors ${
-                settings.suggestionLanguage === lang.code
-                  ? "border-emerald-400 bg-emerald-400/10 text-white"
-                  : "border-white/10 text-white/50 hover:border-white/30"
-              }`}
-            >
-              {lang.label}
-            </button>
-          ))}
+          {SUPPORTED_LANGUAGES.map((lang) => {
+            const checked = settings.enabledLanguages.includes(lang.code);
+            const atCap = settings.enabledLanguages.length >= languageCap;
+            const disabled = lang.code === "en" || (!checked && atCap);
+            return (
+              <label
+                key={lang.code}
+                className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1.5 text-xs transition-colors ${
+                  checked
+                    ? "border-emerald-400 bg-emerald-400/10 text-white"
+                    : disabled
+                    ? "cursor-not-allowed border-white/5 text-white/25"
+                    : "border-white/10 text-white/50 hover:border-white/30"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  disabled={disabled}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      update("enabledLanguages", [...settings.enabledLanguages, lang.code]);
+                    } else {
+                      update(
+                        "enabledLanguages",
+                        settings.enabledLanguages.filter((c) => c !== lang.code)
+                      );
+                    }
+                  }}
+                  className="h-3 w-3 accent-emerald-400"
+                />
+                {lang.label}
+              </label>
+            );
+          })}
+        </div>
+        <p className="mt-2 text-xs text-white/40">
+          {plan === "free"
+            ? "Free plan is English-only."
+            : `Pick up to ${languageCap} languages your customers can write reviews in.`}
+        </p>
+      </div>
+
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <p className="mb-3 text-sm font-medium text-white/70">Review form style</p>
+        <div className="grid grid-cols-2 gap-2">
+          {(["basic", "card", "minimal", "dark"] as const).map((t, i) => {
+            const labels = { basic: "Basic (clean)", card: "Card (accent)", minimal: "Minimal", dark: "Dark" };
+            const planReq = i === 0 ? "free" : i <= 2 ? "growth" : "pro";
+            const locked = (isFree && i > 0) || (plan === "growth" && i >= 3);
+            return (
+              <button
+                key={t}
+                onClick={() => !locked && update("formTemplate", t)}
+                disabled={locked}
+                className={`rounded-md border px-3 py-2 text-sm transition-colors ${
+                  locked
+                    ? "cursor-not-allowed border-white/5 text-white/25"
+                    : settings.formTemplate === t
+                    ? "border-emerald-400 bg-emerald-400/10 text-white"
+                    : "border-white/10 text-white/50 hover:border-white/30"
+                }`}
+              >
+                {locked ? "🔒 " : ""}{labels[t]}
+                {planReq !== "free" && (
+                  <span className="ml-1 text-[10px] opacity-50 capitalize">{planReq}+</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 

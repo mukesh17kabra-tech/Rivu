@@ -1,657 +1,557 @@
 /**
- * Review Widget — premium design with avatar-initial circles, review
- * titles, "Read more" truncation, and an elegant serif big-rating number
- * (inspired by top review apps like Judge.me/Okendo). Supports list,
- * grid, and carousel layouts, plus full color/font customization set by
- * the merchant in the app dashboard.
- *
- * <div id="review-widget"
- *      data-shop="{{ shop.permanent_domain }}"
- *      data-product-id="{{ product.id }}"
- *      data-product-title="{{ product.title | escape }}"
- *      data-product-image="{{ product.featured_image | image_url: width: 800 }}">
- * </div>
- * <script src="https://YOUR-APP-DOMAIN.vercel.app/widget.js" async></script>
+ * Rivu Review Widget — premium design matching the reference image:
+ * - Left: big serif rating, star breakdown bars, filter (Most Recent),
+ *   review cards with avatar circles, verified badge, "I recommend",
+ *   photo thumbnail→lightbox, Read more, Load more, Powered by Rivu (Free)
+ * - Modal popup: 4 selectable form templates (basic/card/minimal/dark),
+ *   plan-gated
  */
 (function () {
   const API_BASE = document.currentScript?.src
     ? new URL(document.currentScript.src).origin
     : "";
 
-  // Global styles injected once per page (not per widget instance):
-  // hides native scrollbars on carousels (our own arrow buttons are the
-  // intended navigation), plus a subtle serif font stack for the big
-  // rating number to match a premium review-app look.
   if (!document.getElementById("rv-global-styles")) {
-    const styleTag = document.createElement("style");
-    styleTag.id = "rv-global-styles";
-    styleTag.textContent = `
-      .rv-list::-webkit-scrollbar { display: none; }
-      .rv-list { scrollbar-width: none; -ms-overflow-style: none; }
-      .rv-big-rating { font-family: Georgia, 'Times New Roman', serif; }
-      .rv-avatar { font-family: Georgia, 'Times New Roman', serif; }
-      .rv-card { transition: box-shadow 0.15s, transform 0.15s; }
-      .rv-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-2px); }
-      .rv-media-thumb { transition: opacity 0.15s; }
-      .rv-media-thumb:hover { opacity: 0.85; }
+    const s = document.createElement("style");
+    s.id = "rv-global-styles";
+    s.textContent = `
+      .rv-list::-webkit-scrollbar{display:none}
+      .rv-list{scrollbar-width:none;-ms-overflow-style:none}
+      .rv-card{transition:box-shadow .15s,transform .15s}
+      .rv-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);transform:translateY(-2px)}
+      .rv-media-thumb{transition:opacity .15s;cursor:pointer}
+      .rv-media-thumb:hover{opacity:.82}
+      @keyframes rv-fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+      .rv-modal-backdrop{animation:rv-fade-in .18s ease}
     `;
-    document.head.appendChild(styleTag);
+    document.head.appendChild(s);
   }
 
-  // Deterministic avatar background color from the reviewer's name, so
-  // the same person always gets the same color (not random per render).
-  const AVATAR_PALETTE = ["#7c3aed", "#0891b2", "#dc2626", "#ea580c", "#16a34a", "#2563eb", "#c026d3", "#0d9488"];
   function avatarColor(name) {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    return AVATAR_PALETTE[Math.abs(hash) % AVATAR_PALETTE.length];
+    const P = ["#7c3aed","#0891b2","#dc2626","#ea580c","#16a34a","#2563eb","#c026d3","#0d9488"];
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+    return P[Math.abs(h) % P.length];
   }
   function initials(name) {
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    const p = name.trim().split(/\s+/);
+    return p.length === 1 ? p[0].slice(0, 2).toUpperCase() : (p[0][0] + p[p.length - 1][0]).toUpperCase();
   }
-  function formatDate(iso) {
-    try {
-      return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
-    } catch {
-      return "";
-    }
+  function timeAgo(iso) {
+    const d = Date.now() - new Date(iso).getTime(), s = d / 1000, m = s / 60, h = m / 60, day = h / 24, mo = day / 30, yr = day / 365;
+    if (yr >= 1) return `${Math.round(yr)} year${Math.round(yr) > 1 ? "s" : ""} ago`;
+    if (mo >= 1) return `about ${Math.round(mo)} month${Math.round(mo) > 1 ? "s" : ""} ago`;
+    if (day >= 1) return `${Math.round(day)} day${Math.round(day) > 1 ? "s" : ""} ago`;
+    if (h >= 1) return `${Math.round(h)} hour${Math.round(h) > 1 ? "s" : ""} ago`;
+    return "just now";
   }
+  function starsHtml(n, color, empty = "#e0e0e0", size = 16) {
+    return [1,2,3,4,5].map(i => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${i<=n?color:empty}" style="display:inline-block;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>`).join("");
+  }
+
+  const REVIEWS_PER_PAGE = 10;
 
   async function render(el) {
     const { shop, productId, productTitle, productImage } = el.dataset;
+    el.innerHTML = `<p style="font-size:14px;color:#aaa;padding:12px 0;">Loading reviews…</p>`;
 
-    el.innerHTML = `<p style="font-size:14px;color:#888;">Loading reviews...</p>`;
-
-    let reviews = [];
-    let summary = { total: 0, average: 0, breakdown: [] };
-    const DEFAULT_DESIGN = {
-      displayStyle: "list",
-      splitSummary: false,
-      gridColumns: 3,
-      carouselVisible: 1,
-      arrowColor: "#111111",
-      primaryColor: "#111111",
-      starColor: "#f5b400",
-      rangeColor: "#f5b400",
-      backgroundColor: "#ffffff",
-      textColor: "#333333",
-      borderRadius: 8,
-      fontFamily: "inherit",
-      reviewTextSize: 14,
-      reviewTextAlign: "left",
-      formAlign: "left",
-      formMaxWidth: 420,
-      widgetMaxWidth: 480,
-      widgetTitle: "Customer Reviews",
-      headingFontSize: 11,
-      headingBold: false,
-      headingAlign: "left",
-      topSpacing: 24,
-      showBorder: true,
-      borderColor: "#e0e0e0",
-      borderWidth: 1,
-      borderStyle: "solid",
-      backgroundGradient: null,
-      primaryGradient: null,
-      letCustomerPickLanguage: false,
-      showSuggestionsOnWebsite: true,
+    let reviews = [], summary = { total: 0, average: 0, breakdown: [] };
+    const D = {
+      displayStyle:"list", splitSummary:false, gridColumns:3, carouselVisible:1,
+      arrowColor:"#111", primaryColor:"#111", starColor:"#f5b400", rangeColor:"#f5b400",
+      backgroundColor:"#fff", textColor:"#333", borderRadius:8, fontFamily:"inherit",
+      reviewTextSize:14, reviewTextAlign:"left", formAlign:"center",
+      formMaxWidth:540, widgetMaxWidth:900, widgetTitle:"CUSTOMER REVIEWS",
+      headingFontSize:13, headingBold:true, headingAlign:"left",
+      topSpacing:24, showBorder:false, borderColor:"#e0e0e0", borderWidth:1, borderStyle:"solid",
+      backgroundGradient:null, primaryGradient:null,
+      letCustomerPickLanguage:false, showSuggestionsOnWebsite:true,
+      formTemplate:"basic",
     };
-    let design = { ...DEFAULT_DESIGN };
+    let design = { ...D };
     let plan = "free";
-    let availableLanguages = [{ code: "en", label: "English" }];
+    let availableLanguages = [{ code:"en", label:"English" }];
 
     try {
-      const res = await fetch(
-        `${API_BASE}/api/reviews/list?shop=${encodeURIComponent(shop)}&productId=${encodeURIComponent(productId)}`
-      );
+      const res = await fetch(`${API_BASE}/api/reviews/list?shop=${encodeURIComponent(shop)}&productId=${encodeURIComponent(productId)}`);
       if (res.ok) {
         const data = await res.json();
         reviews = data.reviews || [];
         summary = data.summary || summary;
         plan = data.plan || "free";
-        availableLanguages = data.availableLanguages || [{ code: "en", label: "English" }];
-        // Merge fetched design over defaults, but only fall back for
-        // truly missing values (undefined/null/empty string) — NOT for
-        // legitimate falsy values like `false` or `0`, which a naive
-        // `fetched[key] || default` would incorrectly override.
-        const fetched = data.design || {};
-        for (const key in DEFAULT_DESIGN) {
-          const val = fetched[key];
-          design[key] = val === undefined || val === null || val === "" ? DEFAULT_DESIGN[key] : val;
+        availableLanguages = data.availableLanguages || availableLanguages;
+        const f = data.design || {};
+        for (const k in D) {
+          const v = f[k];
+          design[k] = (v === undefined || v === null || v === "") ? D[k] : v;
         }
       }
-    } catch {
-      // Fall back to defaults + empty state below.
-    }
+    } catch {}
 
     const r = design.borderRadius;
-    const cardBackground = design.backgroundGradient || design.backgroundColor;
-    const buttonBackground = design.primaryGradient || design.primaryColor;
-    const cardStyle = `background:${cardBackground};color:${design.textColor};border-radius:${r}px;padding:18px;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.04);`;
+    const starColor = design.starColor;
+    const rangeColor = design.rangeColor;
+    const primary = design.primaryGradient || design.primaryColor;
+    const cardBg = design.backgroundGradient || design.backgroundColor;
 
+    // ─── State ───────────────────────────────────────────────────
+    let sortOrder = "newest";
+    let shownCount = REVIEWS_PER_PAGE;
+    let suggestionPool = [], suggestionPoolKey = "", suggestionBatchStart = 0;
+    let selectedRating = 0, photoDataUrl, videoDataUrl, selectedLang = availableLanguages[0]?.code || "en";
+
+    // ─── Lightbox ────────────────────────────────────────────────
+    function buildLightbox() {
+      const lb = document.createElement("div");
+      lb.className = "rv-lightbox-root";
+      lb.innerHTML = `<div class="rv-lightbox-back" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99999;align-items:center;justify-content:center;">
+        <button class="rv-lb-close" style="position:absolute;top:20px;right:24px;background:none;border:none;font-size:28px;color:#fff;cursor:pointer;">✕</button>
+        <div class="rv-lb-content" style="max-width:90vw;max-height:88vh;"></div>
+      </div>`;
+      el.appendChild(lb);
+      const back = lb.querySelector(".rv-lightbox-back");
+      lb.querySelector(".rv-lb-close").addEventListener("click", () => { back.style.display = "none"; lb.querySelector(".rv-lb-content").innerHTML = ""; });
+      back.addEventListener("click", e => { if (e.target === back) { back.style.display = "none"; lb.querySelector(".rv-lb-content").innerHTML = ""; } });
+      return { open(url, type) {
+        lb.querySelector(".rv-lb-content").innerHTML = type === "video"
+          ? `<video src="${url}" controls autoplay style="max-width:90vw;max-height:88vh;border-radius:8px;"></video>`
+          : `<img src="${url}" style="max-width:90vw;max-height:88vh;border-radius:8px;"/>`;
+        back.style.display = "flex";
+      }};
+    }
+
+    // ─── One review card ─────────────────────────────────────────
     function reviewCard(rev) {
-      const cardTextAlign = design.reviewTextAlign === "center" ? "center" : design.reviewTextAlign === "right" ? "right" : "left";
-      const carouselStyle = design.displayStyle === "carousel"
-        ? `min-width:${carouselCardWidth};flex-shrink:0;`
-        : design.displayStyle === "masonry"
-        ? masonryCardStyle
-        : "";
-      const badge = rev.isTopReviewer
-        ? `<span style="display:inline-block;margin-left:6px;padding:1px 6px;background:${design.primaryColor};color:#fff;border-radius:10px;font-size:9px;vertical-align:middle;white-space:nowrap;">⭐ Top Reviewer</span>`
-        : "";
-      const starJustify = cardTextAlign === "center" ? "center" : cardTextAlign === "right" ? "flex-end" : "flex-start";
-      const headerJustify = cardTextAlign === "center" ? "center" : "flex-start";
-
-      // "Read more" truncation for long review bodies — CSS-only clamp
-      // plus a JS toggle button. Kept simple: a max-height + fade, click
-      // to expand (no external libraries).
-      const isLong = rev.body.length > 220;
-      const bodyId = `rv-body-${rev.id}`;
-
+      const ta = design.reviewTextAlign;
+      const isLong = rev.body && rev.body.length > 240;
+      const bodyId = `rv-b-${rev.id}`;
+      const badge = rev.isTopReviewer ? `<span style="margin-left:4px;padding:1px 6px;background:${design.primaryColor};color:#fff;border-radius:10px;font-size:10px;vertical-align:middle;">⭐ Top</span>` : "";
       return `
-        <div class="rv-card" style="${cardStyle}${carouselStyle}">
-          <div style="display:flex;align-items:center;justify-content:${headerJustify};gap:10px;margin-bottom:10px;">
-            <div class="rv-avatar" style="width:34px;height:34px;border-radius:50%;background:${avatarColor(rev.customerName)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;">${initials(rev.customerName)}</div>
-            <div style="text-align:${cardTextAlign};">
-              <p style="margin:0;font-size:13px;font-weight:600;">${rev.customerName}${badge}</p>
-              <p style="margin:0;font-size:11px;opacity:0.5;">${formatDate(rev.createdAt)}</p>
-            </div>
-          </div>
-          <div style="display:flex;justify-content:${starJustify};color:${design.starColor};margin-bottom:8px;font-size:13px;">${"★".repeat(rev.rating)}${"☆".repeat(5 - rev.rating)}</div>
-          ${rev.reviewTitle ? `<p style="margin:0 0 6px;font-size:14px;font-weight:600;font-style:italic;text-align:${cardTextAlign};">${rev.reviewTitle}</p>` : ""}
-          <p id="${bodyId}" class="rv-body-text" data-full="${rev.body.replace(/"/g, "&quot;")}" style="margin:0 0 6px;line-height:1.55;font-size:${design.reviewTextSize}px;text-align:${cardTextAlign};${isLong ? "max-height:4.7em;overflow:hidden;position:relative;" : ""}">${rev.body}</p>
-          ${isLong ? `<button type="button" class="rv-read-more" data-target="${bodyId}" style="background:none;border:none;padding:0;margin:0 0 8px;font-size:12px;font-weight:600;color:${design.primaryColor};cursor:pointer;text-align:${cardTextAlign};display:block;">Read more</button>` : ""}
-          ${rev.videoUrl ? `<div class="rv-media-thumb" data-media-url="${rev.videoUrl}" data-media-type="video" style="width:90px;height:90px;border-radius:${Math.max(r - 2, 0)}px;margin:6px 0 0;cursor:pointer;position:relative;overflow:hidden;background:#000;">
-              <video src="${rev.videoUrl}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>
-              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);">
-                <span style="color:#fff;font-size:22px;">▶</span>
-              </div>
-            </div>` : ""}
-          ${!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}" style="width:90px;height:90px;object-fit:cover;border-radius:${Math.max(r - 2, 0)}px;margin:6px 0 0;cursor:pointer;" />` : ""}
-        </div>`;
+<div class="rv-card" style="background:${cardBg};color:${design.textColor};border-radius:${r}px;padding:20px;font-size:${design.reviewTextSize}px;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 4px rgba(0,0,0,.05);">
+  <div style="display:flex;align-items:flex-start;gap:12px;">
+    <div style="flex-shrink:0;">
+      <div class="rv-avatar" style="width:38px;height:38px;border-radius:50%;background:${avatarColor(rev.customerName)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">${initials(rev.customerName)}</div>
+    </div>
+    <div style="flex:1;min-width:0;">
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:2px;">
+        <span style="font-weight:700;font-size:14px;">${rev.customerName}</span>${badge}
+        <span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#2563eb;background:#eff6ff;padding:1px 7px;border-radius:20px;"><span>✓</span> Verified Buyer</span>
+        <span style="margin-left:auto;font-size:12px;color:#999;">${timeAgo(rev.createdAt)}</span>
+      </div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:6px;">${new Date(rev.createdAt).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})}</div>
+      <div style="display:flex;gap:2px;margin-bottom:8px;">${starsHtml(rev.rating, starColor, "#e0e0e0", 16)}</div>
+      ${rev.reviewTitle ? `<p style="margin:0 0 6px;font-weight:700;font-size:15px;font-style:italic;text-align:${ta};">${rev.reviewTitle}</p>` : ""}
+      ${rev.body ? `<p id="${bodyId}" style="margin:0 0 8px;line-height:1.6;text-align:${ta};${isLong ? "max-height:4.8em;overflow:hidden;" : ""}">${rev.body}</p>` : ""}
+      ${isLong ? `<button class="rv-read-more" data-target="${bodyId}" style="background:none;border:none;padding:0;font-size:12px;font-weight:600;color:${design.primaryColor};cursor:pointer;margin-bottom:8px;">Read more</button>` : ""}
+      ${rev.videoUrl ? `<div class="rv-media-thumb" data-media-url="${rev.videoUrl}" data-media-type="video" style="width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;background:#000;margin-bottom:8px;"><video src="${rev.videoUrl}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);"><span style="color:#fff;font-size:18px;">▶</span></div></div>` : ""}
+      ${!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;"/>` : ""}
+      <div style="display:flex;align-items:center;gap:4px;font-size:12px;color:#16a34a;margin-top:4px;">
+        <span style="font-size:16px;">👍</span> I recommend this product
+      </div>
+    </div>
+  </div>
+</div>`;
     }
 
-    let listWrapperStyle = "display:flex;flex-direction:column;gap:14px;";
-    let carouselCardWidth = null;
-    let masonryCardStyle = "";
-    const carouselNeedsScroll = reviews.length > design.carouselVisible;
-    if (design.displayStyle === "grid") {
-      listWrapperStyle = `display:grid;grid-template-columns:repeat(${design.gridColumns},1fr);gap:14px;`;
-    } else if (design.displayStyle === "carousel") {
-      listWrapperStyle = `display:flex;gap:14px;${carouselNeedsScroll ? "overflow-x:auto;" : "overflow:visible;"}scroll-behavior:smooth;padding-bottom:4px;`;
-      carouselCardWidth = `calc(${100 / design.carouselVisible}% - ${(14 * (design.carouselVisible - 1)) / design.carouselVisible}px)`;
-    } else if (design.displayStyle === "masonry") {
-      // True masonry (variable card heights packed tightly, Pinterest-
-      // style) needs either JS layout or native CSS masonry (not yet
-      // widely supported). CSS multi-column layout gives a very close
-      // visual approximation with zero JS: cards flow down each column
-      // and wrap, so cards of different heights don't leave big gaps.
-      listWrapperStyle = `column-count:${design.gridColumns};column-gap:14px;`;
-      masonryCardStyle = "break-inside:avoid;margin-bottom:14px;display:inline-block;width:100%;";
-    }
-    if (design.splitSummary) {
-      listWrapperStyle += "max-height:560px;overflow-y:auto;";
+    // ─── Sort + slice ─────────────────────────────────────────────
+    function getSortedReviews() {
+      const sorted = [...reviews].sort((a, b) =>
+        sortOrder === "newest"
+          ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          : new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+      return sorted;
     }
 
-    const breakdownHtml = summary.total
-      ? summary.breakdown
-          .map((b) => {
-            // Explicit Number() + fallback to 0 — defends against any
-            // unexpected non-numeric value silently making the whole
-            // inline `width:` declaration invalid (which browsers just
-            // drop, leaving the bar looking uncolored/empty regardless
-            // of the real percentage).
-            const pct = Number(b.percentage) || 0;
-            return `
-        <div style="display:flex;align-items:center;gap:8px;font-size:12px;margin:4px 0;">
-          <span style="width:34px;color:${design.textColor};opacity:0.65;">${b.star}★</span>
-          <div style="flex:1;height:6px;background:rgba(0,0,0,0.08);border-radius:3px;overflow:hidden;">
-            <div style="display:block;width:${pct}%;height:100%;background-color:${design.rangeColor};border-radius:3px;"></div>
+    // ─── Build summary + review list DOM ─────────────────────────
+    function buildMain() {
+      const sorted = getSortedReviews();
+      const visible = sorted.slice(0, shownCount);
+      const hasMore = sorted.length > shownCount;
+
+      // Breakdown bars
+      const breakdownHtml = summary.total ? summary.breakdown.map(b => {
+        const pct = Number(b.percentage) || 0;
+        return `<div style="display:flex;align-items:center;gap:10px;font-size:13px;margin:4px 0;">
+          <span style="width:48px;opacity:.7;">${b.star} Stars</span>
+          <div style="flex:1;height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:${rangeColor};border-radius:4px;"></div>
           </div>
-          <span style="width:32px;text-align:right;color:${design.textColor};opacity:0.65;">${pct}%</span>
+          <span style="width:28px;text-align:right;opacity:.7;">${b.percentage}</span>
         </div>`;
-          })
-          .join("")
-      : "";
+      }).join("") : "";
 
-    const rootTextAlign = design.formAlign === "center" ? "center" : design.formAlign === "right" ? "right" : "left";
-    const summaryJustify = design.formAlign === "center" ? "center" : design.formAlign === "right" ? "flex-end" : "flex-start";
+      const summaryHtml = summary.total ? `
+<div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:28px;">
+  <div style="text-align:center;flex-shrink:0;">
+    <div style="font-family:Georgia,serif;font-size:56px;font-weight:700;color:${design.textColor};line-height:1;">${summary.average}</div>
+    <div style="display:flex;justify-content:center;gap:2px;margin:6px 0 4px;">${starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 22)}</div>
+    <div style="font-size:12px;color:#999;">Based on ${summary.total} review${summary.total === 1 ? "" : "s"}</div>
+  </div>
+  <div style="flex:1;min-width:180px;">${breakdownHtml}</div>
+  <button class="rv-open-form-btn" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);">✏ Write a Review</button>
+</div>` : `
+<div style="margin-bottom:20px;">
+  <button class="rv-open-form-btn" style="display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;">✏ Write a Review</button>
+</div>`;
 
-    const summaryHtml = summary.total
-      ? `
-      <div style="display:flex;align-items:center;justify-content:${summaryJustify};gap:24px;margin-bottom:22px;flex-wrap:wrap;">
-        <div style="text-align:center;">
-          <div class="rv-big-rating" style="font-size:44px;font-weight:700;color:${design.textColor};line-height:1;">${summary.average}</div>
-          <div style="color:${design.starColor};font-size:14px;margin-top:4px;">${"★".repeat(Math.round(summary.average))}${"☆".repeat(5 - Math.round(summary.average))}</div>
-          <div style="font-size:12px;color:${design.textColor};opacity:0.55;margin-top:4px;">${summary.total} review${summary.total === 1 ? "" : "s"}</div>
-        </div>
-        <div style="flex:1;min-width:180px;max-width:300px;">${breakdownHtml}</div>
-      </div>`
-      : "";
+      const filtersHtml = reviews.length > 0 ? `
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(0,0,0,.08);">
+  <span style="font-size:14px;color:#999;">${reviews.length} Review${reviews.length === 1 ? "" : "s"}</span>
+  <select class="rv-sort" style="border:1px solid #ddd;border-radius:${Math.max(r-2,4)}px;padding:7px 12px;font-size:13px;font-family:inherit;cursor:pointer;background:#fff;color:${design.textColor};">
+    <option value="newest">Most Recent</option>
+    <option value="oldest">Oldest First</option>
+  </select>
+</div>` : "";
 
-    const reviewsHtml = reviews.length
-      ? reviews.map(reviewCard).join("")
-      : `<p style="font-size:14px;color:${design.textColor};opacity:0.55;text-align:${rootTextAlign};">No reviews yet — be the first!</p>`;
+      const listHtml = visible.length
+        ? visible.map(reviewCard).join("")
+        : `<p style="font-size:14px;color:#aaa;padding:12px 0;">No reviews yet — be the first!</p>`;
 
-    const formMargin =
-      design.formAlign === "center"
-        ? "18px auto 0"
-        : design.formAlign === "right"
-        ? "18px 0 0 auto"
-        : "18px 0 0 0";
-    const formTextAlign = design.formAlign === "center" ? "center" : "left";
+      const loadMoreHtml = hasMore ? `
+<div style="text-align:center;margin-top:20px;">
+  <button class="rv-load-more" style="padding:12px 32px;background:#fff;color:${design.primaryColor};border:2px solid ${design.primaryColor};border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;">
+    Load More Reviews ▾
+  </button>
+</div>` : "";
 
-    const carouselArrows =
-      design.displayStyle === "carousel" && reviews.length > design.carouselVisible
-        ? `
-      <button class="rv-arrow rv-arrow-prev" style="position:absolute;left:-4px;top:50%;transform:translateY(-50%);background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;cursor:pointer;color:${design.arrowColor};font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,0.1);z-index:1;">‹</button>
-      <button class="rv-arrow rv-arrow-next" style="position:absolute;right:-4px;top:50%;transform:translateY(-50%);background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;cursor:pointer;color:${design.arrowColor};font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,0.1);z-index:1;">›</button>`
-        : "";
-    const listOuterStyle = design.displayStyle === "carousel" ? "position:relative;padding:0 20px;" : "";
-
-    const bodyHtml = design.splitSummary
-      ? `
-        <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;">
-          <div style="flex:0 0 220px;position:sticky;top:16px;">${summaryHtml}</div>
-          <div style="flex:1;min-width:240px;position:relative;">
-            ${design.displayStyle === "carousel" ? carouselArrows : ""}
-            <div class="rv-list" style="${listWrapperStyle}">${reviewsHtml}</div>
-          </div>
-        </div>`
-      : `
-        ${summaryHtml}
-        <div style="${listOuterStyle}">
-          ${carouselArrows}
-          <div class="rv-list" style="${listWrapperStyle}">${reviewsHtml}</div>
-        </div>`;
-
-    const headingAlignValue = design.headingAlign === "center" ? "center" : design.headingAlign === "right" ? "right" : "left";
-    const borderStyle = design.showBorder
-      ? `border:${design.borderWidth}px ${design.borderStyle} ${design.borderColor};border-radius:${r}px;padding:20px;`
-      : "";
-
-    // "Powered by Rivu" — shown only on the Free plan (removed on paid
-    // plans as a perk). Uses window.open so the click doesn't accidentally
-    // navigate the shopper away from the product page in the same tab.
-    const brandingHtml =
-      plan === "free"
-        ? `<p style="margin-top:14px;font-size:10px;opacity:0.4;text-align:${rootTextAlign};">
-             Powered by <a href="https://rivu-one.vercel.app" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Rivu</a>
-           </p>`
+      const poweredBy = plan === "free"
+        ? `<p style="margin-top:16px;font-size:10px;color:#bbb;text-align:center;">Powered by <a href="https://rivu-one.vercel.app" target="_blank" rel="noopener" style="color:#bbb;text-decoration:underline;">Rivu</a></p>`
         : "";
 
-    // Lets shoppers choose which language they want to write their review
-    // in — only shown if the merchant enabled it (paid-plan feature) and
-    // there's more than just English available to pick from.
-    const languageDropdownHtml = design.letCustomerPickLanguage
-      ? `<select class="rv-lang-picker" style="margin-bottom:12px;padding:8px 10px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:12px;font-family:inherit;"></select>`
+      return `${summaryHtml}${filtersHtml}<div class="rv-list" style="display:flex;flex-direction:column;gap:14px;">${listHtml}</div>${loadMoreHtml}${poweredBy}`;
+    }
+
+    // ─── 4 form templates ─────────────────────────────────────────
+    function buildFormHtml(template) {
+      const langDropdown = design.letCustomerPickLanguage && availableLanguages.length > 1
+        ? `<select class="rv-lang-picker" style="width:100%;padding:10px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;margin-bottom:8px;">${availableLanguages.map(l => `<option value="${l.code}">${l.label}</option>`).join("")}</select>`
+        : "";
+
+      const stars = [1,2,3,4,5].map(n =>
+        `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:2px;cursor:pointer;font-size:30px;color:#ddd;transition:color .1s;">★</button>`
+      ).join("");
+
+      if (template === "card") {
+        // Purple-accent card style (top-right in reference)
+        return `
+<div style="background:#fff;border-radius:12px;padding:28px;font-family:inherit;position:relative;">
+  <button class="rv-form-close" style="position:absolute;top:16px;right:18px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer;line-height:1;">×</button>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+    <div style="width:34px;height:34px;border-radius:50%;background:${primary};display:flex;align-items:center;justify-content:center;">⭐</div>
+    <div>
+      <p style="margin:0;font-size:18px;font-weight:700;">Write a Review</p>
+      <p style="margin:0;font-size:12px;color:#aaa;">Share your honest experience</p>
+    </div>
+  </div>
+  <div style="margin:14px 0 6px;"><p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#555;">Your Rating</p><div style="display:flex;gap:2px;">${stars}</div></div>
+  ${langDropdown}
+  <div class="rv-suggestions-wrap" style="display:none;"></div>
+  <form class="rv-form" style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+    <div style="display:flex;gap:10px;">
+      <input type="text" name="customerName" required placeholder="Your Name *" style="flex:1;padding:11px 14px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit;"/>
+      <input type="email" name="customerEmail" placeholder="Email (Optional)" style="flex:1;padding:11px 14px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit;"/>
+    </div>
+    <textarea name="body" required minlength="10" placeholder="What did you like or dislike? How has this worked for you?" style="padding:11px 14px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;min-height:90px;font-family:inherit;resize:vertical;"></textarea>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#666;cursor:pointer;border:1px solid #e0e0e0;border-radius:8px;padding:8px 14px;">📷 <input type="file" name="photo" accept="image/*" style="display:none;"/><span class="rv-photo-label">Add Photo</span></label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#666;cursor:pointer;border:1px solid #e0e0e0;border-radius:8px;padding:8px 14px;">🎥 <input type="file" name="video" accept="video/*" style="display:none;"/><span class="rv-video-label">Add Video</span></label>
+      <button type="submit" style="margin-left:auto;padding:11px 24px;background:${primary};color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Submit Review</button>
+    </div>
+    <p class="rv-status" style="margin:0;font-size:13px;text-align:center;"></p>
+  </form>
+</div>`;
+      }
+
+      if (template === "minimal") {
+        // Clean light style (bottom-left in reference)
+        return `
+<div style="background:#fff;border-radius:12px;padding:28px;font-family:inherit;position:relative;">
+  <button class="rv-form-close" style="position:absolute;top:14px;right:18px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer;">×</button>
+  <p style="margin:0 0 4px;font-size:18px;font-weight:700;">Write a Review</p>
+  <p style="margin:0 0 14px;font-size:12px;color:#aaa;">Help others make the right choice</p>
+  <div style="margin-bottom:14px;">
+    <p style="margin:0 0 6px;font-size:13px;color:#555;">Rate your experience</p>
+    <div style="display:flex;gap:4px;">${[1,2,3,4,5].map(n => `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:2px;cursor:pointer;font-size:26px;color:#ddd;transition:color .1s;">★</button>`).join("")}</div>
+  </div>
+  ${langDropdown}
+  <div class="rv-suggestions-wrap" style="display:none;"></div>
+  <form class="rv-form" style="display:flex;flex-direction:column;gap:10px;">
+    <div style="display:flex;gap:10px;">
+      <input type="text" name="customerName" required placeholder="Your Name *" style="flex:1;padding:10px 14px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit;"/>
+      <input type="email" name="customerEmail" placeholder="Email (Optional)" style="flex:1;padding:10px 14px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit;"/>
+    </div>
+    <input type="text" name="reviewTitle" maxlength="150" placeholder="Review Title *" style="padding:10px 14px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit;font-weight:600;"/>
+    <textarea name="body" required minlength="10" placeholder="Share details of your experience..." style="padding:10px 14px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;min-height:90px;font-family:inherit;resize:vertical;"></textarea>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#666;cursor:pointer;border:1px solid #ddd;border-radius:8px;padding:8px 12px;">📷 <input type="file" name="photo" accept="image/*" style="display:none;"/><span class="rv-photo-label">Upload Photo</span></label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#666;cursor:pointer;border:1px solid #ddd;border-radius:8px;padding:8px 12px;">🎥 <input type="file" name="video" accept="video/*" style="display:none;"/><span class="rv-video-label">Upload Video</span></label>
+      <button type="submit" style="margin-left:auto;padding:10px 22px;background:#111;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Submit Review</button>
+    </div>
+    <p class="rv-status" style="margin:0;font-size:13px;text-align:center;"></p>
+  </form>
+</div>`;
+      }
+
+      if (template === "dark") {
+        // Dark style (bottom-right in reference)
+        return `
+<div style="background:#1a1a2e;border-radius:12px;padding:28px;font-family:inherit;position:relative;color:#fff;">
+  <button class="rv-form-close" style="position:absolute;top:14px;right:18px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer;color:#fff;">×</button>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+    <div style="width:32px;height:32px;border-radius:50%;background:${rangeColor};display:flex;align-items:center;justify-content:center;">⭐</div>
+    <div>
+      <p style="margin:0;font-size:17px;font-weight:700;color:#fff;">Write a Review</p>
+      <p style="margin:0;font-size:11px;color:#aaa;">Your feedback matters</p>
+    </div>
+  </div>
+  <div style="margin-bottom:12px;">
+    <p style="margin:0 0 6px;font-size:12px;color:#aaa;">Rate your experience</p>
+    <div style="display:flex;gap:4px;">${[1,2,3,4,5].map(n => `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:2px;cursor:pointer;font-size:26px;color:#444;transition:color .1s;">★</button>`).join("")}</div>
+  </div>
+  ${langDropdown}
+  <div class="rv-suggestions-wrap" style="display:none;"></div>
+  <form class="rv-form" style="display:flex;flex-direction:column;gap:10px;">
+    <div style="display:flex;gap:10px;">
+      <input type="text" name="customerName" required placeholder="Your Name *" style="flex:1;padding:10px 14px;border:1px solid #333;border-radius:8px;font-size:14px;font-family:inherit;background:#111827;color:#fff;"/>
+      <input type="email" name="customerEmail" placeholder="Email (Optional)" style="flex:1;padding:10px 14px;border:1px solid #333;border-radius:8px;font-size:14px;font-family:inherit;background:#111827;color:#fff;"/>
+    </div>
+    <textarea name="body" required minlength="10" placeholder="Tell us about your experience..." style="padding:10px 14px;border:1px solid #333;border-radius:8px;font-size:14px;min-height:90px;font-family:inherit;resize:vertical;background:#111827;color:#fff;"></textarea>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#aaa;cursor:pointer;">📷 <input type="file" name="photo" accept="image/*" style="display:none;"/><span class="rv-photo-label">Add Photo</span></label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#aaa;cursor:pointer;">🎥 <input type="file" name="video" accept="video/*" style="display:none;"/><span class="rv-video-label">Add Video</span></label>
+      <button type="submit" style="margin-left:auto;padding:10px 22px;background:${rangeColor};color:#1a1a2e;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Submit Review</button>
+    </div>
+    <p class="rv-status" style="margin:0;font-size:13px;text-align:center;color:#aaa;"></p>
+  </form>
+</div>`;
+      }
+
+      // Default "basic" — simple clean
+      return `
+<div style="background:#fff;border-radius:12px;padding:28px;font-family:inherit;position:relative;">
+  <button class="rv-form-close" style="position:absolute;top:14px;right:18px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer;">×</button>
+  <p style="margin:0 0 4px;font-size:19px;font-weight:700;font-family:Georgia,serif;text-align:center;">Write a Review</p>
+  <p style="margin:0 0 16px;font-size:12px;color:#aaa;text-align:center;">Share your honest experience</p>
+  <div style="text-align:center;margin-bottom:14px;">
+    <p style="margin:0 0 6px;font-size:13px;color:#555;">Your Rating</p>
+    <div style="display:flex;justify-content:center;gap:4px;">${stars}</div>
+    <p class="rv-tap-hint" style="margin:6px 0 0;font-size:11px;color:#bbb;">Tap a star to rate</p>
+  </div>
+  ${langDropdown}
+  <div class="rv-suggestions-wrap" style="display:none;"></div>
+  <form class="rv-form" style="display:flex;flex-direction:column;gap:10px;">
+    <div style="display:flex;gap:10px;">
+      <input type="text" name="customerName" required placeholder="Your Name *" style="flex:1;padding:11px 14px;border:1px solid #ddd;border-radius:${Math.max(r-2,4)}px;font-size:14px;font-family:inherit;"/>
+      <input type="email" name="customerEmail" placeholder="Email (Optional)" style="flex:1;padding:11px 14px;border:1px solid #ddd;border-radius:${Math.max(r-2,4)}px;font-size:14px;font-family:inherit;"/>
+    </div>
+    <input type="text" name="reviewTitle" maxlength="150" placeholder="Review Title (optional)" style="padding:11px 14px;border:1px solid #ddd;border-radius:${Math.max(r-2,4)}px;font-size:14px;font-family:inherit;"/>
+    <textarea name="body" required minlength="10" placeholder="What did you like or dislike? How has this worked for you?" style="padding:11px 14px;border:1px solid #ddd;border-radius:${Math.max(r-2,4)}px;font-size:14px;min-height:100px;font-family:inherit;resize:vertical;"></textarea>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#666;cursor:pointer;border:1px solid #ddd;border-radius:8px;padding:8px 12px;">📷 <input type="file" name="photo" accept="image/*" style="display:none;"/><span class="rv-photo-label">Add Photo</span></label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#666;cursor:pointer;border:1px solid #ddd;border-radius:8px;padding:8px 12px;">🎥 <input type="file" name="video" accept="video/*" style="display:none;"/><span class="rv-video-label">Add Video</span></label>
+      <button type="submit" style="margin-left:auto;padding:11px 24px;background:${primary};color:#fff;border:none;border-radius:${Math.max(r-2,4)}px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);">Submit Review</button>
+    </div>
+    <p class="rv-status" style="margin:0;font-size:13px;text-align:center;"></p>
+  </form>
+</div>`;
+    }
+
+    // ─── RENDER ───────────────────────────────────────────────────
+    const borderStr = design.showBorder
+      ? `border:${design.borderWidth}px ${design.borderStyle} ${design.borderColor};border-radius:${r}px;padding:24px;`
       : "";
 
     el.innerHTML = `
-      <div class="rv-root" style="font-family:${design.fontFamily};max-width:${design.widgetMaxWidth}px;width:100%;margin-top:${design.topSpacing}px;margin-left:${design.formAlign === "left" ? "0" : "auto"};margin-right:${design.formAlign === "right" ? "0" : "auto"};color:${design.textColor};text-align:${rootTextAlign};${borderStyle}">
-        <p style="font-size:${design.headingFontSize}px;font-weight:${design.headingBold ? 700 : 400};letter-spacing:0.06em;text-transform:uppercase;opacity:0.6;margin:0 0 6px;text-align:${headingAlignValue};">${design.widgetTitle}</p>
-        ${bodyHtml}
-        ${brandingHtml}
+<div class="rv-root" style="font-family:${design.fontFamily};max-width:${design.widgetMaxWidth}px;width:100%;margin-top:${design.topSpacing}px;margin-left:${design.formAlign==="left"?"0":"auto"};margin-right:${design.formAlign==="right"?"0":"auto"};color:${design.textColor};${borderStr}">
+  <p style="font-size:${design.headingFontSize}px;font-weight:${design.headingBold?700:400};letter-spacing:.06em;text-transform:uppercase;opacity:.6;margin:0 0 20px;text-align:${design.headingAlign};">${design.widgetTitle}</p>
+  <div class="rv-main-content">${buildMain()}</div>
+</div>
 
-        <button class="rv-toggle" style="margin-top:20px;padding:11px 22px;background:${buttonBackground};color:#fff;border:none;border-radius:${r}px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
-          Write a Review
-        </button>
+<div class="rv-modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
+  <div class="rv-form-container" style="width:100%;max-width:${design.formMaxWidth}px;max-height:92vh;overflow-y:auto;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.3);">
+    ${buildFormHtml(design.formTemplate)}
+  </div>
+</div>`;
 
-        <div class="rv-lightbox-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:24px;">
-          <button class="rv-lightbox-close" style="position:absolute;top:20px;right:20px;background:none;border:none;font-size:28px;line-height:1;cursor:pointer;color:#fff;padding:4px;">✕</button>
-          <div class="rv-lightbox-content" style="max-width:90vw;max-height:85vh;"></div>
-        </div>
+    const lightbox = buildLightbox();
 
-        <div class="rv-modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;padding:20px;">
-          <div class="rv-form-wrap" style="position:relative;width:100%;max-width:${design.formMaxWidth}px;max-height:90vh;overflow-y:auto;padding:28px;background:${design.backgroundColor};border-radius:${r}px;text-align:${formTextAlign};box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-            <button class="rv-form-close" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#999;padding:4px;">✕</button>
-            <p style="margin:0 0 4px;font-size:19px;font-weight:700;text-align:center;font-family:Georgia,serif;">Write a Review</p>
-            <p style="margin:0 0 4px;font-size:12px;opacity:0.5;text-align:center;">Share your honest experience</p>
-            ${languageDropdownHtml ? `<div style="text-align:center;margin-top:10px;">${languageDropdownHtml}</div>` : ""}
-            <div class="rv-stars" style="display:flex;gap:8px;justify-content:center;margin:16px 0 6px;">
-              ${[1, 2, 3, 4, 5]
-                .map(
-                  (n) =>
-                    `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:0;cursor:pointer;font-size:36px;line-height:1;color:#d9d9d9;transition:color 0.15s;">★</button>`
-                )
-                .join("")}
-            </div>
-            <p class="rv-tap-hint" style="margin:0 0 16px;font-size:11px;opacity:0.45;text-align:center;">Tap a star to rate</p>
+    // Wire up media thumbnails
+    el.querySelectorAll(".rv-media-thumb").forEach(t => {
+      t.addEventListener("click", () => lightbox.open(t.dataset.mediaUrl, t.dataset.mediaType));
+    });
 
-          <div class="rv-suggestions-wrap" style="display:none;text-align:left;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-              <p style="margin:0;font-size:13px;font-weight:600;opacity:0.7;">Pick a suggestion or write your own</p>
-              <div style="display:flex;gap:12px;">
-                <button type="button" class="rv-refresh" style="background:none;border:none;font-size:12px;color:${design.primaryColor};cursor:pointer;padding:0;">🔄 Refresh</button>
-                <button type="button" class="rv-close-suggestions" style="background:none;border:none;font-size:12px;color:#999;cursor:pointer;padding:0;">✕ Close</button>
-              </div>
-            </div>
-            <div class="rv-suggestions" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
-          </div>
-
-          <form class="rv-form" style="display:flex;flex-direction:column;gap:12px;text-align:left;">
-            <div style="display:flex;gap:10px;">
-              <input type="text" name="customerName" required placeholder="Your Name *"
-                     style="flex:1;padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-family:inherit;" />
-              <input type="email" name="customerEmail" placeholder="Email (Optional)"
-                     style="flex:1;padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-family:inherit;" />
-            </div>
-            <input type="text" name="reviewTitle" maxlength="150" placeholder="Review Title *"
-                   style="padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-family:inherit;font-weight:600;" />
-            <textarea name="body" required minlength="10" placeholder="What did you like or dislike? How has this worked for you?"
-                      style="padding:12px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;min-height:100px;font-family:inherit;resize:vertical;"></textarea>
-
-            <div>
-              <label style="font-size:12px;opacity:0.6;display:block;margin-bottom:6px;">Add a photo (optional)</label>
-              <label class="rv-photo-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:13px;cursor:pointer;color:#555;">
-                📷 <span class="rv-photo-label">Choose a photo</span>
-                <input type="file" name="photo" accept="image/*" style="display:none;" />
-              </label>
-              <img class="rv-photo-preview" style="display:none;max-width:90px;border-radius:6px;margin-top:8px;" />
-            </div>
-
-            <div>
-              <label style="font-size:12px;opacity:0.6;display:block;margin-bottom:6px;">Or add a short video (optional)</label>
-              <label class="rv-video-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #ddd;border-radius:${Math.max(r - 2, 4)}px;font-size:13px;cursor:pointer;color:#555;">
-                🎥 <span class="rv-video-label">Choose a video</span>
-                <input type="file" name="video" accept="video/*" style="display:none;" />
-              </label>
-              <p style="margin:4px 0 0;font-size:11px;opacity:0.5;">Keep it short (under ~15 seconds).</p>
-              <video class="rv-video-preview" controls style="display:none;max-width:160px;border-radius:6px;margin-top:8px;"></video>
-            </div>
-
-            <button type="submit" style="margin-top:6px;padding:13px 18px;background:${buttonBackground};color:#fff;border:none;border-radius:${Math.max(r - 2, 4)}px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
-              Submit Review
-            </button>
-            <p class="rv-status" style="margin:0;font-size:13px;text-align:center;"></p>
-          </form>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // "Read more" toggles — simple expand-in-place.
-    el.querySelectorAll(".rv-read-more").forEach((btn) => {
+    // Read more
+    el.querySelectorAll(".rv-read-more").forEach(btn => {
       btn.addEventListener("click", () => {
-        const target = el.querySelector(`#${btn.dataset.target}`);
-        if (!target) return;
-        target.style.maxHeight = "none";
-        target.style.overflow = "visible";
-        btn.style.display = "none";
+        const tgt = el.querySelector(`#${btn.dataset.target}`);
+        if (tgt) { tgt.style.maxHeight = "none"; tgt.style.overflow = "visible"; btn.style.display = "none"; }
       });
     });
 
-    // Media lightbox — click a photo/video thumbnail to see it full-size
-    // in a dark overlay (Fancybox-style), instead of the media taking up
-    // a huge amount of space inline in every review card.
-    const lightboxBackdrop = el.querySelector(".rv-lightbox-backdrop");
-    const lightboxContent = el.querySelector(".rv-lightbox-content");
-    const lightboxClose = el.querySelector(".rv-lightbox-close");
-
-    function openLightbox(url, type) {
-      lightboxContent.innerHTML =
-        type === "video"
-          ? `<video src="${url}" controls autoplay style="max-width:90vw;max-height:85vh;border-radius:8px;"></video>`
-          : `<img src="${url}" style="max-width:90vw;max-height:85vh;border-radius:8px;" />`;
-      lightboxBackdrop.style.display = "flex";
-    }
-    function closeLightbox() {
-      lightboxBackdrop.style.display = "none";
-      lightboxContent.innerHTML = "";
-    }
-
-    el.querySelectorAll(".rv-media-thumb").forEach((thumb) => {
-      thumb.addEventListener("click", () => {
-        openLightbox(thumb.dataset.mediaUrl, thumb.dataset.mediaType);
+    // Sort
+    const sortEl = el.querySelector(".rv-sort");
+    if (sortEl) {
+      sortEl.addEventListener("change", () => {
+        sortOrder = sortEl.value;
+        shownCount = REVIEWS_PER_PAGE;
+        el.querySelector(".rv-main-content").innerHTML = buildMain();
+        rewireMain();
       });
-    });
-    lightboxClose.addEventListener("click", closeLightbox);
-    lightboxBackdrop.addEventListener("click", (e) => {
-      if (e.target === lightboxBackdrop) closeLightbox();
-    });
-
-    const rvList = el.querySelector(".rv-list");
-    const prevArrow = el.querySelector(".rv-arrow-prev");
-    const nextArrow = el.querySelector(".rv-arrow-next");
-    if (prevArrow && nextArrow && rvList) {
-      const scrollAmount = () => rvList.clientWidth / design.carouselVisible + 14;
-      prevArrow.addEventListener("click", () => rvList.scrollBy({ left: -scrollAmount(), behavior: "smooth" }));
-      nextArrow.addEventListener("click", () => rvList.scrollBy({ left: scrollAmount(), behavior: "smooth" }));
     }
 
-    const toggle = el.querySelector(".rv-toggle");
+    // Load more
+    function rewireMain() {
+      const sortEl2 = el.querySelector(".rv-sort");
+      if (sortEl2) sortEl2.addEventListener("change", () => { sortOrder = sortEl2.value; shownCount = REVIEWS_PER_PAGE; el.querySelector(".rv-main-content").innerHTML = buildMain(); rewireMain(); });
+      const loadMore = el.querySelector(".rv-load-more");
+      if (loadMore) loadMore.addEventListener("click", () => { shownCount += REVIEWS_PER_PAGE; el.querySelector(".rv-main-content").innerHTML = buildMain(); rewireMain(); });
+      el.querySelectorAll(".rv-media-thumb").forEach(t => { t.addEventListener("click", () => lightbox.open(t.dataset.mediaUrl, t.dataset.mediaType)); });
+      el.querySelectorAll(".rv-read-more").forEach(btn => { btn.addEventListener("click", () => { const tgt = el.querySelector(`#${btn.dataset.target}`); if (tgt) { tgt.style.maxHeight="none"; tgt.style.overflow="visible"; btn.style.display="none"; } }); });
+      const openBtns = el.querySelectorAll(".rv-open-form-btn");
+      openBtns.forEach(b => b.addEventListener("click", openModal));
+    }
+    rewireMain();
+
+    // ─── Modal ────────────────────────────────────────────────────
     const backdrop = el.querySelector(".rv-modal-backdrop");
-    const formWrap = el.querySelector(".rv-form-wrap");
-    const formClose = el.querySelector(".rv-form-close");
-    const form = el.querySelector(".rv-form");
-    const status = el.querySelector(".rv-status");
-    const starButtons = [...el.querySelectorAll(".rv-star")];
-    const tapHint = el.querySelector(".rv-tap-hint");
-    const suggestionsWrap = el.querySelector(".rv-suggestions-wrap");
-    const langPicker = el.querySelector(".rv-lang-picker");
-    const suggestionsBox = el.querySelector(".rv-suggestions");
-    const refreshBtn = el.querySelector(".rv-refresh");
-    const closeSuggestionsBtn = el.querySelector(".rv-close-suggestions");
-    const bodyTextarea = form.querySelector('[name="body"]');
-    const photoInput = form.querySelector('[name="photo"]');
-    const photoLabel = el.querySelector(".rv-photo-label");
-    const photoPreview = el.querySelector(".rv-photo-preview");
-    const videoInput = form.querySelector('[name="video"]');
-    const videoLabel = el.querySelector(".rv-video-label");
-    const videoPreview = el.querySelector(".rv-video-preview");
+    const formContainer = el.querySelector(".rv-form-container");
 
-    let selectedRating = 0;
-    let photoDataUrl;
-    let videoDataUrl;
+    function openModal() { backdrop.style.display = "flex"; }
+    function closeModal() { backdrop.style.display = "none"; if(tapHint) tapHint.style.display=""; selectedRating=0; paintStars(); }
 
-    function openModal() {
-      backdrop.style.display = "flex";
-      document.body.style.overflow = "hidden";
+    el.querySelectorAll(".rv-open-form-btn").forEach(b => b.addEventListener("click", openModal));
+    backdrop.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
+
+    const formClose = formContainer.querySelector(".rv-form-close");
+    if (formClose) formClose.addEventListener("click", closeModal);
+
+    const form = formContainer.querySelector(".rv-form");
+    const status = formContainer.querySelector(".rv-status");
+    const starButtons = [...formContainer.querySelectorAll(".rv-star")];
+    const tapHint = formContainer.querySelector(".rv-tap-hint");
+    const suggestionsWrap = formContainer.querySelector(".rv-suggestions-wrap");
+    const langPicker = formContainer.querySelector(".rv-lang-picker");
+    const photoInput = formContainer.querySelector('[name="photo"]');
+    const videoInput = formContainer.querySelector('[name="video"]');
+    const photoLabel = formContainer.querySelector(".rv-photo-label");
+    const videoLabel = formContainer.querySelector(".rv-video-label");
+
+    if (langPicker) {
+      langPicker.addEventListener("change", () => { selectedLang = langPicker.value; if (selectedRating) loadSuggestions(); });
     }
-    function closeModal() {
-      backdrop.style.display = "none";
-      document.body.style.overflow = "";
-    }
-
-    toggle.addEventListener("click", openModal);
-    formClose.addEventListener("click", closeModal);
-    backdrop.addEventListener("click", (e) => {
-      if (e.target === backdrop) closeModal();
-    });
 
     function paintStars() {
-      starButtons.forEach((btn) => {
-        const n = Number(btn.dataset.star);
-        btn.style.color = n <= selectedRating ? design.starColor : "#d9d9d9";
-      });
-      if (tapHint) tapHint.style.display = "none";
+      starButtons.forEach(b => { b.style.color = Number(b.dataset.star) <= selectedRating ? starColor : "#ddd"; });
+      if (tapHint && selectedRating) tapHint.style.display = "none";
     }
 
-    let suggestionPool = [];
-    let suggestionPoolKey = ""; // "rating|lang" — refetch only when this changes
-    let suggestionBatchStart = 0;
-    const BATCH_SIZE = 6;
-
-    function renderSuggestionBatch() {
-      const batch = suggestionPool.slice(suggestionBatchStart, suggestionBatchStart + BATCH_SIZE);
-      suggestionsBox.innerHTML = batch
-        .map(
-          (s) =>
-            `<button type="button" class="rv-suggestion" style="text-align:left;padding:9px 11px;border:1px solid #e5e5e5;border-radius:6px;background:#fafafa;font-size:12px;cursor:pointer;color:#333;">${s}</button>`
-        )
-        .join("");
-      suggestionsBox.querySelectorAll(".rv-suggestion").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          bodyTextarea.value = btn.textContent;
-          suggestionsBox.querySelectorAll(".rv-suggestion").forEach((b) => {
-            b.style.borderColor = "#e5e5e5";
-            b.style.background = "#fafafa";
-          });
-          btn.style.borderColor = design.primaryColor;
-          btn.style.background = "#fff";
-        });
-      });
-    }
-
+    // Suggestions
+    let sPool = [], sKey = "", sBatch = 0;
     async function loadSuggestions() {
-      const lang = langPicker ? langPicker.value : "";
-      const key = `${selectedRating}|${lang}`;
-
-      // Only hit the API when the rating or language actually changed —
-      // "Refresh" just advances to the next unseen batch from the
-      // already-fetched pool, which is both faster and guarantees a
-      // genuinely different set of suggestions each time (instead of the
-      // same small batch getting reshuffled and looking identical).
-      if (key !== suggestionPoolKey) {
-        suggestionsBox.innerHTML = `<p style="font-size:12px;opacity:0.5;margin:0;">Loading...</p>`;
+      const key = `${selectedRating}|${selectedLang}`;
+      if (key !== sKey) {
+        if (suggestionsWrap) suggestionsWrap.innerHTML = `<p style="font-size:12px;color:#aaa;margin:0 0 8px;">Loading suggestions…</p>`;
         try {
-          const res = await fetch(
-            `${API_BASE}/api/reviews/suggestions?rating=${selectedRating}&productTitle=${encodeURIComponent(productTitle)}&shop=${encodeURIComponent(shop)}${lang ? `&lang=${lang}` : ""}`
-          );
+          const res = await fetch(`${API_BASE}/api/reviews/suggestions?rating=${selectedRating}&productTitle=${encodeURIComponent(productTitle)}&shop=${encodeURIComponent(shop)}&lang=${selectedLang}`);
           const data = await res.json();
-          suggestionPool = data.suggestions || [];
-          suggestionPoolKey = key;
-          suggestionBatchStart = 0;
-        } catch {
-          suggestionsBox.innerHTML = "";
-          return;
-        }
+          sPool = data.suggestions || [];
+          sKey = key;
+          sBatch = 0;
+        } catch { if(suggestionsWrap) suggestionsWrap.innerHTML=""; return; }
       } else {
-        // Advance to the next batch; if we've reached the end of the
-        // pool, loop back to the start (re-shuffled server-side data
-        // stays as-is, so this just cycles through what we already have).
-        suggestionBatchStart += BATCH_SIZE;
-        if (suggestionBatchStart >= suggestionPool.length) suggestionBatchStart = 0;
+        sBatch += 6;
+        if (sBatch >= sPool.length) sBatch = 0;
       }
-
       renderSuggestionBatch();
     }
 
-    if (langPicker) {
-      langPicker.innerHTML = availableLanguages
-        .map((l) => `<option value="${l.code}">${l.label}</option>`)
-        .join("");
-      langPicker.addEventListener("change", () => {
-        if (selectedRating) loadSuggestions();
+    function renderSuggestionBatch() {
+      if (!suggestionsWrap) return;
+      const batch = sPool.slice(sBatch, sBatch + 6);
+      const bodyTA = form && form.querySelector('[name="body"]');
+      suggestionsWrap.style.display = "block";
+      suggestionsWrap.innerHTML = `
+<div style="margin-bottom:10px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+    <span style="font-size:12px;font-weight:600;color:#555;">Suggestions</span>
+    <div style="display:flex;gap:10px;">
+      <button type="button" class="rv-refresh" style="background:none;border:none;font-size:12px;color:${design.primaryColor};cursor:pointer;padding:0;">🔄 Refresh</button>
+      <button type="button" class="rv-close-sug" style="background:none;border:none;font-size:12px;color:#aaa;cursor:pointer;padding:0;">✕</button>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:5px;">${batch.map(s => `<button type="button" class="rv-sug" style="text-align:left;padding:7px 10px;border:1px solid #e5e5e5;border-radius:6px;background:#fafafa;font-size:12px;cursor:pointer;color:#333;">${s}</button>`).join("")}</div>
+</div>`;
+      suggestionsWrap.querySelector(".rv-refresh").addEventListener("click", loadSuggestions);
+      suggestionsWrap.querySelector(".rv-close-sug").addEventListener("click", () => { suggestionsWrap.style.display="none"; });
+      suggestionsWrap.querySelectorAll(".rv-sug").forEach(b => {
+        b.addEventListener("click", () => {
+          if (bodyTA) bodyTA.value = b.textContent;
+          suggestionsWrap.querySelectorAll(".rv-sug").forEach(x => { x.style.borderColor="#e5e5e5"; x.style.background="#fafafa"; });
+          b.style.borderColor = design.primaryColor; b.style.background = "#fff";
+        });
       });
     }
 
-    starButtons.forEach((btn) => {
+    starButtons.forEach(btn => {
       btn.addEventListener("click", async () => {
-        selectedRating = Number(btn.dataset.star);
-        paintStars();
-        if (design.showSuggestionsOnWebsite) {
-          suggestionsWrap.style.display = "block";
-          bodyTextarea.value = "";
-          await loadSuggestions();
-        }
+        selectedRating = Number(btn.dataset.star); paintStars();
+        if (design.showSuggestionsOnWebsite) await loadSuggestions();
       });
     });
 
-    refreshBtn.addEventListener("click", loadSuggestions);
+    if (photoInput) {
+      photoInput.addEventListener("change", () => {
+        const file = photoInput.files?.[0]; if (!file) return;
+        if (photoLabel) photoLabel.textContent = file.name.slice(0, 16) + (file.name.length > 16 ? "…" : "");
+        const img = new Image(), reader = new FileReader();
+        reader.onload = () => { img.onload = () => { const c = document.createElement("canvas"); const sc = Math.min(1, 1000/Math.max(img.width,img.height)); c.width=img.width*sc; c.height=img.height*sc; c.getContext("2d").drawImage(img,0,0,c.width,c.height); photoDataUrl=c.toDataURL("image/jpeg",.82); }; img.src=reader.result; };
+        reader.readAsDataURL(file);
+      });
+    }
+    if (videoInput) {
+      videoInput.addEventListener("change", () => {
+        const file = videoInput.files?.[0]; if (!file) return;
+        if (file.size > 8*1024*1024) { alert("Video too large — please keep it under 8MB."); videoInput.value=""; return; }
+        if (videoLabel) videoLabel.textContent = file.name.slice(0,16)+(file.name.length>16?"…":"");
+        const reader = new FileReader();
+        reader.onload = () => { videoDataUrl = reader.result; };
+        reader.readAsDataURL(file);
+      });
+    }
 
-    closeSuggestionsBtn.addEventListener("click", () => {
-      suggestionsWrap.style.display = "none";
-      bodyTextarea.focus();
-    });
-
-    photoInput.addEventListener("change", () => {
-      const file = photoInput.files?.[0];
-      if (!file) return;
-      photoLabel.textContent = file.name.length > 20 ? file.name.slice(0, 18) + "..." : file.name;
-      const img = new Image();
-      const reader = new FileReader();
-      reader.onload = () => {
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const maxDim = 1000;
-          const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
-          canvas.width = img.width * scale;
-          canvas.height = img.height * scale;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          photoDataUrl = canvas.toDataURL("image/jpeg", 0.8);
-          photoPreview.src = photoDataUrl;
-          photoPreview.style.display = "block";
-        };
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    videoInput.addEventListener("change", () => {
-      const file = videoInput.files?.[0];
-      if (!file) return;
-      if (file.size > 8 * 1024 * 1024) {
-        alert("That video is a bit large — please choose one under ~8MB, or a shorter clip.");
-        videoInput.value = "";
-        return;
-      }
-      videoLabel.textContent = file.name.length > 20 ? file.name.slice(0, 18) + "..." : file.name;
-      const reader = new FileReader();
-      reader.onload = () => {
-        videoDataUrl = reader.result;
-        videoPreview.src = videoDataUrl;
-        videoPreview.style.display = "block";
-      };
-      reader.readAsDataURL(file);
-    });
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!selectedRating) {
-        status.textContent = "Please select a star rating.";
-        status.style.color = "#c0392b";
-        return;
-      }
-      const customerName = form.customerName.value;
-      const customerEmail = form.customerEmail.value;
-      const reviewTitle = form.reviewTitle.value;
-      const bodyText = form.body.value;
-
-      status.textContent = "Submitting...";
-      status.style.color = "#666";
-
-      try {
-        const res = await fetch(`${API_BASE}/api/reviews/submit`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            shop,
-            productId,
-            productTitle,
-            productImageUrl: productImage || undefined,
-            rating: selectedRating,
-            reviewTitle,
-            body: bodyText,
-            customerName,
-            customerEmail,
-            photoUrl: photoDataUrl,
-            videoUrl: videoDataUrl,
-          }),
-        });
-        const data = await res.json();
-        if (res.ok) {
-          status.textContent = data.discountCode
-            ? `Thanks! Here's a thank-you discount code: ${data.discountCode}`
-            : "Thanks! Your review is pending approval.";
-          status.style.color = "#1e7e34";
-          status.style.fontWeight = data.discountCode ? "600" : "normal";
-          form.reset();
-          setTimeout(() => {
-            closeModal();
-          }, 2500);
-        } else {
-          status.textContent = data.error || "Something went wrong.";
-          status.style.color = "#c0392b";
-        }
-      } catch {
-        status.textContent = "Network error, please try again.";
-        status.style.color = "#c0392b";
-      }
-    });
+    if (form) {
+      form.addEventListener("submit", async e => {
+        e.preventDefault();
+        if (!selectedRating) { if(status){status.textContent="Please pick a star rating.";status.style.color="#c0392b";} return; }
+        if(status){status.textContent="Submitting…";status.style.color="#666";}
+        try {
+          const res = await fetch(`${API_BASE}/api/reviews/submit`, {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({
+              shop, productId, productTitle,
+              productImageUrl: productImage || undefined,
+              rating: selectedRating,
+              reviewTitle: form.reviewTitle?.value || undefined,
+              body: form.body.value,
+              customerName: form.customerName.value,
+              customerEmail: form.customerEmail?.value || undefined,
+              photoUrl: photoDataUrl,
+              videoUrl: videoDataUrl,
+            }),
+          });
+          const data = await res.json();
+          if (res.ok) {
+            if(status){ status.textContent = data.discountCode ? `Thanks! Discount code: ${data.discountCode}` : "Thanks! Your review is pending approval."; status.style.color="#1e7e34"; }
+            form.reset(); photoDataUrl=undefined; videoDataUrl=undefined;
+            setTimeout(closeModal, 2500);
+          } else {
+            if(status){status.textContent=data.error||"Something went wrong.";status.style.color="#c0392b";}
+          }
+        } catch { if(status){status.textContent="Network error, please try again.";status.style.color="#c0392b";} }
+      });
+    }
   }
 
   document.querySelectorAll("#review-widget").forEach(render);

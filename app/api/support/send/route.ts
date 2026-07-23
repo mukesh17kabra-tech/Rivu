@@ -4,7 +4,11 @@ import { z } from "zod";
 
 const schema = z.object({
   shop: z.string().min(1),
-  message: z.string().min(1).max(2000),
+  message: z.string().max(2000).default(""),
+  imageUrl: z.preprocess(
+    (val) => (val === "" ? null : val),
+    z.string().refine((v) => v.startsWith("data:image/"), "Must be an image data URI").nullable()
+  ).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -14,7 +18,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const { shop, message } = parsed.data;
+  const { shop, message, imageUrl } = parsed.data;
+
+  if (!message && !imageUrl) {
+    return NextResponse.json({ error: "Message or image required" }, { status: 400 });
+  }
 
   const shopRecord = await db.shop.findUnique({ where: { shopDomain: shop } });
   if (!shopRecord) {
@@ -22,7 +30,7 @@ export async function POST(req: NextRequest) {
   }
 
   await db.supportMessage.create({
-    data: { shopId: shopRecord.id, message, fromDeveloper: false },
+    data: { shopId: shopRecord.id, message: message || "", imageUrl: imageUrl ?? null, fromDeveloper: false },
   });
 
   return NextResponse.json({ success: true });

@@ -69,6 +69,10 @@ model Shop {
   // the actual star icons for that product's average rating.
   ratingBadgeTemplate String @default("{rating} rating for this product")
 
+  // Which write-a-review form style to use — plan gated:
+  // Free: "basic" only | Growth: "basic"/"card"/"minimal" | Pro: all four
+  formTemplate        String @default("basic") // "basic" | "card" | "minimal" | "dark"
+
   // Store logo shown on generated UGC graphics (small watermark, bottom
   // corner) — stored as a base64 data URI, same pattern as review photos.
   logoUrl  String? @db.Text
@@ -79,7 +83,8 @@ model Shop {
   // vs. the QR-scan flow, since merchants may want one but not the other.
   showSuggestionsOnWebsite Boolean @default(true)
   showSuggestionsOnQr      Boolean @default(true)
-  suggestionLanguage       String  @default("en") // "en" | "hi" — language of the pre-written review suggestions
+  suggestionLanguage       String  @default("en") // merchant's own default language for suggestions
+  enabledLanguages         String[] @default(["en"]) // languages the merchant has turned on for their store — customer-facing dropdown only shows these. Count is capped by plan (Free:1, Growth:6, Pro:10) at save time.
 
   // Optional reward for leaving a review — merchant toggles this on and
   // picks a discount type/value. When enabled, every review submission
@@ -194,6 +199,7 @@ model SupportMessage {
   shop          Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   message       String   @db.Text
+  imageUrl      String?  @db.Text // optional base64 data URI image attachment
   fromDeveloper Boolean  @default(false) // false = merchant sent it, true = your reply
   read          Boolean  @default(false) // whether you've seen this merchant message yet (only meaningful when fromDeveloper=false)
 

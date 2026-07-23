@@ -5,7 +5,8 @@ import { z } from "zod";
 const schema = z.object({
   key: z.string().min(1),
   shop: z.string().min(1),
-  message: z.string().min(1).max(2000),
+  message: z.string().max(2000).default(""),
+  imageUrl: z.string().optional().nullable(),
 });
 
 export async function POST(req: NextRequest) {
@@ -15,7 +16,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const { key, shop, message } = parsed.data;
+  const { key, shop, message, imageUrl } = parsed.data;
 
   if (!process.env.SUPPORT_SECRET_KEY || key !== process.env.SUPPORT_SECRET_KEY) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
   }
 
   await db.supportMessage.create({
-    data: { shopId: shopRecord.id, message, fromDeveloper: true },
+    data: { shopId: shopRecord.id, message: message || "", imageUrl: imageUrl ?? null, fromDeveloper: true },
   });
 
   return NextResponse.json({ success: true });

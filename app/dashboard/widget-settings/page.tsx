@@ -69,6 +69,8 @@ export default async function WidgetSettingsPage({
               showSuggestionsOnWebsite: shopRecord.showSuggestionsOnWebsite,
               showSuggestionsOnQr: shopRecord.showSuggestionsOnQr,
               suggestionLanguage: shopRecord.suggestionLanguage,
+              enabledLanguages: shopRecord.enabledLanguages,
+              formTemplate: (shopRecord.formTemplate || "basic") as "basic" | "card" | "minimal" | "dark",
             }}
           />
           <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">

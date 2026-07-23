@@ -40,6 +40,8 @@ const schema = z.object({
   showSuggestionsOnWebsite: z.boolean(),
   showSuggestionsOnQr: z.boolean(),
   suggestionLanguage: z.enum(LANGUAGE_CODES),
+  enabledLanguages: z.array(z.enum(LANGUAGE_CODES)).min(1).max(10),
+  formTemplate: z.enum(["basic", "card", "minimal", "dark"]),
 });
 
 export async function POST(req: NextRequest) {

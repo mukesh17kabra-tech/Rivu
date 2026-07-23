@@ -33,22 +33,7 @@ export default async function PlansPage({
 
         <PlanCards shop={shop} currentPlan={shopRecord.plan} />
 
-        <section className="mt-8 rounded-lg border border-white/10 bg-white/[0.02] p-5">
-          <p className="mb-1 text-sm font-medium text-white">Need help?</p>
-          <p className="text-sm text-white/60">
-            Questions about your plan, billing, or the app in general — reach out at{" "}
-            <a href="mailto:support@yourdomain.com" className="text-emerald-400 underline">
-              support@yourdomain.com
-            </a>
-            . Pro plan merchants get priority replies.
-          </p>
-          <p className="mt-2 text-xs text-white/40">
-            (Replace this with your real support email — pick any address on a domain you
-            control, e.g. Gmail forwarding or your store's own domain.)
-          </p>
-        </section>
-
-        <DevPlanBypass shop={shop} currentPlan={shopRecord.plan} />
+        <DevPlanBypass shop={shop} currentPlan={shopRecord.plan} />        <DevPlanBypass shop={shop} currentPlan={shopRecord.plan} />
       </div>
     </main>
   );
