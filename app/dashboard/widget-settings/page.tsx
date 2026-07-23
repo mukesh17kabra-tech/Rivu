@@ -72,6 +72,12 @@ export default async function WidgetSettingsPage({
               enabledLanguages: shopRecord.enabledLanguages,
               formTemplate: (shopRecord.formTemplate || "basic") as "basic" | "card" | "minimal" | "dark",
               summaryLayout: (shopRecord.summaryLayout || "modern") as "modern" | "compact" | "sidebar" | "horizontal",
+              summaryBgColor: (shopRecord as Record<string, unknown>).summaryBgColor as string || "#f8f8f8",
+              summaryTextColor: (shopRecord as Record<string, unknown>).summaryTextColor as string || "#333333",
+              summaryWidth: (shopRecord as Record<string, unknown>).summaryWidth as number || 220,
+              formBgColor: (shopRecord as Record<string, unknown>).formBgColor as string || "#ffffff",
+              formTextColor: (shopRecord as Record<string, unknown>).formTextColor as string || "#1a1a2e",
+              formCloseColor: (shopRecord as Record<string, unknown>).formCloseColor as string || "#999999",
             }}
           />
           <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">

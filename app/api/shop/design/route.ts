@@ -43,6 +43,12 @@ const schema = z.object({
   enabledLanguages: z.array(z.enum(LANGUAGE_CODES)).min(1).max(10),
   formTemplate: z.enum(["basic", "card", "minimal", "dark"]),
   summaryLayout: z.enum(["modern", "compact", "sidebar", "horizontal"]),
+  summaryBgColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  summaryTextColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  summaryWidth: z.number().int().min(160).max(400),
+  formBgColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  formTextColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  formCloseColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
 });
 
 export async function POST(req: NextRequest) {

@@ -39,6 +39,14 @@ type DesignSettings = {
   enabledLanguages: string[];
   formTemplate: "basic" | "card" | "minimal" | "dark";
   summaryLayout: "modern" | "compact" | "sidebar" | "horizontal";
+  // Summary block customization
+  summaryBgColor: string;
+  summaryTextColor: string;
+  summaryWidth: number;
+  // Form modal customization
+  formBgColor: string;
+  formTextColor: string;
+  formCloseColor: string;
 };
 
 const FONT_OPTIONS = [
@@ -745,10 +753,58 @@ export function DesignForm({
         <p className="mt-3 text-xs text-white/40">
           Free: Modern Card only · Growth: + Compact & Sidebar · Pro: All 4
         </p>
+
+        {/* Summary block customization */}
+        <div className="mt-4 grid grid-cols-3 gap-4 border-t border-white/10 pt-4">
+          <ColorField
+            label="Summary background"
+            value={settings.summaryBgColor}
+            onChange={(v) => update("summaryBgColor", v)}
+          />
+          <ColorField
+            label="Summary text color"
+            value={settings.summaryTextColor}
+            onChange={(v) => update("summaryTextColor", v)}
+          />
+          {settings.summaryLayout === "sidebar" && (
+            <div>
+              <label className="mb-1 block text-xs text-white/50">
+                Sidebar width: {settings.summaryWidth}px
+              </label>
+              <input
+                type="range"
+                min={160}
+                max={400}
+                value={settings.summaryWidth}
+                onChange={(e) => update("summaryWidth", Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <p className="mb-4 text-sm font-medium text-white/70">Review form style</p>
+
+        {/* Form color controls */}
+        <div className="mb-4 grid grid-cols-3 gap-4">
+          <ColorField
+            label="Form background"
+            value={settings.formBgColor}
+            onChange={(v) => update("formBgColor", v)}
+          />
+          <ColorField
+            label="Form text color"
+            value={settings.formTextColor}
+            onChange={(v) => update("formTextColor", v)}
+          />
+          <ColorField
+            label="Close button color"
+            value={settings.formCloseColor}
+            onChange={(v) => update("formCloseColor", v)}
+          />
+        </div>
 
         {/* 4 template cards side by side — each shows a mini preview of the real form */}
         <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">

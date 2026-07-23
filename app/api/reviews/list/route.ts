@@ -157,6 +157,12 @@ export async function GET(req: NextRequest) {
           letCustomerPickLanguage: safe(s.letCustomerPickLanguage as boolean, false),
           formTemplate:          safe(s.formTemplate as string,           "basic"),
           summaryLayout:         safe(s.summaryLayout as string,          "modern"),
+          summaryBgColor:        safe(s.summaryBgColor as string,         "#f8f8f8"),
+          summaryTextColor:      safe(s.summaryTextColor as string,       "#333333"),
+          summaryWidth:          safe(s.summaryWidth as number,           220),
+          formBgColor:           safe(s.formBgColor as string,            "#ffffff"),
+          formTextColor:         safe(s.formTextColor as string,          "#1a1a2e"),
+          formCloseColor:        safe(s.formCloseColor as string,         "#999999"),
           showSuggestionsOnWebsite: safe(s.showSuggestionsOnWebsite as boolean, true),
         },
       })

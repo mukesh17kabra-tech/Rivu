@@ -51,7 +51,7 @@
     const { shop, productId, productTitle, productImage, apiBase } = el.dataset;
     const API_BASE = apiBase || "";
     if (!shop || !productId || !API_BASE) {
-      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: block missing configuration. Remove and re-add the Rivu Reviews block from the theme editor.</p>';
+      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: block missing configuration. Remove and re-add the Rivu Reviews block.</p>';
       return;
     }
     el.innerHTML = `<p style="font-size:14px;color:#aaa;padding:12px 0;">Loading reviews…</p>`;
@@ -69,6 +69,12 @@
       letCustomerPickLanguage:false, showSuggestionsOnWebsite:true,
       formTemplate:"basic",
       summaryLayout:"modern",
+      summaryBgColor:"#f8f8f8",
+      summaryTextColor:"#333333",
+      summaryWidth:220,
+      formBgColor:"#ffffff",
+      formTextColor:"#1a1a2e",
+      formCloseColor:"#999999",
     };
     let design = { ...D };
     let plan = "free";
@@ -212,7 +218,7 @@
       // ── A: Modern Card (Free+) ─────────────────────────────────────────────
       // Orange rating box left, breakdown bars center, Write button right
       const summaryModern = summary.total ? `
-<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px;padding:20px;background:#fff;border:1px solid #f0f0f0;border-radius:${r}px;box-shadow:0 1px 6px rgba(0,0,0,.05);">
+<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px;padding:20px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;">
   <div style="display:flex;align-items:center;gap:16px;flex-shrink:0;">
     <div style="background:${rangeColor};border-radius:10px;padding:14px 18px;text-align:center;min-width:72px;">
       <div style="font-family:Georgia,serif;font-size:32px;font-weight:800;color:#fff;line-height:1;">${summary.average}</div>
@@ -306,7 +312,7 @@
       // Sidebar layout (C) — summary as fixed left column, reviews on right
       if (sl === "sidebar" && summary.total) {
         return `<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
-  <div style="flex:0 0 200px;position:sticky;top:16px;">${summaryHtml}</div>
+  <div style="flex:0 0 ${design.summaryWidth}px;position:sticky;top:16px;">${summaryHtml}</div>
   <div style="flex:1;min-width:260px;">
     ${filtersHtml}
     ${reviewListHtml}
@@ -321,51 +327,71 @@
 
     // ─── 4 form templates ─────────────────────────────────────────
     function buildFormHtml(template) {
-      const langDropdown = design.letCustomerPickLanguage && availableLanguages.length > 1
-        ? `<select class="rv-lang-picker" style="width:100%;padding:10px;border:1px solid rgba(255,255,255,.15);border-radius:8px;font-size:13px;font-family:inherit;margin-bottom:12px;background:rgba(255,255,255,.08);color:inherit;">${availableLanguages.map(l => `<option value="${l.code}">${l.label}</option>`).join("")}</select>`
-        : "";
+      const fBg = design.formBgColor || "#fff";
+      const fTc = design.formTextColor || "#1a1a2e";
+      const fClose = design.formCloseColor || "#999";
+      const isDark = template === "dark";
 
-      // Shared: interactive star buttons
-      const starRow = (size, gap, color) => [1,2,3,4,5].map(n =>
-        `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:${gap}px;cursor:pointer;font-size:${size}px;color:#ccc;line-height:1;transition:color .12s,transform .1s;">★</button>`
-      ).join("");
+      // Input style — NO box shadow ever, clean border only
+      const inp = (extra) => `padding:11px 14px;border:1.5px solid ${isDark ? "rgba(255,255,255,.15)" : "#e0e0e0"};border-radius:8px;font-size:14px;font-family:inherit;background:${isDark ? "rgba(255,255,255,.06)" : fBg};color:${isDark ? "#fff" : fTc};outline:none;width:100%;box-sizing:border-box;box-shadow:none;${extra||""}`;
+      const inp_focus = (col) => `onfocus="this.style.borderColor='${col}'" onblur="this.style.borderColor='${isDark ? "rgba(255,255,255,.15)" : "#e0e0e0"}'"`; 
 
-      // Shared: recommend checkbox
-      const recBox = (bg, tc) =>
-        `<label style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:${bg};border-radius:8px;cursor:pointer;font-size:13px;color:${tc};">
+      // Media upload button — highlighted, easy to tap
+      const mediaBtn = (icon, label, name, accept) =>
+        `<label style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:${isDark ? "rgba(255,255,255,.1)" : "#f0f0f0"};color:${isDark ? "rgba(255,255,255,.85)" : "#444"};border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:background .15s;" onmouseenter="this.style.background='${isDark ? "rgba(255,255,255,.18)" : "#e0e0e0"}'" onmouseleave="this.style.background='${isDark ? "rgba(255,255,255,.1)" : "#f0f0f0"}'">
+          ${icon} ${label}
+          <input type="file" name="${name}" accept="${accept}" style="display:none;"/>
+          <span class="rv-${name}-label"></span>
+        </label>`;
+
+      // Recommend checkbox
+      const recBox = `<label style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:${isDark ? "rgba(255,255,255,.05)" : "#f8f8f8"};border-radius:8px;cursor:pointer;font-size:13px;color:${isDark ? "rgba(255,255,255,.8)" : fTc};">
           <input type="checkbox" name="recommends" style="width:16px;height:16px;accent-color:${design.primaryColor};cursor:pointer;flex-shrink:0;"/>
           👍 I would recommend this product
         </label>`;
 
+      const langDropdown = design.letCustomerPickLanguage && availableLanguages.length > 1
+        ? `<select class="rv-lang-picker" style="width:100%;padding:10px;border:1.5px solid ${isDark ? "rgba(255,255,255,.15)" : "#e0e0e0"};border-radius:8px;font-size:13px;font-family:inherit;margin-bottom:12px;background:${isDark ? "rgba(255,255,255,.08)" : fBg};color:${isDark ? "#fff" : fTc};box-shadow:none;">${availableLanguages.map(l => `<option value="${l.code}">${l.label}</option>`).join("")}</select>`
+        : "";
+
+      const starRow = (size, gap) => [1,2,3,4,5].map(n =>
+        `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:${gap}px;cursor:pointer;font-size:${size}px;color:#ccc;line-height:1;transition:color .12s;">★</button>`
+      ).join("");
+
+      const submitBtn = (bg, tc, extra) =>
+        `<button type="submit" style="padding:11px 24px;background:${bg};color:${tc};border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;${extra||""}">Submit Review</button>`;
+
+      const closeBtn = (abs) =>
+        `<button class="rv-form-close" style="${abs ? "position:absolute;top:14px;right:16px;" : ""}background:none;border:none;font-size:22px;cursor:pointer;color:${fClose};line-height:1;padding:4px;">×</button>`;
+
       // ── TEMPLATE 1: BASIC ──────────────────────────────────────────────────
-      // Clean white form, centered heading, big stars in a pill background
       if (template === "basic") { return `
-<div style="background:#fff;border-radius:16px;overflow:hidden;font-family:inherit;">
-  <div style="background:linear-gradient(135deg,#f8f9ff 0%,#eef1ff 100%);padding:24px 28px 20px;text-align:center;border-bottom:1px solid #eee;">
-    <p style="margin:0 0 3px;font-size:20px;font-weight:800;color:#1a1a2e;letter-spacing:-.3px;">Write a Review</p>
-    <p style="margin:0;font-size:13px;color:#888;">Share your honest experience</p>
-    <button class="rv-form-close" style="position:absolute;top:14px;right:16px;background:rgba(0,0,0,.07);border:none;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer;color:#555;display:flex;align-items:center;justify-content:center;">×</button>
+<div style="background:${fBg};border-radius:16px;overflow:hidden;font-family:inherit;color:${fTc};">
+  <div style="background:linear-gradient(135deg,rgba(0,0,0,.04) 0%,rgba(0,0,0,.02) 100%);padding:22px 28px 18px;text-align:center;border-bottom:1px solid rgba(0,0,0,.07);position:relative;">
+    ${closeBtn(true)}
+    <p style="margin:0 0 3px;font-size:20px;font-weight:800;color:${fTc};letter-spacing:-.3px;">Write a Review</p>
+    <p style="margin:0;font-size:13px;color:${fTc};opacity:.5;">Share your honest experience</p>
   </div>
-  <div style="padding:24px 28px;">
-    <div style="text-align:center;margin-bottom:18px;">
-      <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.05em;">Your Rating</p>
-      <div style="display:inline-flex;background:#fff8ee;border-radius:40px;padding:6px 14px;gap:0;">${starRow(34, 3, "#f5b400")}</div>
-      <p class="rv-tap-hint" style="margin:6px 0 0;font-size:11px;color:#bbb;">Tap a star to rate</p>
+  <div style="padding:22px 28px;">
+    <div style="text-align:center;margin-bottom:16px;">
+      <p style="margin:0 0 8px;font-size:11px;font-weight:600;color:${fTc};opacity:.45;text-transform:uppercase;letter-spacing:.05em;">Your Rating</p>
+      <div style="display:inline-flex;background:rgba(245,180,0,.1);border-radius:40px;padding:4px 12px;">${starRow(32, 3)}</div>
+      <p class="rv-tap-hint" style="margin:5px 0 0;font-size:11px;color:${fTc};opacity:.35;">Tap a star to rate</p>
     </div>
     ${langDropdown}
     <div class="rv-suggestions-wrap" style="display:none;"></div>
     <form class="rv-form" style="display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;gap:10px;">
-        <input name="customerName" required placeholder="Your Name *" style="flex:1;padding:11px 14px;border:2px solid #eee;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#eee'"/>
-        <input name="customerEmail" type="email" placeholder="Email (Optional)" style="flex:1;padding:11px 14px;border:2px solid #eee;border-radius:10px;font-size:14px;font-family:inherit;outline:none;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#eee'"/>
+        <input name="customerName" required placeholder="Your Name *" style="${inp()}" ${inp_focus(design.primaryColor)}/>
+        <input name="customerEmail" type="email" placeholder="Email (Optional)" style="${inp()}" ${inp_focus(design.primaryColor)}/>
       </div>
-      <input name="reviewTitle" maxlength="150" placeholder="Give your review a headline (optional)" style="padding:11px 14px;border:2px solid #eee;border-radius:10px;font-size:14px;font-family:inherit;font-weight:600;outline:none;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#eee'"/>
-      <textarea name="body" required minlength="10" placeholder="What did you like or dislike?" style="padding:11px 14px;border:2px solid #eee;border-radius:10px;font-size:14px;min-height:100px;font-family:inherit;resize:vertical;outline:none;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#eee'"></textarea>
-      ${recBox("#f8f9ff", "#555")}
-      <div style="display:flex;gap:8px;align-items:center;">
-        <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#888;cursor:pointer;border:1px solid #ddd;border-radius:8px;padding:7px 12px;">📷<input type="file" name="photo" accept="image/*" style="display:none;"/><span class="rv-photo-label">Photo</span></label>
-        <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#888;cursor:pointer;border:1px solid #ddd;border-radius:8px;padding:7px 12px;">🎥<input type="file" name="video" accept="video/*" style="display:none;"/><span class="rv-video-label">Video</span></label>
-        <button type="submit" style="margin-left:auto;padding:12px 24px;background:${primary};color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);">Submit Review</button>
+      <input name="reviewTitle" maxlength="150" placeholder="Give your review a headline (optional)" style="${inp("font-weight:600;")}" ${inp_focus(design.primaryColor)}/>
+      <textarea name="body" required minlength="10" placeholder="What did you like or dislike?" style="${inp("min-height:90px;resize:vertical;")}" ${inp_focus(design.primaryColor)}></textarea>
+      ${recBox}
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        ${mediaBtn("📷", "Add Photo", "photo", "image/*")}
+        ${mediaBtn("🎥", "Add Video", "video", "video/*")}
+        <div style="margin-left:auto;">${submitBtn(primary, "#fff", "box-shadow:0 2px 8px rgba(0,0,0,.15);")}</div>
       </div>
       <p class="rv-status" style="margin:0;font-size:13px;text-align:center;"></p>
     </form>
@@ -373,37 +399,32 @@
 </div>`; }
 
       // ── TEMPLATE 2: CARD ──────────────────────────────────────────────────
-      // Distinct: orange/colored star rating box top, then compact inline fields
       if (template === "card") { return `
-<div style="background:#fff;border-radius:16px;overflow:hidden;font-family:inherit;box-shadow:0 8px 40px rgba(0,0,0,.12);">
-  <div style="background:${primary};padding:20px 26px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <p style="margin:0 0 2px;font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px;">Write a Review</p>
-        <p style="margin:0;font-size:12px;color:rgba(255,255,255,.75);">Share your honest experience</p>
-      </div>
-      <button class="rv-form-close" style="background:rgba(255,255,255,.2);border:none;border-radius:50%;width:30px;height:30px;font-size:17px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>
-    </div>
-    <div style="margin-top:16px;background:rgba(255,255,255,.12);border-radius:12px;padding:14px 16px;">
+<div style="background:${fBg};border-radius:16px;overflow:hidden;font-family:inherit;color:${fTc};">
+  <div style="background:${primary};padding:20px 26px;position:relative;">
+    ${closeBtn(true).replace(`color:${fClose}`, "color:rgba(255,255,255,.8)")}
+    <p style="margin:0 0 2px;font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px;">Write a Review</p>
+    <p style="margin:0 0 14px;font-size:12px;color:rgba(255,255,255,.75);">Share your honest experience</p>
+    <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:12px 14px;">
       <p style="margin:0 0 6px;font-size:11px;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.06em;">Tap to rate</p>
-      <div style="display:flex;gap:4px;">${starRow(32, 2, "#fff")}</div>
+      <div style="display:flex;gap:4px;">${starRow(30, 2)}</div>
     </div>
   </div>
-  <div style="padding:22px 26px;">
+  <div style="padding:20px 26px;">
     ${langDropdown}
     <div class="rv-suggestions-wrap" style="display:none;"></div>
     <form class="rv-form" style="display:flex;flex-direction:column;gap:10px;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <input name="customerName" required placeholder="Your Name *" style="padding:11px 14px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#e8e8e8'"/>
-        <input name="customerEmail" type="email" placeholder="Email (Optional)" style="padding:11px 14px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:14px;font-family:inherit;outline:none;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#e8e8e8'"/>
+        <input name="customerName" required placeholder="Your Name *" style="${inp()}" ${inp_focus(design.primaryColor)}/>
+        <input name="customerEmail" type="email" placeholder="Email (Optional)" style="${inp()}" ${inp_focus(design.primaryColor)}/>
       </div>
-      <input name="reviewTitle" maxlength="150" placeholder="Review Title *" style="padding:11px 14px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;outline:none;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#e8e8e8'"/>
-      <textarea name="body" required minlength="10" placeholder="Share details of your experience..." style="padding:11px 14px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:14px;min-height:90px;font-family:inherit;resize:vertical;outline:none;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#e8e8e8'"></textarea>
-      ${recBox("#faf8ff", "#555")}
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:4px;">
-        <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#888;cursor:pointer;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 12px;">📷<input type="file" name="photo" accept="image/*" style="display:none;"/><span class="rv-photo-label">Add Photo</span></label>
-        <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#888;cursor:pointer;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 12px;">📹<input type="file" name="video" accept="video/*" style="display:none;"/><span class="rv-video-label">Add Video</span></label>
-        <button type="submit" style="margin-left:auto;padding:11px 24px;background:${primary};color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Submit Review</button>
+      <input name="reviewTitle" maxlength="150" placeholder="Review Title *" style="${inp("font-weight:600;")}" ${inp_focus(design.primaryColor)}/>
+      <textarea name="body" required minlength="10" placeholder="Share details of your experience..." style="${inp("min-height:90px;resize:vertical;")}" ${inp_focus(design.primaryColor)}></textarea>
+      ${recBox}
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        ${mediaBtn("📷", "Add Photo", "photo", "image/*")}
+        ${mediaBtn("🎥", "Add Video", "video", "video/*")}
+        <div style="margin-left:auto;">${submitBtn(primary, "#fff", "")}</div>
       </div>
       <p class="rv-status" style="margin:0;font-size:13px;text-align:center;"></p>
     </form>
@@ -411,77 +432,59 @@
 </div>`; }
 
       // ── TEMPLATE 3: MINIMAL ───────────────────────────────────────────────
-      // Ultra-clean floating card, almost no chrome, large open feel
       if (template === "minimal") { return `
-<div style="background:#fff;border-radius:20px;padding:36px 32px;font-family:inherit;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.18);">
-  <button class="rv-form-close" style="position:absolute;top:18px;right:20px;background:none;border:none;font-size:22px;color:#ccc;cursor:pointer;line-height:1;transition:color .1s;" onmouseenter="this.style.color='#333'" onmouseleave="this.style.color='#ccc'">×</button>
-  <div style="margin-bottom:24px;">
-    <h2 style="margin:0 0 4px;font-size:24px;font-weight:800;color:#111;letter-spacing:-.4px;">How was it?</h2>
-    <p style="margin:0;font-size:14px;color:#aaa;">Your honest review helps everyone</p>
-  </div>
-  <div style="display:flex;gap:6px;margin-bottom:6px;">${starRow(36, 4, "#f5b400")}</div>
-  <p class="rv-tap-hint" style="margin:0 0 20px;font-size:12px;color:#ccc;letter-spacing:.02em;">Select a rating above</p>
+<div style="background:${fBg};border-radius:20px;padding:32px 30px;font-family:inherit;color:${fTc};position:relative;">
+  ${closeBtn(true)}
+  <h2 style="margin:0 0 4px;font-size:24px;font-weight:800;color:${fTc};letter-spacing:-.4px;">How was it?</h2>
+  <p style="margin:0 0 20px;font-size:14px;color:${fTc};opacity:.45;">Your honest review helps everyone</p>
+  <div style="display:flex;gap:6px;margin-bottom:4px;">${starRow(36, 4)}</div>
+  <p class="rv-tap-hint" style="margin:0 0 18px;font-size:11px;color:${fTc};opacity:.3;">Select a rating above</p>
   ${langDropdown}
   <div class="rv-suggestions-wrap" style="display:none;"></div>
-  <form class="rv-form" style="display:flex;flex-direction:column;gap:14px;">
+  <form class="rv-form" style="display:flex;flex-direction:column;gap:12px;">
     <div style="display:flex;gap:12px;">
-      <div style="flex:1;position:relative;">
-        <input name="customerName" required placeholder=" " style="width:100%;padding:14px 14px 6px;border:none;border-bottom:2px solid #eee;border-radius:0;font-size:15px;font-family:inherit;outline:none;background:transparent;box-sizing:border-box;transition:border-color .15s;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#eee'"/>
-        <label style="position:absolute;top:14px;left:14px;font-size:15px;color:#bbb;pointer-events:none;transition:.15s;font-family:inherit;">Name *</label>
-      </div>
-      <div style="flex:1;position:relative;">
-        <input name="customerEmail" type="email" placeholder=" " style="width:100%;padding:14px 14px 6px;border:none;border-bottom:2px solid #eee;border-radius:0;font-size:15px;font-family:inherit;outline:none;background:transparent;box-sizing:border-box;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#eee'"/>
-        <label style="position:absolute;top:14px;left:14px;font-size:15px;color:#bbb;pointer-events:none;font-family:inherit;">Email (optional)</label>
-      </div>
+      <input name="customerName" required placeholder="Name *" style="${inp()}" ${inp_focus(design.primaryColor)}/>
+      <input name="customerEmail" type="email" placeholder="Email (optional)" style="${inp()}" ${inp_focus(design.primaryColor)}/>
     </div>
-    <div style="position:relative;">
-      <input name="reviewTitle" maxlength="150" placeholder=" " style="width:100%;padding:14px 14px 6px;border:none;border-bottom:2px solid #eee;border-radius:0;font-size:15px;font-family:inherit;font-weight:600;outline:none;background:transparent;box-sizing:border-box;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#eee'"/>
-      <label style="position:absolute;top:14px;left:14px;font-size:15px;color:#bbb;pointer-events:none;font-family:inherit;">Review Title (optional)</label>
-    </div>
-    <textarea name="body" required minlength="10" placeholder="Tell us about your experience…" style="padding:0;border:none;border-bottom:2px solid #eee;border-radius:0;font-size:15px;min-height:80px;font-family:inherit;resize:none;outline:none;background:transparent;line-height:1.6;" onfocus="this.style.borderColor='${design.primaryColor}'" onblur="this.style.borderColor='#eee'"></textarea>
-    ${recBox("#f9f9f9", "#555")}
-    <div style="display:flex;align-items:center;gap:10px;">
-      <label style="font-size:12px;color:#aaa;cursor:pointer;display:flex;align-items:center;gap:4px;">📷<input type="file" name="photo" accept="image/*" style="display:none;"/><span class="rv-photo-label">Add photo</span></label>
-      <label style="font-size:12px;color:#aaa;cursor:pointer;display:flex;align-items:center;gap:4px;">🎥<input type="file" name="video" accept="video/*" style="display:none;"/><span class="rv-video-label">Add video</span></label>
-      <button type="submit" style="margin-left:auto;padding:14px 28px;background:#111;color:#fff;border:none;border-radius:40px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.02em;">Submit Review →</button>
+    <input name="reviewTitle" maxlength="150" placeholder="Review Title (optional)" style="${inp("font-weight:600;")}" ${inp_focus(design.primaryColor)}/>
+    <textarea name="body" required minlength="10" placeholder="Tell us about your experience…" style="${inp("min-height:80px;resize:none;")}" ${inp_focus(design.primaryColor)}></textarea>
+    ${recBox}
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      ${mediaBtn("📷", "Add Photo", "photo", "image/*")}
+      ${mediaBtn("🎥", "Add Video", "video", "video/*")}
+      <div style="margin-left:auto;">${submitBtn("#111", "#fff", "border-radius:40px;padding:12px 28px;letter-spacing:.02em;")}</div>
     </div>
     <p class="rv-status" style="margin:0;font-size:13px;text-align:center;"></p>
   </form>
 </div>`; }
 
       // ── TEMPLATE 4: DARK ──────────────────────────────────────────────────
-      // Rich dark with subtle glow, gold stars, premium feel
       return `
-<div style="background:linear-gradient(145deg,#0f0f1a 0%,#1a1a2e 100%);border-radius:16px;padding:30px 28px;font-family:inherit;position:relative;border:1px solid rgba(255,255,255,.08);">
-  <button class="rv-form-close" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,.07);border:none;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer;color:#aaa;display:flex;align-items:center;justify-content:center;">×</button>
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.08);">
-    <div style="width:40px;height:40px;border-radius:10px;background:rgba(245,180,0,.15);border:1px solid rgba(245,180,0,.3);display:flex;align-items:center;justify-content:center;font-size:20px;">⭐</div>
+<div style="background:linear-gradient(145deg,#0f0f1a 0%,#1a1a2e 100%);border-radius:16px;padding:28px;font-family:inherit;position:relative;border:1px solid rgba(255,255,255,.08);color:#fff;">
+  ${closeBtn(true).replace(`color:${fClose}`, "color:rgba(255,255,255,.5)")}
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.08);">
+    <div style="width:40px;height:40px;border-radius:10px;background:rgba(245,180,0,.15);border:1px solid rgba(245,180,0,.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⭐</div>
     <div>
       <p style="margin:0 0 2px;font-size:18px;font-weight:800;color:#fff;">Write a Review</p>
       <p style="margin:0;font-size:12px;color:rgba(255,255,255,.4);">Your feedback matters to us</p>
     </div>
   </div>
-  <div style="margin-bottom:6px;">
-    <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);">Rate your experience</p>
-    <div style="display:flex;gap:6px;">${starRow(30, 2, "#f5b400")}</div>
-  </div>
-  <p class="rv-tap-hint" style="margin:8px 0 18px;font-size:11px;color:rgba(255,255,255,.3);">Tap a star to continue</p>
+  <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);">Rate your experience</p>
+  <div style="display:flex;gap:6px;margin-bottom:4px;">${starRow(30, 2)}</div>
+  <p class="rv-tap-hint" style="margin:8px 0 16px;font-size:11px;color:rgba(255,255,255,.3);">Tap a star to continue</p>
   ${langDropdown}
   <div class="rv-suggestions-wrap" style="display:none;"></div>
   <form class="rv-form" style="display:flex;flex-direction:column;gap:10px;">
     <div style="display:flex;gap:10px;">
-      <input name="customerName" required placeholder="Your Name *" style="flex:1;padding:11px 14px;border:1px solid rgba(255,255,255,.12);border-radius:8px;font-size:14px;font-family:inherit;background:rgba(255,255,255,.05);color:#fff;outline:none;" onfocus="this.style.borderColor='rgba(245,180,0,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"/>
-      <input name="customerEmail" type="email" placeholder="Email (Optional)" style="flex:1;padding:11px 14px;border:1px solid rgba(255,255,255,.12);border-radius:8px;font-size:14px;font-family:inherit;background:rgba(255,255,255,.05);color:#fff;outline:none;" onfocus="this.style.borderColor='rgba(245,180,0,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"/>
+      <input name="customerName" required placeholder="Your Name *" style="${inp()}" ${inp_focus("rgba(245,180,0,.6)")}/>
+      <input name="customerEmail" type="email" placeholder="Email (Optional)" style="${inp()}" ${inp_focus("rgba(245,180,0,.6)")}/>
     </div>
-    <textarea name="body" required minlength="10" placeholder="Tell us about your experience…" style="padding:11px 14px;border:1px solid rgba(255,255,255,.12);border-radius:8px;font-size:14px;min-height:90px;font-family:inherit;resize:vertical;background:rgba(255,255,255,.05);color:#fff;outline:none;" onfocus="this.style.borderColor='rgba(245,180,0,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"></textarea>
-    <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.75);">
-      <input type="checkbox" name="recommends" style="width:16px;height:16px;accent-color:#f5b400;cursor:pointer;flex-shrink:0;"/>
-      👍 I would recommend this product
-    </label>
+    <textarea name="body" required minlength="10" placeholder="Tell us about your experience…" style="${inp("min-height:90px;resize:vertical;")}" ${inp_focus("rgba(245,180,0,.6)")}></textarea>
+    ${recBox}
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,.45);cursor:pointer;">📷<input type="file" name="photo" accept="image/*" style="display:none;"/><span class="rv-photo-label">Photo</span></label>
-      <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,.45);cursor:pointer;">🎥<input type="file" name="video" accept="video/*" style="display:none;"/><span class="rv-video-label">Video</span></label>
-      <button type="submit" style="margin-left:auto;padding:11px 22px;background:linear-gradient(135deg,#f5b400 0%,#f59e0b 100%);color:#1a1a2e;border:none;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.01em;">Submit Review</button>
+      ${mediaBtn("📷", "Add Photo", "photo", "image/*")}
+      ${mediaBtn("🎥", "Add Video", "video", "video/*")}
+      <div style="margin-left:auto;">${submitBtn("linear-gradient(135deg,#f5b400 0%,#f59e0b 100%)", "#1a1a2e", "font-weight:800;")}</div>
     </div>
     <p class="rv-status" style="margin:0;font-size:13px;text-align:center;color:rgba(255,255,255,.5);"></p>
   </form>

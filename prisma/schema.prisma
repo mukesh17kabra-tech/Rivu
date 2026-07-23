@@ -76,6 +76,16 @@ model Shop {
   // "sidebar"  = C — left sidebar sticky summary, reviews on right (Growth)
   // "horizontal" = D — horizontal summary bar, compact list below (Pro)
   summaryLayout String @default("modern")
+
+  // Summary block appearance — width, bg, text color
+  summaryBgColor   String @default("#f8f8f8")
+  summaryTextColor String @default("#333333")
+  summaryWidth     Int    @default(220)  // px — only used for sidebar layout
+
+  // Review form modal appearance
+  formBgColor    String @default("#ffffff")
+  formTextColor  String @default("#1a1a2e")
+  formCloseColor String @default("#999999")
   // Free: "basic" only | Growth: "basic"/"card"/"minimal" | Pro: all four
   formTemplate        String @default("basic") // "basic" | "card" | "minimal" | "dark"
 
