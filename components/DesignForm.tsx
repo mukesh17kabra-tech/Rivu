@@ -43,6 +43,15 @@ type DesignSettings = {
   summaryBgColor: string;
   summaryTextColor: string;
   summaryWidth: number;
+  filterBgColor: string;
+  filterTextColor: string;
+  sortBgColor: string;
+  sortTextColor: string;
+  sortBorderColor: string;
+  reviewCountFontSize: number;
+  reviewTitleColor: string;
+  reviewBodyColor: string;
+  reviewMetaColor: string;
   // Form modal customization
   formBgColor: string;
   formTextColor: string;
@@ -781,6 +790,35 @@ export function DesignForm({
               />
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Review list bar — filter count text + sort dropdown */}
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <p className="mb-3 text-sm font-medium text-white/70">Review list bar</p>
+        <p className="mb-4 text-xs text-white/40">Controls the "3 Reviews" count text and "Most Recent" sort dropdown above the reviews.</p>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <ColorField label='Count text color ("3 Reviews")' value={settings.filterTextColor} onChange={(v) => update("filterTextColor", v)} />
+          <div>
+            <label className="mb-1 block text-xs text-white/50">Count font size: {settings.reviewCountFontSize}px</label>
+            <input type="range" min={10} max={20} value={settings.reviewCountFontSize}
+              onChange={(e) => update("reviewCountFontSize", Number(e.target.value))} className="w-full" />
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <ColorField label="Sort dropdown background" value={settings.sortBgColor} onChange={(v) => update("sortBgColor", v)} />
+          <ColorField label="Sort dropdown text" value={settings.sortTextColor} onChange={(v) => update("sortTextColor", v)} />
+          <ColorField label="Sort dropdown border" value={settings.sortBorderColor} onChange={(v) => update("sortBorderColor", v)} />
+        </div>
+      </div>
+
+      {/* Review card text colors */}
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <p className="mb-3 text-sm font-medium text-white/70">Review card text colors</p>
+        <div className="grid grid-cols-3 gap-4">
+          <ColorField label="Review title color" value={settings.reviewTitleColor} onChange={(v) => update("reviewTitleColor", v)} />
+          <ColorField label="Review body color" value={settings.reviewBodyColor} onChange={(v) => update("reviewBodyColor", v)} />
+          <ColorField label="Date / meta color" value={settings.reviewMetaColor} onChange={(v) => update("reviewMetaColor", v)} />
         </div>
       </div>
 

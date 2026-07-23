@@ -71,6 +71,16 @@
       summaryBgColor:"#f8f8f8",
       summaryTextColor:"#333333",
       summaryWidth:220,
+      filterBgColor:"#ffffff",
+      filterTextColor:"#999999",
+      filterBorderColor:"rgba(0,0,0,0.08)",
+      sortBgColor:"#ffffff",
+      sortTextColor:"#333333",
+      sortBorderColor:"#dddddd",
+      reviewCountFontSize:14,
+      reviewTitleColor:"#111111",
+      reviewBodyColor:"#333333",
+      reviewMetaColor:"#999999",
       formBgColor:"#ffffff",
       formTextColor:"#1a1a2e",
       formCloseColor:"#999999",
@@ -156,15 +166,15 @@
     </div>
     <div style="flex:1;min-width:0;">
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:2px;">
-        <span style="font-weight:700;font-size:14px;">${rev.customerName}</span>
+        <span style="font-weight:700;font-size:14px;color:${design.textColor};">${rev.customerName}</span>
         ${verifiedBadge}
         ${topBadge}
-        <span style="margin-left:auto;font-size:12px;color:#999;white-space:nowrap;">${timeAgo(rev.createdAt)}</span>
+        <span style="margin-left:auto;font-size:12px;color:${design.reviewMetaColor};white-space:nowrap;">${timeAgo(rev.createdAt)}</span>
       </div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:7px;">${new Date(rev.createdAt).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})}</div>
+      <div style="font-size:12px;color:${design.reviewMetaColor};margin-bottom:7px;">${new Date(rev.createdAt).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})}</div>
       <div style="display:flex;gap:2px;margin-bottom:10px;">${starsHtml(rev.rating, starColor, "#e0e0e0", 16)}</div>
-      ${rev.reviewTitle ? `<p style="margin:0 0 7px;font-weight:700;font-size:16px;font-style:italic;text-align:left;line-height:1.4;">${rev.reviewTitle}</p>` : ""}
-      ${rev.body ? `<p id="${bodyId}" style="margin:0 0 8px;line-height:1.65;text-align:left;color:${design.textColor};${isLong ? "max-height:4.8em;overflow:hidden;" : ""}">${rev.body}</p>` : ""}
+      ${rev.reviewTitle ? `<p style="margin:0 0 7px;font-weight:700;font-size:16px;font-style:italic;text-align:left;line-height:1.4;color:${design.reviewTitleColor};">${rev.reviewTitle}</p>` : ""}
+      ${rev.body ? `<p id="${bodyId}" style="margin:0 0 8px;line-height:1.65;text-align:left;color:${design.reviewBodyColor};font-size:${design.reviewTextSize}px;${isLong ? "max-height:4.8em;overflow:hidden;" : ""}">${rev.body}</p>` : ""}
       ${isLong ? `<button class="rv-read-more" data-target="${bodyId}" style="background:none;border:none;padding:0;font-size:12px;font-weight:600;color:${design.primaryColor};cursor:pointer;margin-bottom:8px;">Read more</button>` : ""}
       ${rev.videoUrl ? `<div class="rv-media-thumb" data-media-url="${rev.videoUrl}" data-media-type="video" style="width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;background:#000;margin-bottom:8px;"><video src="${rev.videoUrl}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);"><span style="color:#fff;font-size:18px;">▶</span></div></div>` : ""}
       ${!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;cursor:pointer;"/>` : ""}
@@ -217,7 +227,7 @@
       // ── A: Modern Card (Free+) ─────────────────────────────────────────────
       // Orange rating box left, breakdown bars center, Write button right
       const summaryModern = summary.total ? `
-<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px;padding:20px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;">
+<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px;padding:20px;background:${design.summaryBgColor};color:${design.summaryTextColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;max-width:${design.summaryWidth > 220 ? design.summaryWidth + "px" : "100%"};">
   <div style="display:flex;align-items:center;gap:16px;flex-shrink:0;">
     <div style="background:${rangeColor};border-radius:10px;padding:14px 18px;text-align:center;min-width:72px;">
       <div style="font-family:Georgia,serif;font-size:32px;font-weight:800;color:#fff;line-height:1;">${summary.average}</div>
@@ -225,7 +235,7 @@
     </div>
     <div>
       <div style="display:flex;gap:2px;margin-bottom:4px;">${starsHtml(Math.round(summary.average), starColor, "#e5e5e5", 18)}</div>
-      <div style="font-size:12px;color:#999;">Based on ${summary.total} review${summary.total===1?"":"s"}</div>
+      <div style="font-size:12px;color:${design.summaryTextColor};opacity:.65;">Based on ${summary.total} review${summary.total===1?"":"s"}</div>
     </div>
   </div>
   <div style="flex:1;min-width:160px;">${breakdownHtml}</div>
@@ -283,9 +293,9 @@
         : summaryModern;
 
       const filtersHtml = reviews.length > 0 ? `
-<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(0,0,0,.08);">
-  <span style="font-size:14px;color:#999;">${reviews.length} Review${reviews.length === 1 ? "" : "s"}</span>
-  <select class="rv-sort" style="border:1px solid #ddd;border-radius:${Math.max(r-2,4)}px;padding:7px 12px;font-size:13px;font-family:inherit;cursor:pointer;background:#fff;color:${design.textColor};">
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 0 16px;border-bottom:1px solid ${design.filterBorderColor};background:${design.filterBgColor};">
+  <span style="font-size:${design.reviewCountFontSize}px;color:${design.filterTextColor};font-weight:500;">${reviews.length} Review${reviews.length === 1 ? "" : "s"}</span>
+  <select class="rv-sort" style="border:1px solid ${design.sortBorderColor};border-radius:${Math.max(r-2,4)}px;padding:7px 12px;font-size:13px;font-family:inherit;cursor:pointer;background:${design.sortBgColor};color:${design.sortTextColor};box-shadow:none;outline:none;">
     <option value="newest">Most Recent</option>
     <option value="oldest">Oldest First</option>
   </select>

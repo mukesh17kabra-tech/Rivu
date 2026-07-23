@@ -77,10 +77,25 @@ model Shop {
   // "horizontal" = D — horizontal summary bar, compact list below (Pro)
   summaryLayout String @default("modern")
 
-  // Summary block appearance — width, bg, text color
+  // Summary block appearance — width, bg, text color (applies to all layouts)
   summaryBgColor   String @default("#f8f8f8")
   summaryTextColor String @default("#333333")
-  summaryWidth     Int    @default(220)  // px — only used for sidebar layout
+  summaryWidth     Int    @default(220)  // px — sidebar layout column width; also used as max-width for other summary blocks
+
+  // Review list section — filter bar and count text
+  filterBgColor      String @default("#ffffff")   // background of the "3 Reviews · Most Recent" bar
+  filterTextColor    String @default("#999999")   // "3 Reviews" count text color
+  filterBorderColor  String @default("rgba(0,0,0,0.08)") // border below filter bar
+  sortBgColor        String @default("#ffffff")   // dropdown background
+  sortTextColor      String @default("#333333")   // dropdown text
+  sortBorderColor    String @default("#dddddd")   // dropdown border
+  reviewCountFontSize Int   @default(14)          // px — "3 Reviews" label font size
+
+  // Review card text
+  reviewCardFontSize  Int    @default(14)          // px — already was reviewTextSize; this is the alias
+  reviewTitleColor    String @default("#111111")   // italic bold review title color
+  reviewBodyColor     String @default("#333333")   // review body paragraph color
+  reviewMetaColor     String @default("#999999")   // date, name subdued color
 
   // Review form modal appearance
   formBgColor    String @default("#ffffff")
