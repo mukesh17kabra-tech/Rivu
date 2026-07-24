@@ -51,7 +51,7 @@
     const { shop, productId, productTitle, productImage, apiBase } = el.dataset;
     const API_BASE = apiBase || "";
     if (!shop || !productId || !API_BASE) {
-      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: block missing configuration. Remove and re-add the Rivu Reviews block.</p>';
+      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: block missing configuration.</p>';
       return;
     }
     el.innerHTML = `<p style="font-size:14px;color:#aaa;padding:12px 0;">Loading reviews…</p>`;
