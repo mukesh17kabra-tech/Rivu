@@ -162,6 +162,7 @@ export async function GET(req: NextRequest) {
           summaryBgColor:        safe(s.summaryBgColor as string,         "#f8f8f8"),
           summaryTextColor:      safe(s.summaryTextColor as string,       "#333333"),
           summaryWidth:          safe(s.summaryWidth as number,           220),
+          summaryPosition:       safe(s.summaryPosition as string,        "left"),
           filterBgColor:         safe(s.filterBgColor as string,          "#ffffff"),
           filterTextColor:       safe(s.filterTextColor as string,        "#999999"),
           filterBorderColor:     safe(s.filterBorderColor as string,      "rgba(0,0,0,0.08)"),

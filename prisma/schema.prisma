@@ -80,7 +80,8 @@ model Shop {
   // Summary block appearance — width, bg, text color (applies to all layouts)
   summaryBgColor   String @default("#f8f8f8")
   summaryTextColor String @default("#333333")
-  summaryWidth     Int    @default(220)  // px — sidebar layout column width; also used as max-width for other summary blocks
+  summaryWidth     Int    @default(220)
+  summaryPosition  String @default("left") // "left" | "center" | "right" — alignment of the summary block
 
   // Review list section — filter bar and count text
   filterBgColor      String @default("#ffffff")   // background of the "3 Reviews · Most Recent" bar

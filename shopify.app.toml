@@ -19,7 +19,7 @@ scopes = "read_products,read_orders,write_discounts"
 
 [auth]
 redirect_urls = [
-  "https://rivu-one.vercel.app/api/auth/callback"
+  "https://rivu-one.vercel.appp/api/auth/callback"
 ]
 
 [webhooks]

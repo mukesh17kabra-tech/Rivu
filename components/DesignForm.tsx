@@ -43,6 +43,7 @@ type DesignSettings = {
   summaryBgColor: string;
   summaryTextColor: string;
   summaryWidth: number;
+  summaryPosition: "left" | "center" | "right";
   filterBgColor: string;
   filterTextColor: string;
   sortBgColor: string;
@@ -780,86 +781,91 @@ export function DesignForm({
           Free: Modern Card only · Growth: + Compact & Sidebar · Pro: All 4
         </p>
 
-        {/* Summary block customization */}
-        <div className="mt-4 grid grid-cols-3 gap-4 border-t border-white/10 pt-4">
-          <ColorField
-            label="Summary background"
-            value={settings.summaryBgColor}
-            onChange={(v) => update("summaryBgColor", v)}
-          />
-          <ColorField
-            label="Summary text color"
-            value={settings.summaryTextColor}
-            onChange={(v) => update("summaryTextColor", v)}
-          />
-          {settings.summaryLayout === "sidebar" && (
-            <div>
-              <label className="mb-1 block text-xs text-white/50">
-                Sidebar width: {settings.summaryWidth}px
-              </label>
-              <input
-                type="range"
-                min={160}
-                max={400}
-                value={settings.summaryWidth}
-                onChange={(e) => update("summaryWidth", Number(e.target.value))}
-                className="w-full"
-              />
+        {/* Summary block customization — locked for Free */}
+        {isFree ? (
+          <div className="mt-4 rounded-md border border-white/10 bg-white/[0.03] px-4 py-3">
+            <p className="text-xs text-white/40">🔒 Summary colors, width and position are available on Growth and Pro plans.</p>
+          </div>
+        ) : (
+          <div className="mt-4 border-t border-white/10 pt-4">
+            <div className="mb-3 grid grid-cols-3 gap-4">
+              <ColorField label="Summary background" value={settings.summaryBgColor} onChange={(v) => update("summaryBgColor", v)} />
+              <ColorField label="Summary text color" value={settings.summaryTextColor} onChange={(v) => update("summaryTextColor", v)} />
+              <div>
+                <label className="mb-1 block text-xs text-white/50">Position</label>
+                <div className="flex gap-1">
+                  {(["left","center","right"] as const).map((pos) => (
+                    <button key={pos} onClick={() => update("summaryPosition", pos)}
+                      className={`flex-1 rounded py-1.5 text-xs capitalize transition-colors ${settings.summaryPosition === pos ? "bg-emerald-400/20 text-emerald-300 border border-emerald-400/40" : "border border-white/10 text-white/40 hover:border-white/30"}`}>
+                      {pos}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+            <div>
+              <label className="mb-1 block text-xs text-white/50">Width: {settings.summaryWidth}px</label>
+              <input type="range" min={160} max={600} value={settings.summaryWidth}
+                onChange={(e) => update("summaryWidth", Number(e.target.value))} className="w-full" />
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Review list bar — filter count text + sort dropdown */}
+      {/* Review list bar */}
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <p className="mb-3 text-sm font-medium text-white/70">Review list bar</p>
-        <p className="mb-4 text-xs text-white/40">Controls the "3 Reviews" count label and "Most Recent" sort dropdown above the review cards.</p>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <ColorField label='Count text color ("3 Reviews")' value={settings.filterTextColor} onChange={(v) => update("filterTextColor", v)} />
-          <div>
-            <label className="mb-1 block text-xs text-white/50">Count font size: {settings.reviewCountFontSize}px</label>
-            <input type="range" min={10} max={20} value={settings.reviewCountFontSize}
-              onChange={(e) => update("reviewCountFontSize", Number(e.target.value))} className="w-full" />
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <ColorField label="Sort button background" value={settings.sortBgColor} onChange={(v) => update("sortBgColor", v)} />
-          <ColorField label="Sort button text" value={settings.sortTextColor} onChange={(v) => update("sortTextColor", v)} />
-          <ColorField label="Sort button border" value={settings.sortBorderColor} onChange={(v) => update("sortBorderColor", v)} />
-        </div>
+        <p className="mb-2 text-sm font-medium text-white/70">Review list bar</p>
+        {isFree ? (
+          <p className="text-xs text-white/40">🔒 Filter bar and sort button colors are available on Growth and Pro plans.</p>
+        ) : (
+          <>
+            <p className="mb-4 text-xs text-white/40">Controls the "3 Reviews" count label and "Most Recent" sort dropdown above the review cards.</p>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <ColorField label='Count text color ("3 Reviews")' value={settings.filterTextColor} onChange={(v) => update("filterTextColor", v)} />
+              <div>
+                <label className="mb-1 block text-xs text-white/50">Count font size: {settings.reviewCountFontSize}px</label>
+                <input type="range" min={10} max={20} value={settings.reviewCountFontSize}
+                  onChange={(e) => update("reviewCountFontSize", Number(e.target.value))} className="w-full" />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <ColorField label="Sort button background" value={settings.sortBgColor} onChange={(v) => update("sortBgColor", v)} />
+              <ColorField label="Sort button text" value={settings.sortTextColor} onChange={(v) => update("sortTextColor", v)} />
+              <ColorField label="Sort button border" value={settings.sortBorderColor} onChange={(v) => update("sortBorderColor", v)} />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Review card text colors */}
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <p className="mb-3 text-sm font-medium text-white/70">Review card text colors</p>
-        <div className="grid grid-cols-3 gap-4">
-          <ColorField label="Review title color" value={settings.reviewTitleColor} onChange={(v) => update("reviewTitleColor", v)} />
-          <ColorField label="Review body color" value={settings.reviewBodyColor} onChange={(v) => update("reviewBodyColor", v)} />
-          <ColorField label="Date / meta color" value={settings.reviewMetaColor} onChange={(v) => update("reviewMetaColor", v)} />
-        </div>
+        <p className="mb-2 text-sm font-medium text-white/70">Review card text colors</p>
+        {isFree ? (
+          <p className="text-xs text-white/40">🔒 Review card text colors are available on Growth and Pro plans.</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-4">
+            <ColorField label="Review title color" value={settings.reviewTitleColor} onChange={(v) => update("reviewTitleColor", v)} />
+            <ColorField label="Review body color" value={settings.reviewBodyColor} onChange={(v) => update("reviewBodyColor", v)} />
+            <ColorField label="Date / meta color" value={settings.reviewMetaColor} onChange={(v) => update("reviewMetaColor", v)} />
+          </div>
+        )}
       </div>
 
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <p className="mb-4 text-sm font-medium text-white/70">Review form style</p>
 
         {/* Form color controls */}
-        <div className="mb-4 grid grid-cols-3 gap-4">
-          <ColorField
-            label="Form background"
-            value={settings.formBgColor}
-            onChange={(v) => update("formBgColor", v)}
-          />
-          <ColorField
-            label="Form text color"
-            value={settings.formTextColor}
-            onChange={(v) => update("formTextColor", v)}
-          />
-          <ColorField
-            label="Close button color"
-            value={settings.formCloseColor}
-            onChange={(v) => update("formCloseColor", v)}
-          />
-        </div>
+        {isFree ? (
+          <div className="mb-4 rounded-md border border-white/10 bg-white/[0.03] px-4 py-3">
+            <p className="text-xs text-white/40">🔒 Form background, text, and close button colors are available on Growth and Pro plans.</p>
+          </div>
+        ) : (
+          <div className="mb-4 grid grid-cols-3 gap-4">
+            <ColorField label="Form background" value={settings.formBgColor} onChange={(v) => update("formBgColor", v)} />
+            <ColorField label="Form text color" value={settings.formTextColor} onChange={(v) => update("formTextColor", v)} />
+            <ColorField label="Close button color" value={settings.formCloseColor} onChange={(v) => update("formCloseColor", v)} />
+          </div>
+        )}
 
         {/* 4 template cards side by side — each shows a mini preview of the real form */}
         <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">

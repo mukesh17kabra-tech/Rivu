@@ -71,6 +71,7 @@
       summaryBgColor:"#f8f8f8",
       summaryTextColor:"#333333",
       summaryWidth:220,
+      summaryPosition:"left",
       filterBgColor:"#ffffff",
       filterTextColor:"#999999",
       filterBorderColor:"rgba(0,0,0,0.08)",
@@ -227,7 +228,7 @@
       // ── A: Modern Card (Free+) ─────────────────────────────────────────────
       // Orange rating box left, breakdown bars center, Write button right
       const summaryModern = summary.total ? `
-<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px;padding:20px;background:${design.summaryBgColor};color:${design.summaryTextColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;max-width:${design.summaryWidth > 220 ? design.summaryWidth + "px" : "100%"};">
+<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px;padding:20px;background:${design.summaryBgColor};color:${design.summaryTextColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;max-width:${design.summaryWidth}px;margin-left:${design.summaryPosition === "right" ? "auto" : design.summaryPosition === "center" ? "auto" : "0"};margin-right:${design.summaryPosition === "left" ? "auto" : design.summaryPosition === "center" ? "auto" : "0"};">
   <div style="display:flex;align-items:center;gap:16px;flex-shrink:0;">
     <div style="background:${rangeColor};border-radius:10px;padding:14px 18px;text-align:center;min-width:72px;">
       <div style="font-family:Georgia,serif;font-size:32px;font-weight:800;color:#fff;line-height:1;">${summary.average}</div>
@@ -321,7 +322,7 @@
       // Sidebar layout (C) — summary as fixed left column, reviews on right
       if (sl === "sidebar" && summary.total) {
         return `<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
-  <div style="flex:0 0 ${design.summaryWidth}px;position:sticky;top:16px;">${summaryHtml}</div>
+  <div style="flex:0 0 ${design.summaryWidth}px;min-width:${design.summaryWidth}px;position:sticky;top:16px;">${summaryHtml}</div>
   <div style="flex:1;min-width:260px;">
     ${filtersHtml}
     ${reviewListHtml}

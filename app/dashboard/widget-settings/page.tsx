@@ -4,6 +4,7 @@ import { resolveShop } from "@/lib/shop-context";
 import { DesignForm } from "@/components/DesignForm";
 import { LogoUpload } from "@/components/LogoUpload";
 import { RatingBadgeForm } from "@/components/RatingBadgeForm";
+import { DowngradeNotice } from "@/components/DowngradeNotice";
 
 export default async function WidgetSettingsPage({
   searchParams,
@@ -24,6 +25,7 @@ export default async function WidgetSettingsPage({
 
   return (
     <main className="min-h-screen bg-[#0B0D0F] text-[#E7E9EA] font-sans">
+      <DowngradeNotice currentPlan={shopRecord.plan} shop={shop} />
       <div className="mx-auto max-w-6xl px-6 py-10">
         <header className="mb-6">
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-400/80">Rivu</p>
@@ -75,6 +77,7 @@ export default async function WidgetSettingsPage({
               summaryBgColor: (shopRecord as Record<string, unknown>).summaryBgColor as string || "#f8f8f8",
               summaryTextColor: (shopRecord as Record<string, unknown>).summaryTextColor as string || "#333333",
               summaryWidth: (shopRecord as Record<string, unknown>).summaryWidth as number || 220,
+              summaryPosition: ((shopRecord as Record<string, unknown>).summaryPosition as string || "left") as "left" | "center" | "right",
               filterBgColor: (shopRecord as Record<string, unknown>).filterBgColor as string || "#ffffff",
               filterTextColor: (shopRecord as Record<string, unknown>).filterTextColor as string || "#999999",
               sortBgColor: (shopRecord as Record<string, unknown>).sortBgColor as string || "#ffffff",
