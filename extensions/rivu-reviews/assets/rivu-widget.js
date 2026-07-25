@@ -274,16 +274,22 @@
 </div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
 
       // ── D: Horizontal Summary Bar (Pro) ──────────────────────────────────
-      // Compact horizontal bar — rating box, inline stars breakdown, button all in one row
+      // All 5 star rows shown in a compact horizontal layout
       const summaryHorizontal = summary.total ? `
-<div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;padding:14px 18px;background:${design.backgroundColor};border:1px solid #eee;border-radius:${r}px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.05);">
-  <div style="background:${rangeColor};border-radius:8px;padding:10px 14px;text-align:center;flex-shrink:0;">
-    <div style="font-family:Georgia,serif;font-size:22px;font-weight:800;color:#fff;">${summary.average}</div>
-    <div style="display:flex;gap:1px;margin-top:2px;">${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.4)", 10)}</div>
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding:16px 20px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;flex-wrap:wrap;">
+  <div style="background:${rangeColor};border-radius:8px;padding:10px 16px;text-align:center;flex-shrink:0;">
+    <div style="font-family:Georgia,serif;font-size:24px;font-weight:800;color:#fff;line-height:1;">${summary.average}</div>
+    <div style="display:flex;gap:1px;margin-top:4px;">${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.4)", 11)}</div>
+    <div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:3px;">${summary.total} reviews</div>
   </div>
-  <div style="font-size:11px;color:#aaa;flex-shrink:0;">Based on<br/><strong style="color:${design.textColor};font-size:13px;">${summary.total} reviews</strong></div>
-  <div style="flex:1;display:flex;gap:8px;flex-wrap:wrap;">
-    ${summary.breakdown.slice(0,3).map(b=>`<div style="text-align:center;"><div style="font-size:10px;color:#aaa;">${b.star} Stars</div><div style="font-size:11px;font-weight:700;color:${design.textColor};">${b.percentage}</div><div style="width:40px;height:4px;background:#eee;border-radius:2px;overflow:hidden;margin:2px auto 0;"><div style="width:${Number(b.percentage)||0}%;height:100%;background:${rangeColor};border-radius:2px;"></div></div></div>`).join("")}
+  <div style="flex:1;min-width:200px;">
+    ${summary.breakdown.map(b=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <span style="font-size:11px;color:${design.summaryTextColor};opacity:.7;width:40px;flex-shrink:0;text-align:right;">${b.star} ★</span>
+      <div style="flex:1;height:6px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;">
+        <div style="width:${Number(b.percentage)||0}%;height:100%;background:${rangeColor};border-radius:3px;"></div>
+      </div>
+      <span style="font-size:11px;color:${design.summaryTextColor};opacity:.6;width:36px;flex-shrink:0;">${b.percentage}%</span>
+    </div>`).join("")}
   </div>
   ${writeBtn}
 </div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
