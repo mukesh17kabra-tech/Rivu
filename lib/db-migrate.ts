@@ -51,11 +51,7 @@ const MIGRATIONS = [
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "recommends" BOOLEAN`,
 ];
 
-let ran = false;
-
 export async function runAutoMigrations() {
-  if (ran) return;
-  ran = true;
   try {
     for (const sql of MIGRATIONS) {
       await db.$executeRawUnsafe(sql);

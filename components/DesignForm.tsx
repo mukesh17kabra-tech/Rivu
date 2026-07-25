@@ -114,6 +114,7 @@ export function DesignForm({
   const [settings, setSettings] = useState<DesignSettings>(initial);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [lockedMsg, setLockedMsg] = useState<string[]>([]);
 
   const isFree = plan === "free";
@@ -127,6 +128,7 @@ export function DesignForm({
 
   async function handleSave() {
     setSaving(true);
+    setSaveError("");
     try {
       const res = await fetch("/api/shop/design", {
         method: "POST",
@@ -134,12 +136,18 @@ export function DesignForm({
         body: JSON.stringify({ shop, ...settings }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        setSaveError(data.error || "Save failed — please try again.");
+        return;
+      }
       if (data.lockedFields?.length) {
         setLockedMsg(data.lockedFields);
         setTimeout(() => setLockedMsg([]), 4000);
       }
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
+    } catch (e) {
+      setSaveError("Network error — please check your connection.");
     } finally {
       setSaving(false);
     }
@@ -994,6 +1002,9 @@ export function DesignForm({
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>
+      {saveError && (
+        <p className="mt-2 text-xs text-red-400">{saveError}</p>
+      )}
       {lockedMsg.length > 0 && (
         <p className="mt-2 text-xs text-yellow-300/80">
           Some choices need a higher plan and were kept at their default: {lockedMsg.join(", ")}.{" "}

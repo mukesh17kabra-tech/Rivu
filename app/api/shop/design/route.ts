@@ -113,10 +113,18 @@ export async function POST(req: NextRequest) {
   const plan = (shopRecord.plan as PlanTier) || "free";
   const { clamped, lockedFields } = clampDesignToPlan(plan, design);
 
-  await db.shop.update({
-    where: { shopDomain: shop },
-    data: clamped,
-  });
+  try {
+    await db.shop.update({
+      where: { shopDomain: shop },
+      data: clamped,
+    });
+  } catch (err) {
+    console.error("[rivu/design] db.update failed:", err);
+    return NextResponse.json(
+      { error: "Failed to save settings. This usually means a database column is missing — wait a moment and try again." },
+      { status: 500 }
+    );
+  }
 
   return NextResponse.json({ success: true, lockedFields });
 }
