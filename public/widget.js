@@ -249,16 +249,16 @@
       // ── B: Compact Summary + List (Growth+) ───────────────────────────────
       // Circular ring rating, clean compact bars, reviews in a tight list
       const summaryCompact = summary.total ? `
-<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;padding:16px 20px;border:1px solid #eee;border-radius:${r}px;">
-  <div style="text-align:center;flex-shrink:0;padding:12px;border-right:1px solid #eee;padding-right:20px;margin-right:4px;">
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;padding:16px 20px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.07);border-radius:${r}px;">
+  <div style="text-align:center;flex-shrink:0;padding:12px;border-right:1px solid rgba(0,0,0,.08);padding-right:20px;margin-right:4px;">
     <div style="width:72px;height:72px;border-radius:50%;border:3px solid ${starColor};display:flex;align-items:center;justify-content:center;margin:0 auto;">
       <div>
-        <div style="font-family:Georgia,serif;font-size:22px;font-weight:800;color:${design.textColor};line-height:1;">${summary.average}</div>
-        <div style="font-size:8px;color:#999;margin-top:2px;">out of 5</div>
+        <div style="font-family:Georgia,serif;font-size:22px;font-weight:800;color:${design.summaryTextColor};line-height:1;">${summary.average}</div>
+        <div style="font-size:8px;color:${design.summaryTextColor};opacity:.6;margin-top:2px;">out of 5</div>
       </div>
     </div>
     <div style="display:flex;justify-content:center;gap:1px;margin-top:8px;">${starsHtml(Math.round(summary.average), starColor, "#e5e5e5", 12)}</div>
-    <div style="font-size:10px;color:#aaa;margin-top:3px;">${summary.total} reviews</div>
+    <div style="font-size:10px;color:${design.summaryTextColor};opacity:.6;margin-top:3px;">${summary.total} reviews</div>
   </div>
   <div style="flex:1;min-width:120px;">${breakdownHtml}</div>
   ${writeBtn}
@@ -267,10 +267,10 @@
       // ── C: Left Sidebar Summary (Growth+) ─────────────────────────────────
       // Sticky left column with summary, reviews flow on right — handled in bodyHtml
       const summarySidebar = summary.total ? `
-<div style="background:#f8f8f8;border-radius:${r}px;padding:20px;margin-bottom:20px;">
-  <div style="font-family:Georgia,serif;font-size:40px;font-weight:800;color:${design.textColor};line-height:1;">${summary.average}</div>
+<div style="background:${design.summaryBgColor};border-radius:${r}px;padding:20px;margin-bottom:20px;width:${design.summaryWidth}px;flex-shrink:0;">
+  <div style="font-family:Georgia,serif;font-size:40px;font-weight:800;color:${design.summaryTextColor};line-height:1;">${summary.average}</div>
   <div style="display:flex;gap:2px;margin:6px 0 4px;">${starsHtml(Math.round(summary.average), starColor, "#e5e5e5", 16)}</div>
-  <div style="font-size:12px;color:#999;margin-bottom:14px;">Based on ${summary.total} review${summary.total===1?"":"s"}</div>
+  <div style="font-size:12px;color:${design.summaryTextColor};opacity:.65;margin-bottom:14px;">Based on ${summary.total} review${summary.total===1?"":"s"}</div>
   ${breakdownHtml}
   <div style="margin-top:14px;">${writeBtn}</div>
 </div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
@@ -523,10 +523,10 @@
       : "";
 
     el.innerHTML = `
-<div class="rv-root" style="font-family:${design.fontFamily};max-width:${design.widgetMaxWidth}px;width:100%;margin-top:${design.topSpacing}px;margin-left:${design.formAlign==="left"?"0":"auto"};margin-right:${design.formAlign==="right"?"0":"auto"};color:${design.textColor};${borderStr}">
+<div class="rv-root" style="font-family:${design.fontFamily};max-width:1440px;width:100%;margin-top:${design.topSpacing}px;margin-left:auto;margin-right:auto;color:${design.textColor};${borderStr}"><div style="max-width:${design.widgetMaxWidth}px;width:100%;margin:0 auto;">
   <p style="font-size:${design.headingFontSize}px;font-weight:${design.headingBold?700:400};letter-spacing:.06em;text-transform:uppercase;opacity:.6;margin:0 0 20px;text-align:${design.headingAlign};">${design.widgetTitle}</p>
   <div class="rv-main-content">${buildMain()}</div>
-</div>
+</div></div>
 
 <div class="rv-modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
   <div class="rv-form-container" style="width:100%;max-width:${design.formMaxWidth}px;max-height:92vh;overflow-y:auto;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.3);">
