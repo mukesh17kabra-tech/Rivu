@@ -241,107 +241,117 @@
 
       const writeBtn = `<button class="rv-open-form-btn" style="display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Write a Review</button>`;
 
-      // ── A: MODERN CARD (Free+) — Orange box left, horizontal bars right
-      const summaryModern = summary.total ? `
-<div style='display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:20px 24px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;'>
-  <div style='display:flex;align-items:center;gap:14px;flex-shrink:0;'>
-    <div style='background:${rangeColor};border-radius:10px;padding:12px 16px;text-align:center;min-width:70px;'>
-      <div style='font-family:Georgia,serif;font-size:34px;font-weight:800;color:#fff;line-height:1;'>${summary.average}</div>
-      <div style='display:flex;justify-content:center;gap:1px;margin-top:5px;'>${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.35)", 12)}</div>
-    </div>
-    <div>
-      <div style='display:flex;gap:2px;margin-bottom:4px;'>${starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 18)}</div>
-      <div style='font-size:12px;color:${design.summaryTextColor};opacity:.6;'>Based on ${summary.total} review${summary.total===1?"":"s"}</div>
-    </div>
-  </div>
-  <div style='flex:1;min-width:160px;'>${breakdownHtml}</div>
-  ${writeBtn}
-</div>` : `<div style='margin-bottom:20px;'>${writeBtn}</div>`;
+      // ── A: MODERN CARD (Free+) — orange box + stars left, horizontal bars right
+      const summaryModern = (function(){
+        if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
+        return '<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:20px 24px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
+          + '<div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">'
+          +   '<div style="background:' + rangeColor + ';border-radius:10px;padding:12px 16px;text-align:center;min-width:76px;">'
+          +     '<div style="font-family:Georgia,serif;font-size:34px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</div>'
+          +     '<div style="display:flex;justify-content:center;gap:1px;margin-top:5px;">' + starsHtml(Math.round(summary.average), '#fff', 'rgba(255,255,255,.35)', 12) + '</div>'
+          +   '</div>'
+          +   '<div>'
+          +     '<div style="display:flex;gap:2px;margin-bottom:4px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 18) + '</div>'
+          +     '<div style="font-size:12px;color:' + design.summaryTextColor + ';opacity:.6;">Based on ' + summary.total + ' review' + (summary.total===1?'':'s') + '</div>'
+          +   '</div>'
+          + '</div>'
+          + '<div style="flex:1;min-width:160px;">' + breakdownHtml + '</div>'
+          + writeBtn + '</div>';
+      })();
 
-      // ── B: COMPACT (Growth+) — Circle ring left, bars center, count + button right
-      const summaryCompact = summary.total ? `
-<div style='display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:18px 24px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;'>
-  <div style='text-align:center;flex-shrink:0;'>
-    <div style='width:88px;height:88px;border-radius:50%;border:3px solid ${starColor};display:flex;align-items:center;justify-content:center;margin:0 auto;'>
-      <div>
-        <div style='font-family:Georgia,serif;font-size:26px;font-weight:800;color:${design.summaryTextColor};line-height:1;'>${summary.average}</div>
-        <div style='display:flex;justify-content:center;gap:1px;margin-top:3px;'>${starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 10)}</div>
-      </div>
-    </div>
-    <div style='font-size:10px;color:${design.summaryTextColor};opacity:.6;margin-top:6px;'>Based on ${summary.total} reviews</div>
-  </div>
-  <div style='flex:1;min-width:160px;'>${breakdownHtml}</div>
-  <div style='flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:10px;'>
-    ${writeBtn}
-    <span style='font-size:13px;font-weight:600;color:${design.summaryTextColor};'>${summary.total} Reviews</span>
-  </div>
-</div>` : `<div style='margin-bottom:20px;'>${writeBtn}</div>`;
+      // ── B: COMPACT (Growth+) — circle ring left, bars center, count+button right
+      const summaryCompact = (function(){
+        if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
+        return '<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:18px 24px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
+          + '<div style="text-align:center;flex-shrink:0;">'
+          +   '<div style="width:88px;height:88px;border-radius:50%;border:3px solid ' + starColor + ';display:flex;align-items:center;justify-content:center;margin:0 auto;">'
+          +     '<div>'
+          +       '<div style="font-family:Georgia,serif;font-size:26px;font-weight:800;color:' + design.summaryTextColor + ';line-height:1;">' + summary.average + '</div>'
+          +       '<div style="display:flex;justify-content:center;gap:1px;margin-top:3px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 10) + '</div>'
+          +     '</div>'
+          +   '</div>'
+          +   '<div style="font-size:10px;color:' + design.summaryTextColor + ';opacity:.6;margin-top:6px;">Based on ' + summary.total + ' reviews</div>'
+          + '</div>'
+          + '<div style="flex:1;min-width:160px;">' + breakdownHtml + '</div>'
+          + '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:10px;">'
+          +   writeBtn
+          +   '<span style="font-size:13px;font-weight:600;color:' + design.summaryTextColor + ';">' + summary.total + ' Reviews</span>'
+          + '</div></div>';
+      })();
 
-      // ── C: LEFT SIDEBAR (Growth+) — Sticky sidebar left, reviews scroll right
-      const summarySidebar = summary.total ? `
-<div style='background:${design.summaryBgColor};border-radius:${r}px;padding:20px 18px;width:${design.summaryWidth}px;flex-shrink:0;border:1px solid rgba(0,0,0,.06);'>
-  <div style='font-family:Georgia,serif;font-size:48px;font-weight:800;color:${design.summaryTextColor};line-height:1;'>${summary.average}</div>
-  <div style='display:flex;gap:2px;margin:8px 0 4px;'>${starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 16)}</div>
-  <div style='font-size:12px;color:${design.summaryTextColor};opacity:.55;margin-bottom:16px;'>Based on ${summary.total} review${summary.total===1?"":"s"}</div>
-  ${breakdownHtml}
-  <div style='margin-top:16px;'>${writeBtn}</div>
-</div>` : `<div style='margin-bottom:20px;'>${writeBtn}</div>`;
+      // ── C: LEFT SIDEBAR (Growth+) — sticky sidebar, reviews scroll right
+      const summarySidebar = (function(){
+        if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
+        return '<div style="background:' + design.summaryBgColor + ';border-radius:' + r + 'px;padding:22px 18px;width:' + design.summaryWidth + 'px;flex-shrink:0;border:1px solid rgba(0,0,0,.06);">'
+          + '<div style="font-family:Georgia,serif;font-size:48px;font-weight:800;color:' + design.summaryTextColor + ';line-height:1;">' + summary.average + '</div>'
+          + '<div style="display:flex;gap:2px;margin:8px 0 4px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 16) + '</div>'
+          + '<div style="font-size:12px;color:' + design.summaryTextColor + ';opacity:.55;margin-bottom:16px;">Based on ' + summary.total + ' review' + (summary.total===1?'':'s') + '</div>'
+          + breakdownHtml
+          + '<div style="margin-top:16px;">' + writeBtn + '</div></div>';
+      })();
 
-      // ── D: HORIZONTAL BAR (Pro) — Score box + vertical mini bar chart per star
-      const summaryHorizontal = summary.total ? `
-<div style='display:flex;align-items:center;gap:16px;margin-bottom:24px;padding:16px 20px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;flex-wrap:wrap;'>
-  <div style='background:${rangeColor};border-radius:10px;padding:12px 16px;text-align:center;flex-shrink:0;'>
-    <div style='font-family:Georgia,serif;font-size:28px;font-weight:800;color:#fff;line-height:1;'>${summary.average}</div>
-    <div style='display:flex;justify-content:center;gap:1px;margin-top:4px;'>${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.35)", 11)}</div>
-    <div style='font-size:9px;color:rgba(255,255,255,.8);margin-top:3px;'>Based on ${summary.total} reviews</div>
-  </div>
-  <div style='flex:1;min-width:220px;'>
-    <div style='display:flex;gap:4px;align-items:flex-end;height:48px;margin-bottom:4px;'>
-      ${summary.breakdown.map(b=>{const pct=Number(b.percentage)||0;const h=pct>0?Math.max(Math.round(pct*0.44),3):2;return '<div style="flex:1;display:flex;align-items:flex-end;justify-content:center;"><div style="width:80%;max-width:28px;background:'+rangeColor+';border-radius:3px 3px 0 0;height:'+h+'px;"></div></div>';}).join('')}
-    </div>
-    <div style='display:flex;gap:4px;border-top:1px solid rgba(0,0,0,.08);padding-top:4px;'>
-      ${summary.breakdown.map(b=>'<div style="flex:1;text-align:center;font-size:10px;color:'+design.summaryTextColor+';font-weight:600;">'+b.star+'★</div>').join('')}
-    </div>
-  </div>
-  ${writeBtn}
-</div>` : `<div style='margin-bottom:20px;'>${writeBtn}</div>`;
-
-      // ── E: ICON + PERCENTAGE (Pro) — black circle + person icons + % per star
-      const summaryIconPct = summary.total ? (function(){
-        var rows = summary.breakdown.map(function(b){
+      // ── D: HORIZONTAL BAR (Pro) — score box left + horizontal bar rows per star
+      const summaryHorizontal = (function(){
+        if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
+        var hBars = '';
+        for (var i = 0; i < summary.breakdown.length; i++) {
+          var b = summary.breakdown[i];
           var pct = Number(b.percentage) || 0;
-          var filled = Math.round(pct / 10); // 0-10 icons filled
-          var icons = '';
-          for (var i = 0; i < 10; i++) {
-            icons += '<span style="color:' + (i < filled ? rangeColor : '#ddd') + ';font-size:14px;line-height:1;">&#9679;</span>';
+          hBars += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">'
+            + '<span style="font-size:11px;font-weight:600;color:' + design.summaryTextColor + ';width:24px;flex-shrink:0;text-align:right;">' + b.star + '★</span>'
+            + '<div style="flex:1;height:7px;background:rgba(150,150,150,.2);border-radius:4px;overflow:hidden;">'
+            +   '<div style="display:block;width:' + pct + '%;height:7px;background:' + rangeColor + ';border-radius:4px;"></div>'
+            + '</div>'
+            + '<span style="font-size:10px;color:' + design.summaryTextColor + ';opacity:.65;width:30px;flex-shrink:0;">' + pct + '%</span>'
+            + '</div>';
+        }
+        return '<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding:16px 20px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;flex-wrap:wrap;">'
+          + '<div style="background:' + rangeColor + ';border-radius:10px;padding:12px 16px;text-align:center;flex-shrink:0;">'
+          +   '<div style="font-family:Georgia,serif;font-size:28px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</div>'
+          +   '<div style="display:flex;justify-content:center;gap:1px;margin-top:4px;">' + starsHtml(Math.round(summary.average), '#fff', 'rgba(255,255,255,.35)', 11) + '</div>'
+          +   '<div style="font-size:9px;color:rgba(255,255,255,.8);margin-top:3px;">Based on ' + summary.total + ' reviews</div>'
+          + '</div>'
+          + '<div style="flex:1;min-width:200px;">' + hBars + '</div>'
+          + writeBtn + '</div>';
+      })();
+
+      // ── E: ICON + PERCENTAGE (Pro) — black circle + dot icons per star + %
+      const summaryIconPct = (function(){
+        if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
+        var iRows = '';
+        for (var i = 0; i < summary.breakdown.length; i++) {
+          var b = summary.breakdown[i];
+          var pct = Number(b.percentage) || 0;
+          var filled = Math.round(pct / 10);
+          var dots = '';
+          for (var d = 0; d < 10; d++) {
+            dots += '<span style="color:' + (d < filled ? rangeColor : '#ddd') + ';font-size:14px;line-height:1;">&#9679;</span>';
           }
-          return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
+          iRows += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
             + '<span style="font-size:12px;font-weight:700;color:' + design.summaryTextColor + ';width:50px;flex-shrink:0;">' + b.star + ' Stars</span>'
-            + '<div style="display:flex;gap:3px;flex:1;">' + icons + '</div>'
+            + '<div style="display:flex;gap:3px;flex:1;">' + dots + '</div>'
             + '<span style="font-size:12px;font-weight:600;color:' + design.summaryTextColor + ';width:70px;flex-shrink:0;text-align:right;">' + pct + '% (' + (b.count||0) + ')</span>'
             + '</div>';
-        }).join('');
+        }
         return '<div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;margin-bottom:24px;padding:24px 28px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
           + '<div style="text-align:center;flex-shrink:0;">'
           +   '<div style="width:90px;height:90px;border-radius:50%;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;">'
           +     '<span style="font-family:Georgia,serif;font-size:30px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</span>'
           +     '<span style="font-size:9px;color:#aaa;margin-top:3px;">Out of 5</span>'
           +   '</div>'
-          +   '<div style="display:flex;justify-content:center;gap:2px;margin-top:8px;">' + starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 15) + '</div>'
+          +   '<div style="display:flex;justify-content:center;gap:2px;margin-top:8px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 15) + '</div>'
           +   '<div style="font-size:11px;color:' + design.summaryTextColor + ';opacity:.6;margin-top:4px;">Based on ' + summary.total + ' reviews</div>'
           + '</div>'
-          + '<div style="flex:1;min-width:220px;">' + rows + '</div>'
-          + writeBtn
-          + '</div>';
-      })() : '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
+          + '<div style="flex:1;min-width:220px;">' + iRows + '</div>'
+          + writeBtn + '</div>';
+      })();
 
-      const sl = design.summaryLayout || "modern";
-      const summaryHtml = sl === "compact" ? summaryCompact
-        : sl === "sidebar" ? summarySidebar
-        : sl === "horizontal" ? summaryHorizontal
-        : sl === "iconpct" ? summaryIconPct
+      const sl = design.summaryLayout || 'modern';
+      const summaryHtml = sl === 'compact' ? summaryCompact
+        : sl === 'sidebar' ? summarySidebar
+        : sl === 'horizontal' ? summaryHorizontal
+        : sl === 'iconpct' ? summaryIconPct
         : summaryModern;
-      // debug: console.log('[Rivu] sl=', sl, 'summaryLayout=', design.summaryLayout);
 
       const filtersHtml = reviews.length > 0 ? `
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:8px 0 14px;border-bottom:1px solid ${design.filterBorderColor};background:transparent;">
