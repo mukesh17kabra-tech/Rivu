@@ -199,6 +199,17 @@
     }
 
     // ─── Build summary + review list DOM ─────────────────────────
+    // Helper: render one breakdown bar row (called from all summary layouts)
+    function breakdownRow(star, pct, textColor, barBg, barFill) {
+      return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">'
+        + '<span style="font-size:12px;color:' + textColor + ';width:28px;flex-shrink:0;text-align:right;font-weight:600;">' + star + '★</span>'
+        + '<div style="flex:1;height:8px;background:' + barBg + ';border-radius:4px;overflow:hidden;">'
+        + '<div style="display:block;width:' + pct + '%;height:8px;background:' + barFill + ';border-radius:4px;"></div>'
+        + '</div>'
+        + '<span style="font-size:11px;color:' + textColor + ';opacity:.7;width:34px;flex-shrink:0;font-weight:500;">' + pct + '%</span>'
+        + '</div>';
+    }
+
     function buildMain() {
       const sorted = getSortedReviews();
       const visible = sorted.slice(0, shownCount);
@@ -217,13 +228,13 @@
       // Breakdown bars
       const breakdownHtml = summary.total ? summary.breakdown.map(b => {
         const pct = Number(b.percentage) || 0;
-        return `<div style="display:flex;align-items:center;gap:10px;font-size:13px;margin:4px 0;">
-          <span style="width:48px;color:${design.textColor};opacity:.65;">${b.star} Stars</span>
-          <div style="flex:1;height:8px;background-color:#f0f0f0;border-radius:4px;overflow:hidden;">
-            <div style="display:block;width:${pct}%;height:100%;background-color:${rangeColor};border-radius:4px;"></div>
-          </div>
-          <span style="width:28px;text-align:right;color:${design.textColor};opacity:.65;">${b.percentage}</span>
-        </div>`;
+        return '<div style="display:flex;align-items:center;gap:10px;font-size:13px;margin:4px 0;">'
+          + '<span style="width:48px;color:' + design.textColor + ';opacity:.65;">' + b.star + ' Stars</span>'
+          + '<div style="flex:1;height:8px;background-color:#e0e0e0;border-radius:4px;overflow:hidden;">'
+          + '<div style="display:block;width:' + pct + '%;height:8px;background-color:' + rangeColor + ';border-radius:4px;"></div>'
+          + '</div>'
+          + '<span style="width:28px;text-align:right;color:' + design.textColor + ';opacity:.65;">' + pct + '%</span>'
+          + '</div>';
       }).join("") : "";
 
       const writeBtn = `<button class="rv-open-form-btn" style="display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Write a Review</button>`;
@@ -285,16 +296,7 @@
     <div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:4px;font-weight:600;">${summary.total} review${summary.total===1?"":"s"}</div>
   </div>
   <div style="flex:1;min-width:220px;">
-    ${summary.breakdown.map(b=>{
-      const pct = Number(b.percentage) || 0;
-      return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
-        <span style="font-size:12px;color:${design.summaryTextColor};width:28px;flex-shrink:0;text-align:right;font-weight:600;">${b.star}★</span>
-        <div style="flex:1;height:8px;background:rgba(128,128,128,.2);border-radius:4px;overflow:hidden;">
-          <div style="width:${pct}%;height:100%;background:${rangeColor};border-radius:4px;transition:width .6s ease;"></div>
-        </div>
-        <span style="font-size:11px;color:${design.summaryTextColor};opacity:.7;width:34px;flex-shrink:0;font-weight:500;">${pct}%</span>
-      </div>`;
-    }).join("")}
+    ${summary.breakdown.map(b => breakdownRow(b.star, Number(b.percentage)||0, design.summaryTextColor, "rgba(180,180,180,.3)", rangeColor)).join("")}
   </div>
   <div style="flex-shrink:0;">
     ${writeBtn}
