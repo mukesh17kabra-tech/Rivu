@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { NavBar } from "@/components/NavBar";
 import { resolveShop } from "@/lib/shop-context";
+import { PlanSync } from "@/components/PlanSync";
 import { PlanCards } from "@/components/PlanCards";
 import { DevPlanBypass } from "@/components/DevPlanBypass";
 
@@ -31,6 +32,7 @@ export default async function PlansPage({
 
         <NavBar shop={shop} host={host} active="plans" />
 
+        <PlanSync shop={shop} plan={shopRecord.plan} />
         <PlanCards shop={shop} currentPlan={shopRecord.plan} />
 
         <DevPlanBypass shop={shop} currentPlan={shopRecord.plan} />        <DevPlanBypass shop={shop} currentPlan={shopRecord.plan} />

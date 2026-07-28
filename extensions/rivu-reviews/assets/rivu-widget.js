@@ -321,7 +321,7 @@
 </div>` : "";
 
       const poweredBy = plan === "free"
-        ? `<p style="margin-top:16px;font-size:10px;color:#bbb;text-align:center;">Powered by <a href="https://rivu-one.vercel.app" target="_blank" rel="noopener" style="color:#bbb;text-decoration:underline;">Rivu</a></p>`
+        ? `<p style="margin-top:20px;font-size:13px;font-weight:700;color:#888;text-align:center;letter-spacing:.01em;">Powered by <a href="https://rivu-one.vercel.app" target="_blank" rel="noopener" style="color:#555;text-decoration:none;font-weight:800;">Rivu</a></p>`
         : "";
 
       const reviewListHtml = `<div class="rv-list" style="${listWrapperStyle}">${listHtml}</div>`;

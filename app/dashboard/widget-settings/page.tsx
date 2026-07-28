@@ -4,6 +4,7 @@ import { resolveShop } from "@/lib/shop-context";
 import { DesignForm } from "@/components/DesignForm";
 import { LogoUpload } from "@/components/LogoUpload";
 import { RatingBadgeForm } from "@/components/RatingBadgeForm";
+import { PlanSync } from "@/components/PlanSync";
 import { DowngradeNotice } from "@/components/DowngradeNotice";
 
 export default async function WidgetSettingsPage({
@@ -25,6 +26,7 @@ export default async function WidgetSettingsPage({
 
   return (
     <main className="min-h-screen bg-[#0B0D0F] text-[#E7E9EA] font-sans">
+      <PlanSync shop={shop} plan={shopRecord.plan} />
       <DowngradeNotice currentPlan={shopRecord.plan} shop={shop} />
       <div className="mx-auto max-w-6xl px-6 py-10">
         <header className="mb-6">
