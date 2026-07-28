@@ -104,7 +104,10 @@
           design[k] = (v === undefined || v === null || v === "") ? D[k] : v;
         }
       }
-    } catch {}
+    } catch(err) {
+      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:12px 0;">Rivu: failed to load reviews. Error: ' + String(err) + '</p>';
+      return;
+    }
 
     const r = design.borderRadius;
     const starColor = design.starColor;
@@ -160,7 +163,7 @@
         ? `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#dc2626;margin-top:6px;"><span style="font-size:15px;">👎</span> I don't recommend this product</div>`
         : "";
       return `
-<div class="rv-card" style="background:${cardBg};color:${design.textColor};border-radius:${r}px;padding:20px;font-size:${design.reviewTextSize}px;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 4px rgba(0,0,0,.05);">
+<div class="rv-card" style="background:${cardBg};color:${design.textColor};border-radius:${r}px;padding:20px;font-size:${design.reviewTextSize}px;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 4px rgba(0,0,0,.05);${design.displayStyle==='carousel'?'min-width:260px;max-width:300px;flex-shrink:0;':''}">
   <div style="display:flex;align-items:flex-start;gap:14px;">
     <div style="flex-shrink:0;">
       <div class="rv-avatar" style="width:40px;height:40px;border-radius:50%;background:${avatarColor(rev.customerName)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">${initials(rev.customerName)}</div>
@@ -323,7 +326,13 @@
         ? `<p style="margin-top:20px;font-size:13px;font-weight:700;color:#888;text-align:center;letter-spacing:.01em;">Powered by <a href="https://rivu-one.vercel.app" target="_blank" rel="noopener" style="color:#555;text-decoration:none;font-weight:800;">Rivu</a></p>`
         : "";
 
-      const reviewListHtml = `<div class="rv-list" style="${listWrapperStyle}">${listHtml}</div>`;
+      // Carousel: fixed card width + prev/next arrow buttons
+      const reviewListHtml = design.displayStyle === "carousel" ? `
+<div style="position:relative;padding:0 20px;">
+  <button class="rv-arrow-prev" style="position:absolute;left:0;top:50%;transform:translateY(-50%);z-index:2;width:34px;height:34px;border-radius:50%;background:${design.arrowColor || "#111"};color:#fff;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2);flex-shrink:0;">&#8249;</button>
+  <div class="rv-list" style="${listWrapperStyle}">${listHtml}</div>
+  <button class="rv-arrow-next" style="position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:2;width:34px;height:34px;border-radius:50%;background:${design.arrowColor || "#111"};color:#fff;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2);flex-shrink:0;">&#8250;</button>
+</div>` : `<div class="rv-list" style="${listWrapperStyle}">${listHtml}</div>`;
 
       // Sidebar layout (C) — summary as fixed left column, reviews on right
       if (sl === "sidebar" && summary.total) {
@@ -561,6 +570,21 @@
       el.querySelectorAll(".rv-read-more").forEach(btn => { btn.addEventListener("click", () => { const tgt = el.querySelector(`#${btn.dataset.target}`); if (tgt) { tgt.style.maxHeight="none"; tgt.style.overflow="visible"; btn.style.display="none"; } }); });
       const openBtns = el.querySelectorAll(".rv-open-form-btn");
       openBtns.forEach(b => b.addEventListener("click", openModal));
+
+      // Carousel arrows — wire after every rebuild
+      const rvList = el.querySelector(".rv-list");
+      const prevArrow = el.querySelector(".rv-arrow-prev");
+      const nextArrow = el.querySelector(".rv-arrow-next");
+      if (rvList && prevArrow) {
+        prevArrow.addEventListener("click", () => {
+          rvList.scrollBy({ left: -(rvList.clientWidth * 0.85), behavior: "smooth" });
+        });
+      }
+      if (rvList && nextArrow) {
+        nextArrow.addEventListener("click", () => {
+          rvList.scrollBy({ left: rvList.clientWidth * 0.85, behavior: "smooth" });
+        });
+      }
     }
     rewireMain();
 
