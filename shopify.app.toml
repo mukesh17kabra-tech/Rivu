@@ -25,6 +25,19 @@ redirect_urls = [
 [webhooks]
 api_version = "2024-10"
 
+# GDPR mandatory compliance webhooks (required for App Store)
+[[webhooks.subscriptions]]
+topics = ["customers/data_request"]
+uri = "/api/webhooks/customers/data_request"
+
+[[webhooks.subscriptions]]
+topics = ["customers/redact"]
+uri = "/api/webhooks/customers/redact"
+
+[[webhooks.subscriptions]]
+topics = ["shop/redact"]
+uri = "/api/webhooks/shop/redact"
+
 # The orders/create webhook is temporarily NOT subscribed here — it
 # requires Shopify's "Protected Customer Data" approval first (orders
 # contain customer email/name/address, which Shopify restricts access to
