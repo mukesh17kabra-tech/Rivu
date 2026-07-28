@@ -289,59 +289,62 @@
           + '<div style="margin-top:16px;">' + writeBtn + '</div></div>';
       })();
 
-      // ── D: HORIZONTAL BAR (Pro) — score box left + horizontal bar rows per star
+      // ── D: HORIZONTAL BAR (Pro) — score box + stars + star columns + button (reference design)
       const summaryHorizontal = (function(){
         if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
-        var hBars = '';
+        var cols = '';
         for (var i = 0; i < summary.breakdown.length; i++) {
           var b = summary.breakdown[i];
           var pct = Number(b.percentage) || 0;
-          hBars += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">'
-            + '<span style="font-size:11px;font-weight:600;color:' + design.summaryTextColor + ';width:24px;flex-shrink:0;text-align:right;">' + b.star + '★</span>'
-            + '<div style="flex:1;height:7px;background:rgba(150,150,150,.2);border-radius:4px;overflow:hidden;">'
-            +   '<div style="display:block;width:' + pct + '%;height:7px;background:' + rangeColor + ';border-radius:4px;"></div>'
+          cols += '<div style="text-align:center;padding:0 10px;border-left:' + (i > 0 ? '1px solid rgba(0,0,0,.08)' : 'none') + ';">'
+            + '<div style="font-size:11px;font-weight:600;color:' + design.summaryTextColor + ';margin-bottom:6px;white-space:nowrap;">' + b.star + ' Star' + (b.star===1?'':'s') + '</div>'
+            + '<div style="width:44px;height:5px;background:rgba(150,150,150,.25);border-radius:3px;overflow:hidden;margin:0 auto 5px;">'
+            +   '<div style="display:block;width:' + pct + '%;height:5px;background:' + rangeColor + ';border-radius:3px;"></div>'
             + '</div>'
-            + '<span style="font-size:10px;color:' + design.summaryTextColor + ';opacity:.65;width:30px;flex-shrink:0;">' + pct + '%</span>'
+            + '<div style="font-size:11px;color:' + design.summaryTextColor + ';opacity:.65;">' + (b.count||0) + '</div>'
             + '</div>';
         }
-        return '<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding:16px 20px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;flex-wrap:wrap;">'
-          + '<div style="background:' + rangeColor + ';border-radius:10px;padding:12px 16px;text-align:center;flex-shrink:0;">'
-          +   '<div style="font-family:Georgia,serif;font-size:28px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</div>'
-          +   '<div style="display:flex;justify-content:center;gap:1px;margin-top:4px;">' + starsHtml(Math.round(summary.average), '#fff', 'rgba(255,255,255,.35)', 11) + '</div>'
-          +   '<div style="font-size:9px;color:rgba(255,255,255,.8);margin-top:3px;">Based on ' + summary.total + ' reviews</div>'
+        return '<div style="display:flex;align-items:center;gap:18px;margin-bottom:24px;padding:16px 22px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;flex-wrap:wrap;">'
+          + '<div style="background:' + rangeColor + ';border-radius:10px;padding:14px 16px;text-align:center;flex-shrink:0;">'
+          +   '<div style="font-family:Georgia,serif;font-size:30px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</div>'
           + '</div>'
-          + '<div style="flex:1;min-width:200px;">' + hBars + '</div>'
+          + '<div style="flex-shrink:0;">'
+          +   '<div style="display:flex;gap:2px;margin-bottom:3px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 16) + '</div>'
+          +   '<div style="font-size:11px;color:' + design.summaryTextColor + ';opacity:.6;">Based on ' + summary.total + ' reviews</div>'
+          + '</div>'
+          + '<div style="flex:1;display:flex;justify-content:center;flex-wrap:wrap;gap:0;">' + cols + '</div>'
           + writeBtn + '</div>';
       })();
 
-      // ── E: ICON + PERCENTAGE (Pro) — black circle + dot icons per star + %
+      // ── E: ICON + PERCENTAGE (Pro) — black circle + person icons + % (count) per star
       const summaryIconPct = (function(){
         if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
         var iRows = '';
         for (var i = 0; i < summary.breakdown.length; i++) {
           var b = summary.breakdown[i];
           var pct = Number(b.percentage) || 0;
-          var filled = Math.round(pct / 10);
-          var dots = '';
-          for (var d = 0; d < 10; d++) {
-            dots += '<span style="color:' + (d < filled ? rangeColor : '#ddd') + ';font-size:14px;line-height:1;">&#9679;</span>';
+          var filled = Math.round(pct / 12.5); // 0-8 icons filled
+          var icons = '';
+          for (var d = 0; d < 8; d++) {
+            var col = d < filled ? rangeColor : '#d5d5d5';
+            icons += '<svg width="15" height="15" viewBox="0 0 24 24" fill="' + col + '" style="flex-shrink:0;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
           }
-          iRows += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
-            + '<span style="font-size:12px;font-weight:700;color:' + design.summaryTextColor + ';width:50px;flex-shrink:0;">' + b.star + ' Stars</span>'
-            + '<div style="display:flex;gap:3px;flex:1;">' + dots + '</div>'
-            + '<span style="font-size:12px;font-weight:600;color:' + design.summaryTextColor + ';width:70px;flex-shrink:0;text-align:right;">' + pct + '% (' + (b.count||0) + ')</span>'
+          iRows += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:9px;">'
+            + '<span style="font-size:12px;font-weight:700;color:' + design.summaryTextColor + ';width:52px;flex-shrink:0;">' + b.star + ' Star' + (b.star===1?'':'s') + '</span>'
+            + '<div style="display:flex;gap:4px;flex:1;">' + icons + '</div>'
+            + '<span style="font-size:12px;font-weight:600;color:' + design.summaryTextColor + ';width:74px;flex-shrink:0;text-align:right;">' + pct + '% (' + (b.count||0) + ')</span>'
             + '</div>';
         }
         return '<div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;margin-bottom:24px;padding:24px 28px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
           + '<div style="text-align:center;flex-shrink:0;">'
-          +   '<div style="width:90px;height:90px;border-radius:50%;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;">'
+          +   '<div style="width:96px;height:96px;border-radius:50%;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;">'
           +     '<span style="font-family:Georgia,serif;font-size:30px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</span>'
           +     '<span style="font-size:9px;color:#aaa;margin-top:3px;">Out of 5</span>'
           +   '</div>'
-          +   '<div style="display:flex;justify-content:center;gap:2px;margin-top:8px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 15) + '</div>'
+          +   '<div style="display:flex;justify-content:center;gap:2px;margin-top:9px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 15) + '</div>'
           +   '<div style="font-size:11px;color:' + design.summaryTextColor + ';opacity:.6;margin-top:4px;">Based on ' + summary.total + ' reviews</div>'
           + '</div>'
-          + '<div style="flex:1;min-width:220px;">' + iRows + '</div>'
+          + '<div style="flex:1;min-width:260px;">' + iRows + '</div>'
           + writeBtn + '</div>';
       })();
 
