@@ -56,7 +56,7 @@ export const FREE_PLAN_DESIGN_DEFAULTS = {
   formTemplate:            "basic",
 
   // Summary layout — Modern only on Free
-  summaryLayout:           "modern",
+  summaryLayout:           "modern",  // Free: modern only; Growth: +compact +sidebar; Pro: +horizontal +iconpct
 
   // Summary colors — reset to neutral defaults
   summaryBgColor:          "#f8f8f8",

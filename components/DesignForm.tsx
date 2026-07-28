@@ -38,7 +38,7 @@ type DesignSettings = {
   suggestionLanguage: string;
   enabledLanguages: string[];
   formTemplate: "basic" | "card" | "minimal" | "dark";
-  summaryLayout: "modern" | "compact" | "sidebar" | "horizontal";
+  summaryLayout: "modern" | "compact" | "sidebar" | "horizontal" | "iconpct";
   // Summary block customization
   summaryBgColor: string;
   summaryTextColor: string;
@@ -662,8 +662,9 @@ export function DesignForm({
             { key: "compact", label: "Compact", plan: "Growth+", desc: "Circle rating, clean bars" },
             { key: "sidebar", label: "Left Sidebar", plan: "Growth+", desc: "Sticky left, reviews right" },
             { key: "horizontal", label: "Horizontal Bar", plan: "Pro only", desc: "All in one slim row" },
+            { key: "iconpct", label: "Icon + Percentage", plan: "Pro only", desc: "People icons per star with %" },
           ] as const).map((item) => {
-            const locked = (isFree && item.key !== "modern") || (plan === "growth" && item.key === "horizontal");
+            const locked = (isFree && item.key !== "modern") || (plan === "growth" && (item.key === "horizontal" || item.key === "iconpct"));
             const isSelected = settings.summaryLayout === item.key;
             return (
               <button
@@ -679,76 +680,57 @@ export function DesignForm({
                 {/* Mini visual preview of each summary style */}
                 <div className="w-full bg-white p-3" style={{ pointerEvents: "none", minHeight: "80px" }}>
                   {item.key === "modern" && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "5px", flexShrink: 0 }}>
-                        <div style={{ background: settings.rangeColor, borderRadius: "6px", padding: "5px 7px", textAlign: "center" }}>
-                          <div style={{ fontFamily: "Georgia,serif", fontSize: "13px", fontWeight: 800, color: "#fff", lineHeight: 1 }}>4.8</div>
-                          <div style={{ color: "#fff", fontSize: "5px", marginTop: "2px" }}>★★★★★</div>
-                        </div>
-                        <div>
-                          <div style={{ color: settings.starColor, fontSize: "7px" }}>★★★★★</div>
-                          <div style={{ fontSize: "5px", color: "#aaa" }}>160 reviews</div>
-                        </div>
+                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                      <div style={{ background: settings.rangeColor, borderRadius: "6px", padding: "6px 8px", textAlign: "center", flexShrink: 0 }}>
+                        <div style={{ fontFamily: "Georgia,serif", fontSize: "14px", fontWeight: 700, color: "#fff" }}>4.8</div>
+                        <div style={{ color: settings.starColor, fontSize: "7px" }}>★★★★★</div>
                       </div>
                       <div style={{ flex: 1 }}>
-                        {([[5,90],[4,8],[3,0],[2,0],[1,0]] as [number,number][]).map(([s,w]) => (
-                          <div key={s} style={{ display: "flex", alignItems: "center", gap: "2px", marginBottom: "2px" }}>
-                            <span style={{ fontSize: "5px", color: "#aaa", width: "18px", textAlign: "right" }}>{s}★</span>
-                            <div style={{ flex: 1, height: "3px", background: "#eee", borderRadius: "2px" }}>
+                        {[90, 8, 2].map((w, i) => (
+                          <div key={i} style={{ display: "flex", alignItems: "center", gap: "3px", marginBottom: "2px" }}>
+                            <span style={{ fontSize: "6px", color: "#aaa", width: "20px" }}>{5-i} Stars</span>
+                            <div style={{ flex: 1, height: "4px", background: "#f0f0f0", borderRadius: "2px" }}>
                               <div style={{ width: `${w}%`, height: "100%", background: settings.rangeColor, borderRadius: "2px" }} />
                             </div>
                           </div>
                         ))}
                       </div>
-                      <div style={{ background: settings.primaryColor, color: "#fff", borderRadius: "3px", padding: "3px 5px", fontSize: "5px", fontWeight: 700, flexShrink: 0 }}>✏ Write</div>
+                      <div style={{ background: settings.primaryColor, color: "#fff", borderRadius: "4px", padding: "4px 7px", fontSize: "6px", fontWeight: 700, flexShrink: 0 }}>✏ Write</div>
                     </div>
                   )}
                   {item.key === "compact" && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px" }}>
-                      <div style={{ textAlign: "center", flexShrink: 0 }}>
-                        <div style={{ width: "36px", height: "36px", borderRadius: "50%", border: `2px solid ${settings.starColor}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
-                          <div style={{ fontFamily: "Georgia,serif", fontSize: "12px", fontWeight: 800, color: "#333", lineHeight: 1 }}>4.8</div>
-                        </div>
-                        <div style={{ color: settings.starColor, fontSize: "5px", marginTop: "2px" }}>★★★★★</div>
-                        <div style={{ fontSize: "4px", color: "#aaa" }}>160 reviews</div>
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                      <div style={{ width: "36px", height: "36px", borderRadius: "50%", border: `2px solid ${settings.starColor}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <div style={{ fontFamily: "Georgia,serif", fontSize: "12px", fontWeight: 800, color: "#333" }}>4.8</div>
                       </div>
                       <div style={{ flex: 1 }}>
-                        {([[5,90],[4,8],[3,0],[2,0],[1,0]] as [number,number][]).map(([s,w]) => (
-                          <div key={s} style={{ display: "flex", alignItems: "center", gap: "2px", marginBottom: "2px" }}>
-                            <span style={{ fontSize: "5px", color: "#aaa", width: "14px", textAlign: "right" }}>{s}★</span>
+                        {[90, 8].map((w, i) => (
+                          <div key={i} style={{ display: "flex", alignItems: "center", gap: "2px", marginBottom: "2px" }}>
                             <div style={{ flex: 1, height: "3px", background: "#eee", borderRadius: "2px" }}>
                               <div style={{ width: `${w}%`, height: "100%", background: settings.rangeColor, borderRadius: "2px" }} />
                             </div>
                           </div>
                         ))}
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "3px", flexShrink: 0 }}>
-                        <div style={{ background: settings.primaryColor, color: "#fff", borderRadius: "3px", padding: "3px 5px", fontSize: "5px", fontWeight: 700 }}>✏ Write</div>
-                        <span style={{ fontSize: "5px", color: "#aaa" }}>160 Reviews</span>
+                        <div style={{ color: settings.starColor, fontSize: "8px" }}>★★★★★</div>
                       </div>
                     </div>
                   )}
                   {item.key === "sidebar" && (
-                    <div style={{ display: "flex", gap: "6px", height: "80px" }}>
-                      <div style={{ width: "46px", background: settings.summaryBgColor || "#f8f8f8", borderRadius: "4px", padding: "5px", flexShrink: 0 }}>
-                        <div style={{ fontFamily: "Georgia,serif", fontSize: "16px", fontWeight: 800, color: settings.summaryTextColor || "#333", lineHeight: 1 }}>4.8</div>
-                        <div style={{ color: settings.starColor, fontSize: "6px", marginTop: "2px" }}>★★★★★</div>
-                        <div style={{ fontSize: "4px", color: "#aaa", marginTop: "2px" }}>Based on<br/>160 reviews</div>
-                        {([[90],[8],[0],[0],[0]] as number[][]).map(([w], i) => (
-                          <div key={i} style={{ display: "flex", alignItems: "center", gap: "1px", marginTop: "2px" }}>
-                            <span style={{ fontSize: "4px", color: "#aaa", width: "10px", textAlign: "right" }}>{5-i}★</span>
-                            <div style={{ flex: 1, height: "2px", background: "#eee", borderRadius: "1px" }}>
-                              <div style={{ width: `${w}%`, height: "100%", background: settings.rangeColor }} />
-                            </div>
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      <div style={{ width: "44px", background: "#f8f8f8", borderRadius: "4px", padding: "5px", flexShrink: 0 }}>
+                        <div style={{ fontFamily: "Georgia,serif", fontSize: "14px", fontWeight: 800, color: "#333", lineHeight: 1 }}>4.8</div>
+                        <div style={{ color: settings.starColor, fontSize: "7px", marginTop: "2px" }}>★★★★★</div>
+                        {[90, 8, 2].map((w, i) => (
+                          <div key={i} style={{ height: "3px", background: "#eee", borderRadius: "1px", marginTop: "2px", overflow: "hidden" }}>
+                            <div style={{ width: `${w}%`, height: "100%", background: settings.rangeColor }} />
                           </div>
                         ))}
-                        <div style={{ marginTop: "4px", background: settings.primaryColor, color: "#fff", borderRadius: "2px", padding: "2px 3px", fontSize: "4px", textAlign: "center" }}>✏ Write</div>
                       </div>
-                      <div style={{ flex: 1, overflowY: "hidden" }}>
+                      <div style={{ flex: 1 }}>
                         {[1, 2].map(i => (
-                          <div key={i} style={{ background: "#f9f9f9", borderRadius: "3px", padding: "4px 5px", marginBottom: "3px", borderLeft: `2px solid ${settings.starColor}` }}>
-                            <div style={{ color: settings.starColor, fontSize: "6px" }}>★★★★★</div>
-                            <div style={{ fontSize: "5px", color: "#555", marginTop: "1px" }}>Great product!</div>
+                          <div key={i} style={{ background: "#f5f5f5", borderRadius: "3px", padding: "4px", marginBottom: "3px" }}>
+                            <div style={{ color: settings.starColor, fontSize: "7px" }}>★★★★★</div>
+                            <div style={{ height: "3px", background: "#ddd", borderRadius: "1px", marginTop: "2px" }} />
                           </div>
                         ))}
                       </div>
@@ -773,6 +755,34 @@ export function DesignForm({
                         ))}
                       </div>
                       <div style={{ background: settings.primaryColor, color: "#fff", borderRadius: "3px", padding: "3px 5px", fontSize: "5px", fontWeight: 700, flexShrink: 0 }}>✏</div>
+                    </div>
+                  )}
+                  {item.key === "iconpct" && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px" }}>
+                      <div style={{ textAlign: "center", flexShrink: 0 }}>
+                        <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#111", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
+                          <span style={{ fontFamily: "Georgia,serif", fontSize: "11px", fontWeight: 800, color: "#fff", lineHeight: 1 }}>4.8</span>
+                          <span style={{ fontSize: "4px", color: "#aaa" }}>/ 5</span>
+                        </div>
+                        <div style={{ color: settings.starColor, fontSize: "5px", marginTop: "2px" }}>★★★★★</div>
+                        <div style={{ fontSize: "4px", color: "#aaa" }}>160 reviews</div>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        {([[5,90],[4,8],[3,0],[2,0],[1,0]] as [number,number][]).map(([s,pct]) => {
+                          const filled = Math.round(pct / 10);
+                          return (
+                            <div key={s} style={{ display: "flex", alignItems: "center", gap: "2px", marginBottom: "2px" }}>
+                              <span style={{ fontSize: "5px", color: "#aaa", width: "10px", textAlign: "right" }}>{s}★</span>
+                              <div style={{ display: "flex", gap: "1px" }}>
+                                {Array.from({length: 10}).map((_, i) => (
+                                  <span key={i} style={{ color: i < filled ? settings.rangeColor : "#ddd", fontSize: "6px", lineHeight: 1 }}>●</span>
+                                ))}
+                              </div>
+                              <span style={{ fontSize: "5px", color: "#aaa", marginLeft: "2px" }}>{pct}%</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                 </div>

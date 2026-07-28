@@ -99,7 +99,7 @@ export function clampDesignToPlan<T extends DesignInput>(
   const summaryLayoutsByPlan: Record<PlanTier, string[]> = {
     free: ["modern"],
     growth: ["modern", "compact", "sidebar"],
-    pro: ["modern", "compact", "sidebar", "horizontal"],
+    pro: ["modern", "compact", "sidebar", "horizontal", "iconpct"],
   };
   if (!summaryLayoutsByPlan[plan].includes(clamped.summaryLayout as string)) {
     clamped.summaryLayout = "modern";
