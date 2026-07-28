@@ -13,8 +13,8 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
           "English suggestions only",
           "Basic colors (primary, star, card bg, text)",
           "Widget heading text editable",
-          "Powered by Rivu branding shown",
         ]}
+        brandingShown
         current={currentPlan === "free"}
       />
       <PlanCard
@@ -32,11 +32,11 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
           "Heading size/bold/position controls",
           "Review card text colors",
           "Filter bar + sort button colors",
-          "Remove Powered by Rivu",
           "Top Reviewer streak badges",
           "Automated review-reminder emails",
           "4-day free trial",
         ]}
+        brandingRemoved
         href={`/api/billing/upgrade?shop=${shop}&plan=growth`}
         ctaLabel="Upgrade to Growth"
         current={currentPlan === "growth"}
@@ -59,6 +59,7 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
           "Priority support",
           "4-day free trial",
         ]}
+        brandingRemoved
         href={`/api/billing/upgrade?shop=${shop}&plan=pro`}
         ctaLabel="Upgrade to Pro"
         highlight
@@ -70,9 +71,11 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
 
 function PlanCard({
   name, price, perks, href, ctaLabel, highlight = false, current = false,
+  brandingShown = false, brandingRemoved = false,
 }: {
   name: string; price: string; perks: string[];
   href?: string; ctaLabel?: string; highlight?: boolean; current?: boolean;
+  brandingShown?: boolean; brandingRemoved?: boolean;
 }) {
   return (
     <div className={`rounded-lg border p-6 flex flex-col ${highlight ? "border-emerald-400/40 bg-emerald-400/[0.06]" : "border-white/10 bg-white/[0.02]"}`}>
@@ -81,17 +84,52 @@ function PlanCard({
         {current && <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white/60">Current</span>}
       </div>
       <p className="mt-1 text-2xl font-semibold">{price}</p>
+
+      {/* Powered by Rivu branding notice — shown prominently */}
+      {brandingShown && (
+        <div className="mt-3 flex items-center gap-2 rounded-md border border-orange-400/30 bg-orange-400/10 px-3 py-2">
+          <span className="text-orange-400">⚠</span>
+          <span className="text-xs text-orange-300">
+            <strong>&quot;Powered by Rivu&quot;</strong> shown on your widget
+          </span>
+        </div>
+      )}
+      {brandingRemoved && (
+        <div className="mt-3 flex items-center gap-2 rounded-md border border-emerald-400/30 bg-emerald-400/10 px-3 py-2">
+          <span className="text-emerald-400">✓</span>
+          <span className="text-xs text-emerald-300">
+            <strong>&quot;Powered by Rivu&quot;</strong> branding removed
+          </span>
+        </div>
+      )}
+
       <ul className="mt-4 space-y-2 text-sm text-white/70 flex-1">
         {perks.map((perk) => (
-          <li key={perk} className="flex gap-2"><span className="text-emerald-400">·</span>{perk}</li>
+          <li key={perk} className="flex gap-2">
+            <span className="text-emerald-400 flex-shrink-0">·</span>
+            {perk}
+          </li>
         ))}
       </ul>
+
       {href && ctaLabel && !current && (
-        <a href={href} target="_top" className={`mt-5 inline-block rounded-md px-4 py-2 text-center text-sm font-medium transition-colors ${highlight ? "bg-emerald-400 text-black hover:bg-emerald-300" : "bg-white/10 text-white hover:bg-white/20"}`}>
+        <a
+          href={href}
+          target="_top"
+          className={`mt-5 inline-block rounded-md px-4 py-2 text-center text-sm font-medium transition-colors ${
+            highlight
+              ? "bg-emerald-400 text-black hover:bg-emerald-300"
+              : "bg-white/10 text-white hover:bg-white/20"
+          }`}
+        >
           {ctaLabel}
         </a>
       )}
-      {current && <div className="mt-5 rounded-md border border-white/10 px-4 py-2 text-center text-sm text-white/40">Your current plan</div>}
+      {current && (
+        <div className="mt-5 rounded-md border border-white/10 px-4 py-2 text-center text-sm text-white/40">
+          Your current plan
+        </div>
+      )}
     </div>
   );
 }
