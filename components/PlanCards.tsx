@@ -23,7 +23,7 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
         perks={[
           "500 reviews/month",
           "50 reminder emails/month",
-          "List, Grid, Masonry + Split layouts",
+          "List, Grid & Masonry layouts",
           "Photo reviews (up to 2) + 1 video",
           "Unlimited product QR codes",
           "All 10 suggestion languages (choose 6)",
@@ -47,7 +47,7 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
         perks={[
           "Unlimited reviews",
           "Unlimited reminder emails",
-          "All layouts — Carousel, Masonry, Sidebar + Split",
+          "All layouts — List, Grid, Masonry, Carousel & Sidebar",
           "Photo reviews (up to 3) + 2 videos",
           "Unlimited product QR codes",
           "All 10 suggestion languages",

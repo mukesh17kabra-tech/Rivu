@@ -217,23 +217,6 @@ export function DesignForm({
             </div>
           )}
 
-          <label className="mt-3 flex items-center gap-2 border-t border-white/10 pt-3">
-            <input
-              type="checkbox"
-              checked={settings.splitSummary}
-              disabled={isFree}
-              onChange={(e) => update("splitSummary", e.target.checked)}
-              className="h-4 w-4 accent-emerald-400 disabled:opacity-40"
-            />
-            <span className={`text-sm ${isFree ? "text-white/30" : "text-white/80"}`}>
-              {isFree ? "🔒 " : ""}Split view — sticky rating summary beside the review list
-            </span>
-          </label>
-          <p className="mt-1 text-xs text-white/40">
-            {isFree
-              ? "Upgrade to Growth or Pro to unlock split view."
-              : "Combines with any layout above — the summary stays in place while the reviews scroll."}
-          </p>
         </div>
 
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
@@ -541,8 +524,8 @@ export function DesignForm({
           </label>
           <input
             type="range"
-            min={320}
-            max={900}
+            min={900}
+            max={1220}
             step={20}
             value={settings.widgetMaxWidth}
             onChange={(e) => update("widgetMaxWidth", Number(e.target.value))}
