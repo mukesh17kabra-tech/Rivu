@@ -247,7 +247,7 @@ export function DesignForm({
                 <div style={{ fontSize: "9px", color: settings.summaryTextColor, opacity: 0.6 }}>Based on 13 reviews</div>
               </div>
               <div style={{ flex: 1, minWidth: "100px" }}>
-                {([["5 Stars", 77], ["4 Stars", 23], ["3 Stars", 0]] as [string, number][]).map(([label, pct]) => (
+                {([["\u2605 5", 77], ["\u2605 4", 23], ["\u2605 3", 0], ["\u2605 2", 0], ["\u2605 1", 0]] as [string, number][]).map(([label, pct]) => (
                   <div key={label} style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
                     <span style={{ width: "38px", fontSize: "8px", color: settings.summaryTextColor, opacity: 0.65, flexShrink: 0 }}>{label}</span>
                     <div style={{ flex: 1, height: "5px", backgroundColor: "#e0e0e0", borderRadius: "3px", overflow: "hidden" }}>

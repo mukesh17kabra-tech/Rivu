@@ -278,22 +278,27 @@
       // ── D: Horizontal Summary Bar (Pro) ──────────────────────────────────
       // All 5 star rows shown in a compact horizontal layout
       const summaryHorizontal = summary.total ? `
-<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding:16px 20px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;flex-wrap:wrap;">
-  <div style="background:${rangeColor};border-radius:8px;padding:10px 16px;text-align:center;flex-shrink:0;">
-    <div style="font-family:Georgia,serif;font-size:24px;font-weight:800;color:#fff;line-height:1;">${summary.average}</div>
-    <div style="display:flex;gap:1px;margin-top:4px;">${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.4)", 11)}</div>
-    <div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:3px;">${summary.total} reviews</div>
+<div style="display:flex;align-items:center;gap:20px;margin-bottom:24px;padding:18px 22px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.08);border-radius:${r}px;flex-wrap:wrap;">
+  <div style="background:${rangeColor};border-radius:10px;padding:12px 18px;text-align:center;flex-shrink:0;min-width:80px;">
+    <div style="font-family:Georgia,serif;font-size:28px;font-weight:800;color:#fff;line-height:1;">${summary.average}</div>
+    <div style="display:flex;justify-content:center;gap:1px;margin-top:5px;">${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.35)", 12)}</div>
+    <div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:4px;font-weight:600;">${summary.total} review${summary.total===1?"":"s"}</div>
   </div>
-  <div style="flex:1;min-width:200px;">
-    ${summary.breakdown.map(b=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-      <span style="font-size:11px;color:${design.summaryTextColor};opacity:.7;width:40px;flex-shrink:0;text-align:right;">${b.star} ★</span>
-      <div style="flex:1;height:6px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;">
-        <div style="width:${Number(b.percentage)||0}%;height:100%;background:${rangeColor};border-radius:3px;"></div>
-      </div>
-      <span style="font-size:11px;color:${design.summaryTextColor};opacity:.6;width:36px;flex-shrink:0;">${b.percentage}%</span>
-    </div>`).join("")}
+  <div style="flex:1;min-width:220px;">
+    ${summary.breakdown.map(b=>{
+      const pct = Number(b.percentage) || 0;
+      return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
+        <span style="font-size:12px;color:${design.summaryTextColor};width:28px;flex-shrink:0;text-align:right;font-weight:600;">${b.star}★</span>
+        <div style="flex:1;height:8px;background:rgba(128,128,128,.2);border-radius:4px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${rangeColor};border-radius:4px;transition:width .6s ease;"></div>
+        </div>
+        <span style="font-size:11px;color:${design.summaryTextColor};opacity:.7;width:34px;flex-shrink:0;font-weight:500;">${pct}%</span>
+      </div>`;
+    }).join("")}
   </div>
-  ${writeBtn}
+  <div style="flex-shrink:0;">
+    ${writeBtn}
+  </div>
 </div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
 
       const sl = design.summaryLayout || "modern";
