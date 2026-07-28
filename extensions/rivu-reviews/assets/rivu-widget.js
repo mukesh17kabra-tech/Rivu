@@ -1,3 +1,4 @@
+/* Rivu Widget v20260728 */
 /**
  * Rivu Review Widget — premium design matching the reference image:
  * - Left: big serif rating, star breakdown bars, filter (Most Recent),
@@ -51,7 +52,7 @@
     const { shop, productId, productTitle, productImage, apiBase } = el.dataset;
     const API_BASE = apiBase || "";
     if (!shop || !productId || !API_BASE) {
-      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: missing config.</p>';
+      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: missing config on widget div.</p>';
       return;
     }
     el.innerHTML = `<p style="font-size:14px;color:#aaa;padding:12px 0;">Loading reviews…</p>`;
@@ -309,6 +310,7 @@
         : sl === "sidebar" ? summarySidebar
         : sl === "horizontal" ? summaryHorizontal
         : summaryModern;
+      // debug: console.log('[Rivu] sl=', sl, 'summaryLayout=', design.summaryLayout);
 
       const filtersHtml = reviews.length > 0 ? `
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:8px 0 14px;border-bottom:1px solid ${design.filterBorderColor};background:transparent;">

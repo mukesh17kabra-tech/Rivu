@@ -1,3 +1,4 @@
+/* Rivu Widget v20260728 */
 /**
  * Rivu Review Widget — premium design matching the reference image:
  * - Left: big serif rating, star breakdown bars, filter (Most Recent),
@@ -308,6 +309,7 @@
         : sl === "sidebar" ? summarySidebar
         : sl === "horizontal" ? summaryHorizontal
         : summaryModern;
+      // debug: console.log('[Rivu] sl=', sl, 'summaryLayout=', design.summaryLayout);
 
       const filtersHtml = reviews.length > 0 ? `
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:8px 0 14px;border-bottom:1px solid ${design.filterBorderColor};background:transparent;">
