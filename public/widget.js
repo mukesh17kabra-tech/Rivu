@@ -384,7 +384,7 @@
           👍 I would recommend this product
         </label>`;
 
-      const langDropdown = design.letCustomerPickLanguage && availableLanguages.length > 1
+      const langDropdown = availableLanguages.length > 1
         ? `<select class="rv-lang-picker" style="width:100%;padding:10px;border:1.5px solid ${isDark ? "rgba(255,255,255,.15)" : "#e0e0e0"};border-radius:8px;font-size:13px;font-family:inherit;margin-bottom:12px;background:${isDark ? "rgba(255,255,255,.08)" : fBg};color:${isDark ? "#fff" : fTc};box-shadow:none;">${availableLanguages.map(l => `<option value="${l.code}">${l.label}</option>`).join("")}</select>`
         : "";
 
