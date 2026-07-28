@@ -737,24 +737,26 @@ export function DesignForm({
                     </div>
                   )}
                   {item.key === "horizontal" && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px", background: settings.summaryBgColor || "#f8f8f8", border: "1px solid rgba(0,0,0,.08)", borderRadius: "4px", padding: "6px 7px" }}>
-                      <div style={{ background: settings.rangeColor, borderRadius: "5px", padding: "5px 7px", flexShrink: 0, textAlign: "center" }}>
-                        <div style={{ fontFamily: "Georgia,serif", fontSize: "13px", fontWeight: 800, color: "#fff", lineHeight: 1 }}>4.8</div>
-                        <div style={{ color: "rgba(255,255,255,.8)", fontSize: "6px", marginTop: "2px" }}>★★★★★</div>
-                        <div style={{ color: "rgba(255,255,255,.7)", fontSize: "5px", marginTop: "1px" }}>13 reviews</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", background: settings.summaryBgColor || "#fff", border: "1px solid rgba(0,0,0,.08)", borderRadius: "5px", padding: "6px 8px" }}>
+                      <div style={{ background: settings.rangeColor, borderRadius: "5px", padding: "6px 8px", flexShrink: 0, textAlign: "center" }}>
+                        <div style={{ fontFamily: "Georgia,serif", fontSize: "14px", fontWeight: 800, color: "#fff", lineHeight: 1 }}>4.8</div>
                       </div>
-                      <div style={{ flex: 1 }}>
-                        {([5, 4, 3, 2, 1] as number[]).map((s, i) => (
-                          <div key={s} style={{ display: "flex", alignItems: "center", gap: "3px", marginBottom: "2px" }}>
-                            <span style={{ fontSize: "5px", color: settings.summaryTextColor || "#333", width: "10px", textAlign: "right", flexShrink: 0 }}>{s}★</span>
-                            <div style={{ flex: 1, height: "3px", background: "rgba(150,150,150,.25)", borderRadius: "2px", overflow: "hidden" }}>
-                              <div style={{ width: i === 1 ? "90%" : i === 0 ? "8%" : "0%", height: "100%", background: settings.rangeColor, borderRadius: "2px" }} />
+                      <div style={{ flexShrink: 0 }}>
+                        <div style={{ color: settings.starColor, fontSize: "7px" }}>★★★★★</div>
+                        <div style={{ fontSize: "4px", color: "#aaa" }}>160 reviews</div>
+                      </div>
+                      <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+                        {([[5,90],[4,8],[3,0],[2,0],[1,0]] as [number,number][]).map(([s,pct], i) => (
+                          <div key={s} style={{ textAlign: "center", padding: "0 4px", borderLeft: i > 0 ? "1px solid rgba(0,0,0,.1)" : "none" }}>
+                            <div style={{ fontSize: "5px", fontWeight: 700, color: settings.summaryTextColor || "#333", whiteSpace: "nowrap" }}>{s} Star{s===1?"":"s"}</div>
+                            <div style={{ width: "16px", height: "3px", background: "rgba(150,150,150,.25)", borderRadius: "2px", margin: "2px auto", overflow: "hidden" }}>
+                              <div style={{ width: `${pct}%`, height: "100%", background: settings.rangeColor, borderRadius: "2px" }} />
                             </div>
-                            <span style={{ fontSize: "5px", color: settings.summaryTextColor || "#333", width: "10px", opacity: 0.6 }}>{i === 1 ? "90" : i === 0 ? "8" : "0"}%</span>
+                            <div style={{ fontSize: "5px", color: settings.summaryTextColor || "#333", opacity: 0.6 }}>{pct === 90 ? "155" : pct === 8 ? "5" : "0"}</div>
                           </div>
                         ))}
                       </div>
-                      <div style={{ background: settings.primaryColor, color: "#fff", borderRadius: "3px", padding: "3px 5px", fontSize: "5px", fontWeight: 700, flexShrink: 0 }}>✏</div>
+                      <div style={{ background: settings.primaryColor, color: "#fff", borderRadius: "3px", padding: "3px 5px", fontSize: "5px", fontWeight: 700, flexShrink: 0 }}>✏ Write</div>
                     </div>
                   )}
                   {item.key === "iconpct" && (

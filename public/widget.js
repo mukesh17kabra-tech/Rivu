@@ -309,21 +309,21 @@
         for (var i = 0; i < summary.breakdown.length; i++) {
           var b = summary.breakdown[i];
           var pct = Number(b.percentage) || 0;
-          cols += '<div style="text-align:center;padding:0 10px;border-left:' + (i > 0 ? '1px solid rgba(0,0,0,.08)' : 'none') + ';">'
-            + '<div style="font-size:11px;font-weight:600;color:' + design.summaryTextColor + ';margin-bottom:6px;white-space:nowrap;">' + b.star + ' Star' + (b.star===1?'':'s') + '</div>'
-            + '<div style="width:44px;height:5px;background:rgba(150,150,150,.25);border-radius:3px;overflow:hidden;margin:0 auto 5px;">'
-            +   '<div style="display:block;width:' + pct + '%;height:5px;background:' + rangeColor + ';border-radius:3px;"></div>'
+          cols += '<div style="text-align:center;padding:0 14px;border-left:' + (i > 0 ? '1px solid rgba(0,0,0,.1)' : 'none') + ';">'
+            + '<div style="font-size:14px;font-weight:700;color:' + design.summaryTextColor + ';margin-bottom:8px;white-space:nowrap;">' + b.star + ' Star' + (b.star===1?'':'s') + '</div>'
+            + '<div style="width:56px;height:7px;background:rgba(150,150,150,.25);border-radius:4px;overflow:hidden;margin:0 auto 7px;">'
+            +   '<div style="display:block;width:' + pct + '%;height:7px;background:' + rangeColor + ';border-radius:4px;"></div>'
             + '</div>'
-            + '<div style="font-size:11px;color:' + design.summaryTextColor + ';opacity:.65;">' + (b.count||0) + '</div>'
+            + '<div style="font-size:13px;font-weight:600;color:' + design.summaryTextColor + ';opacity:.7;">' + (b.count||0) + '</div>'
             + '</div>';
         }
-        return wrapSummary('<div style="display:flex;align-items:center;gap:18px;margin-bottom:24px;padding:16px 22px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;flex-wrap:wrap;">'
-          + '<div style="background:' + rangeColor + ';border-radius:10px;padding:14px 16px;text-align:center;flex-shrink:0;">'
-          +   '<div style="font-family:Georgia,serif;font-size:30px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</div>'
+        return wrapSummary('<div style="display:flex;align-items:center;gap:20px;margin-bottom:24px;padding:20px 26px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;flex-wrap:wrap;">'
+          + '<div style="background:' + rangeColor + ';border-radius:12px;padding:18px 22px;text-align:center;flex-shrink:0;">'
+          +   '<div style="font-family:Georgia,serif;font-size:38px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</div>'
           + '</div>'
           + '<div style="flex-shrink:0;">'
-          +   '<div style="display:flex;gap:2px;margin-bottom:3px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 16) + '</div>'
-          +   '<div style="font-size:11px;color:' + design.summaryTextColor + ';opacity:.6;">Based on ' + summary.total + ' reviews</div>'
+          +   '<div style="display:flex;gap:2px;margin-bottom:4px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 19) + '</div>'
+          +   '<div style="font-size:13px;color:' + design.summaryTextColor + ';opacity:.65;">Based on ' + summary.total + ' reviews</div>'
           + '</div>'
           + '<div style="flex:1;display:flex;justify-content:center;flex-wrap:wrap;gap:0;">' + cols + '</div>'
           + writeBtn + '</div>');
