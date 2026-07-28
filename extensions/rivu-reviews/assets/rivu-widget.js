@@ -241,69 +241,70 @@
 
       const writeBtn = `<button class="rv-open-form-btn" style="display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Write a Review</button>`;
 
-      // ── A: Modern Card (Free+) ─────────────────────────────────────────────
-      // Orange rating box left, breakdown bars center, Write button right
+      // ── A: MODERN CARD (Free+) — Orange box left, horizontal bars right
       const summaryModern = summary.total ? `
-<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px;padding:20px;background:${design.summaryBgColor};color:${design.summaryTextColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;max-width:${design.summaryWidth}px;margin-left:${design.summaryPosition === "right" ? "auto" : design.summaryPosition === "center" ? "auto" : "0"};margin-right:${design.summaryPosition === "left" ? "auto" : design.summaryPosition === "center" ? "auto" : "0"};">
-  <div style="display:flex;align-items:center;gap:16px;flex-shrink:0;">
-    <div style="background:${rangeColor};border-radius:10px;padding:14px 18px;text-align:center;min-width:72px;">
-      <div style="font-family:Georgia,serif;font-size:32px;font-weight:800;color:#fff;line-height:1;">${summary.average}</div>
-      <div style="display:flex;justify-content:center;gap:1px;margin-top:4px;">${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.4)", 11)}</div>
+<div style='display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:20px 24px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;'>
+  <div style='display:flex;align-items:center;gap:14px;flex-shrink:0;'>
+    <div style='background:${rangeColor};border-radius:10px;padding:12px 16px;text-align:center;min-width:70px;'>
+      <div style='font-family:Georgia,serif;font-size:34px;font-weight:800;color:#fff;line-height:1;'>${summary.average}</div>
+      <div style='display:flex;justify-content:center;gap:1px;margin-top:5px;'>${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.35)", 12)}</div>
     </div>
     <div>
-      <div style="display:flex;gap:2px;margin-bottom:4px;">${starsHtml(Math.round(summary.average), starColor, "#e5e5e5", 18)}</div>
-      <div style="font-size:12px;color:${design.summaryTextColor};opacity:.65;">Based on ${summary.total} review${summary.total===1?"":"s"}</div>
+      <div style='display:flex;gap:2px;margin-bottom:4px;'>${starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 18)}</div>
+      <div style='font-size:12px;color:${design.summaryTextColor};opacity:.6;'>Based on ${summary.total} review${summary.total===1?"":"s"}</div>
     </div>
   </div>
-  <div style="flex:1;min-width:160px;">${breakdownHtml}</div>
+  <div style='flex:1;min-width:160px;'>${breakdownHtml}</div>
   ${writeBtn}
-</div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
+</div>` : `<div style='margin-bottom:20px;'>${writeBtn}</div>`;
 
-      // ── B: Compact Summary + List (Growth+) ───────────────────────────────
-      // Circular ring rating, clean compact bars, reviews in a tight list
+      // ── B: COMPACT (Growth+) — Circle ring left, bars center, count + button right
       const summaryCompact = summary.total ? `
-<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;padding:16px 20px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.07);border-radius:${r}px;">
-  <div style="text-align:center;flex-shrink:0;padding:12px;border-right:1px solid rgba(0,0,0,.08);padding-right:20px;margin-right:4px;">
-    <div style="width:72px;height:72px;border-radius:50%;border:3px solid ${starColor};display:flex;align-items:center;justify-content:center;margin:0 auto;">
+<div style='display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:18px 24px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;'>
+  <div style='text-align:center;flex-shrink:0;'>
+    <div style='width:88px;height:88px;border-radius:50%;border:3px solid ${starColor};display:flex;align-items:center;justify-content:center;margin:0 auto;'>
       <div>
-        <div style="font-family:Georgia,serif;font-size:22px;font-weight:800;color:${design.summaryTextColor};line-height:1;">${summary.average}</div>
-        <div style="font-size:8px;color:${design.summaryTextColor};opacity:.6;margin-top:2px;">out of 5</div>
+        <div style='font-family:Georgia,serif;font-size:26px;font-weight:800;color:${design.summaryTextColor};line-height:1;'>${summary.average}</div>
+        <div style='display:flex;justify-content:center;gap:1px;margin-top:3px;'>${starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 10)}</div>
       </div>
     </div>
-    <div style="display:flex;justify-content:center;gap:1px;margin-top:8px;">${starsHtml(Math.round(summary.average), starColor, "#e5e5e5", 12)}</div>
-    <div style="font-size:10px;color:${design.summaryTextColor};opacity:.6;margin-top:3px;">${summary.total} reviews</div>
+    <div style='font-size:10px;color:${design.summaryTextColor};opacity:.6;margin-top:6px;'>Based on ${summary.total} reviews</div>
   </div>
-  <div style="flex:1;min-width:120px;">${breakdownHtml}</div>
-  ${writeBtn}
-</div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
-
-      // ── C: Left Sidebar Summary (Growth+) ─────────────────────────────────
-      // Sticky left column with summary, reviews flow on right — handled in bodyHtml
-      const summarySidebar = summary.total ? `
-<div style="background:${design.summaryBgColor};border-radius:${r}px;padding:20px;margin-bottom:20px;width:${design.summaryWidth}px;flex-shrink:0;">
-  <div style="font-family:Georgia,serif;font-size:40px;font-weight:800;color:${design.summaryTextColor};line-height:1;">${summary.average}</div>
-  <div style="display:flex;gap:2px;margin:6px 0 4px;">${starsHtml(Math.round(summary.average), starColor, "#e5e5e5", 16)}</div>
-  <div style="font-size:12px;color:${design.summaryTextColor};opacity:.65;margin-bottom:14px;">Based on ${summary.total} review${summary.total===1?"":"s"}</div>
-  ${breakdownHtml}
-  <div style="margin-top:14px;">${writeBtn}</div>
-</div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
-
-      // ── D: Horizontal Summary Bar (Pro) ──────────────────────────────────
-      // All 5 star rows shown in a compact horizontal layout
-      const summaryHorizontal = summary.total ? `
-<div style="display:flex;align-items:center;gap:20px;margin-bottom:24px;padding:18px 22px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.08);border-radius:${r}px;flex-wrap:wrap;">
-  <div style="background:${rangeColor};border-radius:10px;padding:12px 18px;text-align:center;flex-shrink:0;min-width:80px;">
-    <div style="font-family:Georgia,serif;font-size:28px;font-weight:800;color:#fff;line-height:1;">${summary.average}</div>
-    <div style="display:flex;justify-content:center;gap:1px;margin-top:5px;">${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.35)", 12)}</div>
-    <div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:4px;font-weight:600;">${summary.total} review${summary.total===1?"":"s"}</div>
-  </div>
-  <div style="flex:1;min-width:220px;">
-    ${summary.breakdown.map(b => breakdownRow(b.star, Number(b.percentage)||0, design.summaryTextColor, "rgba(180,180,180,.3)", rangeColor)).join("")}
-  </div>
-  <div style="flex-shrink:0;">
+  <div style='flex:1;min-width:160px;'>${breakdownHtml}</div>
+  <div style='flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:10px;'>
     ${writeBtn}
+    <span style='font-size:13px;font-weight:600;color:${design.summaryTextColor};'>${summary.total} Reviews</span>
   </div>
-</div>` : `<div style="margin-bottom:20px;">${writeBtn}</div>`;
+</div>` : `<div style='margin-bottom:20px;'>${writeBtn}</div>`;
+
+      // ── C: LEFT SIDEBAR (Growth+) — Sticky sidebar left, reviews scroll right
+      const summarySidebar = summary.total ? `
+<div style='background:${design.summaryBgColor};border-radius:${r}px;padding:20px 18px;width:${design.summaryWidth}px;flex-shrink:0;border:1px solid rgba(0,0,0,.06);'>
+  <div style='font-family:Georgia,serif;font-size:48px;font-weight:800;color:${design.summaryTextColor};line-height:1;'>${summary.average}</div>
+  <div style='display:flex;gap:2px;margin:8px 0 4px;'>${starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 16)}</div>
+  <div style='font-size:12px;color:${design.summaryTextColor};opacity:.55;margin-bottom:16px;'>Based on ${summary.total} review${summary.total===1?"":"s"}</div>
+  ${breakdownHtml}
+  <div style='margin-top:16px;'>${writeBtn}</div>
+</div>` : `<div style='margin-bottom:20px;'>${writeBtn}</div>`;
+
+      // ── D: HORIZONTAL BAR (Pro) — Score box + vertical mini bar chart per star
+      const summaryHorizontal = summary.total ? `
+<div style='display:flex;align-items:center;gap:16px;margin-bottom:24px;padding:16px 20px;background:${design.summaryBgColor};border:1px solid rgba(0,0,0,.06);border-radius:${r}px;flex-wrap:wrap;'>
+  <div style='background:${rangeColor};border-radius:10px;padding:12px 16px;text-align:center;flex-shrink:0;'>
+    <div style='font-family:Georgia,serif;font-size:28px;font-weight:800;color:#fff;line-height:1;'>${summary.average}</div>
+    <div style='display:flex;justify-content:center;gap:1px;margin-top:4px;'>${starsHtml(Math.round(summary.average), "#fff", "rgba(255,255,255,.35)", 11)}</div>
+    <div style='font-size:9px;color:rgba(255,255,255,.8);margin-top:3px;'>Based on ${summary.total} reviews</div>
+  </div>
+  <div style='flex:1;min-width:220px;'>
+    <div style='display:flex;gap:4px;align-items:flex-end;height:48px;margin-bottom:4px;'>
+      ${summary.breakdown.map(b=>{const pct=Number(b.percentage)||0;const h=pct>0?Math.max(Math.round(pct*0.44),3):2;return '<div style="flex:1;display:flex;align-items:flex-end;justify-content:center;"><div style="width:80%;max-width:28px;background:'+rangeColor+';border-radius:3px 3px 0 0;height:'+h+'px;"></div></div>';}).join('')}
+    </div>
+    <div style='display:flex;gap:4px;border-top:1px solid rgba(0,0,0,.08);padding-top:4px;'>
+      ${summary.breakdown.map(b=>'<div style="flex:1;text-align:center;font-size:10px;color:'+design.summaryTextColor+';font-weight:600;">'+b.star+'★</div>').join('')}
+    </div>
+  </div>
+  ${writeBtn}
+</div>` : `<div style='margin-bottom:20px;'>${writeBtn}</div>`;
 
       const sl = design.summaryLayout || "modern";
       const summaryHtml = sl === "compact" ? summaryCompact
