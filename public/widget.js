@@ -240,10 +240,23 @@
 
       const writeBtn = `<button class="rv-open-form-btn" style="display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Write a Review</button>`;
 
+      // Wrapper: applies merchant-set width + position to any summary block.
+      // width < 900 acts as max-width; position controls left/center/right alignment.
+      function wrapSummary(inner) {
+        var ml = design.summaryPosition === 'left' ? '0' : 'auto';
+        var mr = design.summaryPosition === 'right' ? '0' : 'auto';
+        var w = Number(design.summaryWidth) || 0;
+        // Treat small values (sidebar-era 160-600 range) as percentages of a
+        // sensible band: anything >= 320 is used as a real max-width in px,
+        // otherwise fall back to 100%.
+        var maxW = w >= 320 ? w + 'px' : '100%';
+        return '<div style="max-width:' + maxW + ';width:100%;margin-left:' + ml + ';margin-right:' + mr + ';">' + inner + '</div>';
+      }
+
       // ── A: MODERN CARD (Free+) — orange box + stars left, horizontal bars right
       const summaryModern = (function(){
         if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
-        return '<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:20px 24px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
+        return wrapSummary('<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:20px 24px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
           + '<div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">'
           +   '<div style="background:' + rangeColor + ';border-radius:10px;padding:12px 16px;text-align:center;min-width:76px;">'
           +     '<div style="font-family:Georgia,serif;font-size:34px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</div>'
@@ -255,13 +268,13 @@
           +   '</div>'
           + '</div>'
           + '<div style="flex:1;min-width:160px;">' + breakdownHtml + '</div>'
-          + writeBtn + '</div>';
+          + writeBtn + '</div>');
       })();
 
       // ── B: COMPACT (Growth+) — circle ring left, bars center, count+button right
       const summaryCompact = (function(){
         if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
-        return '<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:18px 24px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
+        return wrapSummary('<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:18px 24px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
           + '<div style="text-align:center;flex-shrink:0;">'
           +   '<div style="width:88px;height:88px;border-radius:50%;border:3px solid ' + starColor + ';display:flex;align-items:center;justify-content:center;margin:0 auto;">'
           +     '<div>'
@@ -275,7 +288,7 @@
           + '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:10px;">'
           +   writeBtn
           +   '<span style="font-size:13px;font-weight:600;color:' + design.summaryTextColor + ';">' + summary.total + ' Reviews</span>'
-          + '</div></div>';
+          + '</div></div>');
       })();
 
       // ── C: LEFT SIDEBAR (Growth+) — sticky sidebar, reviews scroll right
@@ -304,7 +317,7 @@
             + '<div style="font-size:11px;color:' + design.summaryTextColor + ';opacity:.65;">' + (b.count||0) + '</div>'
             + '</div>';
         }
-        return '<div style="display:flex;align-items:center;gap:18px;margin-bottom:24px;padding:16px 22px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;flex-wrap:wrap;">'
+        return wrapSummary('<div style="display:flex;align-items:center;gap:18px;margin-bottom:24px;padding:16px 22px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;flex-wrap:wrap;">'
           + '<div style="background:' + rangeColor + ';border-radius:10px;padding:14px 16px;text-align:center;flex-shrink:0;">'
           +   '<div style="font-family:Georgia,serif;font-size:30px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</div>'
           + '</div>'
@@ -313,7 +326,7 @@
           +   '<div style="font-size:11px;color:' + design.summaryTextColor + ';opacity:.6;">Based on ' + summary.total + ' reviews</div>'
           + '</div>'
           + '<div style="flex:1;display:flex;justify-content:center;flex-wrap:wrap;gap:0;">' + cols + '</div>'
-          + writeBtn + '</div>';
+          + writeBtn + '</div>');
       })();
 
       // ── E: ICON + PERCENTAGE (Pro) — black circle + person icons + % (count) per star
@@ -335,7 +348,7 @@
             + '<span style="font-size:12px;font-weight:600;color:' + design.summaryTextColor + ';width:74px;flex-shrink:0;text-align:right;">' + pct + '% (' + (b.count||0) + ')</span>'
             + '</div>';
         }
-        return '<div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;margin-bottom:24px;padding:24px 28px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
+        return wrapSummary('<div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;margin-bottom:24px;padding:24px 28px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
           + '<div style="text-align:center;flex-shrink:0;">'
           +   '<div style="width:96px;height:96px;border-radius:50%;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;">'
           +     '<span style="font-family:Georgia,serif;font-size:30px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</span>'
@@ -345,7 +358,7 @@
           +   '<div style="font-size:11px;color:' + design.summaryTextColor + ';opacity:.6;margin-top:4px;">Based on ' + summary.total + ' reviews</div>'
           + '</div>'
           + '<div style="flex:1;min-width:260px;">' + iRows + '</div>'
-          + writeBtn + '</div>';
+          + writeBtn + '</div>');
       })();
 
       const sl = design.summaryLayout || 'modern';

@@ -75,7 +75,7 @@ function parseBody(body: Record<string, unknown>) {
     summaryLayout:            oneOf("summaryLayout", ["modern","compact","sidebar","horizontal","iconpct"], "modern"),
     summaryBgColor:           color("summaryBgColor", "#f8f8f8"),
     summaryTextColor:         color("summaryTextColor", "#333333"),
-    summaryWidth:             num("summaryWidth", 220, 160, 600),
+    summaryWidth:             num("summaryWidth", 300, 160, 1220),
     summaryPosition:          oneOf("summaryPosition", ["left","center","right"], "left"),
     filterBgColor:            color("filterBgColor", "#ffffff"),
     filterTextColor:          color("filterTextColor", "#999999"),

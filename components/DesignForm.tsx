@@ -825,9 +825,12 @@ export function DesignForm({
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-xs text-white/50">Width: {settings.summaryWidth}px</label>
-              <input type="range" min={160} max={600} value={settings.summaryWidth}
+              <label className="mb-1 block text-xs text-white/50">
+                Summary width: {settings.summaryWidth >= 320 ? `${settings.summaryWidth}px` : "Full width"}
+              </label>
+              <input type="range" min={300} max={1220} step={20} value={Math.max(settings.summaryWidth, 300)}
                 onChange={(e) => update("summaryWidth", Number(e.target.value))} className="w-full" />
+              <p className="mt-1 text-[10px] text-white/30">300 = full width · higher values shrink the summary block. For Left Sidebar this sets the sidebar column width.</p>
             </div>
           </div>
         )}
