@@ -22,17 +22,24 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const apiKey = process.env.SHOPIFY_API_KEY || "";
-  
+  // API key must be available at build/runtime. Falls back to the known
+  // client ID so the meta tag is never empty even if the env var is unset.
+  const apiKey =
+    process.env.SHOPIFY_API_KEY ||
+    process.env.NEXT_PUBLIC_SHOPIFY_API_KEY ||
+    "2135e06e19ed7ba1e0303c3a1f48116a";
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        {/* App Bridge v4 — required for Shopify embedded app session tokens */}
+        {/* App Bridge v4 — MUST load first and synchronously (no async/defer)
+            so Shopify can inject session tokens into fetch requests. */}
         <meta name="shopify-api-key" content={apiKey} />
-        <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" async />
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" />
       </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
