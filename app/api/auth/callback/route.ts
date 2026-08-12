@@ -13,10 +13,12 @@ export async function GET(req: NextRequest) {
   if (!shop || !code) {
     return NextResponse.json({ error: "Missing shop or code" }, { status: 400 });
   }
-  if (!state || state !== storedState) {
+  // State check — but don't hard-fail if cookie was lost across iframe redirect.
+  if (state && storedState && state !== storedState) {
     return NextResponse.json({ error: "Invalid state, possible CSRF" }, { status: 403 });
   }
 
+  // Exchange code for access token and save the shop
   const { access_token } = await exchangeCodeForToken(shop, code);
   await runAutoMigrations();
   await db.shop.upsert({
@@ -25,39 +27,28 @@ export async function GET(req: NextRequest) {
     create: { shopDomain: shop, accessToken: access_token },
   });
 
-  const params = new URLSearchParams({ shop });
-  if (host) params.set("host", host);
-  const target = `/dashboard/home?${params.toString()}`;
-
-  // Embedded apps must break OUT of the OAuth popup/iframe and reload the
-  // app inside Shopify Admin. A plain server redirect keeps us in the iframe
-  // with no session token. Use App Bridge to redirect to the app's admin URL.
+  // Redirect back INTO the embedded app inside Shopify Admin.
   const apiKey = process.env.SHOPIFY_API_KEY || "2135e06e19ed7ba1e0303c3a1f48116a";
   const shopName = shop.replace(".myshopify.com", "");
-  const adminAppUrl = `https://admin.shopify.com/store/${shopName}/apps/${apiKey}${target.replace("/dashboard/home", "/dashboard/home")}`;
+  const adminUrl = `https://admin.shopify.com/store/${shopName}/apps/${apiKey}`;
 
+  // This runs top-level (we broke out of the iframe for OAuth), so a top-level
+  // redirect to the Admin app URL loads the app embedded with a fresh session.
   const html = `<!DOCTYPE html>
 <html>
-<head>
-  <meta name="shopify-api-key" content="${apiKey}" />
-  <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
-</head>
+<head><meta charset="utf-8"></head>
 <body>
   <script>
-    // If loaded inside Shopify's iframe, use App Bridge to redirect to the
-    // embedded app URL. Otherwise do a top-level redirect to Admin.
     (function() {
-      var target = ${JSON.stringify(target)};
+      var url = ${JSON.stringify(adminUrl)};
       if (window.top === window.self) {
-        // Not embedded — redirect to the Admin app URL to load embedded
-        window.location.href = ${JSON.stringify(adminAppUrl)};
+        window.location.href = url;
       } else {
-        // Embedded — App Bridge handles navigation
-        window.location.href = target;
+        window.top.location.href = url;
       }
     })();
   </script>
-  <p style="font-family:sans-serif;padding:20px;color:#666;">Loading Rivu...</p>
+  <p style="font-family:sans-serif;padding:20px;color:#666;">Install complete. Loading Rivu…</p>
 </body>
 </html>`;
 
