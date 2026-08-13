@@ -1,4 +1,5 @@
-const API_VERSION = "2024-10";
+import { adminFetch } from "./shopify";
+import { appUrl } from "./app-url";
 
 // Central place to define plan pricing. Unlike a messaging-based app,
 // nothing here has a real per-unit cost (image generation and QR codes
@@ -51,30 +52,23 @@ export type PlanKey = keyof typeof PLANS;
 // (Shopify hosts this page — no billing UI to build yourself).
 export async function createRecurringCharge(
   shop: string,
-  accessToken: string,
   planKey: Exclude<PlanKey, "free">
 ) {
   const plan = PLANS[planKey];
 
-  const res = await fetch(
-    `https://${shop}/admin/api/${API_VERSION}/recurring_application_charges.json`,
-    {
+  const res = await adminFetch(shop, "recurring_application_charges.json", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Access-Token": accessToken,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         recurring_application_charge: {
           name: `Rivu — ${plan.name} Plan`,
           price: plan.price,
-          return_url: `${process.env.HOST}/api/billing/callback?shop=${shop}&plan=${planKey}`,
+          return_url: `${appUrl()}/api/billing/callback?shop=${shop}&plan=${planKey}`,
           trial_days: 4,
           test: process.env.SHOPIFY_BILLING_TEST_MODE === "true",
         },
       }),
-    }
-  );
+  });
 
   if (!res.ok) {
     throw new Error(`Failed to create charge: ${res.status} ${await res.text()}`);
@@ -88,15 +82,13 @@ export async function createRecurringCharge(
   };
 }
 
-export async function activateCharge(shop: string, accessToken: string, chargeId: string) {
-  const res = await fetch(
-    `https://${shop}/admin/api/${API_VERSION}/recurring_application_charges/${chargeId}/activate.json`,
+export async function activateCharge(shop: string, chargeId: string) {
+  const res = await adminFetch(
+    shop,
+    `recurring_application_charges/${chargeId}/activate.json`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Access-Token": accessToken,
-      },
+      headers: { "Content-Type": "application/json" },
     }
   );
   if (!res.ok) {
@@ -105,10 +97,10 @@ export async function activateCharge(shop: string, accessToken: string, chargeId
   return res.json();
 }
 
-export async function getCharge(shop: string, accessToken: string, chargeId: string) {
-  const res = await fetch(
-    `https://${shop}/admin/api/${API_VERSION}/recurring_application_charges/${chargeId}.json`,
-    { headers: { "X-Shopify-Access-Token": accessToken } }
+export async function getCharge(shop: string, chargeId: string) {
+  const res = await adminFetch(
+    shop,
+    `recurring_application_charges/${chargeId}.json`
   );
   if (!res.ok) return null;
   const data = await res.json();

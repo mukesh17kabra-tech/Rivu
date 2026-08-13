@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
   let discountCode: string | undefined;
   if (shopRecord.rewardEnabled) {
     try {
-      discountCode = await createReviewRewardDiscount(shop, shopRecord.accessToken, {
+      discountCode = await createReviewRewardDiscount(shop, {
         type: shopRecord.rewardType as "percentage" | "fixed_amount",
         value: shopRecord.rewardValue,
       });

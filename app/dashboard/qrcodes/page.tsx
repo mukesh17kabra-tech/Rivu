@@ -1,6 +1,7 @@
 import { getProducts } from "@/lib/shopify";
 import { NavBar } from "@/components/NavBar";
-import { requireShop } from "@/lib/shop-context";
+import { requireShop, shopQuery } from "@/lib/shop-context";
+import { ReauthRequiredError } from "@/lib/access-token";
 
 export default async function QRCodesPage({
   searchParams,
@@ -11,14 +12,22 @@ export default async function QRCodesPage({
   // requireShop sends the merchant back to the app entry point when the shop
   // is missing or not yet registered, so authentication can re-run — instead
   // of dead-ending them on "Shop not found. Please reinstall the app."
-  const { shop, shopRecord } = await requireShop(shopParam, host);
+  const { shop } = await requireShop(shopParam, host);
 
   let products: { id: number; title: string; image?: { src: string } }[] = [];
   let fetchError: string | null = null;
+  let needsReauth = false;
   try {
-    products = await getProducts(shop, shopRecord.accessToken);
+    // getProducts resolves and rotates the access token itself.
+    products = await getProducts(shop);
   } catch (err) {
-    fetchError = (err as Error).message;
+    // A token that can't be rotated is recoverable by re-authorizing, so say
+    // that instead of showing the merchant an internal error string.
+    if (err instanceof ReauthRequiredError) {
+      needsReauth = true;
+    } else {
+      fetchError = (err as Error).message;
+    }
   }
 
   const genericQrUrl = `/api/qrcode?shop=${encodeURIComponent(shop)}`;
@@ -65,7 +74,20 @@ export default async function QRCodesPage({
             For anything printed on physical packaging, use the generic QR above instead.
           </p>
 
-          {fetchError ? (
+          {needsReauth ? (
+            <div className="rounded-lg border border-amber-400/30 bg-amber-400/[0.06] p-4">
+              <p className="text-sm text-amber-200">
+                Rivu needs permission to read your products again.
+              </p>
+              <a
+                href={`/api/auth?${shopQuery(shop, host)}`}
+                target="_top"
+                className="mt-3 inline-block rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300"
+              >
+                Reconnect Rivu
+              </a>
+            </div>
+          ) : fetchError ? (
             <p className="rounded-lg border border-red-400/30 bg-red-400/[0.06] p-4 text-sm text-red-300">
               Couldn&apos;t load products: {fetchError}
             </p>

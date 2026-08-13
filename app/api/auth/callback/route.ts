@@ -53,8 +53,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { access_token } = await exchangeCodeForToken(shop!, code);
-    await saveShopToken(shop!, access_token);
+    // Stores the whole payload, not just access_token: expiring tokens come
+    // with expires_in and a refresh_token that lib/access-token.ts needs.
+    const token = await exchangeCodeForToken(shop!, code);
+    await saveShopToken(shop!, token);
   } catch (err) {
     console.error(`[auth/callback] install failed for ${shop}:`, err);
     return errorPage(

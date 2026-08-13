@@ -1,4 +1,9 @@
 import { appUrl } from "./app-url";
+import {
+  getValidAccessToken,
+  ReauthRequiredError,
+  type TokenResponse,
+} from "./access-token";
 
 const API_VERSION = "2024-10";
 
@@ -23,23 +28,65 @@ export function getInstallUrl(shop: string, state: string) {
 export async function exchangeCodeForToken(shop: string, code: string) {
   const res = await fetch(`https://${shop}/admin/oauth/access_token`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      client_id: process.env.SHOPIFY_API_KEY,
-      client_secret: process.env.SHOPIFY_API_SECRET,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+    },
+    body: new URLSearchParams({
+      client_id: process.env.SHOPIFY_API_KEY!,
+      client_secret: process.env.SHOPIFY_API_SECRET!,
       code,
+      // The Admin API rejects non-expiring offline tokens with a 403, so
+      // ask for an expiring one here too — same as token exchange.
+      expiring: "1",
     }),
   });
-  if (!res.ok) throw new Error(`Token exchange failed: ${res.status}`);
-  return res.json() as Promise<{ access_token: string; scope: string }>;
+  if (!res.ok) {
+    throw new Error(
+      `Token exchange failed: ${res.status} ${await res.text().catch(() => "")}`
+    );
+  }
+  return res.json() as Promise<TokenResponse>;
+}
+
+/**
+ * Every Admin API request goes through here so the access token is rotated
+ * before use. A token rejection is surfaced as ReauthRequiredError, which
+ * callers turn into a re-authorization redirect instead of an error page.
+ */
+export async function adminFetch(
+  shop: string,
+  path: string,
+  init: RequestInit = {}
+): Promise<Response> {
+  const accessToken = await getValidAccessToken(shop);
+
+  const res = await fetch(`https://${shop}/admin/api/${API_VERSION}/${path}`, {
+    ...init,
+    headers: {
+      ...(init.headers ?? {}),
+      "X-Shopify-Access-Token": accessToken,
+    },
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    const body = await res.text().catch(() => "");
+    // Distinguish "this token is no good" from "this scope isn't granted".
+    if (/access token|Non-expiring|Invalid API key|unauthorized/i.test(body)) {
+      throw new ReauthRequiredError(shop, `Admin API returned ${res.status}`);
+    }
+    throw new Error(`Admin API ${path} failed: ${res.status} ${body}`);
+  }
+
+  return res;
 }
 
 // Used by the QR code generator page so merchants can pick a product
 // without needing to know its raw Shopify product ID.
-export async function getProducts(shop: string, accessToken: string) {
-  const res = await fetch(
-    `https://${shop}/admin/api/${API_VERSION}/products.json?limit=100&fields=id,title,image`,
-    { headers: { "X-Shopify-Access-Token": accessToken } }
+export async function getProducts(shop: string) {
+  const res = await adminFetch(
+    shop,
+    `products.json?limit=100&fields=id,title,image`
   );
   if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`);
   const data = await res.json();
@@ -50,14 +97,10 @@ export async function getProducts(shop: string, accessToken: string) {
 // enters their email, and this looks up which product(s) they actually
 // bought so the review form knows what to ask about — no per-product QR
 // codes needed at all.
-export async function getProductsFromOrdersByEmail(
-  shop: string,
-  accessToken: string,
-  email: string
-) {
-  const res = await fetch(
-    `https://${shop}/admin/api/${API_VERSION}/orders.json?email=${encodeURIComponent(email)}&status=any&limit=10`,
-    { headers: { "X-Shopify-Access-Token": accessToken } }
+export async function getProductsFromOrdersByEmail(shop: string, email: string) {
+  const res = await adminFetch(
+    shop,
+    `orders.json?email=${encodeURIComponent(email)}&status=any&limit=10`
   );
   if (!res.ok) throw new Error(`Failed to fetch orders: ${res.status}`);
   const data = await res.json();
@@ -86,17 +129,13 @@ export async function getProductsFromOrdersByEmail(
 // which are simple and reliable for this single-code-at-a-time use case.
 export async function createReviewRewardDiscount(
   shop: string,
-  accessToken: string,
   params: { type: "percentage" | "fixed_amount"; value: number }
 ) {
   const code = `REVIEW-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
-  const priceRuleRes = await fetch(`https://${shop}/admin/api/${API_VERSION}/price_rules.json`, {
+  const priceRuleRes = await adminFetch(shop, `price_rules.json`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Access-Token": accessToken,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       price_rule: {
         title: `Review reward — ${code}`,
@@ -119,14 +158,12 @@ export async function createReviewRewardDiscount(
   const priceRuleData = await priceRuleRes.json();
   const priceRuleId = priceRuleData.price_rule.id;
 
-  const discountRes = await fetch(
-    `https://${shop}/admin/api/${API_VERSION}/price_rules/${priceRuleId}/discount_codes.json`,
+  const discountRes = await adminFetch(
+    shop,
+    `price_rules/${priceRuleId}/discount_codes.json`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Access-Token": accessToken,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ discount_code: { code } }),
     }
   );
