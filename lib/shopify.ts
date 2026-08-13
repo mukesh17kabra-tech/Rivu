@@ -1,16 +1,21 @@
+import { appUrl } from "./app-url";
+
 const API_VERSION = "2024-10";
 
 export function getInstallUrl(shop: string, state: string) {
   // read_orders is needed so the QR review flow can look up what a
   // customer bought using just their email — no per-product QR needed.
   const scopes = "read_products,read_orders,write_discounts";
-  const redirectUri = `${process.env.HOST}/api/auth/callback`;
+  // appUrl() rather than process.env.HOST directly: an unset env var used to
+  // produce "undefined/api/auth/callback", which Shopify rejects outright
+  // with an unrecoverable "redirect_uri is not whitelisted" error page.
+  const redirectUri = `${appUrl()}/api/auth/callback`;
   const clientId = process.env.SHOPIFY_API_KEY;
   return (
     `https://${shop}/admin/oauth/authorize` +
     `?client_id=${clientId}` +
-    `&scope=${scopes}` +
-    `&redirect_uri=${encodeURIComponent(redirectUri!)}` +
+    `&scope=${encodeURIComponent(scopes)}` +
+    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
     `&state=${state}`
   );
 }
