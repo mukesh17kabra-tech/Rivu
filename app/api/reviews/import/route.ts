@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireSession } from "@/lib/require-session";
 import { db } from "@/lib/db";
 import Papa from "papaparse";
 
@@ -39,8 +40,17 @@ function findColumn(row: Record<string, string>, field: string): string | undefi
 }
 
 export async function POST(req: NextRequest) {
+  // Merchant-only: requires a valid Shopify session token, which App Bridge
+  // attaches automatically. A bare ?shop= param proves nothing.
+  const auth = requireSession(req);
+  if (!auth.ok) return auth.response;
+
   const body = await req.json().catch(() => null);
   const shop = body?.shop as string | undefined;
+  if (String(shop).trim().toLowerCase() !== auth.shop) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const csvText = body?.csv as string | undefined;
 
   if (!shop || !csvText) {

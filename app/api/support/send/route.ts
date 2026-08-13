@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireSession } from "@/lib/require-session";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
@@ -12,6 +13,11 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  // Merchant-only: requires a valid Shopify session token, which App Bridge
+  // attaches automatically. A bare ?shop= param proves nothing.
+  const auth = requireSession(req);
+  if (!auth.ok) return auth.response;
+
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
@@ -19,6 +25,10 @@ export async function POST(req: NextRequest) {
   }
 
   const { shop, message, imageUrl } = parsed.data;
+  if (String(shop).trim().toLowerCase() !== auth.shop) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
 
   if (!message && !imageUrl) {
     return NextResponse.json({ error: "Message or image required" }, { status: 400 });

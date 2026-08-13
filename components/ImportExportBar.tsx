@@ -4,6 +4,7 @@ import { useState } from "react";
 
 export function ImportExportBar({ shop }: { shop: string }) {
   const [importing, setImporting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [result, setResult] = useState<{ imported: number; skipped: number } | null>(null);
   const [error, setError] = useState("");
 
@@ -38,14 +39,46 @@ export function ImportExportBar({ shop }: { shop: string }) {
     }
   }
 
+  // The export endpoint requires a session token now, and a plain <a download>
+  // can't carry an Authorization header. Fetching it (App Bridge attaches the
+  // token) and saving the blob keeps the same one-click behaviour.
+  async function handleExport() {
+    setExporting(true);
+    setError("");
+    try {
+      const res = await fetch(
+        `/api/reviews/export?shop=${encodeURIComponent(shop)}`
+      );
+      if (!res.ok) {
+        setError("Couldn't export your reviews. Please try again.");
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `rivu-reviews-${shop}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError("Couldn't export your reviews. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <div className="mb-8 flex flex-wrap items-center gap-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
-      <a
-        href={`/api/reviews/export?shop=${encodeURIComponent(shop)}`}
-        className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20"
+      <button
+        type="button"
+        onClick={handleExport}
+        disabled={exporting}
+        className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-50"
       >
-        Export all reviews (CSV)
-      </a>
+        {exporting ? "Exporting…" : "Export all reviews (CSV)"}
+      </button>
 
       <label className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 cursor-pointer">
         {importing ? "Importing..." : "Import from Judge.me / Loox / Stamped / Yotpo / CSV"}
