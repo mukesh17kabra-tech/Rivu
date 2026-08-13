@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { NavBar } from "@/components/NavBar";
 import { ImportExportBar } from "@/components/ImportExportBar";
 import { ReviewsTable } from "@/components/ReviewsTable";
-import { resolveShop } from "@/lib/shop-context";
+import { requireShop } from "@/lib/shop-context";
 
 export default async function ReviewsDashboard({
   searchParams,
@@ -10,16 +10,10 @@ export default async function ReviewsDashboard({
   searchParams: Promise<{ shop?: string; host?: string }>;
 }) {
   const { shop: shopParam, host } = await searchParams;
-  const shop = resolveShop(shopParam, host);
-
-  if (!shop) {
-    return <div className="p-8 text-sm text-gray-500">Missing shop parameter.</div>;
-  }
-
-  const shopRecord = await db.shop.findUnique({ where: { shopDomain: shop } });
-  if (!shopRecord) {
-    return <div className="p-8 text-sm text-gray-500">Shop not found. Please reinstall the app.</div>;
-  }
+  // requireShop sends the merchant back to the app entry point when the shop
+  // is missing or not yet registered, so authentication can re-run — instead
+  // of dead-ending them on "Shop not found. Please reinstall the app."
+  const { shop, shopRecord } = await requireShop(shopParam, host);
 
   const reviews = await db.review.findMany({
     where: { shopId: shopRecord.id },

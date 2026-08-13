@@ -1,9 +1,7 @@
-import { db } from "@/lib/db";
 import { NavBar } from "@/components/NavBar";
-import { resolveShop } from "@/lib/shop-context";
+import { requireShop } from "@/lib/shop-context";
 import { PlanSync } from "@/components/PlanSync";
 import { PlanCards } from "@/components/PlanCards";
-import { DevPlanBypass } from "@/components/DevPlanBypass";
 
 export default async function PlansPage({
   searchParams,
@@ -11,16 +9,10 @@ export default async function PlansPage({
   searchParams: Promise<{ shop?: string; host?: string }>;
 }) {
   const { shop: shopParam, host } = await searchParams;
-  const shop = resolveShop(shopParam, host);
-
-  if (!shop) {
-    return <div className="p-8 text-sm text-gray-500">Missing shop parameter.</div>;
-  }
-
-  const shopRecord = await db.shop.findUnique({ where: { shopDomain: shop } });
-  if (!shopRecord) {
-    return <div className="p-8 text-sm text-gray-500">Shop not found. Please reinstall the app.</div>;
-  }
+  // requireShop sends the merchant back to the app entry point when the shop
+  // is missing or not yet registered, so authentication can re-run — instead
+  // of dead-ending them on "Shop not found. Please reinstall the app."
+  const { shop, shopRecord } = await requireShop(shopParam, host);
 
   return (
     <main className="min-h-screen bg-[#0B0D0F] text-[#E7E9EA] font-sans">
@@ -34,8 +26,6 @@ export default async function PlansPage({
 
         <PlanSync shop={shop} plan={shopRecord.plan} />
         <PlanCards shop={shop} currentPlan={shopRecord.plan} />
-
-        <DevPlanBypass shop={shop} currentPlan={shopRecord.plan} />        <DevPlanBypass shop={shop} currentPlan={shopRecord.plan} />
       </div>
     </main>
   );
