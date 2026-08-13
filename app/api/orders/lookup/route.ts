@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const products = await getProductsFromOrdersByEmail(shop, shopRecord.accessToken, email);
+    const products = await getProductsFromOrdersByEmail(shop, email);
     if (products.length === 0) {
       return withCors(
         NextResponse.json(

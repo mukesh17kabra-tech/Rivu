@@ -59,6 +59,13 @@ const MIGRATIONS = [
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "splitSummary" BOOLEAN NOT NULL DEFAULT false`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "reviewTitle" TEXT`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "recommends" BOOLEAN`,
+  // Expiring offline access tokens — see prisma/schema.prisma and
+  // lib/access-token.ts. Nullable: existing rows hold a legacy
+  // non-expiring token that can't be refreshed and must be re-minted.
+  `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "tokenExpiresAt" TIMESTAMP(3)`,
+  `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "refreshToken" TEXT`,
+  `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "refreshTokenExpiresAt" TIMESTAMP(3)`,
+  `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "tokenScope" TEXT`,
 ];
 
 let ran = false;

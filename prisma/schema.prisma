@@ -16,6 +16,17 @@ model Shop {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Expiring offline access tokens (Shopify, Dec 2025). Non-expiring
+  // tokens are rejected by the Admin API with a 403, so the access token
+  // now lives ~1 hour and is rotated using the refresh token, which lives
+  // ~90 days. Nullable so rows created under the old non-expiring flow
+  // still load; a null tokenExpiresAt means "legacy token, cannot be
+  // refreshed" and forces re-authorization. See lib/access-token.ts.
+  tokenExpiresAt        DateTime?
+  refreshToken          String?
+  refreshTokenExpiresAt DateTime?
+  tokenScope            String?
+
   // Widget design customization — lets merchants match their store's
   // branding instead of a fixed look, and choose how reviews are laid out.
   displayStyle    String @default("list")    // "list" | "grid" | "carousel" | "masonry" — shape of the review list itself
