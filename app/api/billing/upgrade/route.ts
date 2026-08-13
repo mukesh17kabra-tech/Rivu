@@ -1,50 +1,73 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createRecurringCharge, PLANS, PlanKey } from "@/lib/billing";
-import { ReauthRequiredError } from "@/lib/access-token";
-import { isValidShopDomain, shopQuery } from "@/lib/shop-context";
-import { appUrl } from "@/lib/app-url";
+import { managedPricingUrl } from "@/lib/billing";
+import { isValidShopDomain } from "@/lib/shop-context";
 
 /**
- * Starts a plan upgrade by creating a recurring application charge and
- * sending the merchant to Shopify's hosted confirmation page.
+ * Sends the merchant to Shopify's hosted plan-selection page.
  *
- * This route used to let createRecurringCharge throw, which produced a raw
- * HTTP 500 in the browser. The underlying cause was the stored access token:
- * Shopify rejects non-expiring offline tokens on the Admin API, so the charge
- * call came back 403. Now a token problem sends the merchant through
- * re-authorization (which mints an expiring token) and any other failure
- * returns them to the Plans page with a reason instead of an error page.
+ * This app uses Shopify Managed Pricing, so it cannot create charges itself.
+ * The previous implementation called the Billing API, which fails with a bare
+ * 403 ("Managed Pricing Apps cannot use the Billing API") — that was the
+ * cause of both the HTTP 500 and, once guarded, the `?billing=error` redirect.
+ *
+ * The `plan` query param is now advisory only: Shopify's page lists every
+ * plan and the merchant chooses there.
  */
 export async function GET(req: NextRequest) {
   const shop = req.nextUrl.searchParams.get("shop")?.trim().toLowerCase();
-  const host = req.nextUrl.searchParams.get("host") ?? undefined;
-  const planParam = req.nextUrl.searchParams.get("plan") as PlanKey | null;
-
-  const base = appUrl(req);
 
   if (!isValidShopDomain(shop)) {
     return NextResponse.redirect(new URL("/", req.nextUrl));
   }
-  if (!planParam || planParam === "free" || !(planParam in PLANS)) {
-    return NextResponse.redirect(
-      `${base}/dashboard/plans?${shopQuery(shop!, host)}&billing=invalid_plan`
-    );
-  }
 
-  try {
-    const charge = await createRecurringCharge(shop!, planParam);
-    return NextResponse.redirect(charge.confirmation_url);
-  } catch (err) {
-    if (err instanceof ReauthRequiredError) {
-      // The access token can't be used or rotated — re-authorize, then the
-      // merchant can retry the upgrade with a valid token.
-      console.error(`[billing/upgrade] re-auth required for ${shop}:`, err.message);
-      return NextResponse.redirect(`${base}/api/auth?${shopQuery(shop!, host)}`);
-    }
+  const target = managedPricingUrl(shop!);
 
-    console.error(`[billing/upgrade] charge failed for ${shop}:`, err);
-    return NextResponse.redirect(
-      `${base}/dashboard/plans?${shopQuery(shop!, host)}&billing=error`
-    );
-  }
+  // admin.shopify.com cannot be framed inside the app's own iframe, so this
+  // has to be a top-level navigation. window.open(url, "_top") is the
+  // mechanism App Bridge permits — assigning window.top.location directly is
+  // blocked for a cross-origin frame without user activation.
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Choose your Rivu plan</title>
+  <script data-api-key="${escapeAttribute(
+    process.env.SHOPIFY_API_KEY || ""
+  )}" src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+</head>
+<body style="margin:0;background:#0B0D0F;color:#E7E9EA;font-family:system-ui,sans-serif">
+  <p style="padding:20px">Opening Shopify&rsquo;s plan options&hellip;</p>
+  <p style="padding:0 20px">
+    <a href="${escapeAttribute(target)}" target="_top" style="color:#34d399">
+      Continue to plans
+    </a>
+  </p>
+  <script>
+    (function () {
+      var url = ${JSON.stringify(target)};
+      if (window.top === window.self) {
+        window.location.href = url;
+      } else {
+        window.open(url, "_top");
+      }
+    })();
+  </script>
+</body>
+</html>`;
+
+  return new NextResponse(html, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store, max-age=0",
+    },
+  });
+}
+
+function escapeAttribute(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }

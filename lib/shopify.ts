@@ -49,6 +49,48 @@ export async function exchangeCodeForToken(shop: string, code: string) {
   return res.json() as Promise<TokenResponse>;
 }
 
+const GRAPHQL_VERSION = "2025-01";
+
+/**
+ * Admin GraphQL request. Used for the things that have no usable REST
+ * equivalent — notably reading the merchant's active app subscription, which
+ * is how plan state is determined under Shopify Managed Pricing.
+ */
+export async function adminGraphQL<T>(
+  shop: string,
+  query: string,
+  variables?: Record<string, unknown>
+): Promise<T> {
+  const accessToken = await getValidAccessToken(shop);
+
+  const res = await fetch(
+    `https://${shop}/admin/api/${GRAPHQL_VERSION}/graphql.json`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": accessToken,
+      },
+      body: JSON.stringify({ query, variables }),
+    }
+  );
+
+  if (res.status === 401 || res.status === 403) {
+    throw new ReauthRequiredError(shop, `Admin GraphQL returned ${res.status}`);
+  }
+  if (!res.ok) {
+    throw new Error(
+      `Admin GraphQL failed: ${res.status} ${await res.text().catch(() => "")}`
+    );
+  }
+
+  const payload = (await res.json()) as { data?: T; errors?: unknown };
+  if (payload.errors) {
+    throw new Error(`Admin GraphQL errors: ${JSON.stringify(payload.errors)}`);
+  }
+  return payload.data as T;
+}
+
 /**
  * Every Admin API request goes through here so the access token is rotated
  * before use. A token rejection is surfaced as ReauthRequiredError, which

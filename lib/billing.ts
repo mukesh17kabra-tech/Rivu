@@ -1,5 +1,5 @@
-import { adminFetch } from "./shopify";
-import { appUrl } from "./app-url";
+import { adminGraphQL } from "./shopify";
+import { db } from "./db";
 
 // Central place to define plan pricing. Unlike a messaging-based app,
 // nothing here has a real per-unit cost (image generation and QR codes
@@ -47,62 +47,103 @@ export const PLANS = {
 
 export type PlanKey = keyof typeof PLANS;
 
-// Creates a recurring application charge for the given paid plan and
-// returns the confirmation URL the merchant must visit to approve billing
-// (Shopify hosts this page — no billing UI to build yourself).
-export async function createRecurringCharge(
-  shop: string,
-  planKey: Exclude<PlanKey, "free">
-) {
-  const plan = PLANS[planKey];
+/**
+ * This app uses **Shopify Managed Pricing**: plans are defined in the Partner
+ * Dashboard and Shopify hosts the plan-selection and checkout UI.
+ *
+ * That means the Billing API is unavailable to us. Attempting to create a
+ * charge returns a bare `403` over REST, and over GraphQL the actual reason:
+ *
+ *   "Managed Pricing Apps cannot use the Billing API (to create charges)."
+ *
+ * So instead of creating charges, we send the merchant to Shopify's pricing
+ * page and read the resulting subscription back. createRecurringCharge /
+ * activateCharge / getCharge were removed — they could never succeed.
+ */
 
-  const res = await adminFetch(shop, "recurring_application_charges.json", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        recurring_application_charge: {
-          name: `Rivu — ${plan.name} Plan`,
-          price: plan.price,
-          return_url: `${appUrl()}/api/billing/callback?shop=${shop}&plan=${planKey}`,
-          trial_days: 4,
-          test: process.env.SHOPIFY_BILLING_TEST_MODE === "true",
-        },
-      }),
-  });
+/** App handle from the Partner Dashboard — part of the pricing-page URL. */
+const APP_HANDLE = process.env.SHOPIFY_APP_HANDLE || "rivu";
 
-  if (!res.ok) {
-    throw new Error(`Failed to create charge: ${res.status} ${await res.text()}`);
-  }
+/**
+ * Shopify's hosted plan-selection page for this app. Must be opened at the
+ * top level: it's an admin.shopify.com page and cannot render inside the
+ * app's own iframe.
+ */
+export function managedPricingUrl(shop: string): string {
+  const storeHandle = shop.replace(/\.myshopify\.com$/, "");
+  return `https://admin.shopify.com/store/${storeHandle}/charges/${APP_HANDLE}/pricing_plans`;
+}
 
-  const data = await res.json();
-  return data.recurring_application_charge as {
-    id: number;
-    confirmation_url: string;
-    status: string;
+type ActiveSubscriptionsQuery = {
+  currentAppInstallation: {
+    activeSubscriptions: { id: string; name: string; status: string }[];
   };
-}
+};
 
-export async function activateCharge(shop: string, chargeId: string) {
-  const res = await adminFetch(
+/**
+ * Reads the merchant's real plan from Shopify rather than trusting our own
+ * column. Returns null when Shopify reports a subscription whose name we
+ * don't recognise, so a renamed plan can't silently downgrade anyone.
+ */
+export async function getActivePlanFromShopify(
+  shop: string
+): Promise<PlanKey | null> {
+  const data = await adminGraphQL<ActiveSubscriptionsQuery>(
     shop,
-    `recurring_application_charges/${chargeId}/activate.json`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    `{
+      currentAppInstallation {
+        activeSubscriptions { id name status }
+      }
+    }`
+  );
+
+  const active = (data.currentAppInstallation?.activeSubscriptions ?? []).filter(
+    (sub) => sub.status === "ACTIVE"
+  );
+
+  // No active subscription means the merchant is on the free plan.
+  if (active.length === 0) return "free";
+
+  // Match Shopify's plan name against our own, case-insensitively. Managed
+  // pricing names come from the Partner Dashboard, so tolerate extra words
+  // like "Rivu — Growth Plan" as well as a bare "Growth".
+  for (const key of Object.keys(PLANS) as PlanKey[]) {
+    if (key === "free") continue;
+    const planName = PLANS[key].name.toLowerCase();
+    if (active.some((sub) => sub.name.toLowerCase().includes(planName))) {
+      return key;
     }
-  );
-  if (!res.ok) {
-    throw new Error(`Failed to activate charge: ${res.status} ${await res.text()}`);
   }
-  return res.json();
+
+  console.warn(
+    `[billing] ${shop} has an active subscription we don't recognise: ${active
+      .map((s) => s.name)
+      .join(", ")}`
+  );
+  return null;
 }
 
-export async function getCharge(shop: string, chargeId: string) {
-  const res = await adminFetch(
-    shop,
-    `recurring_application_charges/${chargeId}.json`
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.recurring_application_charge as { id: number; status: string };
+/**
+ * Brings our `plan` column in line with Shopify. Safe to call on page load —
+ * it only writes when the value actually changed.
+ *
+ * Returns the plan the app should treat as current.
+ */
+export async function syncPlanFromShopify(
+  shop: string,
+  storedPlan: string
+): Promise<string> {
+  let actual: PlanKey | null;
+  try {
+    actual = await getActivePlanFromShopify(shop);
+  } catch (err) {
+    // Never block the Plans page on a Shopify hiccup — show what we have.
+    console.error(`[billing] plan sync failed for ${shop}:`, err);
+    return storedPlan;
+  }
+
+  if (!actual || actual === storedPlan) return storedPlan;
+
+  await db.shop.update({ where: { shopDomain: shop }, data: { plan: actual } });
+  return actual;
 }
