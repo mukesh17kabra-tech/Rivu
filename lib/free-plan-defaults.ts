@@ -34,7 +34,7 @@ export const FREE_PLAN_DESIGN_DEFAULTS = {
   widgetTitle:             "Customer Reviews",
   headingFontSize:         13,
   headingBold:             true,
-  headingAlign:            "left",
+  headingAlign:            "center",
   topSpacing:              24,
   showBorder:              false,
   borderColor:             "#e0e0e0",

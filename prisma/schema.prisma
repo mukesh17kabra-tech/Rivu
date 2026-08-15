@@ -56,7 +56,7 @@ model Shop {
   widgetTitle     String  @default("Customer Reviews") // merchant-editable heading text above the widget
   headingFontSize Int     @default(11) // px — the small uppercase label above the widget
   headingBold     Boolean @default(false)
-  headingAlign    String  @default("left") // "left" | "center" | "right" — independent from the review-card text alignment
+  headingAlign    String  @default("center") // "left" | "center" | "right" — independent from the review-card text alignment. Centred by default: left-aligned reads as broken inside the centred widget column, especially before any reviews exist.
   topSpacing      Int     @default(24) // px — space above the widget, since themes often butt it right up against other content
   showBorder      Boolean @default(true) // subtle border around the whole widget — helps it stand out against a plain white theme background
   borderColor     String  @default("#e0e0e0")

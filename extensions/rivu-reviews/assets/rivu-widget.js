@@ -64,7 +64,7 @@
       backgroundColor:"#fff", textColor:"#333", borderRadius:8, fontFamily:"inherit",
       reviewTextSize:14, reviewTextAlign:"left", formAlign:"center",
       formMaxWidth:540, widgetMaxWidth:900, widgetTitle:"CUSTOMER REVIEWS",
-      headingFontSize:13, headingBold:true, headingAlign:"left",
+      headingFontSize:13, headingBold:true, headingAlign:"center",
       topSpacing:24, showBorder:false, borderColor:"#e0e0e0", borderWidth:1, borderStyle:"solid",
       backgroundGradient:null, primaryGradient:null,
       letCustomerPickLanguage:false, showSuggestionsOnWebsite:true,
@@ -256,7 +256,7 @@
 
       // ── A: MODERN CARD (Free+) — orange box + stars left, horizontal bars right
       const summaryModern = (function(){
-        if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
+        if (!summary.total) return '<div style="margin-bottom:20px;display:flex;justify-content:center;">' + writeBtn + '</div>';
         return wrapSummary('<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:20px 24px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
           + '<div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">'
           +   '<div style="background:' + rangeColor + ';border-radius:10px;padding:12px 16px;text-align:center;min-width:76px;">'
@@ -274,7 +274,7 @@
 
       // ── B: COMPACT (Growth+) — circle ring left, bars center, count+button right
       const summaryCompact = (function(){
-        if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
+        if (!summary.total) return '<div style="margin-bottom:20px;display:flex;justify-content:center;">' + writeBtn + '</div>';
         return wrapSummary('<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:18px 24px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
           + '<div style="text-align:center;flex-shrink:0;">'
           +   '<div style="width:88px;height:88px;border-radius:50%;border:3px solid ' + starColor + ';display:flex;align-items:center;justify-content:center;margin:0 auto;">'
@@ -294,7 +294,7 @@
 
       // ── C: LEFT SIDEBAR (Growth+) — sticky sidebar, reviews scroll right
       const summarySidebar = (function(){
-        if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
+        if (!summary.total) return '<div style="margin-bottom:20px;display:flex;justify-content:center;">' + writeBtn + '</div>';
         return '<div style="background:' + design.summaryBgColor + ';border-radius:' + r + 'px;padding:22px 18px;width:' + design.summaryWidth + 'px;flex-shrink:0;border:1px solid rgba(0,0,0,.06);">'
           + '<div style="font-family:Georgia,serif;font-size:48px;font-weight:800;color:' + design.summaryTextColor + ';line-height:1;">' + summary.average + '</div>'
           + '<div style="display:flex;gap:2px;margin:8px 0 4px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 16) + '</div>'
@@ -305,7 +305,7 @@
 
       // ── D: HORIZONTAL BAR (Pro) — score box + stars + star columns + button (reference design)
       const summaryHorizontal = (function(){
-        if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
+        if (!summary.total) return '<div style="margin-bottom:20px;display:flex;justify-content:center;">' + writeBtn + '</div>';
         var cols = '';
         for (var i = 0; i < summary.breakdown.length; i++) {
           var b = summary.breakdown[i];
@@ -332,7 +332,7 @@
 
       // ── E: ICON + PERCENTAGE (Pro) — black circle + person icons + % (count) per star
       const summaryIconPct = (function(){
-        if (!summary.total) return '<div style="margin-bottom:20px;">' + writeBtn + '</div>';
+        if (!summary.total) return '<div style="margin-bottom:20px;display:flex;justify-content:center;">' + writeBtn + '</div>';
         var iRows = '';
         for (var i = 0; i < summary.breakdown.length; i++) {
           var b = summary.breakdown[i];
@@ -380,7 +380,14 @@
 
       const listHtml = visible.length
         ? visible.map(reviewCard).join("")
-        : `<p style="font-size:14px;color:#aaa;padding:12px 0;">No reviews yet — be the first!</p>`;
+        : `
+<div style="text-align:center;padding:34px 20px;border:1px dashed ${design.borderColor};border-radius:${r}px;background:rgba(0,0,0,.015);">
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${design.starColor}" stroke-width="1.5" stroke-linejoin="round" style="opacity:.85;margin-bottom:10px;">
+    <path d="M12 2.5l2.9 5.9 6.5.95-4.7 4.58 1.11 6.47L12 17.35l-5.81 3.05L7.3 13.93 2.6 9.35l6.5-.95L12 2.5z"/>
+  </svg>
+  <p style="margin:0 0 4px;font-size:16px;font-weight:600;color:${design.textColor};">No reviews yet</p>
+  <p style="margin:0;font-size:13px;color:${design.reviewMetaColor};">Be the first to share what you think.</p>
+</div>`;
 
       const loadMoreHtml = hasMore ? `
 <div style="text-align:center;margin-top:20px;">
