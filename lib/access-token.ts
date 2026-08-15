@@ -60,6 +60,26 @@ export function tokenFieldsFrom(payload: TokenResponse) {
   };
 }
 
+/**
+ * True when the shop already holds an access token good for at least
+ * `minValidMs`. Lets the app entry point skip a token exchange — a full
+ * round trip to Shopify — on every open when there's nothing to gain.
+ *
+ * Lives here rather than inline in the page because it reads the clock, and
+ * React treats that as an impure call during render.
+ */
+export async function hasFreshAccessToken(
+  shop: string,
+  minValidMs = 10 * 60 * 1000
+): Promise<boolean> {
+  const record = await db.shop.findUnique({
+    where: { shopDomain: shop },
+    select: { accessToken: true, tokenExpiresAt: true },
+  });
+  if (!record?.accessToken || !record.tokenExpiresAt) return false;
+  return record.tokenExpiresAt.getTime() - Date.now() > minValidMs;
+}
+
 /** Exchanges a refresh token for a fresh access token (and a new refresh token). */
 async function requestRefresh(
   shop: string,

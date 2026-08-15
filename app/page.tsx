@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { resolveShop, shopQuery } from "@/lib/shop-context";
 import { registerShopFromSessionToken } from "@/lib/install";
+import { verifySessionToken, shopFromSessionToken } from "@/lib/session-token";
+import { hasFreshAccessToken } from "@/lib/access-token";
 import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
 import { StatusScreen } from "@/components/StatusScreen";
@@ -43,6 +45,17 @@ export default async function Home({
 
   // ---------------------------------------------------------------- 1
   if (idToken) {
+    // Fast path: if we already hold an access token that's good for a while,
+    // skip the exchange entirely. Verifying the session token is local (an
+    // HMAC check, no network), so this trades a round trip to Shopify on
+    // every single app open for one indexed lookup.
+    const payload = verifySessionToken(idToken);
+    const knownShop = payload ? shopFromSessionToken(payload) : null;
+
+    if (knownShop && (await hasFreshAccessToken(knownShop))) {
+      redirect(`/dashboard/home?${shopQuery(knownShop, host)}`);
+    }
+
     const result = await registerShopFromSessionToken(idToken);
 
     if (result.ok) {
