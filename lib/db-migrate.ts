@@ -66,6 +66,29 @@ const MIGRATIONS = [
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "refreshToken" TEXT`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "refreshTokenExpiresAt" TIMESTAMP(3)`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "tokenScope" TEXT`,
+  // AI review-suggestion pool. Each row is claimed at most once per shop —
+  // see lib/suggestion-pool.ts.
+  `CREATE TABLE IF NOT EXISTS "ReviewSuggestion" (
+     "id" TEXT NOT NULL,
+     "shopId" TEXT NOT NULL,
+     "language" TEXT NOT NULL,
+     "rating" INTEGER NOT NULL,
+     "productId" TEXT,
+     "text" TEXT NOT NULL,
+     "textHash" TEXT NOT NULL,
+     "usedAt" TIMESTAMP(3),
+     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     CONSTRAINT "ReviewSuggestion_pkey" PRIMARY KEY ("id")
+   )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS "ReviewSuggestion_shopId_language_rating_textHash_key"
+     ON "ReviewSuggestion"("shopId", "language", "rating", "textHash")`,
+  `CREATE INDEX IF NOT EXISTS "ReviewSuggestion_shopId_language_rating_usedAt_idx"
+     ON "ReviewSuggestion"("shopId", "language", "rating", "usedAt")`,
+  // Added separately so a re-run doesn't fail once the constraint exists.
+  `DO $$ BEGIN
+     ALTER TABLE "ReviewSuggestion" ADD CONSTRAINT "ReviewSuggestion_shopId_fkey"
+       FOREIGN KEY ("shopId") REFERENCES "Shop"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+   EXCEPTION WHEN duplicate_object THEN NULL; END $$`,
 ];
 
 let ran = false;

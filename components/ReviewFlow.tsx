@@ -31,7 +31,8 @@ export function ReviewFlow({
   const [productTitle, setProductTitle] = useState(initialProductTitle || "");
 
   const [rating, setRating] = useState(0);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  // Suggestions carry an id so a picked one can be retired for this store.
+  const [suggestions, setSuggestions] = useState<{ id: string | null; text: string }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [suggestionsAllowed, setSuggestionsAllowed] = useState(true);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
@@ -104,13 +105,36 @@ export function ReviewFlow({
     setLoadingSuggestions(true);
     try {
       const res = await fetch(
-        `/api/reviews/suggestions?rating=${stars}&productTitle=${encodeURIComponent(productTitle)}&shop=${encodeURIComponent(shop)}`
+        `/api/reviews/suggestions?rating=${stars}&productTitle=${encodeURIComponent(productTitle)}&productId=${encodeURIComponent(productId)}&shop=${encodeURIComponent(shop)}`
       );
       const data = await res.json();
-      setSuggestions(data.suggestions || []);
+      // Accept both shapes: `items` carries ids, `suggestions` is the older
+      // plain-string form.
+      setSuggestions(
+        Array.isArray(data.items) && data.items.length
+          ? data.items
+          : (data.suggestions || []).map((text: string) => ({ id: null, text }))
+      );
     } finally {
       setLoadingSuggestions(false);
     }
+  }
+
+  /**
+   * Retires a suggestion the moment it's picked, so no other shopper in this
+   * store is offered the same sentence. Fire-and-forget — the customer
+   * already has the text, so a failed claim must not get in their way.
+   */
+  function pickSuggestion(suggestion: { id: string | null; text: string }) {
+    setBody(suggestion.text);
+    if (!suggestion.id) return;
+
+    setSuggestions((current) => current.filter((s) => s.id !== suggestion.id));
+    fetch("/api/reviews/suggestions/claim", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ shop, id: suggestion.id }),
+    }).catch(() => {});
   }
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -305,16 +329,16 @@ export function ReviewFlow({
                 <div className="space-y-2">
                   {suggestions.map((s, i) => (
                     <button
-                      key={i}
+                      key={s.id ?? i}
                       type="button"
-                      onClick={() => setBody(s)}
+                      onClick={() => pickSuggestion(s)}
                       className={`w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
-                        body === s
+                        body === s.text
                           ? "border-blue-500 bg-blue-50 text-gray-900"
                           : "border-gray-200 text-gray-600 hover:border-gray-300"
                       }`}
                     >
-                      {s}
+                      {s.text}
                     </button>
                   ))}
                 </div>

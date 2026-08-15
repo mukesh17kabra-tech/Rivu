@@ -29,39 +29,39 @@ model Shop {
 
   // Widget design customization — lets merchants match their store's
   // branding instead of a fixed look, and choose how reviews are laid out.
-  displayStyle    String @default("list")    // "list" | "grid" | "carousel" | "masonry" — shape of the review list itself
-  splitSummary    Boolean @default(false)     // when true, shows summary+rating-bar in a sticky left column, review list (in whatever displayStyle) on the right
-  gridColumns     Int    @default(3)          // used for "grid" columns AND "masonry" column count
-  carouselVisible Int    @default(1)          // cards visible at once, carousel only
-  arrowColor      String @default("#111111")  // carousel prev/next arrow color
-  primaryColor    String @default("#111111")  // buttons, "write a review" CTA
-  starColor       String @default("#f5b400")  // stars shown on individual review cards
-  rangeColor      String @default("#f5b400")  // separate color for the rating-breakdown percentage bars (summary section) — independent from starColor so merchants can style them differently
-  backgroundColor String @default("#ffffff")
-  textColor       String @default("#333333")
-  borderRadius    Int    @default(8)          // px, applied to cards/buttons
-  fontFamily      String @default("inherit")
+  displayStyle    String  @default("list") // "list" | "grid" | "carousel" | "masonry" — shape of the review list itself
+  splitSummary    Boolean @default(false) // when true, shows summary+rating-bar in a sticky left column, review list (in whatever displayStyle) on the right
+  gridColumns     Int     @default(3) // used for "grid" columns AND "masonry" column count
+  carouselVisible Int     @default(1) // cards visible at once, carousel only
+  arrowColor      String  @default("#111111") // carousel prev/next arrow color
+  primaryColor    String  @default("#111111") // buttons, "write a review" CTA
+  starColor       String  @default("#f5b400") // stars shown on individual review cards
+  rangeColor      String  @default("#f5b400") // separate color for the rating-breakdown percentage bars (summary section) — independent from starColor so merchants can style them differently
+  backgroundColor String  @default("#ffffff")
+  textColor       String  @default("#333333")
+  borderRadius    Int     @default(8) // px, applied to cards/buttons
+  fontFamily      String  @default("inherit")
 
   // Review card text appearance — decoupled from the write-review form's
   // own alignment (formAlign below), since merchants may want reviews
   // centered but the form left-aligned, or vice versa.
-  reviewTextSize  Int    @default(14)         // px, applied to the review body text
-  reviewTextAlign String @default("left")     // "left" | "center" | "right"
+  reviewTextSize  Int    @default(14) // px, applied to the review body text
+  reviewTextAlign String @default("left") // "left" | "center" | "right"
 
   // Controls where/how big the "write a review" form appears — merchant
   // configurable instead of hardcoded, since it needs to fit their theme.
-  formAlign    String @default("left")  // "left" | "center" | "right"
-  formMaxWidth Int    @default(420)      // px
-  widgetMaxWidth Int  @default(480)      // px — overall widget container (summary + review list), separate from the form's own width
-  widgetTitle  String @default("Customer Reviews") // merchant-editable heading text above the widget
-  headingFontSize Int    @default(11)   // px — the small uppercase label above the widget
+  formAlign       String  @default("left") // "left" | "center" | "right"
+  formMaxWidth    Int     @default(420) // px
+  widgetMaxWidth  Int     @default(480) // px — overall widget container (summary + review list), separate from the form's own width
+  widgetTitle     String  @default("Customer Reviews") // merchant-editable heading text above the widget
+  headingFontSize Int     @default(11) // px — the small uppercase label above the widget
   headingBold     Boolean @default(false)
   headingAlign    String  @default("left") // "left" | "center" | "right" — independent from the review-card text alignment
-  topSpacing   Int    @default(24)       // px — space above the widget, since themes often butt it right up against other content
-  showBorder   Boolean @default(true)   // subtle border around the whole widget — helps it stand out against a plain white theme background
-  borderColor  String  @default("#e0e0e0")
-  borderWidth  Int     @default(1)      // px
-  borderStyle  String  @default("solid") // "solid" | "dashed" | "dotted" | "double"
+  topSpacing      Int     @default(24) // px — space above the widget, since themes often butt it right up against other content
+  showBorder      Boolean @default(true) // subtle border around the whole widget — helps it stand out against a plain white theme background
+  borderColor     String  @default("#e0e0e0")
+  borderWidth     Int     @default(1) // px
+  borderStyle     String  @default("solid") // "solid" | "dashed" | "dotted" | "double"
 
   // Optional CSS gradient for background-type fields — when set (non-
   // empty), takes priority over the plain hex backgroundColor/
@@ -78,8 +78,8 @@ model Shop {
   // Customizable text template for the compact "Rivu Rating Badge" block
   // (used on product cards / near the title) — {rating} is replaced with
   // the actual star icons for that product's average rating.
-  ratingBadgeTemplate  String @default("{rating}")
-  ratingBadgeStarSize  Int    @default(16)  // px — controls how big the stars appear in the rating badge block on product pages and collection cards
+  ratingBadgeTemplate String @default("{rating}")
+  ratingBadgeStarSize Int    @default(16) // px — controls how big the stars appear in the rating badge block on product pages and collection cards
 
   // Which summary+header layout to use for the review widget:
   // "modern"   = A — orange rating box left, breakdown bars center, button right (Free)
@@ -95,26 +95,26 @@ model Shop {
   summaryPosition  String @default("left") // "left" | "center" | "right" — alignment of the summary block
 
   // Review list section — filter bar and count text
-  filterBgColor      String @default("#ffffff")   // background of the "3 Reviews · Most Recent" bar
-  filterTextColor    String @default("#999999")   // "3 Reviews" count text color
-  filterBorderColor  String @default("rgba(0,0,0,0.08)") // border below filter bar
-  sortBgColor        String @default("#ffffff")   // dropdown background
-  sortTextColor      String @default("#333333")   // dropdown text
-  sortBorderColor    String @default("#dddddd")   // dropdown border
-  reviewCountFontSize Int   @default(14)          // px — "3 Reviews" label font size
+  filterBgColor       String @default("#ffffff") // background of the "3 Reviews · Most Recent" bar
+  filterTextColor     String @default("#999999") // "3 Reviews" count text color
+  filterBorderColor   String @default("rgba(0,0,0,0.08)") // border below filter bar
+  sortBgColor         String @default("#ffffff") // dropdown background
+  sortTextColor       String @default("#333333") // dropdown text
+  sortBorderColor     String @default("#dddddd") // dropdown border
+  reviewCountFontSize Int    @default(14) // px — "3 Reviews" label font size
 
   // Review card text
-  reviewCardFontSize  Int    @default(14)          // px — already was reviewTextSize; this is the alias
-  reviewTitleColor    String @default("#111111")   // italic bold review title color
-  reviewBodyColor     String @default("#333333")   // review body paragraph color
-  reviewMetaColor     String @default("#999999")   // date, name subdued color
+  reviewCardFontSize Int    @default(14) // px — already was reviewTextSize; this is the alias
+  reviewTitleColor   String @default("#111111") // italic bold review title color
+  reviewBodyColor    String @default("#333333") // review body paragraph color
+  reviewMetaColor    String @default("#999999") // date, name subdued color
 
   // Review form modal appearance
   formBgColor    String @default("#ffffff")
   formTextColor  String @default("#1a1a2e")
   formCloseColor String @default("#999999")
   // Free: "basic" only | Growth: "basic"/"card"/"minimal" | Pro: all four
-  formTemplate        String @default("basic") // "basic" | "card" | "minimal" | "dark"
+  formTemplate   String @default("basic") // "basic" | "card" | "minimal" | "dark"
 
   // Store logo shown on generated UGC graphics (small watermark, bottom
   // corner) — stored as a base64 data URI, same pattern as review photos.
@@ -124,9 +124,9 @@ model Shop {
   // Whether to show the auto-suggestion picker (with refresh) when
   // writing a review — configurable separately for the storefront widget
   // vs. the QR-scan flow, since merchants may want one but not the other.
-  showSuggestionsOnWebsite Boolean @default(true)
-  showSuggestionsOnQr      Boolean @default(true)
-  suggestionLanguage       String  @default("en") // merchant's own default language for suggestions
+  showSuggestionsOnWebsite Boolean  @default(true)
+  showSuggestionsOnQr      Boolean  @default(true)
+  suggestionLanguage       String   @default("en") // merchant's own default language for suggestions
   enabledLanguages         String[] @default(["en"]) // languages the merchant has turned on for their store — customer-facing dropdown only shows these. Count is capped by plan (Free:1, Growth:6, Pro:10) at save time.
 
   // Optional reward for leaving a review — merchant toggles this on and
@@ -135,7 +135,7 @@ model Shop {
   // "thanks for your review" screen (no email needed).
   rewardEnabled Boolean @default(false)
   rewardType    String  @default("percentage") // "percentage" | "fixed_amount"
-  rewardValue   Float   @default(10)            // e.g. 10 = 10% or $10 depending on type
+  rewardValue   Float   @default(10) // e.g. 10 = 10% or $10 depending on type
 
   // Automated "leave a review" reminder emails, sent a configurable delay
   // after purchase if the customer hasn't already reviewed that product.
@@ -145,10 +145,11 @@ model Shop {
   emailSubject      String  @default("How did you like your purchase?")
   emailBodyTemplate String  @default("Hi {{first_name}},\n\nThank you for your recent order. We'd love to hear your feedback!\n\nLeave a review here: {{review_link}}\n\nThanks,\n{{shop_name}}") @db.Text
 
-  reviews          Review[]
-  reminderRequests PendingReviewRequest[]
+  reviews              Review[]
+  reminderRequests     PendingReviewRequest[]
   reminderUnsubscribes ReminderUnsubscribe[]
   supportMessages      SupportMessage[]
+  reviewSuggestions    ReviewSuggestion[]
 }
 
 // One row per (order, product) pair that's a candidate for a review
@@ -156,9 +157,9 @@ model Shop {
 // checks these against elapsed time and whether a review already exists
 // for that email+product before sending.
 model PendingReviewRequest {
-  id              String    @id @default(cuid())
-  shopId          String
-  shop            Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   orderId         String
   productId       String
@@ -191,25 +192,25 @@ model ReminderUnsubscribe {
 // widget or imported later from another source. Merchant approves before
 // it shows publicly on the product page or becomes eligible for a UGC card.
 model Review {
-  id          String   @id @default(cuid())
-  shopId      String
-  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
-  productId    String // Shopify product GID
-  productTitle String
+  productId       String // Shopify product GID
+  productTitle    String
   productImageUrl String? // used as the background/photo in generated UGC cards
 
-  rating      Int      // 1-5
-  reviewTitle String?  // optional short headline, e.g. "Bought the full bag after loving it in the sampler"
-  body        String   @db.Text
-  customerName String
+  rating        Int // 1-5
+  reviewTitle   String? // optional short headline, e.g. "Bought the full bag after loving it in the sampler"
+  body          String  @db.Text
+  customerName  String
   customerEmail String? // used to prevent duplicate reminder emails once someone reviews
-  photoUrl    String?  @db.Text // optional customer-submitted photo (stored as base64 data URI for simplicity)
-  videoUrl    String?  @db.Text // optional customer-submitted video (stored as base64 data URI, kept short/low-res)
+  photoUrl      String? @db.Text // optional customer-submitted photo (stored as base64 data URI for simplicity)
+  videoUrl      String? @db.Text // optional customer-submitted video (stored as base64 data URI, kept short/low-res)
 
-  recommends  Boolean? // null = customer didn't answer; true = recommends; false = does not recommend
-  approved    Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  recommends Boolean? // null = customer didn't answer; true = recommends; false = does not recommend
+  approved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
   ugcCards UgcCard[]
 
@@ -220,13 +221,13 @@ model Review {
 // A generated social-media graphic for a specific review + template combo.
 // Cached so re-downloading/re-sharing doesn't regenerate the image.
 model UgcCard {
-  id        String   @id @default(cuid())
-  reviewId  String
-  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  id       String @id @default(cuid())
+  reviewId String
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
-  template  String   // e.g. "quote-minimal", "story-bold", "square-photo"
-  format    String   // "story" (1080x1920) | "post" (1080x1080)
-  imageUrl  String   // stored asset URL (Vercel Blob or similar)
+  template String // e.g. "quote-minimal", "story-bold", "square-photo"
+  format   String // "story" (1080x1920) | "post" (1080x1080)
+  imageUrl String // stored asset URL (Vercel Blob or similar)
 
   createdAt DateTime @default(now())
 
@@ -238,16 +239,49 @@ model UgcCard {
 // message from the app dashboard; you view/reply from a secret-key
 // protected page at /developer/support.
 model SupportMessage {
-  id            String   @id @default(cuid())
-  shopId        String
-  shop          Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
-  message       String   @db.Text
-  imageUrl      String?  @db.Text // optional base64 data URI image attachment
-  fromDeveloper Boolean  @default(false) // false = merchant sent it, true = your reply
-  read          Boolean  @default(false) // whether you've seen this merchant message yet (only meaningful when fromDeveloper=false)
+  message       String  @db.Text
+  imageUrl      String? @db.Text // optional base64 data URI image attachment
+  fromDeveloper Boolean @default(false) // false = merchant sent it, true = your reply
+  read          Boolean @default(false) // whether you've seen this merchant message yet (only meaningful when fromDeveloper=false)
 
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([shopId, createdAt])
+}
+
+/// An AI-generated review suggestion offered to a shopper while they write
+/// a review.
+///
+/// Each row is claimed at most once: when a shopper picks a suggestion it is
+/// stamped `usedAt` and never offered again in that store. That's what stops
+/// two customers submitting word-for-word identical reviews, which is the
+/// tell-tale sign of fake reviews.
+///
+/// Scoped per shop, not globally across every merchant — see
+/// lib/suggestion-pool.ts for why.
+model ReviewSuggestion {
+  id     String @id @default(cuid())
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  language  String
+  rating    Int
+  /// Product this was written for; null means it's generic to the store.
+  productId String?
+
+  text     String @db.Text
+  /// sha256 of the normalised text — a Text column can't be indexed for
+  /// uniqueness directly, so the hash carries the constraint.
+  textHash String
+
+  /// Null while available. Set the moment a shopper picks it.
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@unique([shopId, language, rating, textHash])
+  @@index([shopId, language, rating, usedAt])
 }

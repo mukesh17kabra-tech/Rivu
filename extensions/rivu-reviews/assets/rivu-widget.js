@@ -707,9 +707,13 @@
         // Only re-fetch from server when rating or language actually changes.
         if (suggestionsWrap) suggestionsWrap.innerHTML = `<p style="font-size:12px;color:#aaa;margin:0 0 8px;">Loading suggestions…</p>`;
         try {
-          const res = await fetch(`${API_BASE}/api/reviews/suggestions?rating=${selectedRating}&productTitle=${encodeURIComponent(productTitle)}&shop=${encodeURIComponent(shop)}&lang=${selectedLang}`);
+          const res = await fetch(`${API_BASE}/api/reviews/suggestions?rating=${selectedRating}&productTitle=${encodeURIComponent(productTitle)}&productId=${encodeURIComponent(productId || "")}&shop=${encodeURIComponent(shop)}&lang=${selectedLang}`);
           const data = await res.json();
-          sPool = data.suggestions || [];
+          // items carry an id so a picked suggestion can be retired; older
+          // responses only had plain strings, so accept both shapes.
+          sPool = Array.isArray(data.items) && data.items.length
+            ? data.items
+            : (data.suggestions || []).map(t => ({ id: null, text: t }));
           sKey = key;
         } catch { if(suggestionsWrap) suggestionsWrap.innerHTML=""; return; }
       }
@@ -732,7 +736,7 @@
       <button type="button" class="rv-close-sug" style="background:none;border:none;font-size:12px;color:#aaa;cursor:pointer;padding:0;">✕</button>
     </div>
   </div>
-  <div style="display:flex;flex-direction:column;gap:5px;">${batch.map(s => `<button type="button" class="rv-sug" style="text-align:left;padding:7px 10px;border:1px solid #e5e5e5;border-radius:6px;background:#fafafa;font-size:12px;cursor:pointer;color:#333;">${s}</button>`).join("")}</div>
+  <div style="display:flex;flex-direction:column;gap:5px;">${batch.map(s => `<button type="button" class="rv-sug" data-sug-id="${s.id || ""}" style="text-align:left;padding:7px 10px;border:1px solid #e5e5e5;border-radius:6px;background:#fafafa;font-size:12px;cursor:pointer;color:#333;">${s.text}</button>`).join("")}</div>
 </div>`;
       suggestionsWrap.querySelector(".rv-refresh").addEventListener("click", loadSuggestions);
       suggestionsWrap.querySelector(".rv-close-sug").addEventListener("click", () => { suggestionsWrap.style.display="none"; });
@@ -741,6 +745,19 @@
           if (bodyTA) bodyTA.value = b.textContent;
           suggestionsWrap.querySelectorAll(".rv-sug").forEach(x => { x.style.borderColor="#e5e5e5"; x.style.background="#fafafa"; });
           b.style.borderColor = design.primaryColor; b.style.background = "#fff";
+
+          // Retire this suggestion so no other shopper in this store is
+          // offered the same sentence. Fire-and-forget: the shopper already
+          // has the text, so a failed claim must not block them.
+          const sugId = b.dataset.sugId;
+          if (sugId) {
+            sPool = sPool.filter(s => s.id !== sugId);
+            fetch(`${API_BASE}/api/reviews/suggestions/claim`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ shop: shop, id: sugId }),
+            }).catch(() => {});
+          }
         });
       });
     }
