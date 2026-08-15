@@ -15,6 +15,35 @@ function getResend() {
   return _resend;
 }
 
+/**
+ * The verified sender address.
+ *
+ * Accepts either name: .env.example documents EMAIL_FROM, but the deployed
+ * configuration uses RESEND_FROM_EMAIL. Only EMAIL_FROM was ever read, so the
+ * address silently fell back to a placeholder domain that Resend rejects —
+ * every reminder email failed. Reading both means neither name is wrong.
+ *
+ * Throws rather than falling back to a placeholder: a clear error beats
+ * sending from an address that cannot deliver.
+ */
+export function resolveFromAddress(): string {
+  const from = process.env.EMAIL_FROM || process.env.RESEND_FROM_EMAIL;
+  if (!from) {
+    throw new Error(
+      "No sender address configured — set EMAIL_FROM (or RESEND_FROM_EMAIL) to a domain verified in Resend."
+    );
+  }
+  return from;
+}
+
+/** True when email can actually be sent, for pre-flight checks. */
+export function isEmailConfigured(): boolean {
+  return Boolean(
+    process.env.RESEND_API_KEY &&
+      (process.env.EMAIL_FROM || process.env.RESEND_FROM_EMAIL)
+  );
+}
+
 export async function sendReviewReminderEmail(params: {
   to: string;
   customerName: string;
@@ -71,7 +100,7 @@ export async function sendReviewReminderEmail(params: {
     .join("<br/>");
 
   return getResend().emails.send({
-    from: process.env.EMAIL_FROM || "reviews@yourapp.com",
+    from: resolveFromAddress(),
     replyTo: replyToEmail || undefined,
     to,
     subject,
