@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { clampDesignToPlan } from "@/lib/plan-gating";
+import { clampDesignToPlan, type DesignInput } from "@/lib/plan-gating";
 import { FREE_PLAN_DESIGN_DEFAULTS } from "@/lib/design-defaults";
 import { SUMMARY_LAYOUTS, summaryLayoutsFor } from "@/lib/design-options";
 
@@ -11,7 +11,9 @@ import { SUMMARY_LAYOUTS, summaryLayoutsFor } from "@/lib/design-options";
  * defaults had drifted, and Minimal being flattened to Modern.
  */
 
-const base = { ...FREE_PLAN_DESIGN_DEFAULTS } as Record<string, unknown>;
+// Typed as DesignInput so the clamped result keeps its shape — casting to
+// `never` made the assertions below compile against nothing.
+const base = { ...FREE_PLAN_DESIGN_DEFAULTS } as unknown as DesignInput;
 
 describe("summary layouts clamp to the plan", () => {
   it.each(SUMMARY_LAYOUTS.map((l) => [l.key, l.minPlan] as const))(
@@ -20,7 +22,7 @@ describe("summary layouts clamp to the plan", () => {
       const { clamped, lockedFields } = clampDesignToPlan(minPlan, {
         ...base,
         summaryLayout: key,
-      } as never);
+      });
       expect(clamped.summaryLayout).toBe(key);
       expect(lockedFields).not.toContain("summaryLayout");
     }
@@ -32,7 +34,7 @@ describe("summary layouts clamp to the plan", () => {
       const { clamped, lockedFields } = clampDesignToPlan("free", {
         ...base,
         summaryLayout: key,
-      } as never);
+      });
       expect(summaryLayoutsFor("free")).toContain(clamped.summaryLayout);
       // Silent rewriting is what made this hard to diagnose; the caller must
       // be told so the UI can say why the choice didn't stick.
@@ -44,7 +46,7 @@ describe("summary layouts clamp to the plan", () => {
     const { clamped } = clampDesignToPlan("pro", {
       ...base,
       summaryLayout: "not-a-real-layout",
-    } as never);
+    });
     expect(summaryLayoutsFor("pro")).toContain(clamped.summaryLayout);
   });
 });
@@ -56,7 +58,7 @@ describe("the free defaults survive their own clamp", () => {
   it("clamping the free defaults is a no-op", () => {
     const { clamped, lockedFields } = clampDesignToPlan("free", {
       ...base,
-    } as never);
+    });
 
     expect(lockedFields).toEqual([]);
     for (const key of Object.keys(FREE_PLAN_DESIGN_DEFAULTS)) {
@@ -70,7 +72,7 @@ describe("the free defaults survive their own clamp", () => {
     const { clamped } = clampDesignToPlan("free", {
       ...base,
       headingAlign: "center",
-    } as never);
+    });
     expect(clamped.headingAlign).toBe("center");
   });
 });
@@ -82,7 +84,7 @@ describe("paid tiers are not clamped away", () => {
       headingAlign: "right",
       headingBold: false,
       headingFontSize: 22,
-    } as never);
+    });
 
     expect(clamped.headingAlign).toBe("right");
     expect(clamped.headingFontSize).toBe(22);
@@ -93,7 +95,7 @@ describe("paid tiers are not clamped away", () => {
     const { lockedFields } = clampDesignToPlan("free", {
       ...base,
       headingFontSize: 22,
-    } as never);
+    });
     expect(lockedFields).toContain("heading customization");
   });
 });
