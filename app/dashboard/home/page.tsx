@@ -53,16 +53,16 @@ export default async function DashboardHome({
       {/* Deliberately dark — the one call-to-action on an otherwise empty
           dashboard, so it should carry some weight. */}
       {total === 0 && (
-        <Card className="mb-5 !border-slate-900 !bg-slate-900">
-          <p className="text-sm font-semibold text-white">
+        <Card className="mb-5 !border-emerald-400/30 !bg-emerald-400/[0.07]">
+          <p className="text-sm font-bold text-white">
             👋 New here? Add the widget to your storefront
           </p>
-          <p className="mt-1 text-[13px] text-slate-300">
+          <p className="mt-1 text-[13px] text-white/60">
             Reviews start appearing here once the widget is live on your product pages.
           </p>
           <Link
             href={`/dashboard/installation?${query}`}
-            className="mt-3 inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100"
+            className="mt-3 inline-block rounded-lg bg-emerald-400 px-4 py-2 text-sm font-bold text-black transition-colors hover:bg-emerald-300"
           >
             Open the installation guide →
           </Link>
@@ -83,23 +83,23 @@ export default async function DashboardHome({
       </section>
 
       <Card padded={false}>
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
-          <h2 className="text-[15px] font-semibold text-slate-900">Recent reviews</h2>
+        <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-3.5">
+          <h2 className="text-[15px] font-bold text-white">Recent reviews</h2>
           <Link
             href={`/dashboard/reviews?${query}`}
-            className="text-[13px] font-medium text-slate-500 transition-colors hover:text-slate-900"
+            className="text-[13px] font-medium text-white/45 transition-colors hover:text-white"
           >
             View all →
           </Link>
         </div>
 
         {recentReviews.length === 0 ? (
-          <p className="px-5 py-10 text-center text-sm text-slate-400">No reviews yet.</p>
+          <p className="px-5 py-10 text-center text-sm text-white/35">No reviews yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="text-[11px] uppercase tracking-wide text-slate-400">
+                <tr className="text-[11px] font-bold uppercase tracking-[0.08em] text-white/35">
                   <th className="px-5 py-2.5 font-semibold">Reviewer</th>
                   <th className="px-5 py-2.5 font-semibold">Rating</th>
                   <th className="px-5 py-2.5 font-semibold">Product</th>
@@ -115,14 +115,14 @@ export default async function DashboardHome({
                     productTitle: string;
                     createdAt: Date;
                   }) => (
-                    <tr key={r.id} className="border-t border-slate-100">
-                      <td className="px-5 py-3 font-medium text-slate-900">{r.customerName}</td>
+                    <tr key={r.id} className="border-t border-white/[0.07]">
+                      <td className="px-5 py-3 font-medium text-white">{r.customerName}</td>
                       <td className="whitespace-nowrap px-5 py-3 text-amber-500">
                         {"★".repeat(r.rating)}
-                        <span className="text-slate-200">{"★".repeat(5 - r.rating)}</span>
+                        <span className="text-white/15">{"★".repeat(5 - r.rating)}</span>
                       </td>
-                      <td className="px-5 py-3 text-slate-500">{r.productTitle}</td>
-                      <td className="whitespace-nowrap px-5 py-3 text-slate-400">
+                      <td className="px-5 py-3 text-white/55">{r.productTitle}</td>
+                      <td className="whitespace-nowrap px-5 py-3 text-white/35">
                         {r.createdAt.toLocaleDateString()}
                       </td>
                     </tr>
@@ -146,16 +146,16 @@ function MilestoneBar({ total }: { total: number }) {
   return (
     <Card className="mb-5">
       <div className="mb-2.5 flex items-center justify-between">
-        <p className="text-sm font-semibold text-slate-900">
+        <p className="text-sm font-bold text-white">
           {total} review{total === 1 ? "" : "s"} collected
         </p>
-        <p className="text-[13px] text-slate-400">
+        <p className="text-[13px] text-white/40">
           {next - total} more to reach {next}
         </p>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.08]">
         <div
-          className="h-full rounded-full bg-slate-900 transition-all"
+          className="h-full rounded-full bg-emerald-400 transition-all"
           style={{ width: `${progress}%` }}
         />
       </div>

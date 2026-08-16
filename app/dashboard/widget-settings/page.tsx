@@ -1,6 +1,6 @@
 import { PageHeader, Section } from "@/components/ui";
 import { requireShop } from "@/lib/shop-context";
-import { DesignForm } from "@/components/DesignForm";
+import { DesignForm, type DesignSettings } from "@/components/DesignForm";
 import { LogoUpload } from "@/components/LogoUpload";
 import { RatingBadgeForm } from "@/components/RatingBadgeForm";
 import { PlanSync } from "@/components/PlanSync";
@@ -70,7 +70,8 @@ export default async function WidgetSettingsPage({
               suggestionLanguage: shopRecord.suggestionLanguage,
               enabledLanguages: shopRecord.enabledLanguages,
               formTemplate: (shopRecord.formTemplate || "basic") as "basic" | "card" | "minimal" | "dark",
-              summaryLayout: (shopRecord.summaryLayout || "modern") as "modern" | "compact" | "sidebar" | "horizontal",
+              summaryLayout: (shopRecord.summaryLayout ||
+                "modern") as DesignSettings["summaryLayout"],
               summaryBgColor: (shopRecord as Record<string, unknown>).summaryBgColor as string || "#f8f8f8",
               summaryTextColor: (shopRecord as Record<string, unknown>).summaryTextColor as string || "#333333",
               summaryWidth: (shopRecord as Record<string, unknown>).summaryWidth as number || 220,

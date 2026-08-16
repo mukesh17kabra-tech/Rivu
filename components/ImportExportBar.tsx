@@ -70,28 +70,28 @@ export function ImportExportBar({ shop }: { shop: string }) {
   }
 
   return (
-    <div className="mb-8 flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white p-4">
+    <div className="mb-8 flex flex-wrap items-center gap-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
       <button
         type="button"
         onClick={handleExport}
         disabled={exporting}
-        className="rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-900 hover:bg-slate-200 disabled:opacity-50"
+        className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-50"
       >
         {exporting ? "Exporting…" : "Export all reviews (CSV)"}
       </button>
 
-      <label className="rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-900 hover:bg-slate-200 cursor-pointer">
+      <label className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 cursor-pointer">
         {importing ? "Importing..." : "Import from Judge.me / Loox / Stamped / Yotpo / CSV"}
         <input type="file" accept=".csv" onChange={handleImport} disabled={importing} className="hidden" />
       </label>
 
-      <span className="text-xs text-slate-400">
+      <span className="text-xs text-white/40">
         Just export your reviews as CSV from any of those apps and upload it here — column
         names are detected automatically, no need to rename anything.
       </span>
 
       {result && (
-        <span className="text-xs text-slate-900">
+        <span className="text-xs text-emerald-400">
           Imported {result.imported}, skipped {result.skipped}
         </span>
       )}

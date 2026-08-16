@@ -24,15 +24,15 @@ export default function AppError({
   }, [error]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 text-slate-900">
+    <main className="flex min-h-screen items-center justify-center bg-[#0B0D0F] px-6 text-[#E7E9EA]">
       <div className="w-full max-w-md text-center">
-        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-amber-600">
+        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-amber-400/90">
           Rivu
         </p>
         <h1 className="mb-3 text-2xl font-semibold tracking-tight">
           Something went wrong on our side
         </h1>
-        <p className="text-sm leading-relaxed text-slate-500">
+        <p className="text-sm leading-relaxed text-white/60">
           Your reviews and settings are safe. This is usually a temporary
           hiccup — retrying normally clears it.
         </p>
@@ -41,20 +41,20 @@ export default function AppError({
           <button
             type="button"
             onClick={reset}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-emerald-300"
           >
             Try again
           </button>
           <Link
             href="/"
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900"
+            className="rounded-md border border-white/15 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:border-white/30 hover:text-white"
           >
             Back to dashboard
           </Link>
         </div>
 
         {error.digest && (
-          <p className="mt-6 font-mono text-xs text-slate-300">
+          <p className="mt-6 font-mono text-xs text-white/25">
             Reference: {error.digest}
           </p>
         )}

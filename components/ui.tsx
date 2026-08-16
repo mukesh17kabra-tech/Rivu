@@ -3,9 +3,13 @@ import type { ReactNode } from "react";
 /**
  * Shared page furniture for the embedded app.
  *
- * Every dashboard page used to carry its own dark <main> wrapper and heading
- * markup, so spacing and type drifted between them. These are the light-theme
- * equivalents, defined once.
+ * Every dashboard page used to carry its own <main> wrapper and heading
+ * markup, so spacing and type drifted between them. Defined once here.
+ *
+ * Type is deliberately heavier than before: titles at 800 weight with tight
+ * tracking, and a clear size jump between page title, section title and body.
+ * The old 600-weight headings at the same size as body copy were what made
+ * the app read as flat.
  */
 
 export function PageHeader({
@@ -18,11 +22,13 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <header className="mb-7 flex flex-wrap items-start justify-between gap-4">
       <div>
-        <h1 className="text-[26px] font-bold tracking-[-0.02em] text-slate-900">{title}</h1>
+        <h1 className="text-[28px] font-extrabold leading-tight tracking-[-0.03em] text-white">
+          {title}
+        </h1>
         {description && (
-          <p className="mt-1 text-sm text-slate-500">{description}</p>
+          <p className="mt-1.5 text-[13px] text-white/45">{description}</p>
         )}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
@@ -41,7 +47,7 @@ export function Card({
 }) {
   return (
     <section
-      className={`rounded-xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(16,24,40,.04)] ${
+      className={`rounded-xl border border-white/[0.08] bg-white/[0.025] ${
         padded ? "p-5" : ""
       } ${className}`}
     >
@@ -51,8 +57,8 @@ export function Card({
 }
 
 /**
- * A titled block inside a page. Used to break long configuration pages into
- * steps the merchant can scan, instead of one undifferentiated wall of inputs.
+ * A titled block inside a page. Breaks long configuration pages into steps a
+ * merchant can scan, instead of one undifferentiated wall of inputs.
  */
 export function Section({
   title,
@@ -70,17 +76,17 @@ export function Section({
 }) {
   return (
     <Card className="mb-5">
-      <div className="mb-4 flex items-start justify-between gap-4 border-b border-slate-100 pb-3">
+      <div className="mb-5 flex items-start justify-between gap-4 border-b border-white/[0.07] pb-4">
         <div className="flex items-start gap-3">
           {step !== undefined && (
-            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
+            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400 text-[11px] font-extrabold text-black">
               {step}
             </span>
           )}
           <div>
-            <h2 className="text-[15px] font-semibold text-slate-900">{title}</h2>
+            <h2 className="text-[17px] font-bold tracking-[-0.01em] text-white">{title}</h2>
             {description && (
-              <p className="mt-0.5 text-[13px] leading-relaxed text-slate-500">{description}</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-white/45">{description}</p>
             )}
           </div>
         </div>
@@ -104,14 +110,14 @@ export function Stat({
 }) {
   return (
     <Card>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+      <p className="text-[11px] font-bold uppercase tracking-[0.09em] text-white/35">
         {label}
       </p>
-      <p className="mt-2 text-[30px] font-bold leading-none tracking-[-0.02em] text-slate-900 tabular-nums">
+      <p className="mt-2.5 text-[32px] font-extrabold leading-none tracking-[-0.03em] text-white tabular-nums">
         {value}
         {suffix}
       </p>
-      {hint && <p className="mt-1.5 text-xs text-slate-400">{hint}</p>}
+      {hint && <p className="mt-2 text-xs text-white/35">{hint}</p>}
     </Card>
   );
 }
@@ -124,13 +130,13 @@ export function Badge({
   tone?: "neutral" | "success" | "warning";
 }) {
   const tones = {
-    neutral: "bg-slate-100 text-slate-600",
-    success: "bg-emerald-50 text-emerald-700",
-    warning: "bg-amber-50 text-amber-700",
+    neutral: "bg-white/[0.06] text-white/60 ring-white/10",
+    success: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
+    warning: "bg-amber-400/10 text-amber-300 ring-amber-400/20",
   };
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${tones[tone]}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.06em] ring-1 ${tones[tone]}`}
     >
       {children}
     </span>

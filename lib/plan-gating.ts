@@ -97,9 +97,12 @@ export function clampDesignToPlan<T extends DesignInput>(
 
   // Summary layout gating: Free=modern only, Growth=modern/compact/sidebar, Pro=all
   const summaryLayoutsByPlan: Record<PlanTier, string[]> = {
-    free: ["modern"],
-    growth: ["modern", "compact", "sidebar"],
-    pro: ["modern", "compact", "sidebar", "horizontal", "iconpct"],
+    free: ["modern", "minimal"],
+    growth: ["modern", "minimal", "compact", "sidebar", "stacked"],
+    pro: [
+      "modern", "minimal", "compact", "sidebar", "stacked",
+      "horizontal", "iconpct", "split",
+    ],
   };
   if (!summaryLayoutsByPlan[plan].includes(clamped.summaryLayout as string)) {
     clamped.summaryLayout = "modern";

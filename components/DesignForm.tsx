@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 
-type DesignSettings = {
+export type DesignSettings = {
   displayStyle: "list" | "grid" | "carousel" | "masonry";
   splitSummary: boolean;
   gridColumns: number;
@@ -38,7 +38,9 @@ type DesignSettings = {
   suggestionLanguage: string;
   enabledLanguages: string[];
   formTemplate: "basic" | "card" | "minimal" | "dark";
-  summaryLayout: "modern" | "compact" | "sidebar" | "horizontal" | "iconpct";
+  summaryLayout:
+    | "modern" | "minimal" | "compact" | "sidebar"
+    | "stacked" | "horizontal" | "iconpct" | "split";
   // Summary block customization
   summaryBgColor: string;
   summaryTextColor: string;
@@ -157,8 +159,8 @@ export function DesignForm({
     <div className="space-y-6">
       {/* Top row: Layout + live preview side by side, compact */}
       <div className="grid grid-cols-2 gap-6">
-        <div className="rounded-lg border border-slate-200 bg-white p-5">
-          <label className="mb-2 block text-sm font-medium text-slate-600">Layout</label>
+        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+          <label className="mb-2 block text-sm font-medium text-white/70">Layout</label>
           <div className="mb-3 flex gap-2">
             {(["list", "grid", "carousel", "masonry"] as const).map((style) => {
               const locked =
@@ -172,10 +174,10 @@ export function DesignForm({
                   title={locked ? `Upgrade to unlock ${style}` : undefined}
                   className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
                     locked
-                      ? "cursor-not-allowed border-slate-100 text-slate-300"
+                      ? "cursor-not-allowed border-white/5 text-white/25"
                       : settings.displayStyle === style
-                      ? "border-emerald-400 bg-emerald-50 text-slate-900"
-                      : "border-slate-200 text-slate-500 hover:border-slate-400"
+                      ? "border-emerald-400 bg-emerald-400/10 text-white"
+                      : "border-white/10 text-white/50 hover:border-white/30"
                   }`}
                 >
                   {locked ? "🔒 " : ""}
@@ -187,7 +189,7 @@ export function DesignForm({
 
           {(settings.displayStyle === "grid" || settings.displayStyle === "masonry") && (
             <div className="mb-2">
-              <label className="mb-1 block text-xs text-slate-500">
+              <label className="mb-1 block text-xs text-white/50">
                 Columns: {settings.gridColumns}
               </label>
               <input
@@ -203,7 +205,7 @@ export function DesignForm({
 
           {settings.displayStyle === "carousel" && (
             <div className="mb-2">
-              <label className="mb-1 block text-xs text-slate-500">
+              <label className="mb-1 block text-xs text-white/50">
                 Cards visible: {settings.carouselVisible}
               </label>
               <input
@@ -219,8 +221,8 @@ export function DesignForm({
 
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <p className="mb-2 text-xs font-medium text-slate-500">Live preview — updates as you change settings</p>
+        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
+          <p className="mb-2 text-xs font-medium text-white/50">Live preview — updates as you change settings</p>
           <div
             className="overflow-auto rounded-lg"
             style={{
@@ -301,8 +303,8 @@ export function DesignForm({
       </div>
 
       {/* Colors — 4 in a row */}
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
-        <p className="mb-3 text-sm font-medium text-slate-600">Colors</p>
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <p className="mb-3 text-sm font-medium text-white/70">Colors</p>
         <div className="grid grid-cols-5 gap-4">
           <GradientBackgroundField
             label="Primary"
@@ -329,12 +331,12 @@ export function DesignForm({
 
       {/* Typography + shape */}
       <div className="grid grid-cols-2 gap-6">
-        <div className="rounded-lg border border-slate-200 bg-white p-5">
-          <label className="mb-2 block text-sm font-medium text-slate-600">Font</label>
+        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+          <label className="mb-2 block text-sm font-medium text-white/70">Font</label>
           <select
             value={settings.fontFamily}
             onChange={(e) => { update("fontFamily", e.target.value); loadGoogleFont(e.target.value); }}
-            className="mb-4 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+            className="mb-4 w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
           >
             {FONT_OPTIONS.map((f) => (
               <option key={f.value} value={f.value} style={{ color: "#000" }}>
@@ -342,7 +344,7 @@ export function DesignForm({
               </option>
             ))}
           </select>
-          <label className="mb-1 block text-xs text-slate-500">
+          <label className="mb-1 block text-xs text-white/50">
             Corner roundness: {settings.borderRadius}px
           </label>
           <input
@@ -355,18 +357,18 @@ export function DesignForm({
           />
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-5">
-          <label className="mb-2 block text-sm font-medium text-slate-600">Widget heading</label>
+        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+          <label className="mb-2 block text-sm font-medium text-white/70">Widget heading</label>
           <input
             type="text"
             value={settings.widgetTitle}
             onChange={(e) => update("widgetTitle", e.target.value)}
-            className="mb-3 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+            className="mb-3 w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
             maxLength={100}
           />
           <div className={`mb-3 grid grid-cols-3 gap-3 ${isFree ? "pointer-events-none opacity-40" : ""}`}>
             <div>
-              <label className="mb-1 block text-xs text-slate-500">
+              <label className="mb-1 block text-xs text-white/50">
                 {isFree ? "🔒 " : ""}Size: {settings.headingFontSize}px
               </label>
               <input
@@ -379,24 +381,24 @@ export function DesignForm({
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-slate-500">Weight</label>
+              <label className="mb-1 block text-xs text-white/50">Weight</label>
               <button
                 onClick={() => update("headingBold", !settings.headingBold)}
                 className={`w-full rounded-md border px-2 py-1.5 text-xs transition-colors ${
                   settings.headingBold
-                    ? "border-emerald-400 bg-emerald-50 text-slate-900 font-bold"
-                    : "border-slate-200 text-slate-500 hover:border-slate-400"
+                    ? "border-emerald-400 bg-emerald-400/10 text-white font-bold"
+                    : "border-white/10 text-white/50 hover:border-white/30"
                 }`}
               >
                 {settings.headingBold ? "Bold" : "Regular"}
               </button>
             </div>
             <div>
-              <label className="mb-1 block text-xs text-slate-500">Position</label>
+              <label className="mb-1 block text-xs text-white/50">Position</label>
               <select
                 value={settings.headingAlign}
                 onChange={(e) => update("headingAlign", e.target.value as "left" | "center" | "right")}
-                className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900"
+                className="w-full rounded-md border border-white/15 bg-white/[0.03] px-2 py-1.5 text-xs text-white"
               >
                 <option value="left" style={{ color: "#000" }}>Left</option>
                 <option value="center" style={{ color: "#000" }}>Center</option>
@@ -409,7 +411,7 @@ export function DesignForm({
               Heading size/weight/position customization needs Growth or Pro.
             </p>
           )}
-          <label className="mb-1 block text-xs text-slate-500">
+          <label className="mb-1 block text-xs text-white/50">
             Top spacing: {settings.topSpacing}px
           </label>
           <input
@@ -421,14 +423,14 @@ export function DesignForm({
             onChange={(e) => update("topSpacing", Number(e.target.value))}
             className="w-full"
           />
-          <label className="mt-3 flex items-center gap-2 border-t border-slate-200 pt-3">
+          <label className="mt-3 flex items-center gap-2 border-t border-white/10 pt-3">
             <input
               type="checkbox"
               checked={settings.showBorder}
               onChange={(e) => update("showBorder", e.target.checked)}
-              className="h-4 w-4 accent-slate-900"
+              className="h-4 w-4 accent-emerald-400"
             />
-            <span className="text-sm text-slate-700">Show border around widget</span>
+            <span className="text-sm text-white/80">Show border around widget</span>
           </label>
           {settings.showBorder && (
             <div className="mt-3 grid grid-cols-3 gap-3">
@@ -438,7 +440,7 @@ export function DesignForm({
                 onChange={(v) => update("borderColor", v)}
               />
               <div>
-                <label className="mb-1 block text-xs text-slate-500">
+                <label className="mb-1 block text-xs text-white/50">
                   Width: {settings.borderWidth}px
                 </label>
                 <input
@@ -451,13 +453,13 @@ export function DesignForm({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-slate-500">Style</label>
+                <label className="mb-1 block text-xs text-white/50">Style</label>
                 <select
                   value={settings.borderStyle}
                   onChange={(e) =>
                     update("borderStyle", e.target.value as "solid" | "dashed" | "dotted" | "double")
                   }
-                  className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900"
+                  className="w-full rounded-md border border-white/15 bg-white/[0.03] px-2 py-1.5 text-xs text-white"
                 >
                   <option value="solid" style={{ color: "#000" }}>Solid</option>
                   <option value="dashed" style={{ color: "#000" }}>Dashed</option>
@@ -467,7 +469,7 @@ export function DesignForm({
               </div>
             </div>
           )}
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="mt-2 text-xs text-white/40">
             Helps the widget stand out against a plain background — recommended if your
             theme's page background is also white.
           </p>
@@ -475,10 +477,10 @@ export function DesignForm({
       </div>
 
       {/* Review text appearance */}
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <div className={`grid grid-cols-2 gap-6 ${isFree ? "pointer-events-none opacity-40" : ""}`}>
           <div>
-            <label className="mb-1 block text-xs text-slate-500">
+            <label className="mb-1 block text-xs text-white/50">
               {isFree ? "🔒 " : ""}Review text size: {settings.reviewTextSize}px
             </label>
             <input
@@ -491,7 +493,7 @@ export function DesignForm({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-slate-500">Review text position</label>
+            <label className="mb-1 block text-xs text-white/50">Review text position</label>
             <div className="flex gap-1">
               {(["left", "center", "right"] as const).map((align) => (
                 <button
@@ -499,8 +501,8 @@ export function DesignForm({
                   onClick={() => update("reviewTextAlign", align)}
                   className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
                     settings.reviewTextAlign === align
-                      ? "border-emerald-400 bg-emerald-50 text-slate-900"
-                      : "border-slate-200 text-slate-500 hover:border-slate-400"
+                      ? "border-emerald-400 bg-emerald-400/10 text-white"
+                      : "border-white/10 text-white/50 hover:border-white/30"
                   }`}
                 >
                   {align}
@@ -517,9 +519,9 @@ export function DesignForm({
       </div>
 
       {/* Sizing */}
-      <div className="grid grid-cols-3 gap-6 rounded-lg border border-slate-200 bg-white p-5">
+      <div className="grid grid-cols-3 gap-6 rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <div>
-          <label className="mb-1 block text-xs text-slate-500">
+          <label className="mb-1 block text-xs text-white/50">
             Container width: {settings.widgetMaxWidth}px
           </label>
           <input
@@ -533,7 +535,7 @@ export function DesignForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-500">
+          <label className="mb-1 block text-xs text-white/50">
             Form width: {settings.formMaxWidth}px
           </label>
           <input
@@ -547,7 +549,7 @@ export function DesignForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-500">Form alignment</label>
+          <label className="mb-1 block text-xs text-white/50">Form alignment</label>
           <div className="flex gap-1">
             {(["left", "center", "right"] as const).map((align) => (
               <button
@@ -555,8 +557,8 @@ export function DesignForm({
                 onClick={() => update("formAlign", align)}
                 className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
                   settings.formAlign === align
-                    ? "border-emerald-400 bg-emerald-50 text-slate-900"
-                    : "border-slate-200 text-slate-500 hover:border-slate-400"
+                    ? "border-emerald-400 bg-emerald-400/10 text-white"
+                    : "border-white/10 text-white/50 hover:border-white/30"
                 }`}
               >
                 {align}
@@ -567,26 +569,26 @@ export function DesignForm({
       </div>
 
       {/* Suggestions */}
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
-        <p className="mb-3 text-sm font-medium text-slate-600">Review suggestions</p>
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <p className="mb-3 text-sm font-medium text-white/70">Review suggestions</p>
         <div className="mb-4 flex gap-6">
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={settings.showSuggestionsOnWebsite}
               onChange={(e) => update("showSuggestionsOnWebsite", e.target.checked)}
-              className="h-4 w-4 accent-slate-900"
+              className="h-4 w-4 accent-emerald-400"
             />
-            <span className="text-sm text-slate-700">On website widget</span>
+            <span className="text-sm text-white/80">On website widget</span>
           </label>
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={settings.showSuggestionsOnQr}
               onChange={(e) => update("showSuggestionsOnQr", e.target.checked)}
-              className="h-4 w-4 accent-slate-900"
+              className="h-4 w-4 accent-emerald-400"
             />
-            <span className="text-sm text-slate-700">On QR-scan page</span>
+            <span className="text-sm text-white/80">On QR-scan page</span>
           </label>
         </div>
         <label className="mb-4 flex items-center gap-2">
@@ -595,9 +597,9 @@ export function DesignForm({
             checked={settings.letCustomerPickLanguage}
             disabled={isFree}
             onChange={(e) => update("letCustomerPickLanguage", e.target.checked)}
-            className="h-4 w-4 accent-slate-900 disabled:opacity-40"
+            className="h-4 w-4 accent-emerald-400 disabled:opacity-40"
           />
-          <span className={`text-sm ${isFree ? "text-slate-400" : "text-slate-700"}`}>
+          <span className={`text-sm ${isFree ? "text-white/30" : "text-white/80"}`}>
             {isFree ? "🔒 " : ""}Let customers choose their own language (shows a dropdown on the
             review form)
           </span>
@@ -607,7 +609,7 @@ export function DesignForm({
             Also needs Growth or Pro — Free plan is English-only.
           </p>
         )}
-        <label className="mb-2 block text-xs text-slate-500">
+        <label className="mb-2 block text-xs text-white/50">
           Enabled languages ({settings.enabledLanguages.length}/{languageCap})
         </label>
         <div className="grid grid-cols-5 gap-2">
@@ -620,10 +622,10 @@ export function DesignForm({
                 key={lang.code}
                 className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1.5 text-xs transition-colors ${
                   checked
-                    ? "border-emerald-400 bg-emerald-50 text-slate-900"
+                    ? "border-emerald-400 bg-emerald-400/10 text-white"
                     : disabled
-                    ? "cursor-not-allowed border-slate-100 text-slate-300"
-                    : "border-slate-200 text-slate-500 hover:border-slate-400"
+                    ? "cursor-not-allowed border-white/5 text-white/25"
+                    : "border-white/10 text-white/50 hover:border-white/30"
                 }`}
               >
                 <input
@@ -640,31 +642,42 @@ export function DesignForm({
                       );
                     }
                   }}
-                  className="h-3 w-3 accent-slate-900"
+                  className="h-3 w-3 accent-emerald-400"
                 />
                 {lang.label}
               </label>
             );
           })}
         </div>
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-white/40">
           {plan === "free"
             ? "Free plan is English-only."
             : `Pick up to ${languageCap} languages your customers can write reviews in.`}
         </p>
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
-        <p className="mb-4 text-sm font-medium text-slate-600">Widget summary style</p>
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <p className="mb-4 text-sm font-medium text-white/70">Widget summary style</p>
         <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
           {([
-            { key: "modern", label: "Modern Card", plan: "", desc: "Orange rating box, bars, button" },
+            { key: "modern", label: "Modern Card", plan: "", desc: "Rating box, bars, button" },
+            { key: "minimal", label: "Minimal", plan: "", desc: "Just the score — no bars" },
             { key: "compact", label: "Compact", plan: "Growth+", desc: "Circle rating, clean bars" },
             { key: "sidebar", label: "Left Sidebar", plan: "Growth+", desc: "Sticky left, reviews right" },
+            { key: "stacked", label: "Stacked", plan: "Growth+", desc: "Score above full-width bars" },
             { key: "horizontal", label: "Horizontal Bar", plan: "Pro only", desc: "All in one slim row" },
             { key: "iconpct", label: "Icon + Percentage", plan: "Pro only", desc: "People icons per star with %" },
+            { key: "split", label: "Split Panel", plan: "Pro only", desc: "Colour-filled score beside bars" },
           ] as const).map((item) => {
-            const locked = (isFree && item.key !== "modern") || (plan === "growth" && (item.key === "horizontal" || item.key === "iconpct"));
+            // Mirrors summaryLayoutsByPlan in lib/plan-gating.ts, which is
+            // what actually enforces this at save time.
+            const freeLayouts: string[] = ["modern", "minimal"];
+            const growthLayouts: string[] = [...freeLayouts, "compact", "sidebar", "stacked"];
+            const locked = isFree
+              ? !freeLayouts.includes(item.key)
+              : plan === "growth"
+                ? !growthLayouts.includes(item.key)
+                : false;
             const isSelected = settings.summaryLayout === item.key;
             return (
               <button
@@ -672,9 +685,9 @@ export function DesignForm({
                 onClick={() => !locked && update("summaryLayout", item.key)}
                 disabled={locked}
                 className={`group flex flex-col overflow-hidden rounded-lg border transition-all ${
-                  locked ? "cursor-not-allowed border-slate-100 opacity-40"
+                  locked ? "cursor-not-allowed border-white/5 opacity-40"
                   : isSelected ? "border-emerald-400 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]"
-                  : "border-slate-200 hover:border-slate-400"
+                  : "border-white/10 hover:border-white/30"
                 }`}
               >
                 {/* Mini visual preview of each summary style */}
@@ -789,37 +802,37 @@ export function DesignForm({
                   )}
                 </div>
                 <div className="flex items-center justify-between px-3 py-2 bg-white/[0.04]">
-                  <span className="text-xs font-medium text-slate-900">
+                  <span className="text-xs font-medium text-white">
                     {locked ? "🔒 " : isSelected ? "✓ " : ""}{item.label}
                   </span>
                   {item.plan && (
-                    <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] text-slate-500">{item.plan}</span>
+                    <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50">{item.plan}</span>
                   )}
                 </div>
               </button>
             );
           })}
         </div>
-        <p className="mt-3 text-xs text-slate-400">
-          Free: Modern Card only · Growth: + Compact & Sidebar · Pro: All 4
+        <p className="mt-3 text-xs text-white/40">
+          Free: Modern Card & Minimal · Growth: + Compact, Left Sidebar & Stacked · Pro: all 8
         </p>
 
         {/* Summary block customization — locked for Free */}
         {isFree ? (
-          <div className="mt-4 rounded-md border border-slate-200 bg-white px-4 py-3">
-            <p className="text-xs text-slate-400">🔒 Summary colors, width and position are available on Growth and Pro plans.</p>
+          <div className="mt-4 rounded-md border border-white/10 bg-white/[0.03] px-4 py-3">
+            <p className="text-xs text-white/40">🔒 Summary colors, width and position are available on Growth and Pro plans.</p>
           </div>
         ) : (
-          <div className="mt-4 border-t border-slate-200 pt-4">
+          <div className="mt-4 border-t border-white/10 pt-4">
             <div className="mb-3 grid grid-cols-3 gap-4">
               <ColorField label="Summary background" value={settings.summaryBgColor} onChange={(v) => update("summaryBgColor", v)} />
               <ColorField label="Summary text color" value={settings.summaryTextColor} onChange={(v) => update("summaryTextColor", v)} />
               <div>
-                <label className="mb-1 block text-xs text-slate-500">Position</label>
+                <label className="mb-1 block text-xs text-white/50">Position</label>
                 <div className="flex gap-1">
                   {(["left","center","right"] as const).map((pos) => (
                     <button key={pos} onClick={() => update("summaryPosition", pos)}
-                      className={`flex-1 rounded py-1.5 text-xs capitalize transition-colors ${settings.summaryPosition === pos ? "bg-emerald-400/20 text-emerald-700 border border-emerald-300" : "border border-slate-200 text-slate-400 hover:border-slate-400"}`}>
+                      className={`flex-1 rounded py-1.5 text-xs capitalize transition-colors ${settings.summaryPosition === pos ? "bg-emerald-400/20 text-emerald-300 border border-emerald-400/40" : "border border-white/10 text-white/40 hover:border-white/30"}`}>
                       {pos}
                     </button>
                   ))}
@@ -827,29 +840,29 @@ export function DesignForm({
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-xs text-slate-500">
+              <label className="mb-1 block text-xs text-white/50">
                 Summary width: {settings.summaryWidth >= 320 ? `${settings.summaryWidth}px` : "Full width"}
               </label>
               <input type="range" min={300} max={1220} step={20} value={Math.max(settings.summaryWidth, 300)}
                 onChange={(e) => update("summaryWidth", Number(e.target.value))} className="w-full" />
-              <p className="mt-1 text-[10px] text-slate-400">300 = full width · higher values shrink the summary block. For Left Sidebar this sets the sidebar column width.</p>
+              <p className="mt-1 text-[10px] text-white/30">300 = full width · higher values shrink the summary block. For Left Sidebar this sets the sidebar column width.</p>
             </div>
           </div>
         )}
       </div>
 
       {/* Review list bar */}
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
-        <p className="mb-2 text-sm font-medium text-slate-600">Review list bar</p>
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <p className="mb-2 text-sm font-medium text-white/70">Review list bar</p>
         {isFree ? (
-          <p className="text-xs text-slate-400">🔒 Filter bar and sort button colors are available on Growth and Pro plans.</p>
+          <p className="text-xs text-white/40">🔒 Filter bar and sort button colors are available on Growth and Pro plans.</p>
         ) : (
           <>
-            <p className="mb-4 text-xs text-slate-400">Controls the "3 Reviews" count label and "Most Recent" sort dropdown above the review cards.</p>
+            <p className="mb-4 text-xs text-white/40">Controls the "3 Reviews" count label and "Most Recent" sort dropdown above the review cards.</p>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <ColorField label='Count text color ("3 Reviews")' value={settings.filterTextColor} onChange={(v) => update("filterTextColor", v)} />
               <div>
-                <label className="mb-1 block text-xs text-slate-500">Count font size: {settings.reviewCountFontSize}px</label>
+                <label className="mb-1 block text-xs text-white/50">Count font size: {settings.reviewCountFontSize}px</label>
                 <input type="range" min={10} max={20} value={settings.reviewCountFontSize}
                   onChange={(e) => update("reviewCountFontSize", Number(e.target.value))} className="w-full" />
               </div>
@@ -864,10 +877,10 @@ export function DesignForm({
       </div>
 
       {/* Review card text colors */}
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
-        <p className="mb-2 text-sm font-medium text-slate-600">Review card text colors</p>
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <p className="mb-2 text-sm font-medium text-white/70">Review card text colors</p>
         {isFree ? (
-          <p className="text-xs text-slate-400">🔒 Review card text colors are available on Growth and Pro plans.</p>
+          <p className="text-xs text-white/40">🔒 Review card text colors are available on Growth and Pro plans.</p>
         ) : (
           <div className="grid grid-cols-3 gap-4">
             <ColorField label="Review title color" value={settings.reviewTitleColor} onChange={(v) => update("reviewTitleColor", v)} />
@@ -877,13 +890,13 @@ export function DesignForm({
         )}
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
-        <p className="mb-4 text-sm font-medium text-slate-600">Review form style</p>
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <p className="mb-4 text-sm font-medium text-white/70">Review form style</p>
 
         {/* Form color controls */}
         {isFree ? (
-          <div className="mb-4 rounded-md border border-slate-200 bg-white px-4 py-3">
-            <p className="text-xs text-slate-400">🔒 Form background, text, and close button colors are available on Growth and Pro plans.</p>
+          <div className="mb-4 rounded-md border border-white/10 bg-white/[0.03] px-4 py-3">
+            <p className="text-xs text-white/40">🔒 Form background, text, and close button colors are available on Growth and Pro plans.</p>
           </div>
         ) : (
           <div className="mb-4 grid grid-cols-3 gap-4">
@@ -920,10 +933,10 @@ export function DesignForm({
                 disabled={locked}
                 className={`group relative flex flex-col overflow-hidden rounded-lg border transition-all ${
                   locked
-                    ? "cursor-not-allowed border-slate-100 opacity-40"
+                    ? "cursor-not-allowed border-white/5 opacity-40"
                     : isSelected
                     ? "border-emerald-400 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]"
-                    : "border-slate-200 hover:border-slate-400"
+                    : "border-white/10 hover:border-white/30"
                 }`}
               >
                 {/* Mini form preview — accurate visual of each template */}
@@ -993,11 +1006,11 @@ export function DesignForm({
 
                 {/* Name + plan label */}
                 <div className={`flex items-center justify-between px-3 py-2 ${t === "dark" ? "bg-[#1a1a2e]/80" : "bg-white/[0.04]"}`}>
-                  <span className="text-xs font-medium text-slate-900">
+                  <span className="text-xs font-medium text-white">
                     {locked ? "🔒 " : isSelected ? "✓ " : ""}{labels[t]}
                   </span>
                   {planLabels[t] && (
-                    <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] text-slate-500">
+                    <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50">
                       {planLabels[t]}
                     </span>
                   )}
@@ -1007,7 +1020,7 @@ export function DesignForm({
           })}
         </div>
 
-        <p className="mt-3 text-xs text-slate-400">
+        <p className="mt-3 text-xs text-white/40">
           Free: Basic only · Growth: Basic, Card, Minimal · Pro: All 4 templates
         </p>
       </div>
@@ -1016,7 +1029,7 @@ export function DesignForm({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+        className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300 disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>
@@ -1064,12 +1077,12 @@ function GradientBackgroundField({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <label className="block text-xs text-slate-500">{label}</label>
+        <label className="block text-xs text-white/50">{label}</label>
         <div className="flex gap-1">
           <button
             onClick={() => onGradientChange(null)}
             className={`rounded px-1.5 py-0.5 text-[10px] ${
-              !isGradient ? "bg-emerald-400/20 text-emerald-700" : "text-slate-400"
+              !isGradient ? "bg-emerald-400/20 text-emerald-300" : "text-white/40"
             }`}
           >
             Solid
@@ -1077,7 +1090,7 @@ function GradientBackgroundField({
           <button
             onClick={() => onGradientChange(buildGradient(colorA, colorB))}
             className={`rounded px-1.5 py-0.5 text-[10px] ${
-              isGradient ? "bg-emerald-400/20 text-emerald-700" : "text-slate-400"
+              isGradient ? "bg-emerald-400/20 text-emerald-300" : "text-white/40"
             }`}
           >
             Gradient
@@ -1090,16 +1103,16 @@ function GradientBackgroundField({
             type="color"
             value={colorA}
             onChange={(e) => onGradientChange(buildGradient(e.target.value, colorB))}
-            className="h-8 w-8 cursor-pointer rounded border border-slate-300 bg-transparent"
+            className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent"
           />
           <input
             type="color"
             value={colorB}
             onChange={(e) => onGradientChange(buildGradient(colorA, e.target.value))}
-            className="h-8 w-8 cursor-pointer rounded border border-slate-300 bg-transparent"
+            className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent"
           />
           <div
-            className="h-8 flex-1 rounded border border-slate-300"
+            className="h-8 flex-1 rounded border border-white/15"
             style={{ background: gradientValue || undefined }}
           />
         </div>
@@ -1109,13 +1122,13 @@ function GradientBackgroundField({
             type="color"
             value={solidValue}
             onChange={(e) => onSolidChange(e.target.value)}
-            className="h-8 w-8 cursor-pointer rounded border border-slate-300 bg-transparent"
+            className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent"
           />
           <input
             type="text"
             value={solidValue}
             onChange={(e) => onSolidChange(e.target.value)}
-            className="w-full min-w-0 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900"
+            className="w-full min-w-0 rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
           />
         </div>
       )}
@@ -1136,7 +1149,7 @@ function ColorField({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-slate-500">
+      <label className="mb-1 block text-xs text-white/50">
         {locked ? "🔒 " : ""}
         {label}
       </label>
@@ -1146,14 +1159,14 @@ function ColorField({
           value={value}
           disabled={locked}
           onChange={(e) => onChange(e.target.value)}
-          className="h-8 w-8 cursor-pointer rounded border border-slate-300 bg-transparent disabled:cursor-not-allowed disabled:opacity-40"
+          className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent disabled:cursor-not-allowed disabled:opacity-40"
         />
         <input
           type="text"
           value={value}
           disabled={locked}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full min-w-0 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 disabled:opacity-40"
+          className="w-full min-w-0 rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white disabled:opacity-40"
         />
       </div>
     </div>

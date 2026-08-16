@@ -362,10 +362,63 @@
       })();
 
       const sl = design.summaryLayout || 'modern';
+      // ── F: MINIMAL (Free+) — just the score. Suits plain, typographic
+      // themes where rating bars would fight the rest of the page.
+      const summaryMinimal = (function(){
+        if (!summary.total) return '<div style="margin-bottom:20px;display:flex;justify-content:center;">' + writeBtn + '</div>';
+        return wrapSummary('<div style="text-align:center;margin-bottom:26px;padding:6px 0 20px;border-bottom:1px solid rgba(0,0,0,.07);">'
+          + '<div style="display:flex;align-items:baseline;justify-content:center;gap:8px;">'
+          +   '<span style="font-size:42px;font-weight:800;letter-spacing:-1.5px;color:' + design.summaryTextColor + ';line-height:1;">' + summary.average + '</span>'
+          +   '<span style="font-size:15px;color:' + design.summaryTextColor + ';opacity:.4;">/ 5</span>'
+          + '</div>'
+          + '<div style="display:flex;justify-content:center;gap:2px;margin:10px 0 6px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 16) + '</div>'
+          + '<div style="font-size:13px;color:' + design.summaryTextColor + ';opacity:.55;margin-bottom:16px;">' + summary.total + ' review' + (summary.total===1?'':'s') + '</div>'
+          + '<div style="display:flex;justify-content:center;">' + writeBtn + '</div>'
+          + '</div>');
+      })();
+
+      // ── G: STACKED (Growth+) — score above full-width bars. The layout
+      // that survives a narrow column or a phone without wrapping oddly.
+      const summaryStacked = (function(){
+        if (!summary.total) return '<div style="margin-bottom:20px;display:flex;justify-content:center;">' + writeBtn + '</div>';
+        return wrapSummary('<div style="margin-bottom:24px;padding:20px;background:' + design.summaryBgColor + ';border:1px solid rgba(0,0,0,.06);border-radius:' + r + 'px;">'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;">'
+          +   '<div style="display:flex;align-items:center;gap:12px;">'
+          +     '<span style="font-size:34px;font-weight:800;letter-spacing:-1px;color:' + design.summaryTextColor + ';line-height:1;">' + summary.average + '</span>'
+          +     '<div>'
+          +       '<div style="display:flex;gap:2px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 14) + '</div>'
+          +       '<div style="font-size:12px;color:' + design.summaryTextColor + ';opacity:.55;margin-top:3px;">' + summary.total + ' review' + (summary.total===1?'':'s') + '</div>'
+          +     '</div>'
+          +   '</div>'
+          +   writeBtn
+          + '</div>'
+          + '<div>' + breakdownHtml + '</div>'
+          + '</div>');
+      })();
+
+      // ── H: SPLIT PANEL (Pro) — tinted score panel beside the bars, the
+      // shape most large retail sites use, so it looks familiar to shoppers.
+      const summarySplit = (function(){
+        if (!summary.total) return '<div style="margin-bottom:20px;display:flex;justify-content:center;">' + writeBtn + '</div>';
+        return wrapSummary('<div style="display:flex;flex-wrap:wrap;margin-bottom:24px;border:1px solid rgba(0,0,0,.08);border-radius:' + r + 'px;overflow:hidden;">'
+          + '<div style="flex:0 0 190px;min-width:170px;padding:24px 20px;text-align:center;background:' + primary + ';color:#fff;">'
+          +   '<div style="font-size:44px;font-weight:800;letter-spacing:-1.5px;line-height:1;">' + summary.average + '</div>'
+          +   '<div style="display:flex;justify-content:center;gap:2px;margin:10px 0 8px;">' + starsHtml(Math.round(summary.average), '#ffffff', 'rgba(255,255,255,.35)', 14) + '</div>'
+          +   '<div style="font-size:12px;opacity:.85;">' + summary.total + ' review' + (summary.total===1?'':'s') + '</div>'
+          + '</div>'
+          + '<div style="flex:1;min-width:200px;padding:20px;background:' + design.summaryBgColor + ';display:flex;flex-direction:column;justify-content:center;gap:14px;">'
+          +   '<div>' + breakdownHtml + '</div>'
+          +   '<div>' + writeBtn + '</div>'
+          + '</div></div>');
+      })();
+
       const summaryHtml = sl === 'compact' ? summaryCompact
         : sl === 'sidebar' ? summarySidebar
         : sl === 'horizontal' ? summaryHorizontal
         : sl === 'iconpct' ? summaryIconPct
+        : sl === 'minimal' ? summaryMinimal
+        : sl === 'stacked' ? summaryStacked
+        : sl === 'split' ? summarySplit
         : summaryModern;
 
       const filtersHtml = reviews.length > 0 ? `

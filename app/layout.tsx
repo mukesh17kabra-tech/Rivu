@@ -1,10 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
+/**
+ * Plus Jakarta Sans rather than Geist.
+ *
+ * Geist is a neutral UI face — correct, but it has little personality at
+ * heading sizes, which is what made the app read as flat. Jakarta has more
+ * character in its bolder weights and tightens up well, so headings carry
+ * weight while body copy stays readable. The 800 weight is loaded explicitly
+ * because the page and section titles rely on it.
+ */
+const displaySans = Plus_Jakarta_Sans({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -32,7 +43,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${displaySans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
         {/* App Bridge v4 — MUST load first and synchronously (no async/defer)

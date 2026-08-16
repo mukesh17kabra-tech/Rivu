@@ -93,16 +93,16 @@ export function ReviewsTable({
 
   if (reviews.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed border-slate-300 p-6 text-sm text-slate-400">
+      <p className="rounded-lg border border-dashed border-white/15 p-6 text-sm text-white/40">
         No reviews yet. Once shoppers submit reviews, they&apos;ll show up here.
       </p>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-slate-200">
+    <div className="overflow-x-auto rounded-lg border border-white/10">
       <table className="w-full text-left text-sm">
-        <thead className="bg-white text-slate-500">
+        <thead className="bg-white/[0.03] text-white/50">
           <tr>
             <th className="px-4 py-3 font-medium">Reviewer</th>
             <th className="px-4 py-3 font-medium">Product</th>
@@ -118,23 +118,23 @@ export function ReviewsTable({
             const ugcOpen = ugcOpenId === review.id;
             return (
               <Fragment key={review.id}>
-                <tr className="border-t border-slate-100 align-top">
+                <tr className="border-t border-white/5 align-top">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-slate-900">{review.customerName}</p>
+                    <p className="font-medium text-white">{review.customerName}</p>
                     {review.customerEmail && (
-                      <p className="text-xs text-slate-400">{review.customerEmail}</p>
+                      <p className="text-xs text-white/40">{review.customerEmail}</p>
                     )}
                   </td>
-                  <td className="max-w-[220px] px-4 py-3 text-slate-600">
+                  <td className="max-w-[220px] px-4 py-3 text-white/70">
                     <p className="truncate">{review.productTitle}</p>
                     {review.reviewTitle && (
-                      <p className="mt-1 max-w-[220px] truncate text-xs font-medium italic text-slate-500">
+                      <p className="mt-1 max-w-[220px] truncate text-xs font-medium italic text-white/60">
                         {review.reviewTitle}
                       </p>
                     )}
-                    <p className="mt-1 max-w-[220px] truncate text-xs text-slate-400">{review.body}</p>
+                    <p className="mt-1 max-w-[220px] truncate text-xs text-white/40">{review.body}</p>
                   </td>
-                  <td className="px-4 py-3 text-amber-500 whitespace-nowrap">
+                  <td className="px-4 py-3 text-yellow-400 whitespace-nowrap">
                     {"★".repeat(review.rating)}
                     {"☆".repeat(5 - review.rating)}
                   </td>
@@ -142,21 +142,21 @@ export function ReviewsTable({
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs ${
                         review.approved
-                          ? "bg-emerald-400/20 text-emerald-700"
+                          ? "bg-emerald-400/20 text-emerald-300"
                           : "bg-yellow-400/20 text-yellow-300"
                       }`}
                     >
                       {review.approved ? "Published" : "Pending"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-white/40 whitespace-nowrap">
                     {review.createdAt.toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <button
                       onClick={() => toggleApproved(review)}
                       disabled={busyId === review.id}
-                      className="mr-3 text-xs font-medium text-slate-900 hover:underline disabled:opacity-50"
+                      className="mr-3 text-xs font-medium text-emerald-400 hover:underline disabled:opacity-50"
                     >
                       {review.approved ? "Unpublish" : "Publish"}
                     </button>
@@ -178,14 +178,14 @@ export function ReviewsTable({
                   </td>
                 </tr>
                 {ugcOpen && (
-                  <tr className="border-t border-slate-100 bg-white/[0.015]">
+                  <tr className="border-t border-white/5 bg-white/[0.015]">
                     <td colSpan={6} className="px-4 py-4">
                       <div className="flex items-start gap-4">
                         <div className="space-y-2">
                           <select
                             value={template}
                             onChange={(e) => setTemplate(e.target.value)}
-                            className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900"
+                            className="rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
                           >
                             {TEMPLATES.map((t, i) => {
                               const locked = i >= allowedTemplateCount;
@@ -204,7 +204,7 @@ export function ReviewsTable({
                           <select
                             value={format}
                             onChange={(e) => setFormat(e.target.value)}
-                            className="ml-2 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900"
+                            className="ml-2 rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
                           >
                             {FORMATS.map((f) => (
                               <option key={f.value} value={f.value} style={{ color: "#000" }}>
@@ -226,7 +226,7 @@ export function ReviewsTable({
                             <a
                               href={imageUrl}
                               download={`review-${review.id}.png`}
-                              className="inline-block rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-900 hover:bg-slate-200"
+                              className="inline-block rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20"
                             >
                               Download image
                             </a>
@@ -236,7 +236,7 @@ export function ReviewsTable({
                         <img
                           src={imageUrl}
                           alt="UGC preview"
-                          className="w-full max-w-[320px] rounded-md border border-slate-200"
+                          className="w-full max-w-[320px] rounded-md border border-white/10"
                         />
                       </div>
                     </td>

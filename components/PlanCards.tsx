@@ -78,35 +78,35 @@ function PlanCard({
   brandingShown?: boolean; brandingRemoved?: boolean;
 }) {
   return (
-    <div className={`rounded-lg border p-6 flex flex-col ${highlight ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white"}`}>
+    <div className={`rounded-lg border p-6 flex flex-col ${highlight ? "border-emerald-400/40 bg-emerald-400/[0.06]" : "border-white/10 bg-white/[0.02]"}`}>
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">{name}</p>
-        {current && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-500">Current</span>}
+        <p className="text-sm font-medium text-white/50 uppercase tracking-wide">{name}</p>
+        {current && <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white/60">Current</span>}
       </div>
       <p className="mt-1 text-2xl font-semibold">{price}</p>
 
       {/* Powered by Rivu branding notice — shown prominently */}
       {brandingShown && (
-        <div className="mt-3 flex items-center gap-2 rounded-md border border-orange-200 bg-orange-50 px-3 py-2">
+        <div className="mt-3 flex items-center gap-2 rounded-md border border-orange-400/30 bg-orange-400/10 px-3 py-2">
           <span className="text-orange-400">⚠</span>
-          <span className="text-xs text-orange-700">
+          <span className="text-xs text-orange-300">
             <strong>&quot;Powered by Rivu&quot;</strong> shown on your widget
           </span>
         </div>
       )}
       {brandingRemoved && (
-        <div className="mt-3 flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2">
-          <span className="text-slate-900">✓</span>
-          <span className="text-xs text-emerald-700">
+        <div className="mt-3 flex items-center gap-2 rounded-md border border-emerald-400/30 bg-emerald-400/10 px-3 py-2">
+          <span className="text-emerald-400">✓</span>
+          <span className="text-xs text-emerald-300">
             <strong>&quot;Powered by Rivu&quot;</strong> branding removed
           </span>
         </div>
       )}
 
-      <ul className="mt-4 space-y-2 text-sm text-slate-600 flex-1">
+      <ul className="mt-4 space-y-2 text-sm text-white/70 flex-1">
         {perks.map((perk) => (
           <li key={perk} className="flex gap-2">
-            <span className="text-slate-900 flex-shrink-0">·</span>
+            <span className="text-emerald-400 flex-shrink-0">·</span>
             {perk}
           </li>
         ))}
@@ -118,15 +118,15 @@ function PlanCard({
           target="_top"
           className={`mt-5 inline-block rounded-md px-4 py-2 text-center text-sm font-medium transition-colors ${
             highlight
-              ? "bg-slate-900 text-white hover:bg-slate-800"
-              : "bg-slate-100 text-slate-900 hover:bg-slate-200"
+              ? "bg-emerald-400 text-black hover:bg-emerald-300"
+              : "bg-white/10 text-white hover:bg-white/20"
           }`}
         >
           {ctaLabel}
         </a>
       )}
       {current && (
-        <div className="mt-5 rounded-md border border-slate-200 px-4 py-2 text-center text-sm text-slate-400">
+        <div className="mt-5 rounded-md border border-white/10 px-4 py-2 text-center text-sm text-white/40">
           Your current plan
         </div>
       )}

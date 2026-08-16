@@ -64,9 +64,9 @@ export function LogoUpload({
   }
 
   return (
-    <div className="max-w-md rounded-lg border border-slate-200 bg-white p-6">
-      <p className="mb-1 text-sm font-medium text-slate-900">Logo on shareable graphics</p>
-      <p className="mb-4 text-xs text-slate-500">
+    <div className="max-w-md rounded-lg border border-white/10 bg-white/[0.02] p-6">
+      <p className="mb-1 text-sm font-medium text-white">Logo on shareable graphics</p>
+      <p className="mb-4 text-xs text-white/50">
         Shown as a watermark in the corner of every UGC card generated from your reviews —
         helps with brand recall when customers share them.
       </p>
@@ -81,7 +81,7 @@ export function LogoUpload({
       )}
 
       <div className="mb-4 flex items-center gap-3">
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-900 hover:border-slate-400">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-white/15 px-3 py-1.5 text-xs text-white hover:border-white/30">
           {logoUrl ? "Change logo" : "Upload logo"}
           <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
         </label>
@@ -94,7 +94,7 @@ export function LogoUpload({
 
       {logoUrl && (
         <div className="mb-4">
-          <label className="mb-2 block text-xs font-medium text-slate-500">
+          <label className="mb-2 block text-xs font-medium text-white/50">
             Watermark size: {logoSize}px
           </label>
           <input
@@ -115,7 +115,7 @@ export function LogoUpload({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+        className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300 disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>
