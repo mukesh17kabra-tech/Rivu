@@ -16,6 +16,12 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
         ]}
         brandingShown
         current={currentPlan === "free"}
+        // Downgrading is a cancellation, and under Shopify Managed Pricing
+        // Shopify owns that — the same hosted page handles moving up and
+        // down. Deliberately not wired to /api/billing/downgrade, which
+        // resets the merchant's whole widget design to Free defaults.
+        href={`/api/billing/upgrade?shop=${shop}&plan=free`}
+        ctaLabel="Switch to Free"
       />
       <PlanCard
         name="Growth"
