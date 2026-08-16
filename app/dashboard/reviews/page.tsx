@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { PageHeader } from "@/components/ui";
 import { ImportExportBar } from "@/components/ImportExportBar";
 import { ReviewsTable } from "@/components/ReviewsTable";
+import { ModerationToggle } from "@/components/ModerationToggle";
 import { requireShop } from "@/lib/shop-context";
 
 export default async function ReviewsDashboard({
@@ -21,11 +22,23 @@ export default async function ReviewsDashboard({
     take: 200,
   });
 
+  const pendingCount = reviews.filter((r: { approved: boolean }) => !r.approved).length;
+
   return (
     <>
       <PageHeader
         title="All reviews"
-        description={`${reviews.length} total`}
+        description={
+          pendingCount > 0
+            ? `${reviews.length} total · ${pendingCount} awaiting approval`
+            : `${reviews.length} total`
+        }
+      />
+
+      <ModerationToggle
+        shop={shop}
+        initialAutoApprove={shopRecord.autoApproveReviews}
+        pendingCount={pendingCount}
       />
 
       <ImportExportBar shop={shop} />

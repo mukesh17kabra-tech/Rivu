@@ -66,6 +66,7 @@ const MIGRATIONS = [
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "refreshToken" TEXT`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "refreshTokenExpiresAt" TIMESTAMP(3)`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "tokenScope" TEXT`,
+  `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "autoApproveReviews" BOOLEAN NOT NULL DEFAULT true`,
   // AI review-suggestion pool. Each row is claimed at most once per shop —
   // see lib/suggestion-pool.ts.
   `CREATE TABLE IF NOT EXISTS "ReviewSuggestion" (

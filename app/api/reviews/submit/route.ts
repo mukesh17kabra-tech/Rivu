@@ -80,10 +80,15 @@ export async function POST(req: NextRequest) {
     return withCors(NextResponse.json({ error: "Shop not found / app not installed" }, { status: 404 }));
   }
 
-  // New reviews always start unapproved — merchant must approve in the
-  // dashboard before they show publicly or become eligible for UGC cards.
+  // Published immediately unless the merchant has turned moderation on.
+  // Holding every review back by default made the storefront look empty and
+  // the app look broken, with no hint that anything was waiting.
   await db.review.create({
-    data: { shopId: shopRecord.id, approved: false, ...data },
+    data: {
+      shopId: shopRecord.id,
+      approved: shopRecord.autoApproveReviews,
+      ...data,
+    },
   });
 
   // Prevent further reminder emails for this product once this email has

@@ -121,6 +121,12 @@ model Shop {
   logoUrl  String? @db.Text
   logoSize Int     @default(140) // px, width of the watermark on generated graphics
 
+  // Publish reviews the moment they're submitted. Defaults to true because
+  // the opposite silently hides every new review until the merchant finds
+  // the moderation queue — the storefront just looks broken. Merchants who
+  // want to vet reviews first can turn this off.
+  autoApproveReviews Boolean @default(true)
+
   // Whether to show the auto-suggestion picker (with refresh) when
   // writing a review — configurable separately for the storefront widget
   // vs. the QR-scan flow, since merchants may want one but not the other.

@@ -64,7 +64,7 @@
       backgroundColor:"#fff", textColor:"#333", borderRadius:8, fontFamily:"inherit",
       reviewTextSize:14, reviewTextAlign:"left", formAlign:"center",
       formMaxWidth:540, widgetMaxWidth:900, widgetTitle:"CUSTOMER REVIEWS",
-      headingFontSize:13, headingBold:true, headingAlign:"center",
+      headingFontSize:14, headingBold:true, headingAlign:"center",
       topSpacing:24, showBorder:false, borderColor:"#e0e0e0", borderWidth:1, borderStyle:"solid",
       backgroundGradient:null, primaryGradient:null,
       letCustomerPickLanguage:false, showSuggestionsOnWebsite:true,
@@ -651,7 +651,7 @@
 
     el.innerHTML = `
 <div class="rv-root" style="font-family:${design.fontFamily};max-width:1440px;width:100%;margin-top:${design.topSpacing}px;margin-left:auto;margin-right:auto;color:${design.textColor};${borderStr}"><div style="max-width:${design.widgetMaxWidth}px;width:100%;margin:0 auto;">
-  <p style="font-size:${design.headingFontSize}px;font-weight:${design.headingBold?700:400};letter-spacing:.06em;text-transform:uppercase;opacity:.6;margin:0 0 20px;text-align:${design.headingAlign};">${design.widgetTitle}</p>
+  <p style="font-size:${design.headingFontSize}px;font-weight:${design.headingBold?700:400};letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin:0 0 20px;text-align:${design.headingAlign};">${design.widgetTitle}</p>
   <div class="rv-main-content">${buildMain()}</div>
 </div></div>
 

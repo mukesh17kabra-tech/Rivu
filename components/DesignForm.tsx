@@ -800,6 +800,62 @@ export function DesignForm({
                       </div>
                     </div>
                   )}
+
+                  {item.key === "minimal" && (
+                    <div style={{ textAlign: "center", padding: "6px 4px" }}>
+                      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: "3px" }}>
+                        <span style={{ fontSize: "20px", fontWeight: 800, letterSpacing: "-0.5px", color: "#111", lineHeight: 1 }}>4.8</span>
+                        <span style={{ fontSize: "8px", color: "#bbb" }}>/ 5</span>
+                      </div>
+                      <div style={{ color: settings.starColor, fontSize: "8px", marginTop: "3px" }}>★★★★★</div>
+                      <div style={{ fontSize: "6px", color: "#aaa", marginTop: "2px" }}>160 reviews</div>
+                      <div style={{ background: "#111", color: "#fff", fontSize: "5px", borderRadius: "3px", padding: "3px 8px", display: "inline-block", marginTop: "5px" }}>Write</div>
+                    </div>
+                  )}
+
+                  {item.key === "stacked" && (
+                    <div style={{ padding: "3px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "5px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <span style={{ fontSize: "15px", fontWeight: 800, color: "#111", lineHeight: 1 }}>4.8</span>
+                          <div>
+                            <div style={{ color: settings.starColor, fontSize: "6px" }}>★★★★★</div>
+                            <div style={{ fontSize: "4px", color: "#aaa" }}>160 reviews</div>
+                          </div>
+                        </div>
+                        <div style={{ background: "#111", color: "#fff", fontSize: "5px", borderRadius: "3px", padding: "3px 6px" }}>Write</div>
+                      </div>
+                      {[92, 6, 2].map((pct, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "center", gap: "3px", marginBottom: "2px" }}>
+                          <span style={{ fontSize: "4px", color: "#aaa", width: "8px" }}>{5 - i}★</span>
+                          <div style={{ flex: 1, height: "3px", background: "#eee", borderRadius: "2px", overflow: "hidden" }}>
+                            <div style={{ width: pct + "%", height: "100%", background: settings.rangeColor }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {item.key === "split" && (
+                    <div style={{ display: "flex", borderRadius: "4px", overflow: "hidden", border: "1px solid #eee" }}>
+                      <div style={{ flex: "0 0 44%", background: settings.primaryColor, color: "#fff", padding: "8px 4px", textAlign: "center" }}>
+                        <div style={{ fontSize: "16px", fontWeight: 800, lineHeight: 1 }}>4.8</div>
+                        <div style={{ fontSize: "6px", marginTop: "3px" }}>★★★★★</div>
+                        <div style={{ fontSize: "4px", opacity: 0.8, marginTop: "2px" }}>160 reviews</div>
+                      </div>
+                      <div style={{ flex: 1, padding: "7px 5px", background: "#fafafa" }}>
+                        {[92, 6, 2].map((pct, i) => (
+                          <div key={i} style={{ display: "flex", alignItems: "center", gap: "3px", marginBottom: "2px" }}>
+                            <span style={{ fontSize: "4px", color: "#aaa", width: "8px" }}>{5 - i}★</span>
+                            <div style={{ flex: 1, height: "3px", background: "#e6e6e6", borderRadius: "2px", overflow: "hidden" }}>
+                              <div style={{ width: pct + "%", height: "100%", background: settings.rangeColor }} />
+                            </div>
+                          </div>
+                        ))}
+                        <div style={{ background: "#111", color: "#fff", fontSize: "5px", borderRadius: "3px", padding: "3px 6px", display: "inline-block", marginTop: "3px" }}>Write</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center justify-between px-3 py-2 bg-white/[0.04]">
                   <span className="text-xs font-medium text-white">
