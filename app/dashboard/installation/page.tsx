@@ -1,4 +1,4 @@
-import { NavBar } from "@/components/NavBar";
+import { Card, PageHeader } from "@/components/ui";
 import { requireShop } from "@/lib/shop-context";
 import { InstallationContent } from "@/components/InstallationContent";
 
@@ -14,19 +14,15 @@ export default async function InstallationPage({
   const { shop, shopRecord } = await requireShop(shopParam, host);
 
   return (
-    <main className="min-h-screen bg-[#0B0D0F] text-[#E7E9EA] font-sans">
-      <div className="mx-auto max-w-5xl px-6 py-10">
-        <header className="mb-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-400/80">Rivu</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Installation</h1>
-        </header>
+    <>
+      <PageHeader
+        title="Installation"
+        description="Add the Rivu widget to your storefront."
+      />
 
-        <NavBar shop={shop} host={host} active="installation" />
-
-        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
-          <InstallationContent shop={shop} />
-        </div>
-      </div>
-    </main>
+      <Card>
+        <InstallationContent shop={shop} />
+      </Card>
+    </>
   );
 }

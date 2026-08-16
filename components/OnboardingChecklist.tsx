@@ -44,10 +44,10 @@ export function OnboardingChecklist({ shop, host }: { shop: string; host?: strin
   ];
 
   return (
-    <section className="mb-8 rounded-lg border border-white/10 bg-white/[0.02] p-5">
+    <section className="mb-8 rounded-lg border border-slate-200 bg-white p-5">
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm font-medium text-white">🚀 Finish setting up Rivu</p>
-        <button onClick={() => setDismissed(true)} className="text-xs text-white/40 hover:text-white/70">
+        <p className="text-sm font-medium text-slate-900">🚀 Finish setting up Rivu</p>
+        <button onClick={() => setDismissed(true)} className="text-xs text-slate-400 hover:text-slate-600">
           Dismiss
         </button>
       </div>
@@ -56,12 +56,12 @@ export function OnboardingChecklist({ shop, host }: { shop: string; host?: strin
           <div
             key={step.key}
             className={`flex items-center justify-between rounded-md border p-4 ${
-              done[step.key] ? "border-emerald-400/20 bg-emerald-400/[0.03] opacity-60" : "border-white/10"
+              done[step.key] ? "border-emerald-400/20 bg-emerald-400/[0.03] opacity-60" : "border-slate-200"
             }`}
           >
             <div>
-              <p className="text-sm font-medium text-white">{step.title}</p>
-              <p className="mt-0.5 text-xs text-white/50">{step.body}</p>
+              <p className="text-sm font-medium text-slate-900">{step.title}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{step.body}</p>
             </div>
             <div className="flex items-center gap-3">
               <a
@@ -73,7 +73,7 @@ export function OnboardingChecklist({ shop, host }: { shop: string; host?: strin
               </a>
               <button
                 onClick={() => markDone(step.key)}
-                className="whitespace-nowrap text-xs text-emerald-400 hover:underline"
+                className="whitespace-nowrap text-xs text-slate-900 hover:underline"
               >
                 Mark done
               </button>

@@ -1,5 +1,5 @@
 import { getProducts } from "@/lib/shopify";
-import { NavBar } from "@/components/NavBar";
+import { PageHeader, Section } from "@/components/ui";
 import { requireShop, shopQuery } from "@/lib/shop-context";
 import { ReauthRequiredError } from "@/lib/access-token";
 
@@ -33,20 +33,18 @@ export default async function QRCodesPage({
   const genericQrUrl = `/api/qrcode?shop=${encodeURIComponent(shop)}`;
 
   return (
-    <main className="min-h-screen bg-[#0B0D0F] text-[#E7E9EA] font-sans">
-      <div className="mx-auto max-w-5xl px-6 py-10">
-        <header className="mb-10">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-400/80">Rivu</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">QR Codes</h1>
-        </header>
+    <>
+      <PageHeader
+        title="QR codes"
+        description="Print a code on packaging so buyers can review straight from their phone."
+      />
 
-        <NavBar shop={shop} host={host} active="qrcodes" />
-
-        <section className="mb-12 rounded-lg border border-emerald-400/30 bg-emerald-400/[0.06] p-6">
-          <p className="text-sm font-medium text-white mb-1">
-            Recommended: one QR for your whole store
-          </p>
-          <p className="mb-4 text-sm text-white/60 leading-relaxed max-w-2xl">
+      <Section
+        title="One QR for your whole store"
+        description="Recommended — works for every product, so you only print one code."
+      >
+        <div>
+          <p className="mb-4 text-sm text-slate-500 leading-relaxed max-w-2xl">
             Print this single QR code on packing slips, thank-you cards, or receipts —
             it works for every product. When a customer scans it, they enter the email they
             ordered with, and Rivu automatically looks up what they bought so they can
@@ -57,38 +55,34 @@ export default async function QRCodesPage({
             <a
               href={genericQrUrl}
               download="rivu-review-qr.png"
-              className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300"
+              className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
             >
               Download QR
             </a>
           </div>
-        </section>
+        </div>
+      </Section>
 
-        <section>
-          <h2 className="mb-2 text-sm font-medium uppercase tracking-wide text-white/50">
-            Per-product QR codes (optional, advanced)
-          </h2>
-          <p className="mb-4 text-sm text-white/40 max-w-2xl">
-            Only useful for a specific scenario — e.g. showing a QR on your checkout
-            thank-you page where the product is already known, skipping the email step.
-            For anything printed on physical packaging, use the generic QR above instead.
-          </p>
+      <Section
+        title="Per-product QR codes"
+        description="Advanced — only for places where the product is already known, like a checkout thank-you page. For packaging, use the store-wide code above."
+      >
 
           {needsReauth ? (
-            <div className="rounded-lg border border-amber-400/30 bg-amber-400/[0.06] p-4">
-              <p className="text-sm text-amber-200">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm text-amber-800">
                 Rivu needs permission to read your products again.
               </p>
               <a
                 href={`/api/auth?${shopQuery(shop, host)}`}
                 target="_top"
-                className="mt-3 inline-block rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300"
+                className="mt-3 inline-block rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
               >
                 Reconnect Rivu
               </a>
             </div>
           ) : fetchError ? (
-            <p className="rounded-lg border border-red-400/30 bg-red-400/[0.06] p-4 text-sm text-red-300">
+            <p className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
               Couldn&apos;t load products: {fetchError}
             </p>
           ) : (
@@ -98,14 +92,14 @@ export default async function QRCodesPage({
                 return (
                   <div
                     key={product.id}
-                    className="rounded-lg border border-white/10 bg-white/[0.02] p-3 text-center"
+                    className="rounded-lg border border-slate-200 bg-white p-3 text-center"
                   >
                     <img src={qrUrl} alt={`QR for ${product.title}`} className="mx-auto mb-2 w-full rounded-md bg-white p-1" />
-                    <p className="mb-2 text-xs text-white/70 truncate">{product.title}</p>
+                    <p className="mb-2 text-xs text-slate-600 truncate">{product.title}</p>
                     <a
                       href={qrUrl}
                       download={`review-qr-${product.id}.png`}
-                      className="inline-block rounded-md bg-white/10 px-2 py-1 text-[11px] font-medium text-white hover:bg-white/20"
+                      className="inline-block rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-900 hover:bg-slate-200"
                     >
                       Download
                     </a>
@@ -114,8 +108,7 @@ export default async function QRCodesPage({
               })}
             </div>
           )}
-        </section>
-      </div>
-    </main>
+      </Section>
+    </>
   );
 }

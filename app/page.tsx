@@ -122,7 +122,7 @@ export default async function Home({
         body={
           <>
             We couldn&apos;t read a Shopify session for{" "}
-            <span className="text-white/80">{shop}</span>. Reconnecting takes a
+            <span className="text-slate-700">{shop}</span>. Reconnecting takes a
             few seconds.
           </>
         }
@@ -162,13 +162,13 @@ function bounceUrl(shopParam?: string, host?: string): string {
 
 function LandingPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#0B0D0F] px-6 text-[#E7E9EA]">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 text-slate-900">
       <div className="w-full max-w-md text-center">
-        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-emerald-400/80">
+        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-slate-400">
           Shopify App
         </p>
         <h1 className="mb-4 text-3xl font-semibold">Rivu</h1>
-        <p className="text-sm leading-relaxed text-white/60">
+        <p className="text-sm leading-relaxed text-slate-500">
           Collect product reviews via QR codes and email, and display them in a
           fully customizable widget on your storefront.
         </p>
@@ -178,7 +178,7 @@ function LandingPage() {
         <form action="/api/auth" method="GET" className="mt-8 text-left">
           <label
             htmlFor="shop"
-            className="mb-2 block text-xs uppercase tracking-wide text-white/40"
+            className="mb-2 block text-xs uppercase tracking-wide text-slate-400"
           >
             Your store domain
           </label>
@@ -191,18 +191,18 @@ function LandingPage() {
               placeholder="my-store.myshopify.com"
               pattern="[a-zA-Z0-9][a-zA-Z0-9-]*\.myshopify\.com"
               title="Enter your full .myshopify.com domain"
-              className="min-w-0 flex-1 rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-emerald-400/60 focus:outline-none"
+              className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
             />
             <button
               type="submit"
-              className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-emerald-300"
+              className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
             >
               Install
             </button>
           </div>
         </form>
 
-        <p className="mt-6 text-xs text-white/30">
+        <p className="mt-6 text-xs text-slate-400">
           Already installed? Open Rivu from your Shopify admin&apos;s Apps menu.
         </p>
       </div>

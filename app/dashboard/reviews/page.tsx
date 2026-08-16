@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { NavBar } from "@/components/NavBar";
+import { PageHeader } from "@/components/ui";
 import { ImportExportBar } from "@/components/ImportExportBar";
 import { ReviewsTable } from "@/components/ReviewsTable";
 import { requireShop } from "@/lib/shop-context";
@@ -22,21 +22,15 @@ export default async function ReviewsDashboard({
   });
 
   return (
-    <main className="min-h-screen bg-[#0B0D0F] text-[#E7E9EA] font-sans">
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        <header className="mb-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-400/80">Rivu</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-            Reviews <span className="text-white/40 text-base font-normal">— {reviews.length} total</span>
-          </h1>
-        </header>
+    <>
+      <PageHeader
+        title="All reviews"
+        description={`${reviews.length} total`}
+      />
 
-        <NavBar shop={shop} host={host} active="reviews" />
+      <ImportExportBar shop={shop} />
 
-        <ImportExportBar shop={shop} />
-
-        <ReviewsTable shop={shop} reviews={reviews} plan={shopRecord.plan} />
-      </div>
-    </main>
+      <ReviewsTable shop={shop} reviews={reviews} plan={shopRecord.plan} />
+    </>
   );
 }

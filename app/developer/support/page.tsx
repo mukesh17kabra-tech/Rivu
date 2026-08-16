@@ -10,7 +10,7 @@ export default async function DeveloperSupportPage({
   if (!key || key !== process.env.SUPPORT_SECRET_KEY) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-black text-white">
-        <p className="text-sm text-white/50">Invalid or missing key.</p>
+        <p className="text-sm text-slate-500">Invalid or missing key.</p>
       </main>
     );
   }

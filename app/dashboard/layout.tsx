@@ -4,21 +4,31 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { SupportChatWidget } from "@/components/SupportChatWidget";
 import { DowngradeNotice } from "@/components/DowngradeNotice";
+import { Sidebar } from "@/components/Sidebar";
 
 function DashboardInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const shop = searchParams.get("shop") || "";
+  const host = searchParams.get("host") || "";
 
-  const plan = typeof window !== "undefined"
-    ? (sessionStorage.getItem(`rivu_current_plan_${shop}`) || "")
-    : "";
+  const plan =
+    typeof window !== "undefined"
+      ? sessionStorage.getItem(`rivu_current_plan_${shop}`) || ""
+      : "";
 
   return (
-    <>
-      {children}
+    // The sidebar and the scrolling content sit side by side, so navigation
+    // stays put while a long settings page scrolls.
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 md:flex-row">
+      {shop && <Sidebar shop={shop} host={host} plan={plan} />}
+
+      <main className="min-w-0 flex-1">
+        <div className="mx-auto max-w-5xl px-5 py-8 md:px-8">{children}</div>
+      </main>
+
       {shop && plan && <DowngradeNotice currentPlan={plan} shop={shop} />}
       {shop && <SupportChatWidget shop={shop} />}
-    </>
+    </div>
   );
 }
 

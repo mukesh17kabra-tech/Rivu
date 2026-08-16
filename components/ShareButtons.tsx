@@ -38,12 +38,12 @@ export function ShareButtons({ imageUrl, reviewId }: { imageUrl: string; reviewI
       <button
         onClick={handleShare}
         disabled={sharing}
-        className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-60"
+        className="rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-900 hover:bg-slate-200 disabled:opacity-60"
       >
         {sharing ? "Opening share sheet..." : "📤 Share"}
       </button>
       {unsupported && (
-        <p className="mt-2 max-w-[220px] text-xs text-white/40">
+        <p className="mt-2 max-w-[220px] text-xs text-slate-400">
           Sharing directly isn&apos;t supported on this device/browser — download the image
           instead and share it from your phone&apos;s Instagram/WhatsApp app.
         </p>

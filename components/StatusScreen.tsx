@@ -22,23 +22,23 @@ export function StatusScreen({
   secondaryAction?: { label: string; href: string };
   tone?: "neutral" | "warning";
 }) {
-  const accent = tone === "warning" ? "text-amber-400/90" : "text-emerald-400/80";
+  const accent = tone === "warning" ? "text-amber-400/90" : "text-slate-400";
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#0B0D0F] px-6 text-[#E7E9EA]">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 text-slate-900">
       <div className="w-full max-w-md text-center">
         <p className={`mb-2 text-xs uppercase tracking-[0.2em] ${accent}`}>
           {eyebrow}
         </p>
         <h1 className="mb-3 text-2xl font-semibold tracking-tight">{title}</h1>
-        <div className="text-sm leading-relaxed text-white/60">{body}</div>
+        <div className="text-sm leading-relaxed text-slate-500">{body}</div>
 
         {(primaryAction || secondaryAction) && (
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             {primaryAction && (
               <Link
                 href={primaryAction.href}
-                className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-emerald-300"
+                className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
               >
                 {primaryAction.label}
               </Link>
@@ -46,7 +46,7 @@ export function StatusScreen({
             {secondaryAction && (
               <Link
                 href={secondaryAction.href}
-                className="rounded-md border border-white/15 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:border-white/30 hover:text-white"
+                className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900"
               >
                 {secondaryAction.label}
               </Link>

@@ -1,4 +1,4 @@
-import { NavBar } from "@/components/NavBar";
+import { PageHeader, Section } from "@/components/ui";
 import { requireShop } from "@/lib/shop-context";
 import { DesignForm } from "@/components/DesignForm";
 import { LogoUpload } from "@/components/LogoUpload";
@@ -18,19 +18,21 @@ export default async function WidgetSettingsPage({
   const { shop, shopRecord } = await requireShop(shopParam, host);
 
   return (
-    <main className="min-h-screen bg-[#0B0D0F] text-[#E7E9EA] font-sans">
+    <>
       <PlanSync shop={shop} plan={shopRecord.plan} />
       <DowngradeNotice currentPlan={shopRecord.plan} shop={shop} />
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        <header className="mb-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-400/80">Rivu</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Widget Settings</h1>
-        </header>
 
-        <NavBar shop={shop} host={host} active="widget-settings" />
+      <PageHeader
+        title="Widget design"
+        description="Everything a shopper sees on your storefront. Changes save per section."
+      />
 
-        <div className="space-y-8">
-          <DesignForm
+      <Section
+        step={1}
+        title="The review widget"
+        description="Layout, colours, fonts and the write-a-review form — the main block on your product pages."
+      >
+        <DesignForm
             shop={shop}
             plan={shopRecord.plan as "free" | "growth" | "pro"}
             initial={{
@@ -86,21 +88,32 @@ export default async function WidgetSettingsPage({
               formTextColor: (shopRecord as Record<string, unknown>).formTextColor as string || "#1a1a2e",
               formCloseColor: (shopRecord as Record<string, unknown>).formCloseColor as string || "#999999",
             }}
-          />
-          <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">
-            <RatingBadgeForm
-              shop={shop}
-              initialTemplate={shopRecord.ratingBadgeTemplate}
-              initialStarSize={shopRecord.ratingBadgeStarSize}
-            />
-            <LogoUpload
-              shop={shop}
-              initialLogoUrl={shopRecord.logoUrl || ""}
-              initialLogoSize={shopRecord.logoSize}
-            />
-          </div>
-        </div>
-      </div>
-    </main>
+        />
+      </Section>
+
+      <Section
+        step={2}
+        title="Rating badge"
+        description="The compact star line shown near your product title and on collection cards."
+      >
+        <RatingBadgeForm
+          shop={shop}
+          initialTemplate={shopRecord.ratingBadgeTemplate}
+          initialStarSize={shopRecord.ratingBadgeStarSize}
+        />
+      </Section>
+
+      <Section
+        step={3}
+        title="Store logo"
+        description="Watermarked onto the shareable graphics Rivu generates from your reviews."
+      >
+        <LogoUpload
+          shop={shop}
+          initialLogoUrl={shopRecord.logoUrl || ""}
+          initialLogoSize={shopRecord.logoSize}
+        />
+      </Section>
+    </>
   );
 }
