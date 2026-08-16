@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/ui";
 import { requireShop } from "@/lib/shop-context";
 import { PlanSync } from "@/components/PlanSync";
 import { PlanCards } from "@/components/PlanCards";
+import { DowngradeNotice } from "@/components/DowngradeNotice";
 import { syncPlanFromShopify } from "@/lib/billing";
 
 export default async function PlansPage({
@@ -29,6 +30,11 @@ export default async function PlansPage({
       />
 
       <PlanSync shop={shop} plan={currentPlan} />
+      {/* Rendered here with the freshly synced plan rather than relying on
+          the layout's sessionStorage copy, which can be stale or empty.
+          Downgrades land back on this page, so this is where the warning
+          needs to be reliable. */}
+      <DowngradeNotice currentPlan={currentPlan} shop={shop} />
       <PlanCards shop={shop} currentPlan={currentPlan} />
     </>
   );

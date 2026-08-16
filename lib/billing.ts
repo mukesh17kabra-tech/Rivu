@@ -107,8 +107,17 @@ export async function getActivePlanFromShopify(
   // Match Shopify's plan name against our own, case-insensitively. Managed
   // pricing names come from the Partner Dashboard, so tolerate extra words
   // like "Rivu — Growth Plan" as well as a bare "Growth".
-  for (const key of Object.keys(PLANS) as PlanKey[]) {
-    if (key === "free") continue;
+  //
+  // "free" is matched here too. Managed pricing issues a real ACTIVE
+  // subscription named "Free" rather than leaving the list empty, so
+  // skipping the free key made a genuine downgrade look like an
+  // unrecognised plan — the merchant stayed on Pro in our records after
+  // Shopify had already moved them to Free.
+  //
+  // Paid names are checked first: a shop on "Pro" must never match a
+  // substring of the free plan's name.
+  const matchOrder: PlanKey[] = ["pro", "growth", "free"];
+  for (const key of matchOrder) {
     const planName = PLANS[key].name.toLowerCase();
     if (active.some((sub) => sub.name.toLowerCase().includes(planName))) {
       return key;
