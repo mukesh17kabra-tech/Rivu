@@ -1,3 +1,5 @@
+import { FREE_PLAN_DESIGN_DEFAULTS } from "./design-defaults";
+
 // Central definition of which widget-design customizations are locked
 // behind which plan. Used server-side (to actually enforce — not just to
 // hide UI) in app/api/shop/design/route.ts, and mirrored in
@@ -29,17 +31,22 @@ const LANGUAGE_CAP_BY_PLAN: Record<PlanTier, number> = {
   pro: 10,
 };
 
+// Derived from the single shared source rather than restated here. These
+// were two hand-maintained copies and they had drifted: this file said
+// headingAlign "left" while the Free defaults said "center", so
+// clampDesignToPlan silently undid the centring on every save by a Free
+// shop — the setting appeared to save and then reverted.
 const DEFAULTS = {
-  displayStyle: "list",
-  splitSummary: false,
-  rangeColor: "#f5b400",
-  arrowColor: "#111111",
-  headingFontSize: 11,
-  headingBold: false,
-  headingAlign: "left",
-  reviewTextSize: 14,
-  reviewTextAlign: "left",
-  letCustomerPickLanguage: false,
+  displayStyle: FREE_PLAN_DESIGN_DEFAULTS.displayStyle,
+  splitSummary: FREE_PLAN_DESIGN_DEFAULTS.splitSummary,
+  rangeColor: FREE_PLAN_DESIGN_DEFAULTS.rangeColor,
+  arrowColor: FREE_PLAN_DESIGN_DEFAULTS.arrowColor,
+  headingFontSize: FREE_PLAN_DESIGN_DEFAULTS.headingFontSize,
+  headingBold: FREE_PLAN_DESIGN_DEFAULTS.headingBold,
+  headingAlign: FREE_PLAN_DESIGN_DEFAULTS.headingAlign,
+  reviewTextSize: FREE_PLAN_DESIGN_DEFAULTS.reviewTextSize,
+  reviewTextAlign: FREE_PLAN_DESIGN_DEFAULTS.reviewTextAlign,
+  letCustomerPickLanguage: FREE_PLAN_DESIGN_DEFAULTS.letCustomerPickLanguage,
 };
 
 // Everything NOT listed here (colors like primary/star/background/text,
@@ -105,7 +112,7 @@ export function clampDesignToPlan<T extends DesignInput>(
     ],
   };
   if (!summaryLayoutsByPlan[plan].includes(clamped.summaryLayout as string)) {
-    clamped.summaryLayout = "modern";
+    clamped.summaryLayout = FREE_PLAN_DESIGN_DEFAULTS.summaryLayout;
     lockedFields.push("summaryLayout");
   }
 

@@ -73,7 +73,7 @@ function parseBody(body: Record<string, unknown>) {
     suggestionLanguage:       LANGUAGE_CODES.includes(body.suggestionLanguage as typeof LANGUAGE_CODES[number]) ? (body.suggestionLanguage as string) : "en",
     enabledLanguages:         (Array.isArray(body.enabledLanguages) ? body.enabledLanguages.filter((l: unknown) => LANGUAGE_CODES.includes(l as typeof LANGUAGE_CODES[number])) : ["en"]) as string[],
     formTemplate:             oneOf("formTemplate", ["basic","card","minimal","dark"], "basic"),
-    summaryLayout:            oneOf("summaryLayout", ["modern","compact","sidebar","horizontal","iconpct"], "modern"),
+    summaryLayout:            oneOf("summaryLayout", ["modern","minimal","compact","sidebar","stacked","horizontal","iconpct","split"], "modern"),
     summaryBgColor:           color("summaryBgColor", "#f8f8f8"),
     summaryTextColor:         color("summaryTextColor", "#333333"),
     summaryWidth:             num("summaryWidth", 300, 160, 1220),
