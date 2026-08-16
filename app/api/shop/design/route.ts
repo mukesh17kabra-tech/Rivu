@@ -3,6 +3,13 @@ import { requireSession } from "@/lib/require-session";
 import { db } from "@/lib/db";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 import { clampDesignToPlan, PlanTier } from "@/lib/plan-gating";
+import {
+  ALIGNMENTS,
+  BORDER_STYLES,
+  DISPLAY_STYLE_KEYS,
+  FORM_TEMPLATE_KEYS,
+  SUMMARY_LAYOUT_KEYS,
+} from "@/lib/design-options";
 import { runAutoMigrations } from "@/lib/db-migrate";
 
 const LANGUAGE_CODES = SUPPORTED_LANGUAGES.map((l) => l.code) as [string, ...string[]];
@@ -39,7 +46,7 @@ function parseBody(body: Record<string, unknown>) {
   }
 
   return {
-    displayStyle:             oneOf("displayStyle", ["list","grid","carousel","masonry"], "list"),
+    displayStyle:             oneOf("displayStyle", DISPLAY_STYLE_KEYS, "list"),
     splitSummary:             bool("splitSummary", false),
     gridColumns:              num("gridColumns", 3, 2, 5),
     carouselVisible:          num("carouselVisible", 1, 1, 4),
@@ -52,19 +59,19 @@ function parseBody(body: Record<string, unknown>) {
     borderRadius:             num("borderRadius", 8, 0, 24),
     fontFamily:               str("fontFamily", "inherit"),
     reviewTextSize:           num("reviewTextSize", 14, 11, 20),
-    reviewTextAlign:          oneOf("reviewTextAlign", ["left","center","right"], "left"),
-    formAlign:                oneOf("formAlign", ["left","center","right"], "center"),
+    reviewTextAlign:          oneOf("reviewTextAlign", [...ALIGNMENTS], "left"),
+    formAlign:                oneOf("formAlign", [...ALIGNMENTS], "center"),
     formMaxWidth:             num("formMaxWidth", 540, 280, 700),
     widgetMaxWidth:           num("widgetMaxWidth", 900, 320, 1200),
     widgetTitle:              str("widgetTitle", "Customer Reviews"),
     headingFontSize:          num("headingFontSize", 13, 9, 32),
     headingBold:              bool("headingBold", true),
-    headingAlign:             oneOf("headingAlign", ["left","center","right"], "left"),
+    headingAlign:             oneOf("headingAlign", [...ALIGNMENTS], "left"),
     topSpacing:               num("topSpacing", 24, 0, 120),
     showBorder:               bool("showBorder", false),
     borderColor:              color("borderColor", "#e0e0e0"),
     borderWidth:              num("borderWidth", 1, 1, 6),
-    borderStyle:              oneOf("borderStyle", ["solid","dashed","dotted","double"], "solid"),
+    borderStyle:              oneOf("borderStyle", [...BORDER_STYLES], "solid"),
     backgroundGradient:       (typeof body.backgroundGradient === "string" && body.backgroundGradient) ? body.backgroundGradient : null,
     primaryGradient:          (typeof body.primaryGradient === "string" && body.primaryGradient) ? body.primaryGradient : null,
     letCustomerPickLanguage:  bool("letCustomerPickLanguage", false),
@@ -72,12 +79,12 @@ function parseBody(body: Record<string, unknown>) {
     showSuggestionsOnQr:      bool("showSuggestionsOnQr", false),
     suggestionLanguage:       LANGUAGE_CODES.includes(body.suggestionLanguage as typeof LANGUAGE_CODES[number]) ? (body.suggestionLanguage as string) : "en",
     enabledLanguages:         (Array.isArray(body.enabledLanguages) ? body.enabledLanguages.filter((l: unknown) => LANGUAGE_CODES.includes(l as typeof LANGUAGE_CODES[number])) : ["en"]) as string[],
-    formTemplate:             oneOf("formTemplate", ["basic","card","minimal","dark"], "basic"),
-    summaryLayout:            oneOf("summaryLayout", ["modern","minimal","compact","sidebar","stacked","horizontal","iconpct","split"], "modern"),
+    formTemplate:             oneOf("formTemplate", FORM_TEMPLATE_KEYS, "basic"),
+    summaryLayout:            oneOf("summaryLayout", SUMMARY_LAYOUT_KEYS, "modern"),
     summaryBgColor:           color("summaryBgColor", "#f8f8f8"),
     summaryTextColor:         color("summaryTextColor", "#333333"),
     summaryWidth:             num("summaryWidth", 300, 160, 1220),
-    summaryPosition:          oneOf("summaryPosition", ["left","center","right"], "left"),
+    summaryPosition:          oneOf("summaryPosition", [...ALIGNMENTS], "left"),
     filterBgColor:            color("filterBgColor", "#ffffff"),
     filterTextColor:          color("filterTextColor", "#999999"),
     filterBorderColor:        str("filterBorderColor", "rgba(0,0,0,0.08)"),

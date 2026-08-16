@@ -1,4 +1,5 @@
 import { FREE_PLAN_DESIGN_DEFAULTS } from "./design-defaults";
+import { formTemplatesFor, summaryLayoutsFor } from "./design-options";
 
 // Central definition of which widget-design customizations are locked
 // behind which plan. Used server-side (to actually enforce — not just to
@@ -103,26 +104,13 @@ export function clampDesignToPlan<T extends DesignInput>(
   }
 
   // Summary layout gating: Free=modern only, Growth=modern/compact/sidebar, Pro=all
-  const summaryLayoutsByPlan: Record<PlanTier, string[]> = {
-    free: ["modern", "minimal"],
-    growth: ["modern", "minimal", "compact", "sidebar", "stacked"],
-    pro: [
-      "modern", "minimal", "compact", "sidebar", "stacked",
-      "horizontal", "iconpct", "split",
-    ],
-  };
-  if (!summaryLayoutsByPlan[plan].includes(clamped.summaryLayout as string)) {
+  if (!summaryLayoutsFor(plan).includes(clamped.summaryLayout as string)) {
     clamped.summaryLayout = FREE_PLAN_DESIGN_DEFAULTS.summaryLayout;
     lockedFields.push("summaryLayout");
   }
 
   // Form template gating: Free=basic only, Growth=basic/card/minimal, Pro=all four
-  const formTemplatesByPlan: Record<PlanTier, string[]> = {
-    free: ["basic"],
-    growth: ["basic", "card", "minimal"],
-    pro: ["basic", "card", "minimal", "dark"],
-  };
-  if (!formTemplatesByPlan[plan].includes(clamped.formTemplate as string)) {
+  if (!formTemplatesFor(plan).includes(clamped.formTemplate as string)) {
     clamped.formTemplate = "basic";
     lockedFields.push("formTemplate");
   }
