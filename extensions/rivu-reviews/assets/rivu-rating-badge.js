@@ -10,6 +10,18 @@
  *   without needing app block slots — works on any theme, just like Judge.me/Loox.
  */
 (function () {
+  // Hover state for the badge label. Injected once; scoped so it cannot leak
+  // into the merchant's theme.
+  if (!document.getElementById('rivu-badge-styles')) {
+    var bs = document.createElement('style');
+    bs.id = 'rivu-badge-styles';
+    bs.textContent =
+      '.rivu-rating-badge{transition:opacity .15s}' +
+      '.rivu-rating-badge:hover{opacity:.82}' +
+      '.rivu-rating-badge:hover .rivu-badge-label{text-decoration:underline;text-underline-offset:2px}';
+    document.head.appendChild(bs);
+  }
+
   // Read config from the script tag (set by App Embed liquid block).
   // NOTE: document.currentScript is null for deferred scripts, so we
   // use querySelector as fallback — targets the embed script specifically.
@@ -52,16 +64,53 @@
     var size = starSize || data.ratingBadgeStarSize || 16;
     var template = data.ratingBadgeTemplate || '{rating}';
 
-    function toTitleCase(str) {
-      return str.replace(/\w\S*/g, function(t) { return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase(); });
+    // Sentence case, not Title Case. The old version capitalised every word,
+    // turning "rating for this product" into "Rating For This Product", which
+    // reads like a bug rather than a label.
+    function sentenceCase(str) {
+      return str.replace(/^(\s*)([a-z])/, function (_m, space, ch) {
+        return space + ch.toUpperCase();
+      });
     }
 
-    // Apply title case to non-placeholder parts
-    var titled = template.replace(/([^{}]+)(?=\{|$)/g, function(m) { return toTitleCase(m); });
-    var stars = starsHtml(data.average, color, size);
-    var inner = titled.replace(/\{rating\}/g, stars).replace(/\{count\}/g, '<span style="color:' + tc + ';opacity:.75;">' + data.total + '</span>');
+    // The stars are wrapped in one element so the badge's own gap separates
+    // them from the label rather than being shared out between five icons —
+    // that is why the text used to sit flush against the last star.
+    var stars =
+      '<span style="display:inline-flex;align-items:center;gap:1px;flex-shrink:0;">' +
+      starsHtml(data.average, color, size) +
+      '</span>';
 
-    container.style.cssText = 'display:inline-flex;align-items:center;gap:3px;text-decoration:none;cursor:pointer;';
+    var average = Number(data.average || 0).toFixed(1);
+    var averageHtml =
+      '<span style="font-weight:700;color:' + tc + ';font-variant-numeric:tabular-nums;">' +
+      average +
+      '</span>';
+    var countHtml =
+      '<span style="color:' + tc + ';opacity:.6;">' +
+      data.total +
+      ' review' + (Number(data.total) === 1 ? '' : 's') +
+      '</span>';
+
+    // Any literal text between placeholders gets its own styling so it reads
+    // as a label instead of raw theme body copy.
+    var labelled = sentenceCase(template).replace(
+      /([^{}]+)/g,
+      function (text) {
+        if (!text.trim()) return text;
+        return '<span class="rivu-badge-label" style="color:' + tc +
+          ';opacity:.75;font-weight:500;">' + text.trim() + '</span>';
+      }
+    );
+
+    var inner = labelled
+      .replace(/\{rating\}/g, stars)
+      .replace(/\{average\}/g, averageHtml)
+      .replace(/\{count\}/g, countHtml);
+
+    container.style.cssText =
+      'display:inline-flex;align-items:center;gap:7px;line-height:1;' +
+      'text-decoration:none;cursor:pointer;font-size:' + Math.max(size - 2, 12) + 'px;';
     container.innerHTML = inner;
 
     if (onClickScrollToReviews) {
