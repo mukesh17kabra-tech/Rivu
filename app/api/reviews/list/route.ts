@@ -128,6 +128,7 @@ export async function GET(req: NextRequest) {
         plan: safe(shopRecord.plan, "free"),
         availableLanguages,
         design: {
+          richSnippetsEnabled:   safe(s.richSnippetsEnabled as boolean,   true),
           displayStyle:          safe(s.displayStyle as string,           "list"),
           splitSummary:          safe(s.splitSummary as boolean,          false),
           gridColumns:           safe(s.gridColumns as number,            3),

@@ -121,6 +121,13 @@ model Shop {
   logoUrl  String? @db.Text
   logoSize Int     @default(140) // px, width of the watermark on generated graphics
 
+  // Emit schema.org Product/AggregateRating markup on the storefront so
+  // Google can show star ratings in search results. Default on — it is the
+  // headline reason merchants fit a reviews app. Switchable off because some
+  // themes already emit their own Product schema and two aggregateRating
+  // blocks on one page make Google ignore both.
+  richSnippetsEnabled Boolean @default(true)
+
   // Publish reviews the moment they're submitted. Defaults to true because
   // the opposite silently hides every new review until the merchant finds
   // the moderation queue — the storefront just looks broken. Merchants who

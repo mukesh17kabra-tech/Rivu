@@ -59,6 +59,9 @@
 
     let reviews = [], summary = { total: 0, average: 0, breakdown: [] };
     const D = {
+      // Every key the API sends must appear here — the merge below iterates
+      // D, so a field missing from this object is silently discarded.
+      richSnippetsEnabled:true,
       displayStyle:"list", splitSummary:false, gridColumns:3, carouselVisible:1,
       arrowColor:"#111", primaryColor:"#111", starColor:"#f5b400", rangeColor:"#f5b400",
       backgroundColor:"#fff", textColor:"#333", borderRadius:8, fontFamily:"inherit",
@@ -110,6 +113,71 @@
       el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:12px 0;">Rivu: failed to load reviews. Error: ' + String(err) + '</p>';
       return;
     }
+
+    // ── SEO: schema.org Product + AggregateRating ──────────────────────
+    // What earns the star ratings under a product in Google results, and
+    // the main commercial reason a merchant fits a reviews app at all.
+    //
+    // Injected once per product, only when there is at least one approved
+    // review — an aggregateRating with reviewCount 0 is invalid structured
+    // data and Google penalises it rather than ignoring it.
+    //
+    // Merchants can switch this off (richSnippetsEnabled) because many
+    // themes already emit their own Product schema, and two competing
+    // aggregateRating blocks on one page make Google discard both.
+    function injectRichSnippet() {
+      if (!design.richSnippetsEnabled) return;
+      if (!summary.total || !summary.average) return;
+
+      var markerId = "rivu-jsonld-" + String(productId).replace(/[^a-zA-Z0-9_-]/g, "");
+      if (document.getElementById(markerId)) return; // already emitted
+
+      // Only reviews with a body are included; Google requires reviewBody.
+      var sample = (reviews || [])
+        .filter(function (r) { return r.body && r.customerName; })
+        .slice(0, 20)
+        .map(function (r) {
+          return {
+            "@type": "Review",
+            reviewRating: {
+              "@type": "Rating",
+              ratingValue: Number(r.rating),
+              bestRating: 5,
+              worstRating: 1,
+            },
+            author: { "@type": "Person", name: String(r.customerName) },
+            reviewBody: String(r.body),
+            datePublished: r.createdAt
+              ? new Date(r.createdAt).toISOString().slice(0, 10)
+              : undefined,
+          };
+        });
+
+      var payload = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: productTitle || document.title,
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: Number(summary.average),
+          reviewCount: Number(summary.total),
+          bestRating: 5,
+          worstRating: 1,
+        },
+      };
+      if (productImage) payload.image = productImage;
+      if (sample.length) payload.review = sample;
+
+      var tag = document.createElement("script");
+      tag.type = "application/ld+json";
+      tag.id = markerId;
+      // JSON.stringify drops undefined values and escapes the content, so
+      // review text cannot break out of the script element.
+      tag.textContent = JSON.stringify(payload);
+      document.head.appendChild(tag);
+    }
+
+    try { injectRichSnippet(); } catch (e) { /* never block rendering for SEO */ }
 
     const r = design.borderRadius;
     const starColor = design.starColor;

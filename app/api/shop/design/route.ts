@@ -46,6 +46,7 @@ function parseBody(body: Record<string, unknown>) {
   }
 
   return {
+    richSnippetsEnabled:      bool("richSnippetsEnabled", true),
     displayStyle:             oneOf("displayStyle", DISPLAY_STYLE_KEYS, "list"),
     splitSummary:             bool("splitSummary", false),
     gridColumns:              num("gridColumns", 3, 2, 5),
