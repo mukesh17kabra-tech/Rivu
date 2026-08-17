@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import {
+  renderBadgePreview,
+  hasUnrenderedPlaceholder,
+} from "@/lib/badge-template";
 
 export function RatingBadgeForm({
   shop,
@@ -31,11 +35,13 @@ export function RatingBadgeForm({
     }
   }
 
-  // Live preview — shows stars at the configured size
-  const starHtml = "★".repeat(4) + "☆";
-  const preview = template
-    .replace(/\{rating\}/g, starHtml)
-    .replace(/\{count\}/g, "128");
+  // Live preview, rendered through lib/badge-template so it follows the same
+  // rules as the storefront script. This preview used to handle only {rating}
+  // and {count} and did no sentence-casing, so it could look correct while the
+  // real badge was broken — which is how a literal "{ rating }" reached a
+  // product page unnoticed.
+  const preview = renderBadgePreview(template, { average: 4.4, total: 128 });
+  const previewBroken = hasUnrenderedPlaceholder(preview);
 
   return (
     <div className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
@@ -60,8 +66,14 @@ export function RatingBadgeForm({
         <code className="rounded bg-black/30 px-1 text-emerald-300">{"{count}"}</code> the review count.
         Example: <code className="rounded bg-black/30 px-1 text-emerald-300">{"{rating} {average} · {count}"}</code>.
         Your wording is kept as typed — only the first letter is capitalised.
-        Any text you add will be shown in Title Case automatically. Preview:{" "}
-        <span className="text-yellow-300">{preview}</span>
+      </p>
+      <p className="mb-4 text-xs text-white/40">
+        Preview: <span className="text-yellow-300">{preview}</span>
+        {previewBroken && (
+          <span className="ml-2 text-amber-300">
+            — unknown placeholder; only {"{rating}"}, {"{average}"} and {"{count}"} are replaced.
+          </span>
+        )}
       </p>
 
       <label className="mb-1 block text-xs text-white/50">

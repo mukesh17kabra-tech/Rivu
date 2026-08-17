@@ -92,21 +92,32 @@
       ' review' + (Number(data.total) === 1 ? '' : 's') +
       '</span>';
 
-    // Any literal text between placeholders gets its own styling so it reads
-    // as a label instead of raw theme body copy.
-    var labelled = sentenceCase(template).replace(
-      /([^{}]+)/g,
-      function (text) {
-        if (!text.trim()) return text;
+    // Placeholders and literal text are matched in ONE pass.
+    //
+    // Wrapping the literals first was a bug: /([^{}]+)/ also matches the word
+    // *inside* the braces, so {rating} became {<span>rating</span>} and the
+    // later substitution no longer matched it — the storefront rendered a
+    // literal "{ rating }" instead of stars.
+    // sentenceCase is applied to the first *label*, not to the template.
+    // Templates normally open with "{rating}", so casing the whole string
+    // changes nothing — the first character is a brace — and the visible text
+    // stays lowercase. Mirrors renderBadgePreview in lib/badge-template.ts.
+    var capitalised = false;
+    var inner = template.replace(
+      /\{(rating|average|count)\}|([^{}]+)/g,
+      function (_match, placeholder, text) {
+        if (placeholder === 'rating') return stars;
+        if (placeholder === 'average') return averageHtml;
+        if (placeholder === 'count') return countHtml;
+        // Whitespace-only runs are dropped; the flex gap supplies spacing.
+        if (!text || !text.trim()) return '';
+
+        var label = text.trim();
+        if (!capitalised) { label = sentenceCase(label); capitalised = true; }
         return '<span class="rivu-badge-label" style="color:' + tc +
-          ';opacity:.75;font-weight:500;">' + text.trim() + '</span>';
+          ';opacity:.75;font-weight:500;">' + label + '</span>';
       }
     );
-
-    var inner = labelled
-      .replace(/\{rating\}/g, stars)
-      .replace(/\{average\}/g, averageHtml)
-      .replace(/\{count\}/g, countHtml);
 
     container.style.cssText =
       'display:inline-flex;align-items:center;gap:7px;line-height:1;' +
