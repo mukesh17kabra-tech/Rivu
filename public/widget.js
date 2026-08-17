@@ -24,6 +24,9 @@
       .rv-media-thumb:hover{opacity:.82}
       @keyframes rv-fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
       .rv-modal-backdrop{animation:rv-fade-in .18s ease}
+      .rv-sort{transition:border-color .15s,box-shadow .15s}
+      .rv-sort:hover{border-color:rgba(0,0,0,.28)}
+      .rv-sort:focus-visible{border-color:rgba(0,0,0,.4);box-shadow:0 0 0 3px rgba(0,0,0,.06)}
     `;
     document.head.appendChild(s);
   }
@@ -434,7 +437,7 @@
       // themes where rating bars would fight the rest of the page.
       const summaryMinimal = (function(){
         if (!summary.total) return '<div style="margin-bottom:20px;display:flex;justify-content:center;">' + writeBtn + '</div>';
-        return wrapSummary('<div style="text-align:center;margin-bottom:26px;padding:6px 0 20px;border-bottom:1px solid rgba(0,0,0,.07);">'
+        return wrapSummary('<div style="text-align:center;margin-bottom:24px;padding:6px 0 4px;">'
           + '<div style="display:flex;align-items:baseline;justify-content:center;gap:8px;">'
           +   '<span style="font-size:42px;font-weight:800;letter-spacing:-1.5px;color:' + design.summaryTextColor + ';line-height:1;">' + summary.average + '</span>'
           +   '<span style="font-size:15px;color:' + design.summaryTextColor + ';opacity:.4;">/ 5</span>'
@@ -490,12 +493,19 @@
         : summaryModern;
 
       const filtersHtml = reviews.length > 0 ? `
-<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:8px 0 14px;border-bottom:1px solid ${design.filterBorderColor};background:transparent;">
-  <span style="font-size:${design.reviewCountFontSize}px;color:${design.filterTextColor};font-weight:500;">${reviews.length} Review${reviews.length === 1 ? "" : "s"}</span>
-  <select class="rv-sort" style="border:1px solid ${design.sortBorderColor};border-radius:${Math.max(r-2,4)}px;padding:7px 12px;font-size:13px;font-family:inherit;cursor:pointer;background:${design.sortBgColor};color:${design.sortTextColor};box-shadow:none;outline:none;">
-    <option value="newest">Most Recent</option>
-    <option value="oldest">Oldest First</option>
-  </select>
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid ${design.filterBorderColor};">
+  <span style="font-size:${design.reviewCountFontSize}px;color:${design.filterTextColor};font-weight:500;letter-spacing:-.005em;">
+    <span style="color:${design.textColor};font-weight:700;">${reviews.length}</span> Review${reviews.length === 1 ? "" : "s"}
+  </span>
+  <div style="position:relative;display:inline-flex;align-items:center;">
+    <select class="rv-sort" style="appearance:none;-webkit-appearance:none;-moz-appearance:none;border:1px solid ${design.sortBorderColor};border-radius:${Math.max(r-2,6)}px;padding:8px 34px 8px 13px;font-size:13px;font-weight:500;font-family:inherit;line-height:1.2;cursor:pointer;background:${design.sortBgColor};color:${design.sortTextColor};outline:none;">
+      <option value="newest">Most Recent</option>
+      <option value="oldest">Oldest First</option>
+    </select>
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${design.sortTextColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;right:12px;pointer-events:none;opacity:.55;">
+      <path d="M6 9l6 6 6-6"/>
+    </svg>
+  </div>
 </div>` : "";
 
       const listHtml = visible.length
