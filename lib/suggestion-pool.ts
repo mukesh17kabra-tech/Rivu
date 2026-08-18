@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { db } from "./db";
 import { generateSuggestions, isAiConfigured } from "./ai-suggestions";
 import { getSuggestions as getStaticSuggestions } from "./review-suggestions";
+import { aiSuggestionsAllowed } from "./design-options";
 
 /**
  * The pool of review suggestions a store can offer shoppers.
@@ -76,12 +77,16 @@ async function storeSuggestions(params: {
  */
 export async function refillPool(params: {
   shopId: string;
+  plan: string;
   productTitle: string;
   language: string;
   rating: number;
   productId?: string | null;
 }): Promise<number> {
-  const { shopId, productTitle, language, rating, productId } = params;
+  const { shopId, plan, productTitle, language, rating, productId } = params;
+  // Second line of defence: nothing generates for a shop that isn't paying,
+  // even if a caller forgets the check in serveSuggestions.
+  if (!aiSuggestionsAllowed(plan)) return 0;
   if (!isAiConfigured()) return 0;
 
   const available = await db.reviewSuggestion.count({
@@ -127,14 +132,23 @@ export async function refillPool(params: {
  */
 export async function serveSuggestions(params: {
   shopId: string;
+  plan: string;
   productTitle: string;
   language: string;
   rating: number;
   productId?: string | null;
   count?: number;
 }): Promise<{ items: ServedSuggestion[]; source: "ai" | "static" }> {
-  const { shopId, productTitle, language, rating, productId } = params;
+  const { shopId, plan, productTitle, language, rating, productId } = params;
   const count = params.count ?? SERVE_COUNT;
+
+  // Free shops get the hand-written templates. AI generation costs money per
+  // shop, so it is a paid feature — without this check a Free shop's shoppers
+  // would spend the app's model quota.
+  if (!aiSuggestionsAllowed(plan)) {
+    const statics = getStaticSuggestions(rating, productTitle, count, language);
+    return { items: statics.map((text) => ({ id: null, text })), source: "static" };
+  }
 
   const unused = await db.reviewSuggestion.findMany({
     where: { shopId, language, rating, usedAt: null },
@@ -149,7 +163,7 @@ export async function serveSuggestions(params: {
     // Refill in the background once we dip below the low-water mark, so the
     // shopper never waits on a model call.
     if (unused.length < LOW_WATER_MARK) {
-      void refillPool({ shopId, productTitle, language, rating, productId }).catch(
+      void refillPool({ shopId, plan, productTitle, language, rating, productId }).catch(
         (err) => console.error("[suggestion-pool] background refill failed:", err)
       );
     }
@@ -159,7 +173,7 @@ export async function serveSuggestions(params: {
   // Pool too thin to serve from. Try a synchronous top-up once, then fall
   // back to templates if that didn't produce anything.
   if (isAiConfigured()) {
-    await refillPool({ shopId, productTitle, language, rating, productId }).catch((err) =>
+    await refillPool({ shopId, plan, productTitle, language, rating, productId }).catch((err) =>
       console.error("[suggestion-pool] refill failed:", err)
     );
 

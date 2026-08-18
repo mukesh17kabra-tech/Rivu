@@ -96,3 +96,21 @@ export function planBadge(minPlan: PlanTier): string {
   if (minPlan === "free") return "";
   return minPlan === "growth" ? "Growth+" : "Pro only";
 }
+
+/**
+ * AI-written review suggestions are a paid feature.
+ *
+ * Free shops still get suggestions — the hand-written templates in
+ * lib/review-suggestions.ts — so the feature never simply disappears. What
+ * Growth and Pro buy is generation: a large, per-store pool where each line is
+ * offered to one shopper only.
+ *
+ * Gated because generation costs real money per shop. Without this a Free
+ * store's shoppers would spend the app's model quota.
+ */
+export function aiSuggestionsAllowed(plan: string): boolean {
+  return plan === "growth" || plan === "pro";
+}
+
+/** Lowest plan that unlocks AI suggestions — drives the upgrade prompt. */
+export const AI_SUGGESTIONS_MIN_PLAN: PlanTier = "growth";

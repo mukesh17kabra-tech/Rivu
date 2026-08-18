@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
 
   const shopRecord = await db.shop.findUnique({
     where: { shopDomain: shop },
-    select: { id: true, suggestionLanguage: true, enabledLanguages: true },
+    select: { id: true, plan: true, suggestionLanguage: true, enabledLanguages: true },
   });
   if (!shopRecord) {
     return withCors(NextResponse.json({ error: "Shop not found" }, { status: 404 }));
@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
   try {
     const { items, source } = await serveSuggestions({
       shopId: shopRecord.id,
+      plan: shopRecord.plan,
       productTitle,
       productId,
       language,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { aiSuggestionsAllowed } from "@/lib/design-options";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 
 export type DesignSettings = {
@@ -570,7 +571,41 @@ export function DesignForm({
 
       {/* Suggestions */}
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <p className="mb-3 text-sm font-medium text-white/70">Review suggestions</p>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm font-medium text-white/70">Review suggestions</p>
+          {aiSuggestionsAllowed(plan) ? (
+            <span className="rounded-full bg-emerald-400/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-300 ring-1 ring-emerald-400/20">
+              ✨ AI-written
+            </span>
+          ) : (
+            <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white/50 ring-1 ring-white/10">
+              Ready-made
+            </span>
+          )}
+        </div>
+
+        {/* The feature is never simply hidden on Free — the merchant can see
+            what they already have and exactly what upgrading changes. */}
+        {!aiSuggestionsAllowed(plan) && (
+          <div className="mb-4 rounded-lg border border-amber-400/25 bg-amber-400/[0.07] p-3.5">
+            <p className="text-[13px] font-semibold text-amber-200">
+              Your shoppers see ready-made suggestions
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-200/70">
+              About five hand-written lines per star rating. Upgrade to Growth for
+              AI-written suggestions: around 120 per rating, tailored to each
+              product, and each line offered to only one shopper — so no two
+              reviews on your store read the same.
+            </p>
+            <a
+              href={`/dashboard/plans?shop=${encodeURIComponent(shop)}`}
+              target="_top"
+              className="mt-3 inline-block rounded-md bg-emerald-400 px-3.5 py-1.5 text-xs font-bold text-black transition-colors hover:bg-emerald-300"
+            >
+              Upgrade to Growth
+            </a>
+          </div>
+        )}
         <div className="mb-4 flex gap-6">
           <label className="flex items-center gap-2">
             <input
