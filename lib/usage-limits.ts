@@ -64,6 +64,26 @@ export function rewardCodesAllowed(plan: string): boolean {
   return planOf(plan) === "pro";
 }
 
+/**
+ * Monthly reminder-email allowance. Free sends none: the plans advertise
+ * reminders as a paid feature, and sending on Free would give away the thing
+ * Growth is bought for.
+ */
+export function checkReminderQuota(plan: string, sentThisMonth: number): QuotaCheck {
+  const key = planOf(plan);
+  const cap = PLANS[key].reminderMonthlyCap;
+  if (!Number.isFinite(cap)) return { allowed: true };
+  if (sentThisMonth < cap) return { allowed: true };
+
+  return {
+    allowed: false,
+    reason: cap === 0
+      ? "Automated reminder emails are available on the Growth plan."
+      : `This store has sent its ${cap} reminder emails for this month.`,
+    upgradeTo: nextPlan(key),
+  };
+}
+
 /** How many products may have their own QR code. */
 export function qrProductLimit(plan: string): number {
   return PLANS[planOf(plan)].qrProductCap;

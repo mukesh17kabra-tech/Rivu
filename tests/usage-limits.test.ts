@@ -10,6 +10,7 @@ import {
   startOfMonth,
   planOf,
   rewardCodesAllowed,
+  checkReminderQuota,
 } from "@/lib/usage-limits";
 import { PLANS } from "@/lib/billing";
 
@@ -159,19 +160,64 @@ describe("the quota is enforced where reviews are created", () => {
   });
 });
 
-describe("the cards no longer promise reminder emails", () => {
+describe("reminder emails are advertised only while they can actually send", () => {
   const cards = readFileSync(
     path.resolve(__dirname, "../components/PlanCards.tsx"),
     "utf8"
   );
+  const toml = readFileSync(path.resolve(__dirname, "../shopify.app.toml"), "utf8");
+  const cron = readFileSync(
+    path.resolve(__dirname, "../app/api/cron/review-reminders/route.ts"),
+    "utf8"
+  );
 
-  it("has no reminder-email bullet", () => {
-    // orders/create is unsubscribed pending protected-customer-data approval,
-    // so nothing creates the rows the cron sends from. Restore these only once
-    // the webhook is registered and verified.
-    expect(cards).not.toContain("reminder emails/month");
-    expect(cards).not.toContain("Automated review-reminder emails");
-    expect(cards).not.toContain("Unlimited reminder emails");
+  // These were removed once, because the feature could not fire: orders/create
+  // was unsubscribed and nothing queued the rows the cron sends from. They are
+  // back only because all three parts now exist. If any part is removed again,
+  // this fails rather than leaving a paid promise the app cannot keep.
+  it("the cards advertise them", () => {
+    expect(cards).toContain("reminder emails/month");
+  });
+
+  it("the orders webhook is subscribed, not commented out", () => {
+    // Checked as an uncommented line rather than mere presence: it sat in
+    // this file commented out for a long time, which reads the same to a grep.
+    expect(toml).toContain('\ntopics = ["orders/create"]');
+    expect(toml).not.toContain('# topics = ["orders/create"]');
+  });
+
+  it("the cron queues orders itself as a backfill", () => {
+    // A webhook only ever sees new orders; every merchant's existing history
+    // would otherwise never be reminded.
+    expect(cron).toContain("getRecentOrders");
+    expect(cron).toContain("pendingReviewRequest.upsert");
+  });
+
+  it("the advertised allowance is enforced", () => {
+    expect(cron).toContain("checkReminderQuota");
+  });
+});
+
+describe("monthly reminder allowance", () => {
+  it("sends none on free", () => {
+    const check = checkReminderQuota("free", 0);
+    expect(check.allowed).toBe(false);
+    expect(check.allowed === false && check.upgradeTo).toBe("growth");
+  });
+
+  it("allows growth up to its advertised cap", () => {
+    const cap = PLANS.growth.reminderMonthlyCap;
+    expect(checkReminderQuota("growth", 0).allowed).toBe(true);
+    expect(checkReminderQuota("growth", cap - 1).allowed).toBe(true);
+    expect(checkReminderQuota("growth", cap).allowed).toBe(false);
+  });
+
+  it("never limits pro", () => {
+    expect(checkReminderQuota("pro", 100_000).allowed).toBe(true);
+  });
+
+  it("treats an unknown plan as free", () => {
+    expect(checkReminderQuota("mystery", 0).allowed).toBe(false);
   });
 });
 

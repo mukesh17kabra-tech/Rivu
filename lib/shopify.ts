@@ -216,3 +216,38 @@ export async function createReviewRewardDiscount(
 
   return code;
 }
+
+/**
+ * Recent orders, for queueing post-purchase review reminders.
+ *
+ * The orders/create webhook is the primary path; this is the backfill. It
+ * covers two gaps a webhook cannot: orders placed before the webhook was
+ * enabled — which is every existing merchant's history — and any delivery
+ * Shopify fails to make.
+ *
+ * Reads customer email and name, which requires Protected Customer Data
+ * access (approved 2026-08-20). Requests only the fields actually needed
+ * rather than whole orders, so the app holds no more customer data than the
+ * feature requires.
+ */
+export async function getRecentOrders(shop: string, sinceIso: string) {
+  const fields = "id,email,contact_email,customer,created_at,line_items";
+  const res = await adminFetch(
+    shop,
+    `orders.json?status=any&limit=250&created_at_min=${encodeURIComponent(sinceIso)}&fields=${fields}`
+  );
+  if (!res.ok) throw new Error(`Failed to fetch orders: ${res.status}`);
+  const data = await res.json();
+
+  type LineItem = { product_id: number | null; title: string };
+  type Order = {
+    id: number;
+    email?: string | null;
+    contact_email?: string | null;
+    customer?: { first_name?: string; last_name?: string } | null;
+    created_at?: string;
+    line_items?: LineItem[];
+  };
+
+  return (data.orders ?? []) as Order[];
+}

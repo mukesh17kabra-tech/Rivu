@@ -9,18 +9,6 @@ function priceLabel(key: "free" | "growth" | "pro") {
   return price === 0 ? "$0/mo" : `$${price}/mo`;
 }
 
-/**
- * Automated reminder emails are deliberately absent from these lists.
- *
- * They cannot fire: orders/create is unsubscribed in shopify.app.toml pending
- * Shopify's protected-customer-data approval, and that webhook is the only
- * thing that creates the PendingReviewRequest rows the cron sends from. Until
- * it is approved, registered and verified end to end, selling them would be a
- * promise the app cannot keep.
- *
- * The App Store listing carries the same claims and must be edited by hand in
- * the Partner Dashboard — this file cannot reach it.
- */
 export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: string }) {
   return (
     <section className="grid grid-cols-3 gap-4">
@@ -51,6 +39,7 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
         price={priceLabel("growth")}
         perks={[
           "500 reviews/month",
+          "50 reminder emails/month",
           "List, Grid & Masonry layouts",
           "Photo reviews (up to 2) + 1 video",
           "Unlimited product QR codes",
@@ -72,6 +61,7 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
         price={priceLabel("pro")}
         perks={[
           "Unlimited reviews",
+          "Unlimited reminder emails",
           "All layouts — List, Grid, Masonry, Carousel & Sidebar",
           "Photo reviews (up to 3) + 2 videos",
           "Unlimited product QR codes",
