@@ -121,6 +121,12 @@ model Shop {
   logoUrl  String? @db.Text
   logoSize Int     @default(140) // px, width of the watermark on generated graphics
 
+  // Pro "build your own layout": merchant-authored HTML with {{placeholders}}
+  // that replaces the built-in widget markup. Sanitised on save and again on
+  // render — it executes in shoppers' browsers. See lib/widget-template.ts.
+  customTemplateEnabled Boolean @default(false)
+  customTemplateHtml    String? @db.Text
+
   // Emit schema.org Product/AggregateRating markup on the storefront so
   // Google can show star ratings in search results. Default on — it is the
   // headline reason merchants fit a reviews app. Switchable off because some

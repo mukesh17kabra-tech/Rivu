@@ -2,6 +2,7 @@ import { PageHeader, Section } from "@/components/ui";
 import { requireShop } from "@/lib/shop-context";
 import { DesignForm, type DesignSettings } from "@/components/DesignForm";
 import { LogoUpload } from "@/components/LogoUpload";
+import { CustomTemplateForm } from "@/components/CustomTemplateForm";
 import { RatingBadgeForm } from "@/components/RatingBadgeForm";
 import { PlanSync } from "@/components/PlanSync";
 import { DowngradeNotice } from "@/components/DowngradeNotice";
@@ -106,6 +107,19 @@ export default async function WidgetSettingsPage({
 
       <Section
         step={3}
+        title="Build your own layout"
+        description="Pro — write your own HTML and place the stars, reviews and buttons exactly where you want them."
+      >
+        <CustomTemplateForm
+          shop={shop}
+          plan={shopRecord.plan}
+          initialEnabled={shopRecord.customTemplateEnabled}
+          initialHtml={shopRecord.customTemplateHtml || ""}
+        />
+      </Section>
+
+      <Section
+        step={4}
         title="Store logo"
         description="Watermarked onto the shareable graphics Rivu generates from your reviews."
       >

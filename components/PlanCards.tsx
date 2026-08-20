@@ -1,9 +1,20 @@
+import { PLANS } from "@/lib/billing";
+/**
+ * Price shown on a card, taken from lib/billing.ts rather than typed here.
+ * These must match what Shopify charges — a card advertising one number while
+ * checkout shows another is a trust problem, not a cosmetic one.
+ */
+function priceLabel(key: "free" | "growth" | "pro") {
+  const price = PLANS[key].price;
+  return price === 0 ? "$0/mo" : `$${price}/mo`;
+}
+
 export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: string }) {
   return (
     <section className="grid grid-cols-3 gap-4">
       <PlanCard
         name="Free"
-        price="$0/mo"
+        price={priceLabel("free")}
         perks={[
           "25 reviews/month",
           "Photo reviews (up to 1)",
@@ -25,7 +36,7 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
       />
       <PlanCard
         name="Growth"
-        price="$5/mo"
+        price={priceLabel("growth")}
         perks={[
           "500 reviews/month",
           "50 reminder emails/month",
@@ -49,7 +60,7 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
       />
       <PlanCard
         name="Pro"
-        price="$8/mo"
+        price={priceLabel("pro")}
         perks={[
           "Unlimited reviews",
           "Unlimited reminder emails",

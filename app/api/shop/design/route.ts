@@ -11,6 +11,7 @@ import {
   SUMMARY_LAYOUT_KEYS,
 } from "@/lib/design-options";
 import { runAutoMigrations } from "@/lib/db-migrate";
+import { sanitiseTemplate } from "@/lib/widget-template";
 
 const LANGUAGE_CODES = SUPPORTED_LANGUAGES.map((l) => l.code) as [string, ...string[]];
 
@@ -47,6 +48,11 @@ function parseBody(body: Record<string, unknown>) {
 
   return {
     richSnippetsEnabled:      bool("richSnippetsEnabled", true),
+    customTemplateEnabled:    bool("customTemplateEnabled", false),
+    // Sanitised here rather than only on render: the database should never
+    // hold markup we would refuse to serve. Render sanitises again anyway,
+    // because rows can predate a tightening of these rules.
+    customTemplateHtml:       sanitiseTemplate(str("customTemplateHtml", "")).html || null,
     displayStyle:             oneOf("displayStyle", DISPLAY_STYLE_KEYS, "list"),
     splitSummary:             bool("splitSummary", false),
     gridColumns:              num("gridColumns", 3, 2, 5),

@@ -27,6 +27,48 @@
     document.head.appendChild(s);
   }
 
+
+  // ── Custom template (Pro) ────────────────────────────────────────────────
+  // Merchant-authored HTML runs in the *shopper's* browser on a page that
+  // carries the cart and checkout. It is sanitised server-side on save; this
+  // repeats the strip here because a stored row can predate a tightening of
+  // those rules, and this is the last moment before it executes.
+  // The widget title is merchant-controlled and was previously interpolated
+  // raw into the markup. Escaping it costs nothing and closes that gap.
+  function escapeHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  var RV_FORBIDDEN_TAGS = ["script","iframe","object","embed","link","meta","base",
+    "style","form","input","button","textarea","select","option","svg","math",
+    "template","slot","portal","frame","frameset"];
+
+  function rvSanitise(html) {
+    var out = String(html || "");
+    for (var i = 0; i < RV_FORBIDDEN_TAGS.length; i++) {
+      var t = RV_FORBIDDEN_TAGS[i];
+      out = out.replace(new RegExp("<" + t + "\\b[\\s\\S]*?<\\/" + t + "\\s*>", "gi"), "");
+      out = out.replace(new RegExp("<" + t + "\\b[^>]*\\/?>", "gi"), "");
+    }
+    out = out.replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, "");
+    out = out.replace(/\son[a-z]+\s*=\s*'[^']*'/gi, "");
+    out = out.replace(/\son[a-z]+\s*=\s*[^\s>]+/gi, "");
+    out = out.replace(/(href|src|action|formaction)\s*=\s*(["'])\s*(javascript|data|vbscript)\s*:[^"']*\2/gi, "");
+    return out;
+  }
+
+  // Placeholders are replaced with markup the widget generated itself, never
+  // with shopper or merchant input.
+  function rvRenderTemplate(tpl, values) {
+    return tpl.replace(/\{\{\s*([a-z_]+)\s*\}\}/g, function (whole, name) {
+      return Object.prototype.hasOwnProperty.call(values, name) ? values[name] : whole;
+    });
+  }
+
   function avatarColor(name) {
     const P = ["#7c3aed","#0891b2","#dc2626","#ea580c","#16a34a","#2563eb","#c026d3","#0d9488"];
     let h = 0;
@@ -64,7 +106,7 @@
     const D = {
       // Every key the API sends must appear here — the merge below iterates
       // D, so a field missing from this object is silently discarded.
-      richSnippetsEnabled:true,
+      richSnippetsEnabled:true, customTemplateEnabled:false, customTemplateHtml:"",
       displayStyle:"list", splitSummary:false, gridColumns:3, carouselVisible:1,
       arrowColor:"#111", primaryColor:"#111", starColor:"#f5b400", rangeColor:"#f5b400",
       backgroundColor:"#fff", textColor:"#333", borderRadius:8, fontFamily:"inherit",
@@ -727,10 +769,31 @@
       ? `border:${design.borderWidth}px ${design.borderStyle} ${design.borderColor};border-radius:${r}px;padding:24px;`
       : "";
 
+    // A Pro merchant's own layout replaces the built-in heading + body. The
+    // reviews, stars and buttons inside it are still the widget's own markup —
+    // only the arrangement is theirs.
+    var innerBody;
+    if (design.customTemplateEnabled && design.customTemplateHtml) {
+      innerBody = rvRenderTemplate(rvSanitise(design.customTemplateHtml), {
+        title: escapeHtml(design.widgetTitle),
+        stars: starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 16),
+        average: String(summary.average || 0),
+        count: summary.total + " review" + (summary.total === 1 ? "" : "s"),
+        breakdown: breakdownHtml,
+        write_button: writeBtn,
+        review_list: listHtml,
+      });
+    } else {
+      innerBody =
+        '<p style="font-size:' + design.headingFontSize + 'px;font-weight:' + (design.headingBold ? 700 : 400) +
+        ';letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin:0 0 20px;text-align:' +
+        design.headingAlign + ';">' + escapeHtml(design.widgetTitle) + '</p>' +
+        '<div class="rv-main-content">' + buildMain() + '</div>';
+    }
+
     el.innerHTML = `
 <div class="rv-root" style="font-family:${design.fontFamily};max-width:1440px;width:100%;margin-top:${design.topSpacing}px;margin-left:auto;margin-right:auto;color:${design.textColor};${borderStr}"><div style="max-width:${design.widgetMaxWidth}px;width:100%;margin:0 auto;">
-  <p style="font-size:${design.headingFontSize}px;font-weight:${design.headingBold?700:400};letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin:0 0 20px;text-align:${design.headingAlign};">${design.widgetTitle}</p>
-  <div class="rv-main-content">${buildMain()}</div>
+  ${innerBody}
 </div></div>
 
 <div class="rv-modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">

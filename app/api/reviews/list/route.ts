@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { sanitiseTemplate } from "@/lib/widget-template";
+import { customTemplateAllowed } from "@/lib/design-options";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 import { runAutoMigrations } from "@/lib/db-migrate";
 
@@ -129,6 +131,13 @@ export async function GET(req: NextRequest) {
         availableLanguages,
         design: {
           richSnippetsEnabled:   safe(s.richSnippetsEnabled as boolean,   true),
+          // Only sent when the shop's plan actually allows it, so the widget
+          // cannot render a template a downgraded merchant no longer pays for.
+          customTemplateEnabled: customTemplateAllowed(shopRecord.plan) &&
+                                 safe(s.customTemplateEnabled as boolean, false),
+          customTemplateHtml:    customTemplateAllowed(shopRecord.plan)
+                                   ? sanitiseTemplate(String(s.customTemplateHtml ?? "")).html
+                                   : "",
           displayStyle:          safe(s.displayStyle as string,           "list"),
           splitSummary:          safe(s.splitSummary as boolean,          false),
           gridColumns:           safe(s.gridColumns as number,            3),

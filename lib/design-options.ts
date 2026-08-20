@@ -114,3 +114,17 @@ export function aiSuggestionsAllowed(plan: string): boolean {
 
 /** Lowest plan that unlocks AI suggestions — drives the upgrade prompt. */
 export const AI_SUGGESTIONS_MIN_PLAN: PlanTier = "growth";
+
+/**
+ * The custom widget template is a Pro feature.
+ *
+ * Checked on save *and* when serving the widget, so a merchant who downgrades
+ * stops rendering their custom layout immediately rather than keeping a paid
+ * feature until they next touch the settings.
+ */
+export function customTemplateAllowed(plan: string): boolean {
+  return plan === "pro";
+}
+
+/** Named in the upgrade prompt — kept beside the gate so they can't disagree. */
+export const CUSTOM_TEMPLATE_MIN_PLAN: PlanTier = "pro";

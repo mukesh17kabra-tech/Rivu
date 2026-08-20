@@ -21,7 +21,7 @@ export const PLANS = {
   },
   growth: {
     name: "Growth",
-    price: 5,
+    price: 12.99,
     reviewsPerMonthCap: 500,
     qrProductCap: Infinity,
     templateCount: 5,
@@ -33,7 +33,7 @@ export const PLANS = {
   },
   pro: {
     name: "Pro",
-    price: 8,
+    price: 29.99,
     reviewsPerMonthCap: Infinity,
     qrProductCap: Infinity,
     templateCount: 8,
