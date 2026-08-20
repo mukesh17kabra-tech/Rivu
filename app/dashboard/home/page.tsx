@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireShop, shopQuery } from "@/lib/shop-context";
 import { Card, PageHeader, Stat, Badge } from "@/components/ui";
+import { usageWarning } from "@/lib/usage-limits";
 
 export default async function DashboardHome({
   searchParams,
@@ -41,6 +42,7 @@ export default async function DashboardHome({
   });
 
   const query = shopQuery(shop, host);
+  const quotaWarning = usageWarning(shopRecord.plan, thisMonth);
 
   return (
     <>
@@ -65,6 +67,18 @@ export default async function DashboardHome({
             className="mt-3 inline-block rounded-lg bg-emerald-400 px-4 py-2 text-sm font-bold text-black transition-colors hover:bg-emerald-300"
           >
             Open the installation guide →
+          </Link>
+        </Card>
+      )}
+
+      {quotaWarning && (
+        <Card className="mb-5 !border-amber-400/25 !bg-amber-400/[0.07]">
+          <p className="text-sm font-bold text-amber-200">{quotaWarning}</p>
+          <Link
+            href={`/dashboard/plans?${query}`}
+            className="mt-2.5 inline-block rounded-md bg-emerald-400 px-3.5 py-1.5 text-xs font-bold text-black transition-colors hover:bg-emerald-300"
+          >
+            See plans
           </Link>
         </Card>
       )}

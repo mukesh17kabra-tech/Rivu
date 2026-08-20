@@ -2,6 +2,7 @@ import { getProducts } from "@/lib/shopify";
 import { PageHeader, Section } from "@/components/ui";
 import { requireShop, shopQuery } from "@/lib/shop-context";
 import { ReauthRequiredError } from "@/lib/access-token";
+import { qrProductLimit } from "@/lib/usage-limits";
 
 export default async function QRCodesPage({
   searchParams,
@@ -12,7 +13,7 @@ export default async function QRCodesPage({
   // requireShop sends the merchant back to the app entry point when the shop
   // is missing or not yet registered, so authentication can re-run — instead
   // of dead-ending them on "Shop not found. Please reinstall the app."
-  const { shop } = await requireShop(shopParam, host);
+  const { shop, shopRecord } = await requireShop(shopParam, host);
 
   let products: { id: number; title: string; image?: { src: string } }[] = [];
   let fetchError: string | null = null;
@@ -31,6 +32,14 @@ export default async function QRCodesPage({
   }
 
   const genericQrUrl = `/api/qrcode?shop=${encodeURIComponent(shop)}`;
+
+  // Free is documented as ten products. Listing every product regardless
+  // would advertise a limit that doesn't exist.
+  const qrLimit = qrProductLimit(shopRecord.plan);
+  const hiddenProducts = Number.isFinite(qrLimit)
+    ? Math.max(0, products.length - qrLimit)
+    : 0;
+  if (Number.isFinite(qrLimit)) products = products.slice(0, qrLimit);
 
   return (
     <>
@@ -106,6 +115,25 @@ export default async function QRCodesPage({
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {hiddenProducts > 0 && (
+            <div className="mt-4 rounded-lg border border-amber-400/25 bg-amber-400/[0.08] p-4">
+              <p className="text-sm text-amber-200">
+                {hiddenProducts} more product{hiddenProducts === 1 ? "" : "s"} not
+                shown — your plan covers per-product codes for {qrLimit}.
+              </p>
+              <p className="mt-1 text-xs text-amber-200/70">
+                The store-wide code above already works for every product, so
+                you only need these for a checkout thank-you page.
+              </p>
+              <a
+                href={`/dashboard/plans?${shopQuery(shop, host)}`}
+                className="mt-3 inline-block rounded-md bg-emerald-400 px-3.5 py-1.5 text-xs font-bold text-black hover:bg-emerald-300"
+              >
+                Upgrade for unlimited
+              </a>
             </div>
           )}
       </Section>

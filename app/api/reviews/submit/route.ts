@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { createReviewRewardDiscount } from "@/lib/shopify";
+import {
+  checkReviewQuota,
+  checkVideoAllowed,
+  startOfMonth,
+} from "@/lib/usage-limits";
 
 const schema = z.object({
   shop: z.string().min(1),
@@ -80,6 +85,33 @@ export async function POST(req: NextRequest) {
     return withCors(NextResponse.json({ error: "Shop not found / app not installed" }, { status: 404 }));
   }
 
+  // ── Plan quotas ──────────────────────────────────────────────────────
+  // Advertised on the pricing cards and the App Store listing, so they have
+  // to be real. Refused with an explanation rather than silently dropped: the
+  // shopper has just written a review and deserves to know it wasn't saved.
+  const reviewsThisMonth = await db.review.count({
+    where: { shopId: shopRecord.id, createdAt: { gte: startOfMonth() } },
+  });
+
+  const quota = checkReviewQuota(shopRecord.plan, reviewsThisMonth);
+  if (!quota.allowed) {
+    console.warn(`[reviews/submit] ${shop} is over its monthly review quota`);
+    return withCors(
+      NextResponse.json(
+        { error: "This store isn't accepting new reviews right now. Please try again later." },
+        { status: 429 }
+      )
+    );
+  }
+
+  // Video is a paid feature. Dropping the video but keeping the review is
+  // deliberate — losing the whole submission over an attachment would waste a
+  // genuine review the merchant wants.
+  let videoUrl = data.videoUrl;
+  if (videoUrl && !checkVideoAllowed(shopRecord.plan).allowed) {
+    videoUrl = undefined;
+  }
+
   // Published immediately unless the merchant has turned moderation on.
   // Holding every review back by default made the storefront look empty and
   // the app look broken, with no hint that anything was waiting.
@@ -88,6 +120,7 @@ export async function POST(req: NextRequest) {
       shopId: shopRecord.id,
       approved: shopRecord.autoApproveReviews,
       ...data,
+      videoUrl,
     },
   });
 
