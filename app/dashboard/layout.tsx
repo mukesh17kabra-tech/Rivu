@@ -5,16 +5,18 @@ import { useSearchParams } from "next/navigation";
 import { SupportChatWidget } from "@/components/SupportChatWidget";
 import { DowngradeNotice } from "@/components/DowngradeNotice";
 import { Sidebar } from "@/components/Sidebar";
+import { useShopPlan } from "@/components/use-shop-plan";
 
 function DashboardInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const shop = searchParams.get("shop") || "";
   const host = searchParams.get("host") || "";
 
-  const plan =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem(`rivu_current_plan_${shop}`) || ""
-      : "";
+  // Subscribed rather than read during render: the old version read
+  // sessionStorage inline behind a `typeof window` check, which renders empty
+  // on the server and populated on the client — a hydration mismatch — and
+  // never updated when the plan changed.
+  const plan = useShopPlan(shop);
 
   return (
     // The sidebar and the scrolling content sit side by side, so navigation

@@ -5,6 +5,7 @@ import { verifySessionToken, shopFromSessionToken } from "@/lib/session-token";
 import { hasFreshAccessToken } from "@/lib/access-token";
 import { appUrl } from "@/lib/app-url";
 import { db } from "@/lib/db";
+import { syncPlanFromShopify } from "@/lib/billing";
 import { StatusScreen } from "@/components/StatusScreen";
 
 /**
@@ -53,12 +54,14 @@ export default async function Home({
     const knownShop = payload ? shopFromSessionToken(payload) : null;
 
     if (knownShop && (await hasFreshAccessToken(knownShop))) {
+      await syncPlanOnOpen(knownShop);
       redirect(`/dashboard/home?${shopQuery(knownShop, host)}`);
     }
 
     const result = await registerShopFromSessionToken(idToken);
 
     if (result.ok) {
+      await syncPlanOnOpen(result.shop);
       redirect(`/dashboard/home?${shopQuery(result.shop, host)}`);
     }
 
@@ -104,6 +107,7 @@ export default async function Home({
     const record = await db.shop.findUnique({ where: { shopDomain: shop } });
 
     if (record?.accessToken) {
+      await syncPlanOnOpen(shop, record.plan);
       redirect(`/dashboard/home?${shopQuery(shop, host)}`);
     }
 
@@ -136,6 +140,31 @@ export default async function Home({
 
   // ---------------------------------------------------------------- 4
   return <LandingPage />;
+}
+
+/**
+ * Brings the stored plan in line with Shopify when the app is opened.
+ *
+ * Previously this only happened on the Plans page, so a merchant who changed
+ * plan and then went straight to Widget design saw the old plan's options
+ * until they happened to visit Plans. Running it here means every dashboard
+ * page is rendered from a plan that was confirmed with Shopify moments before.
+ *
+ * Once per app open, not per navigation — one GraphQL call at the point the
+ * merchant is already waiting for a redirect. Failures are swallowed inside
+ * syncPlanFromShopify, which falls back to the stored value, so a Shopify
+ * hiccup can never block the app from opening.
+ */
+async function syncPlanOnOpen(shop: string, knownPlan?: string) {
+  try {
+    const stored =
+      knownPlan ??
+      (await db.shop.findUnique({ where: { shopDomain: shop }, select: { plan: true } }))
+        ?.plan;
+    if (stored) await syncPlanFromShopify(shop, stored);
+  } catch (err) {
+    console.error(`[entry] plan sync failed for ${shop}:`, err);
+  }
 }
 
 /**
