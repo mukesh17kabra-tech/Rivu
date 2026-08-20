@@ -6,6 +6,7 @@ import {
   checkReviewQuota,
   checkVideoAllowed,
   startOfMonth,
+  rewardCodesAllowed,
 } from "@/lib/usage-limits";
 
 const schema = z.object({
@@ -143,7 +144,9 @@ export async function POST(req: NextRequest) {
   // immediately, regardless of approval status — the review itself is
   // genuine regardless of whether it ends up published.
   let discountCode: string | undefined;
-  if (shopRecord.rewardEnabled) {
+  // Second check: a shop that downgrades stops issuing codes immediately,
+  // rather than keeping a paid feature until it next saves its settings.
+  if (shopRecord.rewardEnabled && rewardCodesAllowed(shopRecord.plan)) {
     try {
       discountCode = await createReviewRewardDiscount(shop, {
         type: shopRecord.rewardType as "percentage" | "fixed_amount",

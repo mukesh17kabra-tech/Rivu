@@ -9,6 +9,7 @@ import {
   usageWarning,
   startOfMonth,
   planOf,
+  rewardCodesAllowed,
 } from "@/lib/usage-limits";
 import { PLANS } from "@/lib/billing";
 
@@ -171,5 +172,44 @@ describe("the cards no longer promise reminder emails", () => {
     expect(cards).not.toContain("reminder emails/month");
     expect(cards).not.toContain("Automated review-reminder emails");
     expect(cards).not.toContain("Unlimited reminder emails");
+  });
+});
+
+describe("Pro-only features are actually Pro-only", () => {
+  const rewardRoute = readFileSync(
+    path.resolve(__dirname, "../app/api/shop/reward/route.ts"),
+    "utf8"
+  );
+  const submit = readFileSync(
+    path.resolve(__dirname, "../app/api/reviews/submit/route.ts"),
+    "utf8"
+  );
+
+  it("refuses to enable reward codes below Pro", () => {
+    expect(rewardCodesAllowed("free")).toBe(false);
+    expect(rewardCodesAllowed("growth")).toBe(false);
+    expect(rewardCodesAllowed("pro")).toBe(true);
+  });
+
+  it("checks the plan when saving the setting", () => {
+    expect(rewardRoute).toContain("rewardCodesAllowed");
+  });
+
+  it("checks again when issuing a code", () => {
+    // A shop that downgrades must stop issuing codes immediately, not at the
+    // next time it happens to save its settings.
+    expect(submit).toContain("rewardCodesAllowed(shopRecord.plan)");
+  });
+});
+
+describe("the cards only claim features that exist", () => {
+  const cards = readFileSync(
+    path.resolve(__dirname, "../components/PlanCards.tsx"),
+    "utf8"
+  );
+
+  it("does not advertise Top Reviewer streak badges", () => {
+    // Advertised on Growth and implemented nowhere in the codebase.
+    expect(cards).not.toContain("streak badges");
   });
 });

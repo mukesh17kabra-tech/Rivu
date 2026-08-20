@@ -55,6 +55,15 @@ export function checkVideoAllowed(plan: string): QuotaCheck {
   };
 }
 
+/**
+ * Review-reward discount codes are advertised as a Pro feature. They were
+ * enforced nowhere, so every plan could switch them on — a Pro selling point
+ * given away, and another inaccurate line on the listing.
+ */
+export function rewardCodesAllowed(plan: string): boolean {
+  return planOf(plan) === "pro";
+}
+
 /** How many products may have their own QR code. */
 export function qrProductLimit(plan: string): number {
   return PLANS[planOf(plan)].qrProductCap;

@@ -72,6 +72,28 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
 
   return (
     <div className="max-w-3xl space-y-5 rounded-lg border border-white/10 bg-white/[0.02] p-6">
+      {/* The toggle below configures automatic sending, but nothing can send
+          yet: orders/create is unsubscribed pending Shopify's protected
+          customer data approval, and that webhook is what queues the emails.
+          Saying so here is the honest thing — a merchant who ticks the box and
+          waits for emails that never arrive concludes the app is broken.
+          Remove this notice once the webhook is approved and verified. */}
+      <div className="rounded-lg border border-amber-400/25 bg-amber-400/[0.08] p-4">
+        <p className="text-[13px] font-bold text-amber-200">
+          Automatic sending isn&apos;t live yet
+        </p>
+        <p className="mt-1 text-xs leading-relaxed text-amber-200/75">
+          Rivu is waiting on Shopify&apos;s approval to read order data, which is
+          what triggers these emails. Your settings below are saved and will
+          start working the moment it&apos;s granted — nothing is sent to
+          customers until then.
+        </p>
+        <p className="mt-1.5 text-xs leading-relaxed text-amber-200/75">
+          <strong>Send test email</strong> at the bottom works now, so you can
+          check the wording and delivery in the meantime.
+        </p>
+      </div>
+
       <div>
         <label className="mb-2 block text-sm font-medium text-white/70">
           Your email (customer replies go here)

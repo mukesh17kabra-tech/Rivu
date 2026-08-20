@@ -60,7 +60,6 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
           "Heading size/bold/position controls",
           "Review card text colors",
           "Filter bar + sort button colors",
-          "Top Reviewer streak badges",
           "4-day free trial",
         ]}
         brandingRemoved

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/require-session";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { rewardCodesAllowed } from "@/lib/usage-limits";
 
 const schema = z.object({
   shop: z.string().min(1),
@@ -27,6 +28,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+
+  // Checked server-side, not merely hidden: this endpoint is reachable by
+  // anyone holding a valid session token for the shop.
+  if (reward.rewardEnabled) {
+    const record = await db.shop.findUnique({
+      where: { shopDomain: shop },
+      select: { plan: true },
+    });
+    if (!rewardCodesAllowed(record?.plan ?? "free")) {
+      return NextResponse.json(
+        { error: "Review-reward discount codes are available on the Pro plan." },
+        { status: 403 }
+      );
+    }
+  }
 
   await db.shop.update({
     where: { shopDomain: shop },
