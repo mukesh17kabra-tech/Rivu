@@ -593,6 +593,21 @@
 </div>`;
       }
 
+      // A Pro merchant's own layout. Rendered here rather than at the call
+      // site because every piece it can place — the bars, the button, the
+      // review list — is scoped to this function.
+      if (design.customTemplateEnabled && design.customTemplateHtml) {
+        return rvRenderTemplate(rvSanitise(design.customTemplateHtml), {
+          title: escapeHtml(design.widgetTitle),
+          stars: starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 16),
+          average: String(summary.average || 0),
+          count: summary.total + " review" + (summary.total === 1 ? "" : "s"),
+          breakdown: breakdownHtml,
+          write_button: writeBtn,
+          review_list: reviewListHtml,
+        }) + poweredBy;
+      }
+
       return `${summaryHtml}${filtersHtml}${reviewListHtml}${loadMoreHtml}${poweredBy}`;
     }
 
@@ -768,27 +783,16 @@
       ? `border:${design.borderWidth}px ${design.borderStyle} ${design.borderColor};border-radius:${r}px;padding:24px;`
       : "";
 
-    // A Pro merchant's own layout replaces the built-in heading + body. The
-    // reviews, stars and buttons inside it are still the widget's own markup —
-    // only the arrangement is theirs.
-    var innerBody;
-    if (design.customTemplateEnabled && design.customTemplateHtml) {
-      innerBody = rvRenderTemplate(rvSanitise(design.customTemplateHtml), {
-        title: escapeHtml(design.widgetTitle),
-        stars: starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 16),
-        average: String(summary.average || 0),
-        count: summary.total + " review" + (summary.total === 1 ? "" : "s"),
-        breakdown: breakdownHtml,
-        write_button: writeBtn,
-        review_list: listHtml,
-      });
-    } else {
-      innerBody =
-        '<p style="font-size:' + design.headingFontSize + 'px;font-weight:' + (design.headingBold ? 700 : 400) +
-        ';letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin:0 0 20px;text-align:' +
-        design.headingAlign + ';">' + escapeHtml(design.widgetTitle) + '</p>' +
-        '<div class="rv-main-content">' + buildMain() + '</div>';
-    }
+    // The custom template, when enabled, is produced by buildMain itself —
+    // the heading is part of the merchant's own markup in that case, so it is
+    // only added here for the built-in layout.
+    var innerBody =
+      (design.customTemplateEnabled && design.customTemplateHtml
+        ? ''
+        : '<p style="font-size:' + design.headingFontSize + 'px;font-weight:' + (design.headingBold ? 700 : 400) +
+          ';letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin:0 0 20px;text-align:' +
+          design.headingAlign + ';">' + escapeHtml(design.widgetTitle) + '</p>') +
+      '<div class="rv-main-content">' + buildMain() + '</div>';
 
     el.innerHTML = `
 <div class="rv-root" style="font-family:${design.fontFamily};max-width:1440px;width:100%;margin-top:${design.topSpacing}px;margin-left:auto;margin-right:auto;color:${design.textColor};${borderStr}"><div style="max-width:${design.widgetMaxWidth}px;width:100%;margin:0 auto;">
