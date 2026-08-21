@@ -233,6 +233,28 @@ describe("design presets", () => {
     );
   });
 
+  it.each(DESIGN_PRESETS)("$label styles the review list, not just the summary", (preset) => {
+    // Presets originally only styled the header, so every design showed the
+    // same review card underneath and the three looked interchangeable.
+    expect(preset.css, `${preset.key}: never styles .rv-card`).toContain(".rv-card");
+  });
+
+  it("gives each preset a visibly different card", () => {
+    // Compares the .rv-card rule across presets — same rule means same look.
+    const cardRules = DESIGN_PRESETS.map((p) => ({
+      key: p.key,
+      rule: p.css.match(/\.rv-card\s*\{([^}]*)\}/)?.[1]?.replace(/\s+/g, " ").trim(),
+    }));
+
+    for (const { key, rule } of cardRules) {
+      expect(rule, `${key} has no .rv-card rule`).toBeTruthy();
+    }
+    const unique = new Set(cardRules.map((c) => c.rule));
+    expect(unique.size, "two presets share an identical card design").toBe(
+      DESIGN_PRESETS.length
+    );
+  });
+
   it.each(DESIGN_PRESETS)("$label includes the review list", (preset) => {
     // Without it the widget renders a summary and no reviews at all.
     expect(preset.html).toContain("{{review_list}}");

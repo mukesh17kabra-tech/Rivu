@@ -300,8 +300,11 @@ describe.each(sources)("%s renders custom CSS", (_name, source) => {
     const html = await render(source, withCss("body { display: none }"));
 
     expect(html).toContain("<style>");
-    // Retargeted at the widget, never left as a bare `body` rule.
-    expect(html).not.toMatch(/<style>[^<]*\bbody\s*\{/);
+    // Retargeted at the widget, never left as a bare `body` rule. Anchored to a
+    // rule boundary rather than \b: a word boundary also matches inside
+    // `.rv-card-body {`, which made the earlier version of this assertion pass
+    // or fail on unrelated class names.
+    expect(html).not.toMatch(/(?:<style>|\n)body\s*\{/);
     expect(html).toContain(".rivu-custom-root {");
   });
 
@@ -313,6 +316,65 @@ describe.each(sources)("%s renders custom CSS", (_name, source) => {
 
     expect(html).not.toContain("</style><script");
     expect(html).not.toContain("window.pwned");
+  });
+
+  /**
+   * The review list must be restyleable.
+   *
+   * Every card element was inline-styled, and an inline style beats any
+   * selector a merchant can write — so no custom stylesheet could change the
+   * list, and all three designs rendered the identical card.
+   */
+  it("drops the cards' inline styles so CSS can win", async () => {
+    const html = await render(source, withCss(".rv-card { border: none }"));
+
+    expect(html).toContain('class="rv-card"');
+    // The card must carry no inline style of its own, or the merchant's rule
+    // loses to it no matter how specific they get.
+    expect(html).not.toMatch(/class="rv-card"[^>]*\sstyle=/);
+    expect(html).not.toMatch(/class="rv-card-body[^"]*"[^>]*\sstyle=/);
+  });
+
+  it("drops the list container's inline style too", async () => {
+    // Without this the merchant cannot lay the list out — no columns, no grid.
+    const html = await render(source, withCss(".rv-list { column-count: 2 }"));
+
+    expect(html).toContain('class="rv-list"');
+    expect(html).not.toMatch(/class="rv-list"[^>]*\sstyle=/);
+  });
+
+  it("keeps the inline styles for the built-in layout", async () => {
+    // The built-in path carries every merchant colour and size setting inline;
+    // stripping them there would leave the default widget unstyled.
+    const html = await render(source, {
+      customTemplateEnabled: false,
+      summaryLayout: "modern",
+      displayStyle: "list",
+      richSnippetsEnabled: false,
+    });
+
+    expect(html).toMatch(/class="rv-card"[^>]*\sstyle=/);
+  });
+
+  it("ships a default stylesheet so a bare custom layout still looks right", async () => {
+    // A merchant writing their own markup with no CSS must not get naked cards.
+    const html = await render(source, withCss(""));
+
+    expect(html).toContain("<style>");
+    expect(html).toContain(".rivu-custom-root .rv-card");
+  });
+
+  it("puts the merchant's CSS after the defaults so theirs wins", async () => {
+    const html = await render(source, withCss(".rv-card { padding: 40px }"));
+
+    const style = html.slice(html.indexOf("<style>"), html.indexOf("</style>"));
+    // Compared against a declaration only the baseline emits. Anchoring on the
+    // selector instead is useless: the merchant's own rule has the same
+    // selector, so the comparison passed whichever order they were in.
+    const baselineOnly = style.indexOf("box-shadow:0 1px 4px");
+    expect(baselineOnly, "baseline stylesheet missing").toBeGreaterThan(-1);
+    // Equal specificity, so source order decides — theirs must come last.
+    expect(style.indexOf("padding: 40px")).toBeGreaterThan(baselineOnly);
   });
 
   it("renders the layout fine when no CSS is set", async () => {

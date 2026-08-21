@@ -91,6 +91,40 @@ export const DESIGN_PRESETS: DesignPreset[] = [
 .rv-ed-cta {
   margin-left: auto;
 }
+
+/* Review list: no boxes at all. Reviews are separated by a hairline rule and
+   the name sits above the text, like a magazine's letters page. */
+.rv-card {
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 26px 0;
+  border-bottom: 1px solid #eeeef1;
+}
+.rv-card-inner {
+  display: block;
+}
+.rv-card-avatar {
+  display: none;
+}
+.rv-card-author {
+  font-size: 13px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.rv-card-title {
+  font-size: 19px;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  margin: 10px 0 8px;
+}
+.rv-card-body {
+  font-size: 15px;
+  line-height: 1.75;
+  max-width: 62ch;
+}
 @media (max-width: 560px) {
   .rv-ed-score { font-size: 48px; }
   .rv-ed-cta { margin-left: 0; flex-basis: 100%; }
@@ -168,6 +202,41 @@ export const DESIGN_PRESETS: DesignPreset[] = [
   font-size: 15px;
   font-weight: 700;
 }
+
+/* Review list: two columns of soft cards, so it reads as a grid rather than a
+   single stack. .rv-list is the widget's own container; CSS columns keep cards
+   of different heights from leaving gaps the way a fixed grid would. */
+.rv-list {
+  display: block;
+  gap: 0;
+}
+.rv-card {
+  border: 1px solid #ececf1;
+  border-radius: 12px;
+  box-shadow: none;
+  padding: 20px;
+  margin-bottom: 16px;
+  break-inside: avoid;
+}
+.rv-card-author {
+  font-size: 13px;
+}
+.rv-card-title {
+  font-style: normal;
+  font-size: 15px;
+}
+.rv-avatar {
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+}
+
+@media (min-width: 860px) {
+  .rv-list {
+    column-count: 2;
+    column-gap: 16px;
+  }
+}
 @media (max-width: 640px) {
   .rv-sp-panel { flex: 1 1 100%; }
 }`,
@@ -212,6 +281,45 @@ export const DESIGN_PRESETS: DesignPreset[] = [
   display: inline-flex;
   align-items: center;
   gap: 3px;
+}
+
+/* Review list: dense rows with a coloured spine instead of cards, so a long
+   list stays scannable rather than turning into a wall of boxes. */
+.rv-list {
+  gap: 0;
+}
+.rv-card {
+  background: none;
+  border: none;
+  border-left: 3px solid #ececf1;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 14px 0 14px 16px;
+  margin-bottom: 4px;
+  transition: border-color .15s;
+}
+.rv-card:hover {
+  border-left-color: #c9c9d2;
+}
+.rv-card-inner {
+  gap: 10px;
+}
+.rv-avatar {
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
+}
+.rv-card-title {
+  font-style: normal;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.rv-card-body {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.rv-card-stars {
+  margin-bottom: 6px;
 }
 .rv-cb-count {
   font-size: 13px;

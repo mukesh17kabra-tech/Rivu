@@ -337,42 +337,93 @@
     // only shown to customers who have submitted 3 or more reviews (i.e.
     // the isTopReviewer flag that the API already computes per-email).
     // This re-uses the same flag — the badge shows when isTopReviewer=true.
+    /**
+     * Default styling for the review list when a custom layout is active.
+     *
+     * In custom mode reviewCard drops its inline styles — an inline style beats
+     * any selector a merchant can write, so while they were there no custom
+     * stylesheet could restyle the list, and every design ended up with the
+     * same card. This is the baseline that replaces them: it still honours the
+     * merchant's colour and size settings, and it is injected *before* their
+     * own CSS so anything they write wins.
+     */
+    function listBaseCss() {
+      return [
+        ".rv-list{display:flex;flex-direction:column;gap:14px;}",
+        ".rv-card{background:" + cardBg + ";color:" + design.textColor + ";border-radius:" + r + "px;padding:20px;font-size:" + design.reviewTextSize + "px;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 4px rgba(0,0,0,.05);}",
+        ".rv-card-inner{display:flex;align-items:flex-start;gap:14px;}",
+        ".rv-card-avatar{flex-shrink:0;}",
+        ".rv-avatar{width:40px;height:40px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}",
+        ".rv-card-main{flex:1;min-width:0;}",
+        ".rv-card-head{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:2px;}",
+        ".rv-card-author{font-weight:700;font-size:14px;color:" + design.textColor + ";}",
+        ".rv-card-time{margin-left:auto;font-size:12px;color:" + design.reviewMetaColor + ";white-space:nowrap;}",
+        ".rv-card-date{font-size:12px;color:" + design.reviewMetaColor + ";margin-bottom:7px;}",
+        ".rv-card-stars{display:flex;gap:2px;margin-bottom:10px;}",
+        ".rv-card-title{margin:0 0 7px;font-weight:700;font-size:16px;font-style:italic;line-height:1.4;color:" + design.reviewTitleColor + ";}",
+        ".rv-card-body{margin:0 0 8px;line-height:1.65;color:" + design.reviewBodyColor + ";font-size:" + design.reviewTextSize + "px;}",
+        ".rv-card-body.rv-clamped{max-height:4.8em;overflow:hidden;}",
+        ".rv-read-more{background:none;border:none;padding:0;font-size:12px;font-weight:600;color:" + design.primaryColor + ";cursor:pointer;margin-bottom:8px;}",
+        ".rv-card-media{width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;cursor:pointer;}",
+        ".rv-card-video{position:relative;overflow:hidden;background:#000;}",
+        ".rv-card-video video{width:100%;height:100%;object-fit:cover;pointer-events:none;}",
+        ".rv-card-video-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);color:#fff;font-size:18px;}",
+        ".rv-card-verified{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#2563eb;background:#eff6ff;padding:1px 7px;border-radius:20px;flex-shrink:0;}",
+        ".rv-card-top{margin-left:4px;padding:1px 6px;background:" + design.primaryColor + ";color:#fff;border-radius:10px;font-size:10px;vertical-align:middle;}",
+        ".rv-card-recommend{display:flex;align-items:center;gap:5px;font-size:12px;margin-top:6px;}",
+        ".rv-card-recommend.rv-yes{color:#16a34a;}",
+        ".rv-card-recommend.rv-no{color:#dc2626;}",
+      ].join("");
+    }
+
+    /**
+     * One review card, serving both paths.
+     *
+     * The built-in layouts need the inline styles — they carry every colour and
+     * size the merchant set. A custom layout needs them gone, for the reason
+     * described above listBaseCss. Same markup either way, so the two can't
+     * drift; only the styling mechanism changes.
+     */
     function reviewCard(rev) {
+      const custom = !!(design.customTemplateEnabled && design.customTemplateHtml);
+      // In custom mode the class name carries the styling instead.
+      const st = (css) => (custom ? "" : ' style="' + css + '"');
+
       const isLong = rev.body && rev.body.length > 240;
       const bodyId = `rv-b-${rev.id}`;
       const topBadge = rev.isTopReviewer
-        ? `<span style="margin-left:4px;padding:1px 6px;background:${design.primaryColor};color:#fff;border-radius:10px;font-size:10px;vertical-align:middle;">⭐ Top</span>`
+        ? `<span class="rv-card-top"${st(`margin-left:4px;padding:1px 6px;background:${design.primaryColor};color:#fff;border-radius:10px;font-size:10px;vertical-align:middle;`)}>⭐ Top</span>`
         : "";
       // Verified Buyer badge only for reviewers with 3+ reviews (isTopReviewer flag)
       const verifiedBadge = rev.isTopReviewer
-        ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#2563eb;background:#eff6ff;padding:1px 7px;border-radius:20px;flex-shrink:0;"><span>✓</span> Verified Buyer</span>`
+        ? `<span class="rv-card-verified"${st("display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#2563eb;background:#eff6ff;padding:1px 7px;border-radius:20px;flex-shrink:0;")}><span>✓</span> Verified Buyer</span>`
         : "";
       // "I recommend" — stored in rev.recommends boolean (null means not answered)
       const recommendHtml = rev.recommends === true
-        ? `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#16a34a;margin-top:6px;"><span style="font-size:15px;">👍</span> I recommend this product</div>`
+        ? `<div class="rv-card-recommend rv-yes"${st("display:flex;align-items:center;gap:5px;font-size:12px;color:#16a34a;margin-top:6px;")}><span${st("font-size:15px;")}>👍</span> I recommend this product</div>`
         : rev.recommends === false
-        ? `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#dc2626;margin-top:6px;"><span style="font-size:15px;">👎</span> I don't recommend this product</div>`
+        ? `<div class="rv-card-recommend rv-no"${st("display:flex;align-items:center;gap:5px;font-size:12px;color:#dc2626;margin-top:6px;")}><span${st("font-size:15px;")}>👎</span> I don't recommend this product</div>`
         : "";
       return `
-<div class="rv-card" style="background:${cardBg};color:${design.textColor};border-radius:${r}px;padding:20px;font-size:${design.reviewTextSize}px;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 4px rgba(0,0,0,.05);${design.displayStyle==='carousel'?'min-width:260px;max-width:300px;flex-shrink:0;':''}">
-  <div style="display:flex;align-items:flex-start;gap:14px;">
-    <div style="flex-shrink:0;">
-      <div class="rv-avatar" style="width:40px;height:40px;border-radius:50%;background:${avatarColor(rev.customerName)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">${initials(rev.customerName)}</div>
+<div class="rv-card"${st(`background:${cardBg};color:${design.textColor};border-radius:${r}px;padding:20px;font-size:${design.reviewTextSize}px;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 4px rgba(0,0,0,.05);${design.displayStyle==='carousel'?'min-width:260px;max-width:300px;flex-shrink:0;':''}`)}>
+  <div class="rv-card-inner"${st("display:flex;align-items:flex-start;gap:14px;")}>
+    <div class="rv-card-avatar"${st("flex-shrink:0;")}>
+      <div class="rv-avatar" style="background:${avatarColor(rev.customerName)};${custom ? "" : `width:40px;height:40px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;`}">${initials(rev.customerName)}</div>
     </div>
-    <div style="flex:1;min-width:0;">
-      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:2px;">
-        <span style="font-weight:700;font-size:14px;color:${design.textColor};">${rev.customerName}</span>
+    <div class="rv-card-main"${st("flex:1;min-width:0;")}>
+      <div class="rv-card-head"${st("display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:2px;")}>
+        <span class="rv-card-author"${st(`font-weight:700;font-size:14px;color:${design.textColor};`)}>${rev.customerName}</span>
         ${verifiedBadge}
         ${topBadge}
-        <span style="margin-left:auto;font-size:12px;color:${design.reviewMetaColor};white-space:nowrap;">${timeAgo(rev.createdAt)}</span>
+        <span class="rv-card-time"${st(`margin-left:auto;font-size:12px;color:${design.reviewMetaColor};white-space:nowrap;`)}>${timeAgo(rev.createdAt)}</span>
       </div>
-      <div style="font-size:12px;color:${design.reviewMetaColor};margin-bottom:7px;">${new Date(rev.createdAt).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})}</div>
-      <div style="display:flex;gap:2px;margin-bottom:10px;">${starsHtml(rev.rating, starColor, "#e0e0e0", 16)}</div>
-      ${rev.reviewTitle ? `<p style="margin:0 0 7px;font-weight:700;font-size:16px;font-style:italic;text-align:left;line-height:1.4;color:${design.reviewTitleColor};">${rev.reviewTitle}</p>` : ""}
-      ${rev.body ? `<p id="${bodyId}" style="margin:0 0 8px;line-height:1.65;text-align:left;color:${design.reviewBodyColor};font-size:${design.reviewTextSize}px;${isLong ? "max-height:4.8em;overflow:hidden;" : ""}">${rev.body}</p>` : ""}
-      ${isLong ? `<button class="rv-read-more" data-target="${bodyId}" style="background:none;border:none;padding:0;font-size:12px;font-weight:600;color:${design.primaryColor};cursor:pointer;margin-bottom:8px;">Read more</button>` : ""}
-      ${rev.videoUrl ? `<div class="rv-media-thumb" data-media-url="${rev.videoUrl}" data-media-type="video" style="width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;background:#000;margin-bottom:8px;"><video src="${rev.videoUrl}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);"><span style="color:#fff;font-size:18px;">▶</span></div></div>` : ""}
-      ${!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;cursor:pointer;"/>` : ""}
+      <div class="rv-card-date"${st(`font-size:12px;color:${design.reviewMetaColor};margin-bottom:7px;`)}>${new Date(rev.createdAt).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})}</div>
+      <div class="rv-card-stars"${st("display:flex;gap:2px;margin-bottom:10px;")}>${starsHtml(rev.rating, starColor, "#e0e0e0", 16)}</div>
+      ${rev.reviewTitle ? `<p class="rv-card-title"${st(`margin:0 0 7px;font-weight:700;font-size:16px;font-style:italic;text-align:left;line-height:1.4;color:${design.reviewTitleColor};`)}>${rev.reviewTitle}</p>` : ""}
+      ${rev.body ? `<p id="${bodyId}" class="rv-card-body${isLong ? " rv-clamped" : ""}"${st(`margin:0 0 8px;line-height:1.65;text-align:left;color:${design.reviewBodyColor};font-size:${design.reviewTextSize}px;${isLong ? "max-height:4.8em;overflow:hidden;" : ""}`)}>${rev.body}</p>` : ""}
+      ${isLong ? `<button class="rv-read-more" data-target="${bodyId}"${st(`background:none;border:none;padding:0;font-size:12px;font-weight:600;color:${design.primaryColor};cursor:pointer;margin-bottom:8px;`)}>Read more</button>` : ""}
+      ${rev.videoUrl ? `<div class="rv-media-thumb rv-card-media rv-card-video" data-media-url="${rev.videoUrl}" data-media-type="video"${st("width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;background:#000;margin-bottom:8px;")}><video src="${rev.videoUrl}"${st("width:100%;height:100%;object-fit:cover;pointer-events:none;")}></video><div class="rv-card-video-play"${st("position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);")}><span${st("color:#fff;font-size:18px;")}>▶</span></div></div>` : ""}
+      ${!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb rv-card-media" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}"${st("width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;cursor:pointer;")}/>` : ""}
       ${recommendHtml}
     </div>
   </div>
@@ -655,7 +706,15 @@
   <button class="rv-arrow-prev" style="position:absolute;left:0;top:50%;transform:translateY(-50%);z-index:2;width:34px;height:34px;border-radius:50%;background:${design.arrowColor || "#111"};color:#fff;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2);flex-shrink:0;">&#8249;</button>
   <div class="rv-list" style="${listWrapperStyle}">${listHtml}</div>
   <button class="rv-arrow-next" style="position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:2;width:34px;height:34px;border-radius:50%;background:${design.arrowColor || "#111"};color:#fff;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2);flex-shrink:0;">&#8250;</button>
-</div>` : `<div class="rv-list" style="${listWrapperStyle}">${listHtml}</div>`;
+</div>` : `<div class="rv-list"${
+        // The wrapper's inline layout is dropped in custom mode for the same
+        // reason the cards' is: an inline style beats every selector, so with
+        // it in place a merchant could not lay the list out at all. The
+        // baseline stylesheet supplies a sane default they can override.
+        design.customTemplateEnabled && design.customTemplateHtml
+          ? ""
+          : ` style="${listWrapperStyle}"`
+      }>${listHtml}</div>`;
 
       // Sidebar layout (C) — summary as fixed left column, reviews on right
       if (sl === "sidebar" && summary.total) {
@@ -679,7 +738,9 @@
         // so it cannot reach the rest of the storefront, and the wrapper below
         // is what those scoped selectors hang off. Without the wrapper every
         // rule would match nothing and the layout would render unstyled.
-        var customCss = rvScopeCss(design.customTemplateCss);
+        // Baseline first, merchant CSS second — later rules of equal
+        // specificity win, so whatever they write overrides the defaults.
+        var customCss = rvScopeCss(listBaseCss() + (design.customTemplateCss || ""));
         var styleTag = customCss
           ? "<style>" + customCss.split("<").join("") + "</style>"
           : "";
