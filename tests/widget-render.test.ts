@@ -258,3 +258,71 @@ describe.each(sources)("%s renders a custom template", (_name, source) => {
     expect(html).toContain("loads of pop");
   });
 });
+
+/**
+ * The merchant's CSS, executed.
+ *
+ * Custom layouts originally had no CSS field at all, so markup like
+ * `<div class="mine">` referenced classes nothing defined and rendered
+ * unstyled. These assert the stylesheet actually reaches the page — and,
+ * more importantly, that it cannot reach past the widget.
+ */
+describe.each(sources)("%s renders custom CSS", (_name, source) => {
+  const withCss = (css: string) => ({
+    customTemplateEnabled: true,
+    customTemplateHtml: CUSTOM_TEMPLATE,
+    customTemplateCss: css,
+    summaryLayout: "modern",
+    displayStyle: "list",
+    richSnippetsEnabled: false,
+  });
+
+  it("injects the stylesheet and the wrapper it hangs off", async () => {
+    const html = await render(source, withCss(".mine { color: rebeccapurple }"));
+
+    expect(html).not.toContain("Loading reviews");
+    expect(html).toContain("<style>");
+    expect(html).toContain("rebeccapurple");
+    // The wrapper *element*, not just the string — every scoped rule hangs off
+    // it, so without it the merchant's CSS matches nothing and the layout
+    // renders unstyled, which is the bug this feature exists to fix. Asserting
+    // on the bare class name is not enough: the stylesheet text contains it too.
+    expect(html).toContain('<div class="rivu-custom-root">');
+  });
+
+  it("scopes the merchant's rules to the widget", async () => {
+    const html = await render(source, withCss(".mine { color: red }"));
+    expect(html).toContain(".rivu-custom-root .mine");
+  });
+
+  it("cannot hide the merchant's whole storefront", async () => {
+    // `body { display: none }` is the rule that makes this dangerous.
+    const html = await render(source, withCss("body { display: none }"));
+
+    expect(html).toContain("<style>");
+    // Retargeted at the widget, never left as a bare `body` rule.
+    expect(html).not.toMatch(/<style>[^<]*\bbody\s*\{/);
+    expect(html).toContain(".rivu-custom-root {");
+  });
+
+  it("cannot break out of the style tag it sits in", async () => {
+    const html = await render(
+      source,
+      withCss("</style><script>window.pwned=1</script>.mine{color:red}")
+    );
+
+    expect(html).not.toContain("</style><script");
+    expect(html).not.toContain("window.pwned");
+  });
+
+  it("renders the layout fine when no CSS is set", async () => {
+    // An existing Pro merchant's saved row has no CSS at all; it must not
+    // render an empty <style> or, worse, the string "undefined".
+    const html = await render(source, withCss(""));
+
+    expect(html).not.toContain("Loading reviews");
+    expect(html).not.toContain("undefined");
+    expect(html).not.toContain("<style></style>");
+    expect(html).toContain("loads of pop");
+  });
+});

@@ -115,6 +115,7 @@ export default async function WidgetSettingsPage({
           plan={shopRecord.plan}
           initialEnabled={shopRecord.customTemplateEnabled}
           initialHtml={shopRecord.customTemplateHtml || ""}
+          initialCss={shopRecord.customTemplateCss || ""}
         />
       </Section>
 

@@ -4,12 +4,14 @@ import { db, withDbRetry } from "@/lib/db";
 import { requireSession } from "@/lib/require-session";
 import { runAutoMigrations } from "@/lib/db-migrate";
 import { sanitiseTemplate } from "@/lib/widget-template";
+import { prepareCustomCss } from "@/lib/widget-css";
 import { customTemplateAllowed } from "@/lib/design-options";
 
 const schema = z.object({
   shop: z.string().min(1),
   customTemplateEnabled: z.boolean(),
   customTemplateHtml: z.string().max(30000),
+  customTemplateCss: z.string().max(30000).optional(),
 });
 
 /**
@@ -54,16 +56,26 @@ export async function POST(req: NextRequest) {
   // Stored sanitised so the database never holds markup we would refuse to
   // serve. The storefront sanitises again before rendering.
   const { html, removed } = sanitiseTemplate(parsed.data.customTemplateHtml);
+  // Scoped as well as sanitised, so what's stored is already safe to serve.
+  const { css, removed: cssRemoved } = prepareCustomCss(
+    parsed.data.customTemplateCss ?? ""
+  );
 
   await db.shop.update({
     where: { shopDomain: auth.shop },
     data: {
       customTemplateEnabled: parsed.data.customTemplateEnabled,
       customTemplateHtml: html || null,
+      customTemplateCss: css || null,
     },
   });
 
   // Returning what was actually stored keeps the editor honest: it shows the
   // merchant the saved version rather than what they typed.
-  return NextResponse.json({ success: true, customTemplateHtml: html, removed });
+  return NextResponse.json({
+    success: true,
+    customTemplateHtml: html,
+    customTemplateCss: css,
+    removed: [...removed, ...cssRemoved],
+  });
 }

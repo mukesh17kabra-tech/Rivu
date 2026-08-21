@@ -51,6 +51,83 @@
     "style","form","input","button","textarea","select","option","svg","math",
     "template","slot","portal","frame","frameset"];
 
+  /**
+   * Client-side mirror of lib/widget-css.ts.
+   *
+   * The server already sanitises and scopes this CSS before storing it, so in
+   * the normal path this is a no-op. It runs anyway because the result goes
+   * straight into a <style> tag on the merchant's storefront: if a stored row
+   * predates a tightening of the rules, or the payload is ever tampered with,
+   * an unscoped rule here could restyle their entire site rather than just the
+   * review widget.
+   */
+  function rvScopeCss(css) {
+    css = String(css || "")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/<\/?[a-z][^>]*>/gi, "")
+      .replace(/@import[^;]*;?/gi, "")
+      .replace(/expression\s*\([^)]*\)/gi, "")
+      .replace(/url\s*\(\s*['"]?\s*(javascript|vbscript|data:text\/html)[^)]*\)/gi, "none")
+      .replace(/@charset[^;]*;?/gi, "");
+
+    var out = [];
+    var rest = css;
+
+    while (rest.length) {
+      var braceAt = rest.indexOf("{");
+      if (braceAt === -1) break;
+
+      var head = rest.slice(0, braceAt).trim();
+
+      // Match the closing brace by depth, so @media blocks stay intact.
+      var depth = 0, end = -1;
+      for (var i = braceAt; i < rest.length; i++) {
+        if (rest[i] === "{") depth++;
+        else if (rest[i] === "}") { depth--; if (depth === 0) { end = i; break; } }
+      }
+      if (end === -1) break; // unbalanced — drop the remainder
+
+      var body = rest.slice(braceAt + 1, end);
+      rest = rest.slice(end + 1);
+      if (!head) continue;
+
+      if (/^@(media|supports|container|layer)\b/i.test(head)) {
+        var inner = rvScopeCss(body);
+        if (inner) out.push(head + " { " + inner + " }");
+        continue;
+      }
+      if (head.charAt(0) === "@") {
+        // @keyframes / @font-face carry no selectors to scope.
+        out.push(head + " { " + body.trim() + " }");
+        continue;
+      }
+
+      var scoped = head.split(",").map(function (raw) {
+        var sel = raw.trim();
+        if (!sel) return "";
+        // Stripping tags out of "</style><script>x=1</script>.a{}" leaves
+        // "x=1.a" behind as a pseudo-selector. It matches nothing, but
+        // attacker-supplied text should not be emitted into a <style> tag at
+        // all, so drop anything that isn't selector-shaped. "=" is legal only
+        // inside an attribute selector.
+        if (!/^[A-Za-z0-9_\-.#:\s>+~*[\]="'()|^$&]+$/.test(sel)) return "";
+        if (sel.replace(/\[[^\]]*\]/g, "").indexOf("=") !== -1) return "";
+        if (sel.indexOf(".rivu-custom-root") === 0) return sel;
+        // html/body/:root/* are retargeted at the widget rather than dropped,
+        // so the rule still does something instead of silently vanishing.
+        if (/^(html|body|:root|\*)\b/i.test(sel)) {
+          var restSel = sel.replace(/^(html|body|:root|\*)\b/i, "").trim();
+          return restSel ? ".rivu-custom-root " + restSel : ".rivu-custom-root";
+        }
+        return ".rivu-custom-root " + sel;
+      }).filter(Boolean).join(", ");
+
+      if (scoped && body.trim()) out.push(scoped + " { " + body.trim() + " }");
+    }
+
+    return out.join("\n");
+  }
+
   function rvSanitise(html) {
     var out = String(html || "");
     for (var i = 0; i < RV_FORBIDDEN_TAGS.length; i++) {
@@ -105,7 +182,7 @@
     const D = {
       // Every key the API sends must appear here — the merge below iterates
       // D, so a field missing from this object is silently discarded.
-      richSnippetsEnabled:true, customTemplateEnabled:false, customTemplateHtml:"",
+      richSnippetsEnabled:true, customTemplateEnabled:false, customTemplateHtml:"", customTemplateCss:"",
       displayStyle:"list", splitSummary:false, gridColumns:3, carouselVisible:1,
       arrowColor:"#111", primaryColor:"#111", starColor:"#f5b400", rangeColor:"#f5b400",
       backgroundColor:"#fff", textColor:"#333", borderRadius:8, fontFamily:"inherit",
@@ -597,7 +674,18 @@
       // site because every piece it can place — the bars, the button, the
       // review list — is scoped to this function.
       if (design.customTemplateEnabled && design.customTemplateHtml) {
-        return rvRenderTemplate(rvSanitise(design.customTemplateHtml), {
+        // The merchant's stylesheet ships with their markup. It arrives
+        // already scoped to .rivu-custom-root (server-side, lib/widget-css.ts)
+        // so it cannot reach the rest of the storefront, and the wrapper below
+        // is what those scoped selectors hang off. Without the wrapper every
+        // rule would match nothing and the layout would render unstyled.
+        var customCss = rvScopeCss(design.customTemplateCss);
+        var styleTag = customCss
+          ? "<style>" + customCss.split("<").join("") + "</style>"
+          : "";
+
+        return '<div class="rivu-custom-root">' + styleTag +
+          rvRenderTemplate(rvSanitise(design.customTemplateHtml), {
           title: escapeHtml(design.widgetTitle),
           stars: starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 16),
           average: String(summary.average || 0),
@@ -605,7 +693,7 @@
           breakdown: breakdownHtml,
           write_button: writeBtn,
           review_list: reviewListHtml,
-        }) + poweredBy;
+        }) + "</div>" + poweredBy;
       }
 
       return `${summaryHtml}${filtersHtml}${reviewListHtml}${loadMoreHtml}${poweredBy}`;

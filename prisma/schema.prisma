@@ -126,6 +126,10 @@ model Shop {
   // render — it executes in shoppers' browsers. See lib/widget-template.ts.
   customTemplateEnabled Boolean @default(false)
   customTemplateHtml    String? @db.Text
+  /// Stored already sanitised AND scoped — see lib/widget-css.ts. A
+  /// stylesheet is global by nature, so an unscoped rule here could take down
+  /// the merchant's whole storefront rather than just the review section.
+  customTemplateCss     String? @db.Text
 
   // Emit schema.org Product/AggregateRating markup on the storefront so
   // Google can show star ratings in search results. Default on — it is the

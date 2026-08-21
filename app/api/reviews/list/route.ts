@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sanitiseTemplate } from "@/lib/widget-template";
+import { prepareCustomCss } from "@/lib/widget-css";
 import { customTemplateAllowed } from "@/lib/design-options";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 import { runAutoMigrations } from "@/lib/db-migrate";
@@ -137,6 +138,11 @@ export async function GET(req: NextRequest) {
                                  safe(s.customTemplateEnabled as boolean, false),
           customTemplateHtml:    customTemplateAllowed(shopRecord.plan)
                                    ? sanitiseTemplate(String(s.customTemplateHtml ?? "")).html
+                                   : "",
+          // Already scoped when saved; re-scoped here because a row can
+          // predate a tightening of those rules.
+          customTemplateCss:     customTemplateAllowed(shopRecord.plan)
+                                   ? prepareCustomCss(String(s.customTemplateCss ?? "")).css
                                    : "",
           displayStyle:          safe(s.displayStyle as string,           "list"),
           splitSummary:          safe(s.splitSummary as boolean,          false),
