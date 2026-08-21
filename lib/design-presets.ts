@@ -10,6 +10,13 @@ import { CUSTOM_SCOPE_CLASS } from "./widget-css";
  *
  * Every selector is written *without* the scope prefix; prepareCustomCss adds
  * it on save. Presets stay editable — they're a starting point, not a theme.
+ *
+ * IMPORTANT: {{stars}} and {{breakdown}} each expand to *several sibling
+ * elements*, not one — five <svg>s and five bar rows respectively. Dropping
+ * either straight into a flex container makes every star its own flex item, so
+ * the rating renders as a vertical column of stars. Both must sit inside a
+ * wrapper element that the stylesheet controls. {{write_button}} is a single
+ * <button> and needs no wrapper.
  */
 
 export type DesignPreset = {
@@ -31,7 +38,7 @@ export const DESIGN_PRESETS: DesignPreset[] = [
   <div class="rv-ed-head">
     <span class="rv-ed-score">{{average}}</span>
     <div class="rv-ed-meta">
-      {{stars}}
+      <span class="rv-ed-stars">{{stars}}</span>
       <span class="rv-ed-count">{{count}}</span>
     </div>
     <div class="rv-ed-cta">{{write_button}}</div>
@@ -67,7 +74,15 @@ export const DESIGN_PRESETS: DesignPreset[] = [
 .rv-ed-meta {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: flex-start;
+  gap: 7px;
+}
+/* {{stars}} is five separate <svg>s — without this wrapper the column above
+   would stack them one per row instead of laying them out side by side. */
+.rv-ed-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
 }
 .rv-ed-count {
   font-size: 13px;
@@ -75,6 +90,10 @@ export const DESIGN_PRESETS: DesignPreset[] = [
 }
 .rv-ed-cta {
   margin-left: auto;
+}
+@media (max-width: 560px) {
+  .rv-ed-score { font-size: 48px; }
+  .rv-ed-cta { margin-left: 0; flex-basis: 100%; }
 }`,
   },
   {
@@ -84,14 +103,14 @@ export const DESIGN_PRESETS: DesignPreset[] = [
     html: `<div class="rv-sp">
   <div class="rv-sp-panel">
     <span class="rv-sp-score">{{average}}</span>
-    {{stars}}
+    <span class="rv-sp-stars">{{stars}}</span>
     <span class="rv-sp-count">{{count}}</span>
     {{write_button}}
   </div>
 
   <div class="rv-sp-bars">
     <p class="rv-sp-title">{{title}}</p>
-    {{breakdown}}
+    <div class="rv-sp-breakdown">{{breakdown}}</div>
   </div>
 </div>
 
@@ -122,10 +141,19 @@ export const DESIGN_PRESETS: DesignPreset[] = [
   line-height: 1;
   letter-spacing: -.03em;
 }
+/* The panel is a flex column, so the five star <svg>s need their own row. */
+.rv-sp-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
 .rv-sp-count {
   font-size: 13px;
   color: #82828e;
   margin-bottom: 4px;
+}
+.rv-sp-breakdown {
+  display: block;
 }
 .rv-sp-bars {
   flex: 1;
@@ -151,7 +179,7 @@ export const DESIGN_PRESETS: DesignPreset[] = [
     html: `<div class="rv-cb">
   <div class="rv-cb-left">
     <span class="rv-cb-score">{{average}}</span>
-    {{stars}}
+    <span class="rv-cb-stars">{{stars}}</span>
     <span class="rv-cb-count">{{count}}</span>
   </div>
   {{write_button}}
@@ -178,6 +206,12 @@ export const DESIGN_PRESETS: DesignPreset[] = [
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -.02em;
+}
+/* Without the wrapper the row's 10px gap would land between every star. */
+.rv-cb-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
 }
 .rv-cb-count {
   font-size: 13px;

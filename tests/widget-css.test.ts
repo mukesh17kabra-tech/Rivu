@@ -183,6 +183,56 @@ describe("design presets", () => {
     }
   });
 
+  /**
+   * {{stars}} and {{breakdown}} expand to several sibling elements — five
+   * <svg>s and five bar rows. Dropped straight into a flex container, each
+   * becomes its own flex item, so the rating renders as a vertical column of
+   * stars. That shipped in Editorial and was latent in the other two.
+   */
+  it.each(DESIGN_PRESETS)("$label wraps multi-element placeholders", (preset) => {
+    for (const name of ["stars", "breakdown"]) {
+      const at = preset.html.indexOf(`{{${name}}}`);
+      if (at === -1) continue;
+
+      // The placeholder's immediate parent must be an element that exists
+      // solely to hold it, so the stylesheet can lay the siblings out.
+      const before = preset.html.slice(0, at);
+      const openTag = before.match(/<(\w+)([^>]*)>\s*$/);
+      expect(
+        openTag,
+        `${preset.key}: {{${name}}} must sit directly inside its own wrapper element`
+      ).not.toBeNull();
+
+      const cls = openTag![2].match(/class="([^"]+)"/)?.[1];
+      expect(cls, `${preset.key}: the wrapper around {{${name}}} needs a class`).
+        toBeTruthy();
+
+      const after = preset.html.slice(at + `{{${name}}}`.length);
+      expect(
+        after.trimStart().startsWith(`</${openTag![1]}>`),
+        `${preset.key}: {{${name}}} must be the only content of its wrapper`
+      ).toBe(true);
+    }
+  });
+
+  it.each(DESIGN_PRESETS)("$label lays its star wrapper out in a row", (preset) => {
+    const at = preset.html.indexOf("{{stars}}");
+    const cls = preset.html
+      .slice(0, at)
+      .match(/<\w+[^>]*class="([^"]+)"[^>]*>\s*$/)?.[1];
+    expect(cls).toBeTruthy();
+
+    // A wrapper with no layout of its own leaves the stars as inline svgs at
+    // the mercy of the parent — declaring flex is what keeps them in a row.
+    const rule = preset.css.match(
+      new RegExp(`\\.${cls}\\s*\\{([^}]*)\\}`)
+    )?.[1];
+    expect(rule, `${preset.key}: .${cls} is never styled`).toBeTruthy();
+    expect(rule, `${preset.key}: .${cls} must set its own layout`).toMatch(
+      /display:\s*(inline-)?flex/
+    );
+  });
+
   it.each(DESIGN_PRESETS)("$label includes the review list", (preset) => {
     // Without it the widget renders a summary and no reviews at all.
     expect(preset.html).toContain("{{review_list}}");
