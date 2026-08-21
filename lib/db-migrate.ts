@@ -98,8 +98,18 @@ const MIGRATIONS = [
 
 let ran = false;
 
-export async function runAutoMigrations() {
-  if (ran) return;
+/**
+ * `force` re-runs the statements even if this process already did.
+ *
+ * Used by the schema self-heal in lib/db.ts. The flag is per-process, and the
+ * loop below deliberately swallows errors, so "already ran" is not the same as
+ * "the schema is correct": a statement that failed for a real reason would
+ * otherwise be permanently skipped for the life of the lambda, leaving the
+ * app broken until it recycled. Every statement is idempotent
+ * (ADD COLUMN IF NOT EXISTS), so repeating them is cheap and safe.
+ */
+export async function runAutoMigrations({ force = false } = {}) {
+  if (ran && !force) return;
   ran = true;
   for (const sql of MIGRATIONS) {
     try {
