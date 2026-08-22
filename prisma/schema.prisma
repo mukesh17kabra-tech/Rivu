@@ -242,13 +242,50 @@ model Review {
   // review app has this and it is the first thing merchants ask for.
   ownerReply   String?   @db.Text
   ownerReplyAt DateTime?
-  approved   Boolean  @default(false)
-  createdAt  DateTime @default(now())
+
+  // Pinned reviews float to the top of every sort order, which is the whole
+  // point — a merchant pins the review that answers the question shoppers keep
+  // asking, and it has to be the one they read first regardless of how they
+  // sort. Ordered among themselves by when they were pinned, newest first.
+  pinnedAt DateTime?
+
+  // Denormalised so the storefront list query stays a single read. Kept in
+  // step with the ReviewVote rows inside a transaction — a count that drifts
+  // from the votes behind it is worse than no count at all.
+  helpfulCount   Int @default(0)
+  unhelpfulCount Int @default(0)
+
+  votes     ReviewVote[]
+  approved  Boolean      @default(false)
+  createdAt DateTime     @default(now())
 
   ugcCards UgcCard[]
 
   @@index([shopId, productId])
   @@index([shopId, approved])
+  @@index([shopId, pinnedAt])
+}
+
+/**
+ * One shopper's helpful/unhelpful vote on one review.
+ * Storefront shoppers are anonymous, so there is no account to hang a vote on.
+ * voterKey is a salted hash of the shop, review, IP and user agent: enough to
+ * stop the same browser voting repeatedly, while the raw IP — personal data —
+ * is never written down. It is not proof of identity and is not meant to be;
+ * someone determined can vote twice, and the alternative is either logging IPs
+ * or letting a single click be repeated without limit.
+ */
+model ReviewVote {
+  id        String   @id @default(cuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  voterKey  String
+  helpful   Boolean
+  createdAt DateTime @default(now())
+
+  // One vote per voter per review; switching sides updates this row.
+  @@unique([reviewId, voterKey])
+  @@index([reviewId])
 }
 
 // A generated social-media graphic for a specific review + template combo.

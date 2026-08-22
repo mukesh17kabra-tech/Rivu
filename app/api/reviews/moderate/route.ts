@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   if (
     !shop ||
     (needsId && !reviewId) ||
-    !["approve", "reject", "unpublish", "approveAll", "reply"].includes(action)
+    !["approve", "reject", "unpublish", "approveAll", "reply", "pin", "unpin"].includes(action)
   ) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
@@ -45,6 +45,17 @@ export async function POST(req: NextRequest) {
         data: { approved: true },
       });
       return NextResponse.json({ success: true, published: count });
+    }
+
+    if (action === "pin" || action === "unpin") {
+      // pinnedAt carries both the state and the order: pinned reviews sit above
+      // everything else, newest pin first, so pinning a second review does not
+      // silently displace the first.
+      await db.review.update({
+        where: { id: reviewId, shopId: shopRecord.id },
+        data: { pinnedAt: action === "pin" ? new Date() : null },
+      });
+      return NextResponse.json({ success: true, pinned: action === "pin" });
     }
 
     if (action === "reply") {

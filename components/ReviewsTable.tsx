@@ -15,6 +15,9 @@ type Review = {
   approved: boolean;
   createdAt: Date;
   ownerReply: string | null;
+  pinnedAt: Date | string | null;
+  helpfulCount: number;
+  unhelpfulCount: number;
 };
 
 const TEMPLATES = [
@@ -124,6 +127,37 @@ export function ReviewsTable({
     }
   }
 
+  /**
+   * Pins or unpins a review.
+   *
+   * Pinned reviews sit above every sort order on the storefront, so this is
+   * how a merchant answers the question shoppers keep asking — put the review
+   * that addresses it first, whatever order they choose.
+   */
+  async function togglePin(review: Review) {
+    setBusyId(review.id);
+    try {
+      const pinning = !review.pinnedAt;
+      const res = await fetch("/api/reviews/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          shop,
+          reviewId: review.id,
+          action: pinning ? "pin" : "unpin",
+        }),
+      });
+      if (!res.ok) return;
+      setReviews((rs) =>
+        rs.map((r) =>
+          r.id === review.id ? { ...r, pinnedAt: pinning ? new Date() : null } : r
+        )
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   function toggleReply(review: Review) {
     setReplyOpenId((cur) => (cur === review.id ? null : review.id));
     setReplyDraft(review.ownerReply || "");
@@ -210,6 +244,15 @@ export function ReviewsTable({
                         className="mr-3 text-xs font-medium text-blue-400 hover:underline"
                       >
                         {ugcOpen ? "Hide graphic" : "Create graphic"}
+                      </button>
+                    )}
+                    {review.approved && (
+                      <button
+                        onClick={() => togglePin(review)}
+                        disabled={busyId === review.id}
+                        className="mr-3 text-xs font-medium text-amber-300 hover:underline disabled:opacity-50"
+                      >
+                        {review.pinnedAt ? "Unpin" : "Pin to top"}
                       </button>
                     )}
                     <button

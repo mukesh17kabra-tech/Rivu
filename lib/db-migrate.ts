@@ -64,6 +64,28 @@ const MIGRATIONS = [
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "recommends" BOOLEAN`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "ownerReply" TEXT`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "ownerReplyAt" TIMESTAMP(3)`,
+  `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "pinnedAt" TIMESTAMP(3)`,
+  `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "helpfulCount" INTEGER NOT NULL DEFAULT 0`,
+  `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "unhelpfulCount" INTEGER NOT NULL DEFAULT 0`,
+  `CREATE INDEX IF NOT EXISTS "Review_shopId_pinnedAt_idx" ON "Review"("shopId", "pinnedAt")`,
+  // Helpful/unhelpful votes. voterKey is a salted hash — see prisma/schema.prisma.
+  `CREATE TABLE IF NOT EXISTS "ReviewVote" (
+     "id" TEXT NOT NULL,
+     "reviewId" TEXT NOT NULL,
+     "voterKey" TEXT NOT NULL,
+     "helpful" BOOLEAN NOT NULL,
+     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     CONSTRAINT "ReviewVote_pkey" PRIMARY KEY ("id")
+   )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS "ReviewVote_reviewId_voterKey_key" ON "ReviewVote"("reviewId", "voterKey")`,
+  `CREATE INDEX IF NOT EXISTS "ReviewVote_reviewId_idx" ON "ReviewVote"("reviewId")`,
+  // Dollar-quoted with $$, not $. A single dollar is not a valid delimiter, so
+  // the statement throws — and this loop swallows errors, which would have
+  // left the foreign key silently absent.
+  `DO $$ BEGIN
+     ALTER TABLE "ReviewVote" ADD CONSTRAINT "ReviewVote_reviewId_fkey"
+       FOREIGN KEY ("reviewId") REFERENCES "Review"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+   EXCEPTION WHEN duplicate_object THEN NULL; END $$`,
   // Expiring offline access tokens — see prisma/schema.prisma and
   // lib/access-token.ts. Nullable: existing rows hold a legacy
   // non-expiring token that can't be refreshed and must be re-minted.

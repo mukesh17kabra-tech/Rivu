@@ -59,6 +59,41 @@
    * an unscoped rule here could restyle their entire site rather than just the
    * review widget.
    */
+  /**
+   * This browser's own votes, by review id.
+   *
+   * The server dedupes by a salted hash it cannot hand back — that is the
+   * point of it — and the review list is the same response for every shopper,
+   * so neither can say "you voted on this one". localStorage can, and is the
+   * honest place for it: it is a UI memory, not the thing that enforces one
+   * vote per person.
+   *
+   * Wrapped because storage throws rather than returning null in a private
+   * window in some browsers, and a review widget must not break over that.
+   */
+  function rvVotes() {
+    try {
+      return JSON.parse(localStorage.getItem("rivu_votes") || "{}") || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function rvGetVote(reviewId) {
+    return rvVotes()[reviewId] || null;
+  }
+
+  function rvSetVote(reviewId, value) {
+    try {
+      const all = rvVotes();
+      if (value) all[reviewId] = value;
+      else delete all[reviewId];
+      localStorage.setItem("rivu_votes", JSON.stringify(all));
+    } catch (e) {
+      // Voting still works for this page view; it just won't be remembered.
+    }
+  }
+
   function rvScopeCss(css) {
     css = String(css || "")
       .replace(/\/\*[\s\S]*?\*\//g, "")
@@ -421,6 +456,11 @@
         ".rv-card-reply{margin-top:10px;padding:10px 12px;border-left:3px solid " + design.primaryColor + ";background:rgba(0,0,0,.035);border-radius:0 6px 6px 0;}",
         ".rv-card-reply-label{margin:0 0 3px;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;opacity:.6;}",
         ".rv-card-reply-body{margin:0;font-size:13px;line-height:1.6;}",
+        ".rv-card-pin{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:" + design.primaryColor + ";letter-spacing:.02em;}",
+        ".rv-card-votes{display:flex;align-items:center;gap:8px;margin-top:11px;}",
+        ".rv-card-votes-label{font-size:12px;color:" + design.reviewMetaColor + ";margin-right:2px;}",
+        ".rv-vote{display:inline-flex;align-items:center;gap:5px;background:none;cursor:pointer;border:1px solid rgba(0,0,0,.12);border-radius:20px;padding:4px 11px;font-size:12px;font-family:inherit;color:" + design.reviewMetaColor + ";}",
+        ".rv-vote[aria-pressed=\"true\"]{border-color:" + design.primaryColor + ";color:" + design.primaryColor + ";font-weight:700;}",
       ].join("");
     }
 
@@ -447,6 +487,52 @@
         ? `<span class="rv-card-verified"${st("display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#2563eb;background:#eff6ff;padding:1px 7px;border-radius:20px;flex-shrink:0;")}><span>✓</span> Verified Buyer</span>`
         : "";
       // "I recommend" — stored in rev.recommends boolean (null means not answered)
+      const pinnedHtml = rev.pinnedAt
+        ? '<span class="rv-card-pin"' + st(
+            "display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;" +
+            "color:" + design.primaryColor + ";letter-spacing:.02em;"
+          ) + '>' +
+          '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">' +
+          '<path d="M14 2l8 8-4 1-3 3 1 5-3-2-5 5-1-1 5-5-2-3 5-3 1-4z"/></svg>' +
+          'Pinned</span>'
+        : "";
+
+      /**
+       * "Was this helpful?" — the counts plus this browser's own vote.
+       *
+       * The current vote is read from localStorage rather than the payload:
+       * the server identifies a voter by a salted hash it cannot hand back
+       * without undoing the anonymity, and the list response is cached for
+       * every shopper alike. localStorage is the honest place for "what did
+       * *this* browser do".
+       */
+      const myVote = rvGetVote(rev.id);
+      const voteBtn = (helpful, count) => {
+        const active = myVote === (helpful ? "up" : "down");
+        return '<button type="button" class="rv-vote" data-review="' + rev.id +
+          '" data-vote="' + (helpful ? "up" : "down") + '"' +
+          ' aria-pressed="' + (active ? "true" : "false") + '"' +
+          st(
+            "display:inline-flex;align-items:center;gap:5px;background:none;cursor:pointer;" +
+            "border:1px solid " + (active ? design.primaryColor : "rgba(0,0,0,.12)") + ";" +
+            "border-radius:20px;padding:4px 11px;font-size:12px;font-family:inherit;" +
+            "color:" + (active ? design.primaryColor : design.reviewMetaColor) + ";" +
+            "font-weight:" + (active ? 700 : 500) + ";"
+          ) + '>' +
+          (helpful ? "👍" : "👎") + ' <span class="rv-vote-count">' + (count || 0) + '</span>' +
+          '</button>';
+      };
+
+      const votesHtml =
+        '<div class="rv-card-votes"' + st(
+          "display:flex;align-items:center;gap:8px;margin-top:11px;"
+        ) + '>' +
+        '<span class="rv-card-votes-label"' + st(
+          "font-size:12px;color:" + design.reviewMetaColor + ";margin-right:2px;"
+        ) + '>Helpful?</span>' +
+        voteBtn(true, rev.helpfulCount) + voteBtn(false, rev.unhelpfulCount) +
+        '</div>';
+
       // The merchant's public reply. Escaped, not trusted: it is written in
       // the admin but rendered in shoppers' browsers, so it goes through the
       // same treatment as any other stored text.
@@ -478,6 +564,7 @@
         <span class="rv-card-author"${st(`font-weight:700;font-size:14px;color:${design.textColor};`)}>${rev.customerName}</span>
         ${verifiedBadge}
         ${topBadge}
+        ${pinnedHtml}
         <span class="rv-card-time"${st(`margin-left:auto;font-size:12px;color:${design.reviewMetaColor};white-space:nowrap;`)}>${timeAgo(rev.createdAt)}</span>
       </div>
       <div class="rv-card-date"${st(`font-size:12px;color:${design.reviewMetaColor};margin-bottom:7px;`)}>${new Date(rev.createdAt).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})}</div>
@@ -488,6 +575,7 @@
       ${rev.videoUrl ? `<div class="rv-media-thumb rv-card-media rv-card-video" data-media-url="${rev.videoUrl}" data-media-type="video"${st("width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;background:#000;margin-bottom:8px;")}><video src="${rev.videoUrl}"${st("width:100%;height:100%;object-fit:cover;pointer-events:none;")}></video><div class="rv-card-video-play"${st("position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);")}><span${st("color:#fff;font-size:18px;")}>▶</span></div></div>` : ""}
       ${!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb rv-card-media" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}"${st("width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;cursor:pointer;")}/>` : ""}
       ${recommendHtml}
+      ${votesHtml}
       ${ownerReplyHtml}
     </div>
   </div>
@@ -524,7 +612,20 @@
         lowest: (a, b) => a.rating - b.rating || byNewest(a, b),
       };
 
-      return [...matching].sort(comparators[sortOrder] || byNewest);
+      const chosen = comparators[sortOrder] || byNewest;
+
+      // Pinned first, whatever the sort. That is the point of pinning: the
+      // merchant chose the review that answers the question shoppers keep
+      // asking, and it has to be the one they read first even if they then
+      // sort by lowest rating. Among themselves, most recently pinned wins.
+      return [...matching].sort((a, b) => {
+        if (a.pinnedAt && !b.pinnedAt) return -1;
+        if (b.pinnedAt && !a.pinnedAt) return 1;
+        if (a.pinnedAt && b.pinnedAt) {
+          return new Date(b.pinnedAt).getTime() - new Date(a.pinnedAt).getTime();
+        }
+        return chosen(a, b);
+      });
     }
 
     // ─── Build summary + review list DOM ─────────────────────────
@@ -1250,6 +1351,62 @@
       // with two click listeners — every click flipped the panel twice and the
       // menu looked dead.
       wireSort();
+      // Helpful / unhelpful
+      el.querySelectorAll(".rv-vote").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (btn.dataset.rvBusy) return;
+          btn.dataset.rvBusy = "1";
+
+          const reviewId = btn.dataset.review;
+          const choice = btn.dataset.vote;
+          // Clicking the vote you already gave withdraws it, so a misclick is
+          // recoverable without hunting for an undo.
+          const next = rvGetVote(reviewId) === choice ? null : choice;
+
+          try {
+            const res = await fetch(API_BASE + "/api/reviews/vote", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                shop: shop,
+                reviewId: reviewId,
+                helpful: next === null ? null : next === "up",
+              }),
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+
+            rvSetVote(reviewId, next);
+            // Update the counts in place rather than rebuilding the list: a
+            // re-render would scroll the shopper away from the review they
+            // just voted on.
+            const review = reviews.find((r) => r.id === reviewId);
+            if (review) {
+              review.helpfulCount = data.helpfulCount;
+              review.unhelpfulCount = data.unhelpfulCount;
+            }
+            const card = btn.closest ? btn.closest(".rv-card") : null;
+            (card || el).querySelectorAll(".rv-vote").forEach((b) => {
+              if (b.dataset.review !== reviewId) return;
+              const isUp = b.dataset.vote === "up";
+              const countEl = b.querySelector(".rv-vote-count");
+              if (countEl) {
+                countEl.textContent = isUp ? data.helpfulCount : data.unhelpfulCount;
+              }
+              const active = next === b.dataset.vote;
+              b.setAttribute("aria-pressed", active ? "true" : "false");
+              b.style.borderColor = active ? design.primaryColor : "rgba(0,0,0,.12)";
+              b.style.color = active ? design.primaryColor : design.reviewMetaColor;
+              b.style.fontWeight = active ? "700" : "500";
+            });
+          } catch (e) {
+            // Silent: a failed vote is not worth interrupting a shopper over.
+          } finally {
+            delete btn.dataset.rvBusy;
+          }
+        });
+      });
+
       const loadMore = el.querySelector(".rv-load-more");
       if (loadMore) loadMore.addEventListener("click", () => { shownCount += REVIEWS_PER_PAGE; el.querySelector(".rv-main-content").innerHTML = buildMain(); rewireMain(); });
       el.querySelectorAll(".rv-media-thumb").forEach(t => { t.addEventListener("click", () => lightbox.open(t.dataset.mediaUrl, t.dataset.mediaType)); });
