@@ -2,42 +2,14 @@
 
 import { useState } from "react";
 
+/**
+ * Export only. Importing moved to ImportWizard, which previews the file before
+ * writing anything — this used to import blind on file selection, which is a
+ * lot to ask of a merchant handing over their entire review history.
+ */
 export function ImportExportBar({ shop }: { shop: string }) {
-  const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [result, setResult] = useState<{ imported: number; skipped: number } | null>(null);
   const [error, setError] = useState("");
-
-  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setImporting(true);
-    setError("");
-    setResult(null);
-
-    try {
-      const csv = await file.text();
-      const res = await fetch("/api/reviews/import", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ shop, csv }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setResult({ imported: data.imported, skipped: data.skipped });
-        // Refresh so imported reviews show up in the approved list below.
-        setTimeout(() => window.location.reload(), 1500);
-      } else {
-        setError(data.error || "Import failed.");
-      }
-    } catch {
-      setError("Something went wrong reading that file.");
-    } finally {
-      setImporting(false);
-      e.target.value = "";
-    }
-  }
 
   // The export endpoint requires a session token now, and a plain <a download>
   // can't carry an Authorization header. Fetching it (App Bridge attaches the
@@ -80,21 +52,11 @@ export function ImportExportBar({ shop }: { shop: string }) {
         {exporting ? "Exporting…" : "Export all reviews (CSV)"}
       </button>
 
-      <label className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 cursor-pointer">
-        {importing ? "Importing..." : "Import from Judge.me / Loox / Stamped / Yotpo / CSV"}
-        <input type="file" accept=".csv" onChange={handleImport} disabled={importing} className="hidden" />
-      </label>
-
       <span className="text-xs text-white/40">
-        Just export your reviews as CSV from any of those apps and upload it here — column
-        names are detected automatically, no need to rename anything.
+        Your reviews are yours — export them at any time, in a format any other
+        review app can read.
       </span>
 
-      {result && (
-        <span className="text-xs text-emerald-400">
-          Imported {result.imported}, skipped {result.skipped}
-        </span>
-      )}
       {error && <span className="text-xs text-red-400">{error}</span>}
     </div>
   );

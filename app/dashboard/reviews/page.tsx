@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { PageHeader } from "@/components/ui";
 import { ImportExportBar } from "@/components/ImportExportBar";
+import { ImportWizard } from "@/components/ImportWizard";
 import { ReviewsTable } from "@/components/ReviewsTable";
 import { ModerationToggle } from "@/components/ModerationToggle";
 import { requireShop } from "@/lib/shop-context";
@@ -41,6 +42,7 @@ export default async function ReviewsDashboard({
         pendingCount={pendingCount}
       />
 
+      <ImportWizard shop={shop} />
       <ImportExportBar shop={shop} />
 
       <ReviewsTable shop={shop} reviews={reviews} plan={shopRecord.plan} />
