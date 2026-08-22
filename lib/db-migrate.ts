@@ -62,6 +62,8 @@ const MIGRATIONS = [
   // existing value; re-running it on an already-converted column is a no-op.
   `ALTER TABLE "Review" ALTER COLUMN "rating" TYPE DOUBLE PRECISION`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "recommends" BOOLEAN`,
+  `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "ownerReply" TEXT`,
+  `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "ownerReplyAt" TIMESTAMP(3)`,
   // Expiring offline access tokens — see prisma/schema.prisma and
   // lib/access-token.ts. Nullable: existing rows hold a legacy
   // non-expiring token that can't be refreshed and must be re-minted.

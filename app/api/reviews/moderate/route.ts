@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   if (!auth.ok) return auth.response;
 
   const body = await req.json().catch(() => null);
-  const { shop, reviewId, action } = body || {};
+  const { shop, reviewId, action, reply } = body || {};
   if (String(shop).trim().toLowerCase() !== auth.shop) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   if (
     !shop ||
     (needsId && !reviewId) ||
-    !["approve", "reject", "unpublish", "approveAll"].includes(action)
+    !["approve", "reject", "unpublish", "approveAll", "reply"].includes(action)
   ) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
@@ -45,6 +45,20 @@ export async function POST(req: NextRequest) {
         data: { approved: true },
       });
       return NextResponse.json({ success: true, published: count });
+    }
+
+    if (action === "reply") {
+      // Stored as plain text and escaped when rendered. An empty reply clears
+      // it, so a merchant can withdraw a reply without deleting the review.
+      const text = typeof reply === "string" ? reply.trim().slice(0, 2000) : "";
+      await db.review.update({
+        where: { id: reviewId, shopId: shopRecord.id },
+        data: {
+          ownerReply: text || null,
+          ownerReplyAt: text ? new Date() : null,
+        },
+      });
+      return NextResponse.json({ success: true, ownerReply: text });
     }
 
     if (action === "approve") {

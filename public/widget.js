@@ -351,6 +351,7 @@
 
     // ─── State ───────────────────────────────────────────────────
     let sortOrder = "newest";
+    let searchTerm = "";
     let shownCount = REVIEWS_PER_PAGE;
     let suggestionPool = [], suggestionPoolKey = "", suggestionBatchStart = 0;
     let selectedRating = 0, photoDataUrl, videoDataUrl, selectedLang = availableLanguages[0]?.code || "en";
@@ -416,6 +417,9 @@
         ".rv-card-recommend{display:flex;align-items:center;gap:5px;font-size:12px;margin-top:6px;}",
         ".rv-card-recommend.rv-yes{color:#16a34a;}",
         ".rv-card-recommend.rv-no{color:#dc2626;}",
+        ".rv-card-reply{margin-top:10px;padding:10px 12px;border-left:3px solid " + design.primaryColor + ";background:rgba(0,0,0,.035);border-radius:0 6px 6px 0;}",
+        ".rv-card-reply-label{margin:0 0 3px;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;opacity:.6;}",
+        ".rv-card-reply-body{margin:0;font-size:13px;line-height:1.6;}",
       ].join("");
     }
 
@@ -442,6 +446,21 @@
         ? `<span class="rv-card-verified"${st("display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#2563eb;background:#eff6ff;padding:1px 7px;border-radius:20px;flex-shrink:0;")}><span>✓</span> Verified Buyer</span>`
         : "";
       // "I recommend" — stored in rev.recommends boolean (null means not answered)
+      // The merchant's public reply. Escaped, not trusted: it is written in
+      // the admin but rendered in shoppers' browsers, so it goes through the
+      // same treatment as any other stored text.
+      const ownerReplyHtml = rev.ownerReply
+        ? '<div class="rv-card-reply"' + st(
+            "margin-top:10px;padding:10px 12px;border-left:3px solid " + design.primaryColor +
+            ";background:rgba(0,0,0,.035);border-radius:0 6px 6px 0;"
+          ) + '>' +
+            '<p class="rv-card-reply-label"' + st(
+              "margin:0 0 3px;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;opacity:.6;"
+            ) + '>Store owner reply</p>' +
+            '<p class="rv-card-reply-body"' + st("margin:0;font-size:13px;line-height:1.6;") + '>' +
+            escapeHtml(rev.ownerReply) + '</p></div>'
+        : "";
+
       const recommendHtml = rev.recommends === true
         ? `<div class="rv-card-recommend rv-yes"${st("display:flex;align-items:center;gap:5px;font-size:12px;color:#16a34a;margin-top:6px;")}><span${st("font-size:15px;")}>👍</span> I recommend this product</div>`
         : rev.recommends === false
@@ -468,6 +487,7 @@
       ${rev.videoUrl ? `<div class="rv-media-thumb rv-card-media rv-card-video" data-media-url="${rev.videoUrl}" data-media-type="video"${st("width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;background:#000;margin-bottom:8px;")}><video src="${rev.videoUrl}"${st("width:100%;height:100%;object-fit:cover;pointer-events:none;")}></video><div class="rv-card-video-play"${st("position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);")}><span${st("color:#fff;font-size:18px;")}>▶</span></div></div>` : ""}
       ${!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb rv-card-media" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}"${st("width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;cursor:pointer;")}/>` : ""}
       ${recommendHtml}
+      ${ownerReplyHtml}
     </div>
   </div>
 </div>`;
@@ -483,6 +503,15 @@
      * order is stable rather than whatever the database happened to return.
      */
     function getSortedReviews() {
+      const term = searchTerm.trim().toLowerCase();
+      const matching = term
+        ? reviews.filter((r) =>
+            [r.body, r.reviewTitle, r.customerName]
+              .filter(Boolean)
+              .some((field) => String(field).toLowerCase().includes(term))
+          )
+        : reviews;
+
       const byNewest = (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 
@@ -494,7 +523,7 @@
         lowest: (a, b) => a.rating - b.rating || byNewest(a, b),
       };
 
-      return [...reviews].sort(comparators[sortOrder] || byNewest);
+      return [...matching].sort(comparators[sortOrder] || byNewest);
     }
 
     // ─── Build summary + review list DOM ─────────────────────────
@@ -525,6 +554,26 @@
       }
 
       // Breakdown bars
+      /**
+       * The share of reviewers who said they would recommend the product.
+       *
+       * Appended to the breakdown so every summary layout picks it up from one
+       * place — there are eight of them, and editing each would guarantee one
+       * gets missed.
+       *
+       * Hidden when nobody answered, rather than showing "0%", which would read
+       * as everyone disliking the product.
+       */
+      const recommendSummaryHtml = (summary.recommend && summary.recommend.answered)
+        ? '<div style="display:flex;align-items:baseline;gap:7px;margin-top:12px;padding-top:11px;' +
+          'border-top:1px solid rgba(0,0,0,.07);">' +
+          '<span style="font-size:17px;font-weight:800;color:' + design.textColor + ';">' +
+          summary.recommend.percent + '%</span>' +
+          '<span style="font-size:12px;color:' + design.reviewMetaColor + ';">would recommend' +
+          ' (' + summary.recommend.count + ' of ' + summary.recommend.answered + ')</span>' +
+          '</div>'
+        : "";
+
       const breakdownHtml = summary.total ? summary.breakdown.map(b => {
         const pct = Number(b.percentage) || 0;
         return '<div style="display:flex;align-items:center;gap:10px;font-size:13px;margin:4px 0;">'
@@ -534,7 +583,7 @@
           + '</div>'
           + '<span style="width:28px;text-align:right;color:' + design.textColor + ';opacity:.65;">' + pct + '%</span>'
           + '</div>';
-      }).join("") : "";
+      }).join("") + recommendSummaryHtml : "";
 
       const writeBtn = `<button class="rv-open-form-btn" style="display:flex;align-items:center;gap:8px;padding:12px 22px;background:${primary};color:#fff;border:none;border-radius:${r}px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Write a Review</button>`;
 
@@ -719,6 +768,27 @@
         : sl === 'split' ? summarySplit
         : summaryModern;
 
+    /**
+      * Search across the reviews already loaded.
+      *
+      * Filtering in the browser rather than round-tripping: the widget already
+      * holds every review it will show, so a server call would add latency for
+      * a list it can filter instantly. If pagination ever changes that, this
+      * has to move server-side, and the count above it would start lying first.
+      */
+     function searchControl() {
+       return '<label style="position:relative;display:inline-flex;align-items:center;">' +
+         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="' + design.filterTextColor +
+         '" stroke-width="2" stroke-linecap="round" style="position:absolute;left:11px;pointer-events:none;opacity:.7;">' +
+         '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>' +
+         '<input class="rv-search" type="search" value="' + escapeHtml(searchTerm) + '"' +
+         ' placeholder="Search reviews" aria-label="Search reviews"' +
+         ' style="border:1px solid ' + design.sortBorderColor + ';border-radius:' + Math.max(r - 2, 6) + 'px;' +
+         'background:' + design.sortBgColor + ';color:' + design.sortTextColor + ';' +
+         'padding:8px 12px 8px 32px;font-size:13px;font-family:inherit;width:160px;outline:none;"/>' +
+         '</label>';
+     }
+
     const SORT_OPTIONS = [
       { value: "newest", label: "Newest" },
       { value: "oldest", label: "Oldest" },
@@ -776,9 +846,12 @@
       const filtersHtml = reviews.length > 0 ? `
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid ${design.filterBorderColor};">
   <span style="font-size:${design.reviewCountFontSize}px;color:${design.filterTextColor};font-weight:500;letter-spacing:-.005em;">
-    <span style="color:${design.textColor};font-weight:700;">${reviews.length}</span> Review${reviews.length === 1 ? "" : "s"}
+    <span style="color:${design.textColor};font-weight:700;">${sorted.length}</span> Review${sorted.length === 1 ? "" : "s"}${searchTerm.trim() ? " matching “" + escapeHtml(searchTerm.trim()) + "”" : ""}
   </span>
-  ${sortControl()}
+  <div style="display:flex;align-items:center;gap:10px;">
+    ${searchControl()}
+    ${sortControl()}
+  </div>
 </div>` : "";
 
       const listHtml = visible.length
@@ -1096,6 +1169,23 @@
      * rebuilding the list replaces these nodes.
      */
     function wireSort() {
+      const search = el.querySelector(".rv-search");
+      if (search) {
+        search.addEventListener("input", () => {
+          searchTerm = search.value;
+          shownCount = REVIEWS_PER_PAGE;
+          el.querySelector(".rv-main-content").innerHTML = buildMain();
+          rewireMain();
+          // Re-rendering replaces the input, so focus and caret have to be put
+          // back or typing a second character would go nowhere.
+          const next = el.querySelector(".rv-search");
+          if (next) {
+            next.focus();
+            next.setSelectionRange(next.value.length, next.value.length);
+          }
+        });
+      }
+
       const toggle = el.querySelector(".rv-sort-toggle");
       const panel = el.querySelector(".rv-sort-panel");
       if (!toggle || !panel) return;

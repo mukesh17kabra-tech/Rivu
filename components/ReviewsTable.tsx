@@ -14,6 +14,7 @@ type Review = {
   customerEmail: string | null;
   approved: boolean;
   createdAt: Date;
+  ownerReply: string | null;
 };
 
 const TEMPLATES = [
@@ -48,6 +49,8 @@ export function ReviewsTable({
   const [reviews, setReviews] = useState(initial);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [ugcOpenId, setUgcOpenId] = useState<string | null>(null);
+  const [replyOpenId, setReplyOpenId] = useState<string | null>(null);
+  const [replyDraft, setReplyDraft] = useState("");
   const [template, setTemplate] = useState(TEMPLATES[0].value);
   const [format, setFormat] = useState(FORMATS[0].value);
 
@@ -83,6 +86,47 @@ export function ReviewsTable({
     } finally {
       setBusyId(null);
     }
+  }
+
+  /**
+   * Saves the merchant's public reply to a review.
+   *
+   * Answering a critical review well reassures the next shopper more than the
+   * review itself worried them — which is why this is the feature merchants
+   * ask for first. An empty reply clears it, so one can be withdrawn without
+   * deleting the review.
+   */
+  // Takes the text explicitly rather than reading state: "Remove reply" sets
+  // the draft empty and saves in the same handler, and a React state update is
+  // not visible until the next render — so reading state here would have saved
+  // the old text and left the reply in place.
+  async function saveReply(review: Review, text: string) {
+    setBusyId(review.id);
+    try {
+      const res = await fetch("/api/reviews/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          shop,
+          reviewId: review.id,
+          action: "reply",
+          reply: text,
+        }),
+      });
+      if (!res.ok) return;
+      const saved = text.trim();
+      setReviews((rs) =>
+        rs.map((r) => (r.id === review.id ? { ...r, ownerReply: saved || null } : r))
+      );
+      setReplyOpenId(null);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  function toggleReply(review: Review) {
+    setReplyOpenId((cur) => (cur === review.id ? null : review.id));
+    setReplyDraft(review.ownerReply || "");
   }
 
   function toggleUgc(id: string) {
@@ -169,6 +213,12 @@ export function ReviewsTable({
                       </button>
                     )}
                     <button
+                      onClick={() => toggleReply(review)}
+                      className="mr-3 text-xs font-medium text-white/60 hover:underline"
+                    >
+                      {review.ownerReply ? "Edit reply" : "Reply"}
+                    </button>
+                    <button
                       onClick={() => deleteReview(review)}
                       disabled={busyId === review.id}
                       className="text-xs font-medium text-red-400 hover:underline disabled:opacity-50"
@@ -177,6 +227,50 @@ export function ReviewsTable({
                     </button>
                   </td>
                 </tr>
+                {replyOpenId === review.id && (
+                  <tr className="border-t border-white/5 bg-white/[0.015]">
+                    <td colSpan={6} className="px-4 py-4">
+                      <label className="mb-1.5 block text-xs font-medium text-white/50">
+                        Your public reply — shown under this review on your storefront
+                      </label>
+                      <textarea
+                        value={replyDraft}
+                        onChange={(e) => setReplyDraft(e.target.value)}
+                        rows={3}
+                        maxLength={2000}
+                        placeholder="Thanks for the feedback — we've passed this on to our team."
+                        className="w-full rounded-md border border-white/15 bg-black/40 px-3 py-2 text-sm text-white"
+                      />
+                      <div className="mt-2 flex items-center gap-3">
+                        <button
+                          onClick={() => saveReply(review, replyDraft)}
+                          disabled={busyId === review.id}
+                          className="rounded-md bg-emerald-400 px-3.5 py-1.5 text-xs font-bold text-black hover:bg-emerald-300 disabled:opacity-60"
+                        >
+                          {busyId === review.id ? "Saving…" : "Save reply"}
+                        </button>
+                        <button
+                          onClick={() => setReplyOpenId(null)}
+                          className="text-xs font-medium text-white/45 hover:text-white/70"
+                        >
+                          Cancel
+                        </button>
+                        {review.ownerReply && (
+                          <button
+                            onClick={() => {
+                              setReplyDraft("");
+                              saveReply(review, "");
+                            }}
+                            disabled={busyId === review.id}
+                            className="ml-auto text-xs font-medium text-red-400/80 hover:underline disabled:opacity-50"
+                          >
+                            Remove reply
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
                 {ugcOpen && (
                   <tr className="border-t border-white/5 bg-white/[0.015]">
                     <td colSpan={6} className="px-4 py-4">

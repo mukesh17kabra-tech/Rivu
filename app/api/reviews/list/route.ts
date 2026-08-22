@@ -53,6 +53,8 @@ export async function GET(req: NextRequest) {
         rating: true,
         reviewTitle: true,
         recommends: true,
+        ownerReply: true,
+        ownerReplyAt: true,
         body: true,
         customerName: true,
         customerEmail: true,
@@ -88,13 +90,14 @@ export async function GET(req: NextRequest) {
     }));
 
     // Rating breakdown
-    const allRatings: { rating: number }[] = await db.review.findMany({
+    const allRatings: { rating: number; recommends: boolean | null }[] =
+      await db.review.findMany({
       where: {
         shopId: shopRecord.id,
         productId: { in: [numericId, gidId] },
         approved: true,
       },
-      select: { rating: true },
+      select: { rating: true, recommends: true },
     });
     const total = allRatings.length;
     const counts = [5, 4, 3, 2, 1].map((star) => {
@@ -111,6 +114,27 @@ export async function GET(req: NextRequest) {
           (allRatings.reduce((s: number, r: { rating: number }) => s + r.rating, 0) / total) * 10
         ) / 10
       : 0;
+
+    // "Would recommend" was collected on the form from the start and then
+    // never counted, so the answer sat in the database doing nothing. It is
+    // the strongest single line of reassurance a review section can show.
+    //
+    // The denominator is people who actually answered — null means the
+    // question was skipped, and counting a skip as a "no" would understate
+    // every merchant who added the question later.
+    const answered = allRatings.filter(
+      (r: { recommends: boolean | null }) => r.recommends !== null
+    );
+    const recommendYes = answered.filter(
+      (r: { recommends: boolean | null }) => r.recommends === true
+    ).length;
+    const recommend = answered.length
+      ? {
+          percent: Math.round((recommendYes / answered.length) * 100),
+          count: recommendYes,
+          answered: answered.length,
+        }
+      : null;
 
     // enabledLanguages — safe access (column may not exist yet if migration pending)
     const enabledLangs: string[] =
@@ -132,7 +156,7 @@ export async function GET(req: NextRequest) {
     return withCors(
       NextResponse.json({
         reviews: reviewsWithBadge,
-        summary: { total, average, breakdown: counts },
+        summary: { total, average, breakdown: counts, recommend },
         plan: safe(shopRecord.plan, "free"),
         availableLanguages,
         design: {

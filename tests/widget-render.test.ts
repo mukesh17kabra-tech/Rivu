@@ -62,6 +62,7 @@ const SUMMARY = {
     count: star === 5 ? 1 : 0,
     percentage: star === 5 ? 100 : 0,
   })),
+  recommend: { percent: 100, count: 1, answered: 1 },
 };
 
 const REVIEWS = [
@@ -74,7 +75,8 @@ const REVIEWS = [
     createdAt: new Date().toISOString(),
     photoUrl: null,
     videoUrl: null,
-    recommends: null,
+    recommends: true,
+    ownerReply: "Thanks Asha — glad it is working out.",
   },
 ];
 
@@ -82,8 +84,11 @@ const REVIEWS = [
 async function render(
   source: string,
   design: Record<string, unknown>,
-  plan = "pro"
+  plan = "pro",
+  /** Overrides merged into the single fixture review. */
+  reviewOverrides: Record<string, unknown> = {}
 ): Promise<string> {
+  const reviews = REVIEWS.map((r) => ({ ...r, ...reviewOverrides }));
   const target = makeEl();
   target.dataset = {
     shop: "example.myshopify.com",
@@ -136,7 +141,7 @@ async function render(
     json: async () =>
       String(url).includes("/api/reviews/list")
         ? {
-            reviews: REVIEWS,
+            reviews,
             summary: SUMMARY,
             plan,
             availableLanguages: [{ code: "en", label: "English" }],
@@ -386,5 +391,56 @@ describe.each(sources)("%s renders custom CSS", (_name, source) => {
     expect(html).not.toContain("undefined");
     expect(html).not.toContain("<style></style>");
     expect(html).toContain("loads of pop");
+  });
+});
+
+/**
+ * Owner replies and the recommend stat, rendered rather than asserted on
+ * source. Both are new payload fields, and a widget that silently ignores one
+ * looks identical to a widget that renders it — until a merchant checks.
+ */
+describe.each(sources)("%s renders the new review fields", (_name, source) => {
+  const base = {
+    customTemplateEnabled: false,
+    summaryLayout: "modern",
+    displayStyle: "list",
+    richSnippetsEnabled: false,
+  };
+
+  it("shows the store owner reply", async () => {
+    const html = await render(source, base);
+    expect(html).toContain("Store owner reply");
+    expect(html).toContain("glad it is working out");
+  });
+
+  it("escapes a reply containing markup", async () => {
+    const html = await render(source, base, "pro", {
+      ownerReply: '<script>window.pwned=1</script>',
+    });
+    expect(html).not.toContain("<script>window.pwned");
+    expect(html).toContain("&lt;script&gt;");
+  });
+
+  it("renders no reply block when there is no reply", async () => {
+    const html = await render(source, base, "pro", { ownerReply: null });
+    expect(html).not.toContain("Store owner reply");
+    // The review itself must still be there.
+    expect(html).toContain("loads of pop");
+  });
+});
+
+describe.each(sources)("%s renders the recommend stat", (_name, source) => {
+  const base = {
+    customTemplateEnabled: false,
+    summaryLayout: "modern",
+    displayStyle: "list",
+    richSnippetsEnabled: false,
+  };
+
+  it("shows the percentage who would recommend", async () => {
+    // Collected by the form since the beginning and never once displayed.
+    const html = await render(source, base);
+    expect(html).toContain("would recommend");
+    expect(html).toContain("100%");
   });
 });

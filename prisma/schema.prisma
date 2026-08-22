@@ -235,6 +235,13 @@ model Review {
   videoUrl      String? @db.Text // optional customer-submitted video (stored as base64 data URI, kept short/low-res)
 
   recommends Boolean? // null = customer didn't answer; true = recommends; false = does not recommend
+
+  // The merchant's public answer to a review, shown beneath it on the
+  // storefront. Answering a critical review well reassures the next shopper
+  // more than the review itself worried them, which is why every established
+  // review app has this and it is the first thing merchants ask for.
+  ownerReply   String?   @db.Text
+  ownerReplyAt DateTime?
   approved   Boolean  @default(false)
   createdAt  DateTime @default(now())
 
