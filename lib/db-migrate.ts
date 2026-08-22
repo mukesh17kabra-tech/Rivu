@@ -58,6 +58,9 @@ const MIGRATIONS = [
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "ratingBadgeTemplate" TEXT NOT NULL DEFAULT '{rating}'`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "splitSummary" BOOLEAN NOT NULL DEFAULT false`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "reviewTitle" TEXT`,
+  // Half-star ratings. Widening Int -> double precision preserves every
+  // existing value; re-running it on an already-converted column is a no-op.
+  `ALTER TABLE "Review" ALTER COLUMN "rating" TYPE DOUBLE PRECISION`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "recommends" BOOLEAN`,
   // Expiring offline access tokens — see prisma/schema.prisma and
   // lib/access-token.ts. Nullable: existing rows hold a legacy

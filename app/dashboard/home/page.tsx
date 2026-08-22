@@ -132,8 +132,9 @@ export default async function DashboardHome({
                     <tr key={r.id} className="border-t border-white/[0.07]">
                       <td className="px-5 py-3 font-medium text-white">{r.customerName}</td>
                       <td className="whitespace-nowrap px-5 py-3 text-amber-500">
-                        {"★".repeat(r.rating)}
-                        <span className="text-white/15">{"★".repeat(5 - r.rating)}</span>
+                        {/* Rounded — String.repeat truncates a fraction. */}
+                        {"★".repeat(Math.round(r.rating))}
+                        <span className="text-white/15">{"★".repeat(5 - Math.round(r.rating))}</span>
                       </td>
                       <td className="px-5 py-3 text-white/55">{r.productTitle}</td>
                       <td className="whitespace-nowrap px-5 py-3 text-white/35">

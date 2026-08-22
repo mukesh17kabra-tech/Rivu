@@ -24,9 +24,11 @@
       .rv-media-thumb:hover{opacity:.82}
       @keyframes rv-fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
       .rv-modal-backdrop{animation:rv-fade-in .18s ease}
-      .rv-sort{transition:border-color .15s,box-shadow .15s}
-      .rv-sort:hover{border-color:rgba(0,0,0,.28)}
-      .rv-sort:focus-visible{border-color:rgba(0,0,0,.4);box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+      .rv-sort-toggle{transition:border-color .15s,box-shadow .15s}
+      .rv-sort-toggle:hover{border-color:rgba(0,0,0,.28)}
+      .rv-sort-toggle:focus-visible{border-color:rgba(0,0,0,.4);box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+      .rv-sort-option:hover{background:rgba(0,0,0,.05)!important}
+      .rv-star-input:focus-visible{outline:2px solid currentColor}
     `;
     document.head.appendChild(s);
   }
@@ -717,22 +719,66 @@
         : sl === 'split' ? summarySplit
         : summaryModern;
 
+    const SORT_OPTIONS = [
+      { value: "newest", label: "Newest" },
+      { value: "oldest", label: "Oldest" },
+      { value: "highest", label: "Highest rating" },
+      { value: "lowest", label: "Lowest rating" },
+    ];
+
+    /**
+     * The sort control: an icon button that opens a small panel.
+     *
+     * A native <select> was doing this job, but it can only ever look like the
+     * browser's dropdown, and on a review section that is meant to match the
+     * merchant's theme it stood out as the one unstyled thing on the page.
+     *
+     * Built as a real menu rather than a styled div: the button reports its
+     * expanded state, the options are focusable buttons, and Escape closes it —
+     * so it is still usable without a mouse, which is what a native select gave
+     * away for free.
+     */
+    function sortControl() {
+      const current = SORT_OPTIONS.find((o) => o.value === sortOrder) || SORT_OPTIONS[0];
+
+      return '<div class="rv-sort-wrap" style="position:relative;">' +
+        '<button type="button" class="rv-sort-toggle" aria-haspopup="true" aria-expanded="false"' +
+        ' aria-label="Sort reviews. Currently ' + current.label + '"' +
+        ' style="display:inline-flex;align-items:center;justify-content:center;gap:7px;' +
+        'border:1px solid ' + design.sortBorderColor + ';border-radius:' + Math.max(r - 2, 6) + 'px;' +
+        'background:' + design.sortBgColor + ';color:' + design.sortTextColor + ';' +
+        'padding:8px 11px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;' +
+        'line-height:1;">' +
+        // Sliders icon — reads as "filter/sort" without needing a label.
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
+        ' stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h10M18 18h2"/>' +
+        '<circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="16" cy="18" r="2"/></svg>' +
+        '<span class="rv-sort-current">' + escapeHtml(current.label) + '</span>' +
+        '</button>' +
+        '<div class="rv-sort-panel" role="menu" hidden' +
+        ' style="position:absolute;top:calc(100% + 8px);right:0;z-index:20;min-width:172px;' +
+        'background:' + design.sortBgColor + ';border:1px solid ' + design.sortBorderColor + ';' +
+        'border-radius:' + Math.max(r, 8) + 'px;box-shadow:0 8px 28px rgba(0,0,0,.13);padding:8px;">' +
+        '<p style="margin:0 0 4px;padding:5px 10px;font-size:12px;font-weight:700;' +
+        'color:' + design.sortTextColor + ';opacity:.55;">Sort by</p>' +
+        SORT_OPTIONS.map(function (o) {
+          const selected = o.value === sortOrder;
+          return '<button type="button" role="menuitem" class="rv-sort-option" data-sort="' + o.value + '"' +
+            ' style="display:block;width:100%;text-align:left;background:' +
+            (selected ? "rgba(0,0,0,.05)" : "none") + ';border:none;border-radius:6px;' +
+            'padding:8px 10px;font-size:13px;font-family:inherit;cursor:pointer;' +
+            'color:' + design.sortTextColor + ';font-weight:' + (selected ? 700 : 500) + ';">' +
+            escapeHtml(o.label) + '</button>';
+        }).join("") +
+        '</div></div>';
+    }
+
       const filtersHtml = reviews.length > 0 ? `
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid ${design.filterBorderColor};">
   <span style="font-size:${design.reviewCountFontSize}px;color:${design.filterTextColor};font-weight:500;letter-spacing:-.005em;">
     <span style="color:${design.textColor};font-weight:700;">${reviews.length}</span> Review${reviews.length === 1 ? "" : "s"}
   </span>
-  <div style="position:relative;display:inline-flex;align-items:center;">
-    <select class="rv-sort" style="appearance:none;-webkit-appearance:none;-moz-appearance:none;border:1px solid ${design.sortBorderColor};border-radius:${Math.max(r-2,6)}px;padding:8px 34px 8px 13px;font-size:13px;font-weight:500;font-family:inherit;line-height:1.2;cursor:pointer;background:${design.sortBgColor};color:${design.sortTextColor};outline:none;">
-      <option value="newest">Most Recent</option>
-      <option value="oldest">Oldest First</option>
-      <option value="highest">Highest Rating</option>
-      <option value="lowest">Lowest Rating</option>
-    </select>
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${design.sortTextColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;right:12px;pointer-events:none;opacity:.55;">
-      <path d="M6 9l6 6 6-6"/>
-    </svg>
-  </div>
+  ${sortControl()}
 </div>` : "";
 
       const listHtml = visible.length
@@ -846,9 +892,28 @@
         ? `<select class="rv-lang-picker" style="width:100%;padding:10px;border:1.5px solid ${isDark ? "rgba(255,255,255,.15)" : "#e0e0e0"};border-radius:8px;font-size:13px;font-family:inherit;margin-bottom:12px;background:${isDark ? "rgba(255,255,255,.08)" : fBg};color:${isDark ? "#fff" : fTc};box-shadow:none;">${availableLanguages.map(l => `<option value="${l.code}">${l.label}</option>`).join("")}</select>`
         : "";
 
-      const starRow = (size, gap) => [1,2,3,4,5].map(n =>
-        `<button type="button" class="rv-star" data-star="${n}" style="background:none;border:none;padding:${gap}px;cursor:pointer;font-size:${size}px;color:#ccc;line-height:1;transition:color .12s;">★</button>`
-      ).join("");
+      /**
+       * The rating input.
+       *
+       * One track rather than five buttons, because the rating a shopper can
+       * give now includes halves — 3.5, 4.5 — and five whole-star buttons
+       * cannot express one. The value comes from where the pointer is across
+       * the track, so each star has a left half and a right half without any
+       * extra markup.
+       *
+       * It stays keyboard-operable: the track is focusable and behaves as a
+       * slider, since replacing buttons with a pointer-only control would shut
+       * out anyone not using a mouse.
+       */
+      const starRow = (size, gap) =>
+        '<span class="rv-star-input" role="slider" tabindex="0"' +
+        ' aria-label="Rating" aria-valuemin="0.5" aria-valuemax="5" aria-valuenow="0"' +
+        ' aria-valuetext="No rating selected"' +
+        ' data-star-size="' + size + '"' +
+        ' style="display:inline-flex;align-items:center;gap:' + gap + 'px;cursor:pointer;' +
+        'padding:2px;border-radius:6px;outline-offset:3px;touch-action:none;">' +
+        starsHtml(0, starColor, "#ddd", size) +
+        "</span>";
 
       const submitBtn = (bg, tc, extra) =>
         `<button type="submit" style="padding:11px 24px;background:${bg};color:${tc};border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;${extra||""}">Submit Review</button>`;
@@ -1026,21 +1091,54 @@
       });
     });
 
-    // Sort
-    const sortEl = el.querySelector(".rv-sort");
-    if (sortEl) {
-      sortEl.addEventListener("change", () => {
-        sortOrder = sortEl.value;
-        shownCount = REVIEWS_PER_PAGE;
-        el.querySelector(".rv-main-content").innerHTML = buildMain();
-        rewireMain();
+    /**
+     * Wires the sort menu. Called again after every re-render, because
+     * rebuilding the list replaces these nodes.
+     */
+    function wireSort() {
+      const toggle = el.querySelector(".rv-sort-toggle");
+      const panel = el.querySelector(".rv-sort-panel");
+      if (!toggle || !panel) return;
+
+      function close() {
+        panel.hidden = true;
+        toggle.setAttribute("aria-expanded", "false");
+      }
+
+      toggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const open = panel.hidden;
+        panel.hidden = !open;
+        toggle.setAttribute("aria-expanded", String(open));
+      });
+
+      el.querySelectorAll(".rv-sort-option").forEach((option) => {
+        option.addEventListener("click", () => {
+          sortOrder = option.dataset.sort;
+          shownCount = REVIEWS_PER_PAGE;
+          el.querySelector(".rv-main-content").innerHTML = buildMain();
+          rewireMain();
+        });
+      });
+
+      toggle.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") close();
+      });
+      panel.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") { close(); toggle.focus(); }
+      });
+      // A menu that only closes by choosing something is a trap; clicking away
+      // has to dismiss it.
+      document.addEventListener("click", (e) => {
+        if (!panel.hidden && !panel.contains(e.target) && e.target !== toggle) close();
       });
     }
 
+    wireSort();
+
     // Load more
     function rewireMain() {
-      const sortEl2 = el.querySelector(".rv-sort");
-      if (sortEl2) sortEl2.addEventListener("change", () => { sortOrder = sortEl2.value; shownCount = REVIEWS_PER_PAGE; el.querySelector(".rv-main-content").innerHTML = buildMain(); rewireMain(); });
+      wireSort();
       const loadMore = el.querySelector(".rv-load-more");
       if (loadMore) loadMore.addEventListener("click", () => { shownCount += REVIEWS_PER_PAGE; el.querySelector(".rv-main-content").innerHTML = buildMain(); rewireMain(); });
       el.querySelectorAll(".rv-media-thumb").forEach(t => { t.addEventListener("click", () => lightbox.open(t.dataset.mediaUrl, t.dataset.mediaType)); });
@@ -1080,7 +1178,7 @@
 
     const form = formContainer.querySelector(".rv-form");
     const status = formContainer.querySelector(".rv-status");
-    const starButtons = [...formContainer.querySelectorAll(".rv-star")];
+    const starInputs = [...formContainer.querySelectorAll(".rv-star-input")];
     const tapHint = formContainer.querySelector(".rv-tap-hint");
     const suggestionsWrap = formContainer.querySelector(".rv-suggestions-wrap");
     const langPicker = formContainer.querySelector(".rv-lang-picker");
@@ -1093,9 +1191,34 @@
       langPicker.addEventListener("change", () => { selectedLang = langPicker.value; if (selectedRating) loadSuggestions(); });
     }
 
-    function paintStars() {
-      starButtons.forEach(b => { b.style.color = Number(b.dataset.star) <= selectedRating ? starColor : "#ddd"; });
+    /** Redraws the track, optionally previewing the value under the pointer. */
+    function paintStars(preview) {
+      const shown = typeof preview === "number" ? preview : selectedRating;
+      starInputs.forEach((track) => {
+        const size = Number(track.dataset.starSize) || 30;
+        track.innerHTML = starsHtml(shown, starColor, "#ddd", size);
+        track.setAttribute("aria-valuenow", String(selectedRating));
+        track.setAttribute(
+          "aria-valuetext",
+          selectedRating ? selectedRating + " out of 5 stars" : "No rating selected"
+        );
+      });
       if (tapHint && selectedRating) tapHint.style.display = "none";
+    }
+
+    /**
+     * The rating for a pointer position across the track.
+     *
+     * Rounded up to the next half so the star under the pointer is always at
+     * least half filled — landing on a star and getting the previous value
+     * feels broken.
+     */
+    function ratingFromPointer(track, clientX) {
+      const box = track.getBoundingClientRect();
+      if (!box.width) return 0;
+      const ratio = (clientX - box.left) / box.width;
+      const value = Math.ceil(ratio * 10) / 2;
+      return Math.max(0.5, Math.min(5, value));
     }
 
     // Suggestions — fetch a large pool (all templates for this rating) once
@@ -1172,10 +1295,33 @@
       });
     }
 
-    starButtons.forEach(btn => {
-      btn.addEventListener("click", async () => {
-        selectedRating = Number(btn.dataset.star); paintStars();
+    starInputs.forEach((track) => {
+      async function commit(value) {
+        selectedRating = value;
+        paintStars();
         if (design.showSuggestionsOnWebsite) await loadSuggestions();
+      }
+
+      track.addEventListener("click", (e) => {
+        commit(ratingFromPointer(track, e.clientX));
+      });
+
+      // Preview on hover, so it is clear which half is about to be picked.
+      track.addEventListener("mousemove", (e) => {
+        paintStars(ratingFromPointer(track, e.clientX));
+      });
+      track.addEventListener("mouseleave", () => paintStars());
+
+      track.addEventListener("keydown", (e) => {
+        const step =
+          e.key === "ArrowRight" || e.key === "ArrowUp"
+            ? 0.5
+            : e.key === "ArrowLeft" || e.key === "ArrowDown"
+              ? -0.5
+              : 0;
+        if (!step) return;
+        e.preventDefault();
+        commit(Math.max(0.5, Math.min(5, (selectedRating || 0) + step)));
       });
     });
 

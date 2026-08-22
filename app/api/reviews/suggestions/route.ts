@@ -21,7 +21,9 @@ export async function OPTIONS() {
  * static templates when AI isn't configured.
  */
 export async function GET(req: NextRequest) {
-  const rating = Number(req.nextUrl.searchParams.get("rating"));
+  // Rounded: shoppers can pick half stars, but the suggestion pool is keyed
+  // by whole star, so 4.5 draws from the 5-star set rather than missing.
+  const rating = Math.round(Number(req.nextUrl.searchParams.get("rating")));
   const productTitle = req.nextUrl.searchParams.get("productTitle") || "this product";
   const productId = req.nextUrl.searchParams.get("productId");
   const shop = req.nextUrl.searchParams.get("shop");

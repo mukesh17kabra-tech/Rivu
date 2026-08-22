@@ -98,7 +98,12 @@ export async function GET(req: NextRequest) {
     });
     const total = allRatings.length;
     const counts = [5, 4, 3, 2, 1].map((star) => {
-      const count = allRatings.filter((r: { rating: number }) => r.rating === star).length;
+      // Bucketed, not matched exactly: a 4.5 belongs in the 5-star row, and
+      // an exact comparison would drop every half rating from the breakdown
+      // while still counting it in the average.
+      const count = allRatings.filter(
+        (r: { rating: number }) => Math.round(r.rating) === star
+      ).length;
       return { star, count, percentage: total ? Math.round((count / total) * 100) : 0 };
     });
     const average = total

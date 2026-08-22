@@ -133,8 +133,10 @@ export function ReviewsTable({
                     <p className="mt-1 max-w-[220px] truncate text-xs text-white/40">{review.body}</p>
                   </td>
                   <td className="px-4 py-3 text-yellow-400 whitespace-nowrap">
-                    {"★".repeat(review.rating)}
-                    {"☆".repeat(5 - review.rating)}
+                    {/* Rounded: String.repeat truncates, so a 4.5 would draw
+                        four filled and no empty stars. */}
+                    {"★".repeat(Math.round(review.rating))}
+                    {"☆".repeat(5 - Math.round(review.rating))}
                   </td>
                   <td className="px-4 py-3">
                     <span

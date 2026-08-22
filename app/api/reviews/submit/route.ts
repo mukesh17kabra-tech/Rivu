@@ -26,7 +26,16 @@ const schema = z.object({
     },
     z.string().url().optional()
   ),
-  rating: z.number().int().min(1).max(5),
+  // Half stars are allowed, quarter stars are not: the picker offers halves,
+  // so anything else came from a hand-made request and would render as a
+  // rating no shopper could have chosen.
+  rating: z
+    .number()
+    .min(1)
+    .max(5)
+    .refine((n) => Number.isInteger(n * 2), {
+      message: "Rating must be a whole or half star",
+    }),
   reviewTitle: z.preprocess((val) => (val === "" ? undefined : val), z.string().max(150).optional()),
   body: z.string().min(10).max(2000),
   customerName: z.string().min(1).max(100),

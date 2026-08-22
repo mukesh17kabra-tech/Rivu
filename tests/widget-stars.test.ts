@@ -117,18 +117,31 @@ describe.each(sources)("%s sort options", (_name, rel) => {
 
   it("offers sorting by rating, not only by date", () => {
     // A shopper looking for the complaints goes straight to the lowest ratings.
-    expect(src).toContain('<option value="highest">');
-    expect(src).toContain('<option value="lowest">');
+    expect(src).toContain('value: "highest"');
+    expect(src).toContain('value: "lowest"');
   });
 
   it("has a comparator for every option it offers", () => {
-    const offered = [...src.matchAll(/<option value="(\w+)">/g)]
-      .map((m) => m[1])
-      .filter((v) => ["newest", "oldest", "highest", "lowest"].includes(v));
+    // Reads the menu the widget actually renders, so an option added to the
+    // list without a comparator fails here rather than silently sorting by
+    // date on someone's storefront.
+    const listStart = src.indexOf("const SORT_OPTIONS = [");
+    const menu = src.slice(listStart, src.indexOf("];", listStart));
+    const offered = [...menu.matchAll(/value: "(\w+)"/g)].map((m) => m[1]);
+    expect(offered.length).toBe(4);
+
     const block = src.slice(src.indexOf("const comparators = {"));
     for (const option of offered) {
       expect(block, `no comparator for "${option}"`).toContain(`${option}:`);
     }
+  });
+
+  it("builds the sort menu as a real menu, not a styled div", () => {
+    // Replacing a native <select> means taking on what it gave away for free:
+    // an expanded state, focusable options, and a way out with the keyboard.
+    expect(src).toContain('aria-haspopup="true"');
+    expect(src).toContain('role="menuitem"');
+    expect(src).toContain('e.key === "Escape"');
   });
 
   it("breaks rating ties by date so the order is stable", () => {

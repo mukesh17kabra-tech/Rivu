@@ -223,7 +223,10 @@ model Review {
   productTitle    String
   productImageUrl String? // used as the background/photo in generated UGC cards
 
-  rating        Int // 1-5
+  // Float, not Int: shoppers can give half stars (3.5, 4.5). Whole-number
+  // rows from before this change convert cleanly. The rating breakdown buckets
+  // by Math.round, so a 4.5 counts toward the 5-star row.
+  rating        Float // 1-5, in steps of 0.5
   reviewTitle   String? // optional short headline, e.g. "Bought the full bag after loving it in the sampler"
   body          String  @db.Text
   customerName  String
