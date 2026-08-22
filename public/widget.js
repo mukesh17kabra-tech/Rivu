@@ -961,7 +961,11 @@
         ? visible.map(reviewCard).join("")
         : `
 <div style="text-align:center;padding:34px 20px;border:1px dashed ${design.borderColor};border-radius:${r}px;background:rgba(0,0,0,.015);">
-  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${design.starColor}" stroke-width="1.5" stroke-linejoin="round" style="opacity:.85;margin-bottom:10px;">
+  <!-- Centred with auto margins rather than by the parent's text-align.
+       An inline svg centres on text-align, but plenty of Shopify themes set
+       "svg { display: block }" globally, which drops it to the left edge — it
+       looked right on one store and wrong on the next. -->
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${design.starColor}" stroke-width="1.5" stroke-linejoin="round" style="display:block;margin:0 auto 10px;opacity:.85;">
     <path d="M12 2.5l2.9 5.9 6.5.95-4.7 4.58 1.11 6.47L12 17.35l-5.81 3.05L7.3 13.93 2.6 9.35l6.5-.95L12 2.5z"/>
   </svg>
   <p style="margin:0 0 4px;font-size:16px;font-weight:600;color:${design.textColor};">No reviews yet</p>

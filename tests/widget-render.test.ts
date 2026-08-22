@@ -86,7 +86,9 @@ async function render(
   design: Record<string, unknown>,
   plan = "pro",
   /** Overrides merged into the single fixture review. */
-  reviewOverrides: Record<string, unknown> = {}
+  reviewOverrides: Record<string, unknown> = {},
+  /** Replaces the whole payload — used for the empty state. */
+  payloadOverrides: Record<string, unknown> = {}
 ): Promise<string> {
   const reviews = REVIEWS.map((r) => ({ ...r, ...reviewOverrides }));
   const target = makeEl();
@@ -143,6 +145,7 @@ async function render(
         ? {
             reviews,
             summary: SUMMARY,
+            ...payloadOverrides,
             plan,
             availableLanguages: [{ code: "en", label: "English" }],
             design,
@@ -442,5 +445,31 @@ describe.each(sources)("%s renders the recommend stat", (_name, source) => {
     const html = await render(source, base);
     expect(html).toContain("would recommend");
     expect(html).toContain("100%");
+  });
+});
+
+describe.each(sources)("%s empty state", (_name, source) => {
+  it("centres the star without relying on the theme", async () => {
+    // text-align only centres an svg while it is inline, and plenty of Shopify
+    // themes set "svg { display: block }" globally — which put the star hard
+    // against the left edge on one merchant's store while looking correct on
+    // another's. Auto margins centre it either way.
+    const html = await render(
+      source,
+      {
+        customTemplateEnabled: false,
+        summaryLayout: "modern",
+        displayStyle: "list",
+        richSnippetsEnabled: false,
+      },
+      "pro",
+      {},
+      { reviews: [], summary: { total: 0, average: 0, breakdown: [], recommend: null } }
+    );
+
+    expect(html).toContain("No reviews yet");
+    const star = html.slice(html.indexOf("No reviews yet") - 700, html.indexOf("No reviews yet"));
+    expect(star).toContain("margin:0 auto");
+    expect(star).not.toMatch(/<svg[^>]*style="opacity:\.85;margin-bottom:10px;"/);
   });
 });
