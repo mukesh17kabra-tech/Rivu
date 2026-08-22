@@ -845,7 +845,9 @@
 
       const filtersHtml = reviews.length > 0 ? `
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid ${design.filterBorderColor};">
-  <span style="font-size:${design.reviewCountFontSize}px;color:${design.filterTextColor};font-weight:500;letter-spacing:-.005em;">
+  <!-- "2 Reviews" reads as one phrase, so it is weighted as one. The count
+       was bold and the word beside it wasn't, which looked like a mistake. -->
+  <span style="font-size:${design.reviewCountFontSize}px;color:${design.textColor};font-weight:700;letter-spacing:-.005em;">
     <span style="color:${design.textColor};font-weight:700;">${sorted.length}</span> Review${sorted.length === 1 ? "" : "s"}${searchTerm.trim() ? " matching “" + escapeHtml(searchTerm.trim()) + "”" : ""}
   </span>
   <div style="display:flex;align-items:center;gap:10px;">
@@ -1190,6 +1192,12 @@
       const panel = el.querySelector(".rv-sort-panel");
       if (!toggle || !panel) return;
 
+      // Belt and braces: re-render replaces these nodes, but if this ever runs
+      // twice against the same one, binding again would reintroduce the
+      // double-toggle. A marked node is skipped.
+      if (toggle.dataset.rvWired) return;
+      toggle.dataset.rvWired = "1";
+
       function close() {
         panel.hidden = true;
         toggle.setAttribute("aria-expanded", "false");
@@ -1217,17 +1225,29 @@
       panel.addEventListener("keydown", (e) => {
         if (e.key === "Escape") { close(); toggle.focus(); }
       });
-      // A menu that only closes by choosing something is a trap; clicking away
-      // has to dismiss it.
-      document.addEventListener("click", (e) => {
-        if (!panel.hidden && !panel.contains(e.target) && e.target !== toggle) close();
-      });
     }
 
-    wireSort();
+    // A menu that only closes by choosing something is a trap; clicking away
+    // has to dismiss it. Registered once for the widget rather than inside
+    // wireSort, which runs again on every re-render — that would have added a
+    // listener per sort, per search keystroke and per "load more", each one
+    // holding a panel that no longer exists.
+    document.addEventListener("click", (e) => {
+      const panel = el.querySelector(".rv-sort-panel");
+      const toggle = el.querySelector(".rv-sort-toggle");
+      if (!panel || panel.hidden) return;
+      if (!panel.contains(e.target) && e.target !== toggle) {
+        panel.hidden = true;
+        if (toggle) toggle.setAttribute("aria-expanded", "false");
+      }
+    });
 
     // Load more
     function rewireMain() {
+      // Wiring happens here only. It used to be called standalone as well, and
+      // because rewireMain also runs during first render the button ended up
+      // with two click listeners — every click flipped the panel twice and the
+      // menu looked dead.
       wireSort();
       const loadMore = el.querySelector(".rv-load-more");
       if (loadMore) loadMore.addEventListener("click", () => { shownCount += REVIEWS_PER_PAGE; el.querySelector(".rv-main-content").innerHTML = buildMain(); rewireMain(); });
