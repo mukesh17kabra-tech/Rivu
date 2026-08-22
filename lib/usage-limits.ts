@@ -15,17 +15,12 @@ import { PLANS, type PlanKey } from "./billing";
  */
 
 export function planOf(plan: string): PlanKey {
-  return plan === "growth" || plan === "pro" ? plan : "free";
+  return plan === "pro" ? "pro" : "free";
 }
 
 export type QuotaCheck =
   | { allowed: true }
-  | { allowed: false; reason: string; upgradeTo: "growth" | "pro" };
-
-/** The next plan up, used to word the upgrade prompt. */
-function nextPlan(plan: PlanKey): "growth" | "pro" {
-  return plan === "free" ? "growth" : "pro";
-}
+  | { allowed: false; reason: string; upgradeTo: "pro" };
 
 /**
  * Monthly review allowance. Counted per calendar month so it resets on a date
@@ -39,7 +34,7 @@ export function checkReviewQuota(plan: string, reviewsThisMonth: number): QuotaC
   return {
     allowed: false,
     reason: `This store has reached its limit of ${cap} reviews this month.`,
-    upgradeTo: nextPlan(key),
+    upgradeTo: "pro",
   };
 }
 
@@ -51,7 +46,7 @@ export function checkVideoAllowed(plan: string): QuotaCheck {
   return {
     allowed: false,
     reason: "Video reviews aren't available on the Free plan.",
-    upgradeTo: "growth",
+    upgradeTo: "pro",
   };
 }
 
@@ -67,7 +62,7 @@ export function rewardCodesAllowed(plan: string): boolean {
 /**
  * Monthly reminder-email allowance. Free sends none: the plans advertise
  * reminders as a paid feature, and sending on Free would give away the thing
- * Growth is bought for.
+ * Pro is bought for.
  */
 export function checkReminderQuota(plan: string, sentThisMonth: number): QuotaCheck {
   const key = planOf(plan);
@@ -78,9 +73,9 @@ export function checkReminderQuota(plan: string, sentThisMonth: number): QuotaCh
   return {
     allowed: false,
     reason: cap === 0
-      ? "Automated reminder emails are available on the Growth plan."
+      ? "Automated reminder emails are available on the Pro plan."
       : `This store has sent its ${cap} reminder emails for this month.`,
-    upgradeTo: nextPlan(key),
+    upgradeTo: "pro",
   };
 }
 
@@ -104,11 +99,9 @@ export function startOfMonth(now: Date = new Date()): Date {
 }
 
 /**
- * Wording for a merchant approaching their limit. Silence until 80% — a
- * warning shown from the first review would be noise, not a signal.
- */
-/**
  * The warning text for a usage level, independent of any plan.
+ *
+ * Silence until 80% — a warning from the first review would be noise.
  *
  * Split out from usageWarning because no plan caps reviews any more — Free is
  * unlimited — so routing this through a plan would leave the threshold logic

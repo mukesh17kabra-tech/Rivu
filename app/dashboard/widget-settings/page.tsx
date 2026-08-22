@@ -35,7 +35,7 @@ export default async function WidgetSettingsPage({
       >
         <DesignForm
             shop={shop}
-            plan={shopRecord.plan as "free" | "growth" | "pro"}
+            plan={shopRecord.plan === "pro" ? "pro" : "free"}
             initial={{
               displayStyle: shopRecord.displayStyle as "list" | "grid" | "carousel" | "masonry",
               splitSummary: shopRecord.splitSummary,

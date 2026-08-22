@@ -67,13 +67,11 @@ describe("every layout is wired through the whole stack", () => {
 });
 
 describe("plan tiers expand downward", () => {
-  it("free is a subset of growth, growth of pro", () => {
+  it("free is a subset of pro", () => {
     const free = summaryLayoutsFor("free");
-    const growth = summaryLayoutsFor("growth");
     const pro = summaryLayoutsFor("pro");
 
-    expect(free.every((k) => growth.includes(k))).toBe(true);
-    expect(growth.every((k) => pro.includes(k))).toBe(true);
+    expect(free.every((k) => pro.includes(k))).toBe(true);
     expect(pro).toEqual(SUMMARY_LAYOUT_KEYS);
   });
 
@@ -83,7 +81,7 @@ describe("plan tiers expand downward", () => {
   });
 
   it("every plan has at least one form template", () => {
-    for (const plan of ["free", "growth", "pro"] as const) {
+    for (const plan of ["free", "pro"] as const) {
       expect(formTemplatesFor(plan).length).toBeGreaterThan(0);
     }
   });
@@ -107,5 +105,30 @@ describe("the free defaults are themselves valid on the free plan", () => {
 
   it("default display style is allowed on free", () => {
     expect(DISPLAY_STYLE_KEYS).toContain(FREE_PLAN_DESIGN_DEFAULTS.displayStyle);
+  });
+});
+
+/**
+ * The picker must read its gating from this module rather than restating it.
+ *
+ * The same list used to be written out by hand in four places, and the API
+ * validator was the one that got missed — so choosing a locked layout saved
+ * silently as another, with no error anywhere. A hand-kept copy in the form is
+ * how that returns.
+ */
+describe("DesignForm derives its locking from here", () => {
+  const form = readFileSync(
+    path.resolve(__dirname, "../components/DesignForm.tsx"),
+    "utf8"
+  );
+
+  it("asks this module which options the plan allows", () => {
+    expect(form).toContain("summaryLayoutsFor(plan)");
+    expect(form).toContain("formTemplatesFor(plan)");
+  });
+
+  it("keeps no hand-written copy of the tier lists", () => {
+    expect(form).not.toMatch(/const\s+\w*[Ll]ayouts\s*:\s*string\[\]\s*=/);
+    expect(form).not.toMatch(/growth/i);
   });
 });

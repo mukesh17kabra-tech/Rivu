@@ -33,8 +33,6 @@ const FORMATS = [
 
 const PLAN_TEMPLATE_COUNTS: Record<string, number> = {
   free: 1,
-  starter: 2,
-  growth: Infinity,
   pro: Infinity,
 };
 

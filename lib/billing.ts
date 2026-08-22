@@ -30,25 +30,6 @@ export const PLANS = {
     languageCount: 1, // English only
     brandingRemoved: false, // Free plan shows "Powered by Rivu" on the widget
   },
-  /**
-   * Legacy. Retired from the pricing page in favour of two tiers, but kept as
-   * a plan key because Shopify may still report an active "Growth"
-   * subscription for a shop that signed up under it. Entitlements match Pro:
-   * anyone already paying keeps everything, and nobody gets a feature removed
-   * from under them by a pricing change they did not ask for.
-   */
-  growth: {
-    name: "Growth",
-    price: 12.99,
-    reviewsPerMonthCap: Infinity,
-    qrProductCap: Infinity,
-    templateCount: 8,
-    photoReviewCap: 3,
-    videoReviewCap: 2,
-    reminderMonthlyCap: Infinity,
-    languageCount: Infinity,
-    brandingRemoved: true,
-  },
   pro: {
     name: "Pro",
     price: 14.99,
@@ -65,7 +46,7 @@ export const PLANS = {
 
 export type PlanKey = keyof typeof PLANS;
 
-/** Plans offered to new merchants. `growth` is honoured but never sold. */
+/** Every plan a merchant can be on. */
 export const SELLABLE_PLANS: PlanKey[] = ["free", "pro"];
 
 // Defined in lib/design-options.ts, which imports nothing and is therefore
@@ -131,7 +112,7 @@ export async function getActivePlanFromShopify(
 
   // Match Shopify's plan name against our own, case-insensitively. Managed
   // pricing names come from the Partner Dashboard, so tolerate extra words
-  // like "Rivu — Growth Plan" as well as a bare "Growth".
+  // like "Rivu — Pro Plan" as well as a bare "Pro".
   //
   // "free" is matched here too. Managed pricing issues a real ACTIVE
   // subscription named "Free" rather than leaving the list empty, so
@@ -141,7 +122,7 @@ export async function getActivePlanFromShopify(
   //
   // Paid names are checked first: a shop on "Pro" must never match a
   // substring of the free plan's name.
-  const matchOrder: PlanKey[] = ["pro", "growth", "free"];
+  const matchOrder: PlanKey[] = ["pro", "free"];
   for (const key of matchOrder) {
     const planName = PLANS[key].name.toLowerCase();
     if (active.some((sub) => sub.name.toLowerCase().includes(planName))) {

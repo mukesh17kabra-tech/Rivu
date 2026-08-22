@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
     });
     const unsubscribedEmails = new Set(unsubscribed.map((u: { customerEmail: string }) => u.customerEmail));
 
-    // The plans advertise a monthly reminder allowance — Free none, Growth
+    // The plans advertise a monthly reminder allowance — Free none, Pro
     // 50, Pro unlimited — so it has to be counted. Sends are stamped with
     // reminderSentAt, which makes this month's total a single query.
     let sentThisMonth = await db.pendingReviewRequest.count({

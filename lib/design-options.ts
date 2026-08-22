@@ -13,10 +13,10 @@
  * from server routes.
  */
 
-export type PlanTier = "free" | "growth" | "pro";
+export type PlanTier = "free" | "pro";
 
 /** Plans ordered cheapest first — used to expand "available from this tier". */
-export const PLAN_ORDER: PlanTier[] = ["free", "growth", "pro"];
+export const PLAN_ORDER: PlanTier[] = ["free", "pro"];
 
 /**
  * Whether a plan carries the paid entitlements.
@@ -24,13 +24,12 @@ export const PLAN_ORDER: PlanTier[] = ["free", "growth", "pro"];
  * Lives here rather than beside the prices in lib/billing.ts because that
  * module pulls in Prisma, and this one is imported by client components.
  *
- * "growth" is a retired tier, kept because Shopify may still report an active
- * Growth subscription for a shop that signed up under it. A single predicate
- * means it can't be honoured by one gate and forgotten by another — which is
- * how a merchant ends up locked out of something they're still paying for.
+ * One predicate rather than a comparison at each gate: a plan honoured in one
+ * place and forgotten in another is how a merchant ends up locked out of
+ * something they are paying for.
  */
 export function isPaidPlan(plan: string): boolean {
-  return plan === "pro" || plan === "growth";
+  return plan === "pro";
 }
 
 export type DesignOption<K extends string> = {
@@ -44,9 +43,9 @@ export type DesignOption<K extends string> = {
 export const SUMMARY_LAYOUTS = [
   { key: "modern", label: "Modern Card", minPlan: "free", description: "Rating box, bars, button" },
   { key: "minimal", label: "Minimal", minPlan: "free", description: "Just the score — no bars" },
-  { key: "compact", label: "Compact", minPlan: "growth", description: "Circle rating, clean bars" },
-  { key: "sidebar", label: "Left Sidebar", minPlan: "growth", description: "Sticky left, reviews right" },
-  { key: "stacked", label: "Stacked", minPlan: "growth", description: "Score above full-width bars" },
+  { key: "compact", label: "Compact", minPlan: "pro", description: "Circle rating, clean bars" },
+  { key: "sidebar", label: "Left Sidebar", minPlan: "pro", description: "Sticky left, reviews right" },
+  { key: "stacked", label: "Stacked", minPlan: "pro", description: "Score above full-width bars" },
   { key: "horizontal", label: "Horizontal Bar", minPlan: "pro", description: "All in one slim row" },
   { key: "iconpct", label: "Icon + Percentage", minPlan: "pro", description: "People icons per star with %" },
   { key: "split", label: "Split Panel", minPlan: "pro", description: "Colour-filled score beside bars" },
@@ -54,15 +53,15 @@ export const SUMMARY_LAYOUTS = [
 
 export const FORM_TEMPLATES = [
   { key: "basic", label: "Basic", minPlan: "free", description: "Clean, plain form" },
-  { key: "card", label: "Card", minPlan: "growth", description: "Elevated card style" },
-  { key: "minimal", label: "Minimal", minPlan: "growth", description: "Stripped back" },
+  { key: "card", label: "Card", minPlan: "pro", description: "Elevated card style" },
+  { key: "minimal", label: "Minimal", minPlan: "pro", description: "Stripped back" },
   { key: "dark", label: "Dark", minPlan: "pro", description: "Dark modal" },
 ] as const satisfies readonly DesignOption<string>[];
 
 export const DISPLAY_STYLES = [
   { key: "list", label: "List", minPlan: "free", description: "One review per row" },
   { key: "grid", label: "Grid", minPlan: "free", description: "Cards in a grid" },
-  { key: "masonry", label: "Masonry", minPlan: "growth", description: "Staggered columns" },
+  { key: "masonry", label: "Masonry", minPlan: "pro", description: "Staggered columns" },
   { key: "carousel", label: "Carousel", minPlan: "pro", description: "Swipeable row" },
 ] as const satisfies readonly DesignOption<string>[];
 
@@ -106,13 +105,7 @@ export function displayStylesFor(plan: PlanTier): string[] {
   return allowedFor(DISPLAY_STYLES, plan);
 }
 
-/**
- * Tier badge for the picker.
- *
- * Everything paid reads as "Pro" now. Options introduced at the Growth tier
- * kept their `minPlan`, so labelling them "Growth+" would advertise a plan a
- * new merchant cannot buy and cannot find on the pricing page.
- */
+/** Tier badge for the picker — blank on Free, "Pro" on everything paid. */
 export function planBadge(minPlan: PlanTier): string {
   return minPlan === "free" ? "" : "Pro";
 }
@@ -122,8 +115,8 @@ export function planBadge(minPlan: PlanTier): string {
  *
  * Free shops still get suggestions — the hand-written templates in
  * lib/review-suggestions.ts — so the feature never simply disappears. What
- * Growth and Pro buy is generation: a large, per-store pool where each line is
- * offered to one shopper only.
+ * Pro buys is generation: a large, per-store pool where each line is offered
+ * to one shopper only.
  *
  * Gated because generation costs real money per shop. Without this a Free
  * store's shoppers would spend the app's model quota.
@@ -133,7 +126,7 @@ export function aiSuggestionsAllowed(plan: string): boolean {
 }
 
 /** Lowest plan that unlocks AI suggestions — drives the upgrade prompt. */
-export const AI_SUGGESTIONS_MIN_PLAN: PlanTier = "growth";
+export const AI_SUGGESTIONS_MIN_PLAN: PlanTier = "pro";
 
 /**
  * The custom widget template is a paid feature.
@@ -142,8 +135,6 @@ export const AI_SUGGESTIONS_MIN_PLAN: PlanTier = "growth";
  * stops rendering their custom layout immediately rather than keeping a paid
  * feature until they next touch the settings.
  *
- * Legacy Growth subscribers are included: they are still being charged, so
- * excluding them would take away a feature they are paying for.
  */
 export function customTemplateAllowed(plan: string): boolean {
   return isPaidPlan(plan);

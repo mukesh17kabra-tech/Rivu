@@ -4,7 +4,7 @@ import { PLANS } from "@/lib/billing";
  * These must match what Shopify charges — a card advertising one number while
  * checkout shows another is a trust problem, not a cosmetic one.
  */
-function priceLabel(key: "free" | "growth" | "pro") {
+function priceLabel(key: "free" | "pro") {
   const price = PLANS[key].price;
   return price === 0 ? "$0/mo" : `$${price}/mo`;
 }
@@ -20,9 +20,6 @@ function priceLabel(key: "free" | "growth" | "pro") {
  * Video stays paid because media is stored as base64 in Postgres, so it is the
  * one thing here whose cost genuinely scales with use.
  *
- * Growth is retired and deliberately absent: it is still honoured for anyone
- * subscribed under it (with Pro's entitlements), but showing a third card for
- * a plan nobody can buy only makes the choice harder.
  */
 export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: string }) {
   return (
@@ -77,16 +74,6 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
         current={currentPlan === "pro"}
       />
 
-      {/* Only shown to someone actually on the retired tier, so they can see
-          their plan is recognised rather than wondering why it vanished. */}
-      {currentPlan === "growth" && (
-        <p className="sm:col-span-2 rounded-md border border-white/10 bg-white/[0.02] p-3 text-xs text-white/50">
-          You&apos;re on the <strong className="text-white/75">Growth</strong> plan
-          (${PLANS.growth.price}/mo). It&apos;s no longer offered to new stores,
-          but yours keeps every Pro feature at the price you signed up for —
-          nothing changes unless you switch.
-        </p>
-      )}
     </section>
   );
 }

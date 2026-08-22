@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { aiSuggestionsAllowed } from "@/lib/design-options";
+import {
+  aiSuggestionsAllowed,
+  formTemplatesFor,
+  summaryLayoutsFor,
+} from "@/lib/design-options";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 
 export type DesignSettings = {
@@ -111,7 +115,7 @@ export function DesignForm({
   initial,
 }: {
   shop: string;
-  plan: "free" | "growth" | "pro";
+  plan: "free" | "pro";
   initial: DesignSettings;
 }) {
   const [settings, setSettings] = useState<DesignSettings>(initial);
@@ -122,7 +126,7 @@ export function DesignForm({
 
   const isFree = plan === "free";
   const isPro = plan === "pro";
-  const languageCap = plan === "free" ? 1 : plan === "growth" ? 6 : 10;
+  const languageCap = plan === "free" ? 1 : 10;
 
   function update<K extends keyof DesignSettings>(key: K, value: DesignSettings[K]) {
     setSettings((s) => ({ ...s, [key]: value }));
@@ -704,15 +708,10 @@ export function DesignForm({
             { key: "iconpct", label: "Icon + Percentage", plan: "Pro only", desc: "People icons per star with %" },
             { key: "split", label: "Split Panel", plan: "Pro only", desc: "Colour-filled score beside bars" },
           ] as const).map((item) => {
-            // Mirrors summaryLayoutsByPlan in lib/plan-gating.ts, which is
-            // what actually enforces this at save time.
-            const freeLayouts: string[] = ["modern", "minimal"];
-            const growthLayouts: string[] = [...freeLayouts, "compact", "sidebar", "stacked"];
-            const locked = isFree
-              ? !freeLayouts.includes(item.key)
-              : plan === "growth"
-                ? !growthLayouts.includes(item.key)
-                : false;
+            // Read from the shared source rather than restated here. This
+            // used to be a hand-kept copy of the same list, which is exactly
+            // how choosing a locked layout once saved silently as another.
+            const locked = !summaryLayoutsFor(plan).includes(item.key);
             const isSelected = settings.summaryLayout === item.key;
             return (
               <button
@@ -1002,7 +1001,7 @@ export function DesignForm({
           {(["basic", "card", "minimal", "dark"] as const).map((t, i) => {
             const labels = { basic: "Basic", card: "Card", minimal: "Minimal", dark: "Dark" };
             const planLabels = { basic: "", card: "Pro", minimal: "Pro", dark: "Pro" };
-            const locked = (isFree && i > 0) || (plan === "growth" && i >= 3);
+            const locked = !formTemplatesFor(plan).includes(t);
             const isSelected = settings.formTemplate === t;
 
             // Mini form preview colours

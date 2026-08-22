@@ -7,7 +7,7 @@ import { formTemplatesFor, summaryLayoutsFor } from "./design-options";
 // components/DesignForm.tsx to show locked controls with an upgrade hint
 // before the user even tries to save.
 
-export type PlanTier = "free" | "growth" | "pro";
+export type PlanTier = "free" | "pro";
 
 export type DesignInput = {
   displayStyle: string;
@@ -26,11 +26,8 @@ export type DesignInput = {
   [key: string]: unknown;
 };
 
-// Growth is a retired tier kept for merchants who subscribed under it; it gets
-// the Pro allowance so nobody loses a feature they're still paying for.
 const LANGUAGE_CAP_BY_PLAN: Record<PlanTier, number> = {
   free: 1,
-  growth: 10,
   pro: 10,
 };
 
@@ -105,20 +102,20 @@ export function clampDesignToPlan<T extends DesignInput>(
     }
   }
 
-  // Summary layout gating: Free=modern only, Growth=modern/compact/sidebar, Pro=all
+  // Summary layout gating: Free=modern only, Pro=all
   if (!summaryLayoutsFor(plan).includes(clamped.summaryLayout as string)) {
     clamped.summaryLayout = FREE_PLAN_DESIGN_DEFAULTS.summaryLayout;
     lockedFields.push("summaryLayout");
   }
 
-  // Form template gating: Free=basic only, Growth=basic/card/minimal, Pro=all four
+  // Form template gating: Free=basic only, Pro=all four
   if (!formTemplatesFor(plan).includes(clamped.formTemplate as string)) {
     clamped.formTemplate = "basic";
     lockedFields.push("formTemplate");
   }
 
-  // Language count cap applies to every plan (not just Free) — Growth
-  // can pick UP TO 6, Pro up to 10. "en" is always force-included so a
+  // Language count cap applies to every plan (not just Free) — Free gets
+  // English only, Pro up to 10. "en" is always force-included so a
   // shop never ends up with zero languages (e.g. if a merchant somehow
   // unchecks everything).
   const cap = LANGUAGE_CAP_BY_PLAN[plan];
@@ -129,7 +126,7 @@ export function clampDesignToPlan<T extends DesignInput>(
     if (withEnglish.length > cap) lockedFields.push("enabledLanguages (too many for plan)");
   }
 
-  // Carousel itself (regardless of Free/Growth) is Pro-only.
+  // Carousel is Pro-only.
   if (!isCarouselAllowed && clamped.displayStyle === "carousel") {
     clamped.displayStyle = "grid";
     lockedFields.push("displayStyle (carousel)");

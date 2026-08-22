@@ -31,7 +31,7 @@ describe("monthly review quota", () => {
     // carry unlimited reviews, so a cap meant the app stopped working exactly
     // when a store started succeeding. Text reviews cost almost nothing to
     // store, so the cap bought nothing and cost every install.
-    for (const plan of ["free", "growth", "pro"]) {
+    for (const plan of ["free", "pro"]) {
       expect(checkReviewQuota(plan, 1_000_000).allowed, plan).toBe(true);
     }
   });
@@ -39,7 +39,7 @@ describe("monthly review quota", () => {
   it("keeps every plan unlimited in the pricing table", () => {
     // Guards the policy at its source: if a cap is reintroduced here, the
     // enforcement path and its wording need revisiting with it.
-    for (const plan of ["free", "growth", "pro"] as const) {
+    for (const plan of ["free", "pro"] as const) {
       expect(Number.isFinite(PLANS[plan].reviewsPerMonthCap), plan).toBe(false);
     }
   });
@@ -63,13 +63,13 @@ describe("video reviews", () => {
     expect(checkVideoAllowed("free").allowed).toBe(false);
   });
 
-  it.each(["growth", "pro"])("are allowed on %s", (plan) => {
-    expect(checkVideoAllowed(plan).allowed).toBe(true);
+  it("are allowed on pro", () => {
+    expect(checkVideoAllowed("pro").allowed).toBe(true);
   });
 
   it("matches the advertised caps", () => {
     expect(PLANS.free.videoReviewCap).toBe(0);
-    expect(PLANS.growth.videoReviewCap).toBeGreaterThan(0);
+    expect(PLANS.pro.videoReviewCap).toBeGreaterThan(0);
   });
 });
 
@@ -79,8 +79,8 @@ describe("per-product QR codes", () => {
     expect(Number.isFinite(qrProductLimit("free"))).toBe(true);
   });
 
-  it.each(["growth", "pro"])("is unlimited on %s", (plan) => {
-    expect(Number.isFinite(qrProductLimit(plan))).toBe(false);
+  it("is unlimited on pro", () => {
+    expect(Number.isFinite(qrProductLimit("pro"))).toBe(false);
   });
 });
 
@@ -108,7 +108,7 @@ describe("the merchant is warned before they hit the wall", () => {
 
   it("never warns an unlimited plan", () => {
     expect(warningForUsage(10_000, Infinity)).toBeNull();
-    for (const plan of ["free", "growth", "pro"]) {
+    for (const plan of ["free", "pro"]) {
       expect(usageWarning(plan, 10_000), plan).toBeNull();
     }
   });
@@ -202,15 +202,7 @@ describe("monthly reminder allowance", () => {
   it("sends none on free", () => {
     const check = checkReminderQuota("free", 0);
     expect(check.allowed).toBe(false);
-    expect(check.allowed === false && check.upgradeTo).toBe("growth");
-  });
-
-  it("gives the retired Growth tier the Pro allowance", () => {
-    // Growth is no longer sold, but Shopify may still report an active Growth
-    // subscription. Anyone still being charged keeps everything — a pricing
-    // change must not quietly remove a feature from under a paying merchant.
-    expect(checkReminderQuota("growth", 100_000).allowed).toBe(true);
-    expect(PLANS.growth.reminderMonthlyCap).toBe(PLANS.pro.reminderMonthlyCap);
+    expect(check.allowed === false && check.upgradeTo).toBe("pro");
   });
 
   it("never limits pro", () => {
@@ -234,6 +226,7 @@ describe("Pro-only features are actually Pro-only", () => {
 
   it("refuses to enable reward codes below Pro", () => {
     expect(rewardCodesAllowed("free")).toBe(false);
+    // An unrecognised plan must not unlock a Pro-only feature.
     expect(rewardCodesAllowed("growth")).toBe(false);
     expect(rewardCodesAllowed("pro")).toBe(true);
   });
@@ -262,29 +255,23 @@ describe("the cards only claim features that exist", () => {
 });
 
 /**
- * Growth was retired in favour of two tiers, but merchants who subscribed
- * under it may still have an active Growth subscription in Shopify. Every
- * entitlement must match Pro: they are still being charged, so losing a
- * feature to a pricing change they did not ask for would be indefensible.
+ * There are exactly two plans. A third tier existed briefly and was removed
+ * before anyone subscribed to it, so there is no legacy to carry — but any
+ * stray "growth" string left in a database row must land on Free rather than
+ * quietly granting paid features.
  */
-describe("the retired Growth tier", () => {
-  it("matches Pro on every entitlement", () => {
-    const growth = PLANS.growth as Record<string, unknown>;
-    const pro = PLANS.pro as Record<string, unknown>;
-
-    for (const key of Object.keys(pro)) {
-      // Name and price are what make it a different plan; everything that
-      // decides what the merchant can *do* has to be identical.
-      if (key === "name" || key === "price") continue;
-      expect(growth[key], `Growth.${key} differs from Pro`).toBe(pro[key]);
-    }
+describe("plans", () => {
+  it("has exactly two", () => {
+    expect(Object.keys(PLANS).sort()).toEqual(["free", "pro"]);
   });
 
-  it("is treated as paid by the shared predicate", () => {
-    expect(isPaidPlan("growth")).toBe(true);
+  it("treats only pro as paid, and fails closed on anything unknown", () => {
     expect(isPaidPlan("pro")).toBe(true);
     expect(isPaidPlan("free")).toBe(false);
-    expect(isPaidPlan("nonsense")).toBe(false);
+    for (const unknown of ["growth", "starter", "", "PRO", "enterprise"]) {
+      expect(isPaidPlan(unknown), unknown).toBe(false);
+      expect(planOf(unknown), unknown).toBe("free");
+    }
   });
 
   it("is not offered to new merchants", () => {
@@ -313,12 +300,37 @@ describe("the retired tier is not advertised", () => {
     expect(src).not.toMatch(/plan=growth/);
   });
 
-  it("PlanCards mentions Growth only to reassure an existing subscriber", () => {
+  it("PlanCards does not mention the removed tier at all", () => {
     const src = readFileSync(
       path.resolve(__dirname, "../components/PlanCards.tsx"),
       "utf8"
     );
-    // The one legitimate mention is behind a check on the merchant's own plan.
-    expect(src).toContain('currentPlan === "growth"');
+    expect(src).not.toMatch(/growth/i);
+  });
+});
+
+/**
+ * The price a merchant reads and the price Shopify charges have to agree.
+ *
+ * The pricing tables in MARKETING.md and GO-TO-MARKET.md are pasted into the
+ * App Store listing, so a number left behind there advertises a price the app
+ * does not charge — a trust problem rather than a typo.
+ */
+describe("the advertised price matches the code", () => {
+  const docs = ["../MARKETING.md", "../GO-TO-MARKET.md"];
+
+  it.each(docs)("%s quotes the current Pro price", (rel) => {
+    const text = readFileSync(path.resolve(__dirname, rel), "utf8");
+    const current = `$${PLANS.pro.price}`;
+    expect(text, `expected ${current} somewhere in ${rel}`).toContain(current);
+  });
+
+  it.each(docs)("%s does not quote a retired price", (rel) => {
+    const text = readFileSync(path.resolve(__dirname, rel), "utf8");
+    // The three-tier prices. Left in place they would undercut or oversell the
+    // real one depending on which the merchant happened to read.
+    for (const stale of ["$29.99", "$12.99"]) {
+      expect(text, `${rel} still quotes ${stale}`).not.toContain(stale);
+    }
   });
 });

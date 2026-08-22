@@ -242,19 +242,18 @@ Self-promotion in these communities is noticed instantly and permanently.
 Two tiers. Free is genuinely free: **unlimited reviews**, no trial clock, no
 card. Pro is **$14.99/mo**.
 
-The old three-tier structure priced Free at 25 reviews/month and Pro at
-$29.99. Both were wrong for this market:
+The old three-tier structure capped Free at 25 reviews/month and priced Pro
+at twice the current figure. Both were wrong for this market:
 
 - Competing free plans carry unlimited reviews, so a 25/month cap meant Rivu
   stopped working exactly when a store started succeeding. Anyone comparing
   the two picked the unlimited one in seconds, and the cap saved nothing —
   text reviews cost almost nothing to store.
-- $29.99 against a $15 competitor with more features is not a position you can
-  argue from, whatever the listing says.
+- Charging double a $15 competitor that ships more features is not a position
+  you can argue from, whatever the listing says.
 
-**Growth is retired** but still honoured: any merchant subscribed under it
-keeps every Pro feature at $12.99. Nobody loses a feature to a pricing change
-they did not ask for.
+**Growth has been removed entirely.** It never had a subscriber, so there was
+no legacy to carry and no reason to keep a third tier of branching in the code.
 
 ### You must update Shopify Managed Pricing
 
@@ -263,8 +262,9 @@ there, the code and the checkout disagree.
 
 1. Partner Dashboard → Apps → Rivu → **Pricing**
 2. Set the Pro plan to **$14.99/mo**, keep the 4-day trial
-3. **Do not delete the Growth plan** — deleting it cancels existing
-   subscribers. Hide it from new signups instead.
+3. **Delete the Growth plan.** It has no subscribers, so nothing is cancelled.
+   (Had there been any, deleting would cancel them — hiding it would be the
+   move instead.)
 4. Confirm the plan is still literally named "Pro": plan detection matches on
    the name, so renaming it to something like "Premium" silently drops paying
    merchants back to Free.

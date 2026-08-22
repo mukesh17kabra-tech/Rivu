@@ -31,7 +31,7 @@ export function DowngradeNotice({ currentPlan, shop }: { currentPlan: string; sh
       return;
     }
 
-    const wasPaid = lastPlan === "growth" || lastPlan === "pro";
+    const wasPaid = lastPlan === "pro";
     const nowFree = currentPlan === "free";
 
     // Always update stored plan

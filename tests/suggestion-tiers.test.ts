@@ -27,8 +27,8 @@ describe("who gets AI suggestions", () => {
     expect(aiSuggestionsAllowed("free")).toBe(false);
   });
 
-  it.each(["growth", "pro"])("%s does", (plan) => {
-    expect(aiSuggestionsAllowed(plan)).toBe(true);
+  it("pro does", () => {
+    expect(aiSuggestionsAllowed("pro")).toBe(true);
   });
 
   it("an unknown plan is treated as unpaid", () => {
