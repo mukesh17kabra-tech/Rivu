@@ -119,9 +119,14 @@ export async function POST(req: NextRequest) {
   await db.review.create({
     data: {
       shopId: shopRecord.id,
-      approved: shopRecord.autoApproveReviews,
       ...data,
       videoUrl,
+      // After the spread, not before it. `data` cannot carry `approved` today
+      // because the schema doesn't declare it and zod strips unknown keys, but
+      // that is a subtle thing to be relying on: adding the field to the schema
+      // later would let a shopper publish their own review while the merchant
+      // had moderation switched on.
+      approved: shopRecord.autoApproveReviews,
     },
   });
 

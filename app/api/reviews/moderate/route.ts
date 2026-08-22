@@ -15,7 +15,14 @@ export async function POST(req: NextRequest) {
   }
 
 
-  if (!shop || !reviewId || !["approve", "reject", "unpublish"].includes(action)) {
+  // approveAll works on the whole pending queue, so it is the one action
+  // without a review id.
+  const needsId = action !== "approveAll";
+  if (
+    !shop ||
+    (needsId && !reviewId) ||
+    !["approve", "reject", "unpublish", "approveAll"].includes(action)
+  ) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
@@ -28,6 +35,18 @@ export async function POST(req: NextRequest) {
   // already-refreshed table, say), which surfaced as a 500. That's a missing
   // review, not a server fault — report it as one.
   try {
+    if (action === "approveAll") {
+      // "Publish automatically" only decides what happens to reviews as they
+      // arrive — it cannot reach back and publish ones already held. A
+      // merchant who turns it on reasonably expects nothing to be pending, so
+      // this clears the queue in one go rather than one review at a time.
+      const { count } = await db.review.updateMany({
+        where: { shopId: shopRecord.id, approved: false },
+        data: { approved: true },
+      });
+      return NextResponse.json({ success: true, published: count });
+    }
+
     if (action === "approve") {
       await db.review.update({
         where: { id: reviewId, shopId: shopRecord.id },
