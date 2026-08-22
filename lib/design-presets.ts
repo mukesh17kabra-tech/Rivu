@@ -242,6 +242,103 @@ export const DESIGN_PRESETS: DesignPreset[] = [
 }`,
   },
   {
+    key: "classic",
+    label: "Classic",
+    description: "Big heading, score line and star bars. The layout shoppers already know.",
+    html: `<div class="rv-cl">
+  <div class="rv-cl-top">
+    <h2 class="rv-cl-title">{{title}}</h2>
+    <div class="rv-cl-actions">{{write_button}}</div>
+  </div>
+
+  <div class="rv-cl-score">
+    <span class="rv-cl-stars">{{stars}}</span>
+    <span class="rv-cl-avg">{{average}} out of 5</span>
+    <span class="rv-cl-sep"></span>
+    <span class="rv-cl-count">{{count}}</span>
+  </div>
+
+  <div class="rv-cl-bars">{{breakdown}}</div>
+
+  {{review_list}}
+</div>`,
+    css: `.rv-cl-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.rv-cl-title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+}
+.rv-cl-actions {
+  margin-left: auto;
+}
+.rv-cl-score {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+/* {{stars}} is five separate <svg>s, so it needs its own row wrapper. */
+.rv-cl-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.rv-cl-avg {
+  font-size: 15px;
+  font-weight: 600;
+}
+/* A hairline divider between the score and the count, as a border rather than
+   a "|" character — a pipe would be read aloud by a screen reader. */
+.rv-cl-sep {
+  width: 1px;
+  height: 15px;
+  background: #d8d8de;
+}
+.rv-cl-count {
+  font-size: 15px;
+  color: #6d6d78;
+}
+.rv-cl-bars {
+  max-width: 420px;
+  margin-bottom: 28px;
+}
+
+/* Review list: plain rows under a single rule, so the summary above stays the
+   focus. */
+.rv-list {
+  gap: 0;
+}
+.rv-card {
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 22px 0;
+  border-top: 1px solid #ececf1;
+}
+.rv-card-title {
+  font-style: normal;
+  font-size: 16px;
+}
+.rv-card-body {
+  font-size: 14px;
+  line-height: 1.7;
+}
+@media (max-width: 560px) {
+  .rv-cl-title { font-size: 23px; }
+  .rv-cl-actions { margin-left: 0; flex-basis: 100%; }
+}`,
+  },
+  {
     key: "compact-bar",
     label: "Compact bar",
     description: "One slim row above the reviews. Best when space is tight.",

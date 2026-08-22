@@ -164,8 +164,49 @@
     if (h >= 1) return `${Math.round(h)} hour${Math.round(h) > 1 ? "s" : ""} ago`;
     return "just now";
   }
+  const STAR_PATH = "M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z";
+
+  function starSvg(fill, size) {
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + fill +
+      '" style="display:block;flex-shrink:0"><path d="' + STAR_PATH + '"/></svg>';
+  }
+
+  /**
+   * Stars for a rating, including halves.
+   *
+   * This used to be called with Math.round, so a 4.5 average drew five solid
+   * stars — the widget claimed a perfect score for a store that didn't have
+   * one. Overstating a merchant's rating is worse than a cosmetic bug: their
+   * shoppers see it, and it's the number the whole app exists to report.
+   *
+   * The half star is a clipped overlay rather than an SVG gradient or clipPath,
+   * both of which need an id. Several widgets can share a page (product page,
+   * badge, related products), and duplicate ids would make one instance's
+   * gradient silently apply to another's stars.
+   */
   function starsHtml(n, color, empty = "#e0e0e0", size = 16) {
-    return [1,2,3,4,5].map(i => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${i<=n?color:empty}" style="display:inline-block;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>`).join("");
+    var rating = Number(n) || 0;
+    var out = "";
+
+    for (var i = 1; i <= 5; i++) {
+      var fillFraction = Math.max(0, Math.min(1, rating - (i - 1)));
+
+      if (fillFraction >= 0.75) {
+        out += starSvg(color, size);
+      } else if (fillFraction >= 0.25) {
+        out +=
+          '<span style="position:relative;display:inline-block;width:' + size +
+          'px;height:' + size + 'px;flex-shrink:0;">' +
+          starSvg(empty, size) +
+          '<span style="position:absolute;top:0;left:0;width:50%;height:100%;overflow:hidden;">' +
+          starSvg(color, size) +
+          "</span></span>";
+      } else {
+        out += starSvg(empty, size);
+      }
+    }
+
+    return out;
   }
 
   const REVIEWS_PER_PAGE = 10;
@@ -432,13 +473,27 @@
     }
 
     // ─── Sort + slice ─────────────────────────────────────────────
+    /**
+     * Sorts the review list.
+     *
+     * Rating order matters more than it looks: a shopper who wants to know
+     * what the complaints are goes straight for the lowest ratings, and every
+     * established review app offers it. Ties fall back to newest first, so the
+     * order is stable rather than whatever the database happened to return.
+     */
     function getSortedReviews() {
-      const sorted = [...reviews].sort((a, b) =>
-        sortOrder === "newest"
-          ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          : new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-      return sorted;
+      const byNewest = (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+      const comparators = {
+        newest: byNewest,
+        oldest: (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        highest: (a, b) => b.rating - a.rating || byNewest(a, b),
+        lowest: (a, b) => a.rating - b.rating || byNewest(a, b),
+      };
+
+      return [...reviews].sort(comparators[sortOrder] || byNewest);
     }
 
     // ─── Build summary + review list DOM ─────────────────────────
@@ -502,10 +557,10 @@
           + '<div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">'
           +   '<div style="background:' + rangeColor + ';border-radius:10px;padding:12px 16px;text-align:center;min-width:76px;">'
           +     '<div style="font-family:Georgia,serif;font-size:34px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</div>'
-          +     '<div style="display:flex;justify-content:center;gap:1px;margin-top:5px;">' + starsHtml(Math.round(summary.average), '#fff', 'rgba(255,255,255,.35)', 12) + '</div>'
+          +     '<div style="display:flex;justify-content:center;gap:1px;margin-top:5px;">' + starsHtml(summary.average, '#fff', 'rgba(255,255,255,.35)', 12) + '</div>'
           +   '</div>'
           +   '<div>'
-          +     '<div style="display:flex;gap:2px;margin-bottom:4px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 18) + '</div>'
+          +     '<div style="display:flex;gap:2px;margin-bottom:4px;">' + starsHtml(summary.average, starColor, '#e0e0e0', 18) + '</div>'
           +     '<div style="font-size:12px;color:' + design.summaryTextColor + ';opacity:.6;">Based on ' + summary.total + ' review' + (summary.total===1?'':'s') + '</div>'
           +   '</div>'
           + '</div>'
@@ -521,7 +576,7 @@
           +   '<div style="width:88px;height:88px;border-radius:50%;border:3px solid ' + starColor + ';display:flex;align-items:center;justify-content:center;margin:0 auto;">'
           +     '<div>'
           +       '<div style="font-family:Georgia,serif;font-size:26px;font-weight:800;color:' + design.summaryTextColor + ';line-height:1;">' + summary.average + '</div>'
-          +       '<div style="display:flex;justify-content:center;gap:1px;margin-top:3px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 10) + '</div>'
+          +       '<div style="display:flex;justify-content:center;gap:1px;margin-top:3px;">' + starsHtml(summary.average, starColor, '#e0e0e0', 10) + '</div>'
           +     '</div>'
           +   '</div>'
           +   '<div style="font-size:10px;color:' + design.summaryTextColor + ';opacity:.6;margin-top:6px;">Based on ' + summary.total + ' reviews</div>'
@@ -538,7 +593,7 @@
         if (!summary.total) return '<div style="margin-bottom:20px;display:flex;justify-content:center;">' + writeBtn + '</div>';
         return '<div style="background:' + design.summaryBgColor + ';border-radius:' + r + 'px;padding:22px 18px;width:' + design.summaryWidth + 'px;flex-shrink:0;border:1px solid rgba(0,0,0,.06);">'
           + '<div style="font-family:Georgia,serif;font-size:48px;font-weight:800;color:' + design.summaryTextColor + ';line-height:1;">' + summary.average + '</div>'
-          + '<div style="display:flex;gap:2px;margin:8px 0 4px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 16) + '</div>'
+          + '<div style="display:flex;gap:2px;margin:8px 0 4px;">' + starsHtml(summary.average, starColor, '#e0e0e0', 16) + '</div>'
           + '<div style="font-size:12px;color:' + design.summaryTextColor + ';opacity:.55;margin-bottom:16px;">Based on ' + summary.total + ' review' + (summary.total===1?'':'s') + '</div>'
           + breakdownHtml
           + '<div style="margin-top:16px;">' + writeBtn + '</div></div>';
@@ -564,7 +619,7 @@
           +   '<div style="font-family:Georgia,serif;font-size:38px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</div>'
           + '</div>'
           + '<div style="flex-shrink:0;">'
-          +   '<div style="display:flex;gap:2px;margin-bottom:4px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 19) + '</div>'
+          +   '<div style="display:flex;gap:2px;margin-bottom:4px;">' + starsHtml(summary.average, starColor, '#e0e0e0', 19) + '</div>'
           +   '<div style="font-size:13px;color:' + design.summaryTextColor + ';opacity:.65;">Based on ' + summary.total + ' reviews</div>'
           + '</div>'
           + '<div style="flex:1;display:flex;justify-content:center;flex-wrap:wrap;gap:0;">' + cols + '</div>'
@@ -596,7 +651,7 @@
           +     '<span style="font-family:Georgia,serif;font-size:30px;font-weight:800;color:#fff;line-height:1;">' + summary.average + '</span>'
           +     '<span style="font-size:9px;color:#aaa;margin-top:3px;">Out of 5</span>'
           +   '</div>'
-          +   '<div style="display:flex;justify-content:center;gap:2px;margin-top:9px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 15) + '</div>'
+          +   '<div style="display:flex;justify-content:center;gap:2px;margin-top:9px;">' + starsHtml(summary.average, starColor, '#e0e0e0', 15) + '</div>'
           +   '<div style="font-size:11px;color:' + design.summaryTextColor + ';opacity:.6;margin-top:4px;">Based on ' + summary.total + ' reviews</div>'
           + '</div>'
           + '<div style="flex:1;min-width:260px;">' + iRows + '</div>'
@@ -613,7 +668,7 @@
           +   '<span style="font-size:42px;font-weight:800;letter-spacing:-1.5px;color:' + design.summaryTextColor + ';line-height:1;">' + summary.average + '</span>'
           +   '<span style="font-size:15px;color:' + design.summaryTextColor + ';opacity:.4;">/ 5</span>'
           + '</div>'
-          + '<div style="display:flex;justify-content:center;gap:2px;margin:10px 0 6px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 16) + '</div>'
+          + '<div style="display:flex;justify-content:center;gap:2px;margin:10px 0 6px;">' + starsHtml(summary.average, starColor, '#e0e0e0', 16) + '</div>'
           + '<div style="font-size:13px;color:' + design.summaryTextColor + ';opacity:.55;margin-bottom:16px;">' + summary.total + ' review' + (summary.total===1?'':'s') + '</div>'
           + '<div style="display:flex;justify-content:center;">' + writeBtn + '</div>'
           + '</div>');
@@ -628,7 +683,7 @@
           +   '<div style="display:flex;align-items:center;gap:12px;">'
           +     '<span style="font-size:34px;font-weight:800;letter-spacing:-1px;color:' + design.summaryTextColor + ';line-height:1;">' + summary.average + '</span>'
           +     '<div>'
-          +       '<div style="display:flex;gap:2px;">' + starsHtml(Math.round(summary.average), starColor, '#e0e0e0', 14) + '</div>'
+          +       '<div style="display:flex;gap:2px;">' + starsHtml(summary.average, starColor, '#e0e0e0', 14) + '</div>'
           +       '<div style="font-size:12px;color:' + design.summaryTextColor + ';opacity:.55;margin-top:3px;">' + summary.total + ' review' + (summary.total===1?'':'s') + '</div>'
           +     '</div>'
           +   '</div>'
@@ -645,7 +700,7 @@
         return wrapSummary('<div style="display:flex;flex-wrap:wrap;margin-bottom:24px;border:1px solid rgba(0,0,0,.08);border-radius:' + r + 'px;overflow:hidden;">'
           + '<div style="flex:0 0 190px;min-width:170px;padding:24px 20px;text-align:center;background:' + primary + ';color:#fff;">'
           +   '<div style="font-size:44px;font-weight:800;letter-spacing:-1.5px;line-height:1;">' + summary.average + '</div>'
-          +   '<div style="display:flex;justify-content:center;gap:2px;margin:10px 0 8px;">' + starsHtml(Math.round(summary.average), '#ffffff', 'rgba(255,255,255,.35)', 14) + '</div>'
+          +   '<div style="display:flex;justify-content:center;gap:2px;margin:10px 0 8px;">' + starsHtml(summary.average, '#ffffff', 'rgba(255,255,255,.35)', 14) + '</div>'
           +   '<div style="font-size:12px;opacity:.85;">' + summary.total + ' review' + (summary.total===1?'':'s') + '</div>'
           + '</div>'
           + '<div style="flex:1;min-width:200px;padding:20px;background:' + design.summaryBgColor + ';display:flex;flex-direction:column;justify-content:center;gap:14px;">'
@@ -672,6 +727,8 @@
     <select class="rv-sort" style="appearance:none;-webkit-appearance:none;-moz-appearance:none;border:1px solid ${design.sortBorderColor};border-radius:${Math.max(r-2,6)}px;padding:8px 34px 8px 13px;font-size:13px;font-weight:500;font-family:inherit;line-height:1.2;cursor:pointer;background:${design.sortBgColor};color:${design.sortTextColor};outline:none;">
       <option value="newest">Most Recent</option>
       <option value="oldest">Oldest First</option>
+      <option value="highest">Highest Rating</option>
+      <option value="lowest">Lowest Rating</option>
     </select>
     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${design.sortTextColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;right:12px;pointer-events:none;opacity:.55;">
       <path d="M6 9l6 6 6-6"/>
@@ -749,7 +806,7 @@
         return '<div class="rivu-custom-root">' + styleTag +
           rvRenderTemplate(rvSanitise(design.customTemplateHtml), {
           title: escapeHtml(design.widgetTitle),
-          stars: starsHtml(Math.round(summary.average), starColor, "#e0e0e0", 16),
+          stars: starsHtml(summary.average, starColor, "#e0e0e0", 16),
           average: String(summary.average || 0),
           count: summary.total + " review" + (summary.total === 1 ? "" : "s"),
           breakdown: breakdownHtml,
