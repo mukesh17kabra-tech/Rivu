@@ -4,6 +4,7 @@ import path from "path";
 
 import {
   checkReviewQuota,
+  warningForUsage,
   checkVideoAllowed,
   qrProductLimit,
   usageWarning,
@@ -12,7 +13,7 @@ import {
   rewardCodesAllowed,
   checkReminderQuota,
 } from "@/lib/usage-limits";
-import { PLANS } from "@/lib/billing";
+import { PLANS, SELLABLE_PLANS, isPaidPlan } from "@/lib/billing";
 
 /**
  * These limits were printed on the pricing cards and the App Store listing
@@ -25,41 +26,34 @@ import { PLANS } from "@/lib/billing";
  */
 
 describe("monthly review quota", () => {
-  it("allows a shop below its cap", () => {
-    expect(checkReviewQuota("free", 0).allowed).toBe(true);
-    expect(checkReviewQuota("free", PLANS.free.reviewsPerMonthCap - 1).allowed).toBe(true);
+  it("does not limit any plan", () => {
+    // Deliberate pricing decision, not an oversight: the competing free plans
+    // carry unlimited reviews, so a cap meant the app stopped working exactly
+    // when a store started succeeding. Text reviews cost almost nothing to
+    // store, so the cap bought nothing and cost every install.
+    for (const plan of ["free", "growth", "pro"]) {
+      expect(checkReviewQuota(plan, 1_000_000).allowed, plan).toBe(true);
+    }
   });
 
-  it("refuses at the cap, not one past it", () => {
-    // Off-by-one here either gives away a free review or steals a paid one.
-    const cap = PLANS.free.reviewsPerMonthCap;
-    expect(checkReviewQuota("free", cap).allowed).toBe(false);
-    expect(checkReviewQuota("free", cap + 5).allowed).toBe(false);
+  it("keeps every plan unlimited in the pricing table", () => {
+    // Guards the policy at its source: if a cap is reintroduced here, the
+    // enforcement path and its wording need revisiting with it.
+    for (const plan of ["free", "growth", "pro"] as const) {
+      expect(Number.isFinite(PLANS[plan].reviewsPerMonthCap), plan).toBe(false);
+    }
   });
 
-  it("scales with the plan", () => {
-    const freeCap = PLANS.free.reviewsPerMonthCap;
-    // What stops a Free shop is fine for Growth.
-    expect(checkReviewQuota("growth", freeCap).allowed).toBe(true);
-    expect(checkReviewQuota("growth", PLANS.growth.reviewsPerMonthCap).allowed).toBe(false);
-  });
-
-  it("never limits Pro", () => {
-    expect(checkReviewQuota("pro", 1_000_000).allowed).toBe(true);
-  });
-
-  it("names the plan to upgrade to", () => {
-    const free = checkReviewQuota("free", 999);
-    const growth = checkReviewQuota("growth", 99_999);
-    expect(free.allowed === false && free.upgradeTo).toBe("growth");
-    expect(growth.allowed === false && growth.upgradeTo).toBe("pro");
+  it("still refuses correctly if a finite cap returns", () => {
+    // The enforcement mechanism outlives the current pricing.
+    expect(warningForUsage(24, 25)).toBeTruthy();
+    expect(warningForUsage(25, 25)).toBeTruthy();
   });
 
   it("treats an unrecognised plan as free", () => {
-    // Fail closed: an unknown plan string must not grant unlimited usage.
+    // Fail closed: an unknown plan string must not grant paid entitlements.
     for (const plan of ["", "trial", "PRO", "enterprise"]) {
       expect(planOf(plan)).toBe("free");
-      expect(checkReviewQuota(plan, PLANS.free.reviewsPerMonthCap).allowed).toBe(false);
     }
   });
 });
@@ -91,26 +85,32 @@ describe("per-product QR codes", () => {
 });
 
 describe("the merchant is warned before they hit the wall", () => {
-  const cap = PLANS.free.reviewsPerMonthCap;
+  // Tested against a synthetic cap: no plan is metered today, but the
+  // threshold logic is what a future metered feature would rely on.
+  const cap = 25;
 
   it("stays quiet well below the cap", () => {
-    expect(usageWarning("free", 0)).toBeNull();
-    expect(usageWarning("free", Math.floor(cap * 0.5))).toBeNull();
+    expect(warningForUsage(0, cap)).toBeNull();
+    expect(warningForUsage(Math.floor(cap * 0.5), cap)).toBeNull();
   });
 
   it("warns from 80%", () => {
-    expect(usageWarning("free", Math.ceil(cap * 0.8))).toBeTruthy();
+    expect(warningForUsage(Math.ceil(cap * 0.8), cap)).toBeTruthy();
+    expect(warningForUsage(Math.ceil(cap * 0.8) - 1, cap)).toBeNull();
   });
 
   it("is explicit once the cap is reached", () => {
-    const message = usageWarning("free", cap);
+    const message = warningForUsage(cap, cap);
     expect(message).toBeTruthy();
     // A merchant should not have to infer that reviews are being dropped.
     expect(message!.toLowerCase()).toContain("won't be saved");
   });
 
   it("never warns an unlimited plan", () => {
-    expect(usageWarning("pro", 10_000)).toBeNull();
+    expect(warningForUsage(10_000, Infinity)).toBeNull();
+    for (const plan of ["free", "growth", "pro"]) {
+      expect(usageWarning(plan, 10_000), plan).toBeNull();
+    }
   });
 });
 
@@ -205,11 +205,12 @@ describe("monthly reminder allowance", () => {
     expect(check.allowed === false && check.upgradeTo).toBe("growth");
   });
 
-  it("allows growth up to its advertised cap", () => {
-    const cap = PLANS.growth.reminderMonthlyCap;
-    expect(checkReminderQuota("growth", 0).allowed).toBe(true);
-    expect(checkReminderQuota("growth", cap - 1).allowed).toBe(true);
-    expect(checkReminderQuota("growth", cap).allowed).toBe(false);
+  it("gives the retired Growth tier the Pro allowance", () => {
+    // Growth is no longer sold, but Shopify may still report an active Growth
+    // subscription. Anyone still being charged keeps everything — a pricing
+    // change must not quietly remove a feature from under a paying merchant.
+    expect(checkReminderQuota("growth", 100_000).allowed).toBe(true);
+    expect(PLANS.growth.reminderMonthlyCap).toBe(PLANS.pro.reminderMonthlyCap);
   });
 
   it("never limits pro", () => {
@@ -257,5 +258,67 @@ describe("the cards only claim features that exist", () => {
   it("does not advertise Top Reviewer streak badges", () => {
     // Advertised on Growth and implemented nowhere in the codebase.
     expect(cards).not.toContain("streak badges");
+  });
+});
+
+/**
+ * Growth was retired in favour of two tiers, but merchants who subscribed
+ * under it may still have an active Growth subscription in Shopify. Every
+ * entitlement must match Pro: they are still being charged, so losing a
+ * feature to a pricing change they did not ask for would be indefensible.
+ */
+describe("the retired Growth tier", () => {
+  it("matches Pro on every entitlement", () => {
+    const growth = PLANS.growth as Record<string, unknown>;
+    const pro = PLANS.pro as Record<string, unknown>;
+
+    for (const key of Object.keys(pro)) {
+      // Name and price are what make it a different plan; everything that
+      // decides what the merchant can *do* has to be identical.
+      if (key === "name" || key === "price") continue;
+      expect(growth[key], `Growth.${key} differs from Pro`).toBe(pro[key]);
+    }
+  });
+
+  it("is treated as paid by the shared predicate", () => {
+    expect(isPaidPlan("growth")).toBe(true);
+    expect(isPaidPlan("pro")).toBe(true);
+    expect(isPaidPlan("free")).toBe(false);
+    expect(isPaidPlan("nonsense")).toBe(false);
+  });
+
+  it("is not offered to new merchants", () => {
+    expect(SELLABLE_PLANS).toEqual(["free", "pro"]);
+  });
+});
+
+/**
+ * A retired plan must not be advertised anywhere a merchant can act on it.
+ *
+ * When Growth was withdrawn the dashboard still said "Upgrade to Growth" and
+ * labelled options "Growth+", pointing merchants at a plan Shopify would not
+ * sell them. The pricing page and the settings screens have to agree.
+ */
+describe("the retired tier is not advertised", () => {
+  const files = [
+    "../components/PlanCards.tsx",
+    "../components/DesignForm.tsx",
+    "../components/DowngradeNotice.tsx",
+  ];
+
+  it.each(files)("%s does not offer Growth as an upgrade", (rel) => {
+    const src = readFileSync(path.resolve(__dirname, rel), "utf8");
+    expect(src).not.toMatch(/Upgrade to Growth/i);
+    expect(src).not.toMatch(/Growth\+/);
+    expect(src).not.toMatch(/plan=growth/);
+  });
+
+  it("PlanCards mentions Growth only to reassure an existing subscriber", () => {
+    const src = readFileSync(
+      path.resolve(__dirname, "../components/PlanCards.tsx"),
+      "utf8"
+    );
+    // The one legitimate mention is behind a check on the merchant's own plan.
+    expect(src).toContain('currentPlan === "growth"');
   });
 });

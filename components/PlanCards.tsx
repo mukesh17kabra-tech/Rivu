@@ -9,21 +9,37 @@ function priceLabel(key: "free" | "growth" | "pro") {
   return price === 0 ? "$0/mo" : `$${price}/mo`;
 }
 
+/**
+ * Two tiers, not three.
+ *
+ * The free plan used to cap reviews at 25/month, which against competitors
+ * offering unlimited meant the app stopped working exactly when a store
+ * started succeeding — and anyone comparing the two picked the unlimited one.
+ * Text reviews cost almost nothing to store, so the cap bought nothing.
+ *
+ * Video stays paid because media is stored as base64 in Postgres, so it is the
+ * one thing here whose cost genuinely scales with use.
+ *
+ * Growth is retired and deliberately absent: it is still honoured for anyone
+ * subscribed under it (with Pro's entitlements), but showing a third card for
+ * a plan nobody can buy only makes the choice harder.
+ */
 export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: string }) {
   return (
-    <section className="grid grid-cols-3 gap-4">
+    <section className="grid gap-4 sm:grid-cols-2">
       <PlanCard
         name="Free"
         price={priceLabel("free")}
         perks={[
-          "25 reviews/month",
+          "Unlimited reviews",
           "Photo reviews (up to 1)",
-          "List & Grid layouts only",
+          "Import from Judge.me, Loox, Stamped & Yotpo",
+          "Google rich snippets (star ratings in search)",
+          "List & Grid layouts",
           "QR codes for up to 10 products",
           "1 UGC template",
           "English suggestions only",
           "Basic colors (primary, star, card bg, text)",
-          "Widget heading text editable",
         ]}
         brandingShown
         current={currentPlan === "free"}
@@ -35,43 +51,23 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
         ctaLabel="Switch to Free"
       />
       <PlanCard
-        name="Growth"
-        price={priceLabel("growth")}
-        perks={[
-          "500 reviews/month",
-          "50 reminder emails/month",
-          "List, Grid & Masonry layouts",
-          "Photo reviews (up to 2) + 1 video",
-          "Unlimited product QR codes",
-          "All 10 suggestion languages (choose 6)",
-          "5 UGC templates",
-          "Full widget customization — all colors, fonts, sizes",
-          "Heading size/bold/position controls",
-          "Review card text colors",
-          "Filter bar + sort button colors",
-          "4-day free trial",
-        ]}
-        brandingRemoved
-        href={`/api/billing/upgrade?shop=${shop}&plan=growth`}
-        ctaLabel="Upgrade to Growth"
-        current={currentPlan === "growth"}
-      />
-      <PlanCard
         name="Pro"
         price={priceLabel("pro")}
         perks={[
-          "Unlimited reviews",
-          "Unlimited reminder emails",
+          "Everything in Free, plus:",
+          "Video reviews",
+          "Unlimited reminder emails/month",
+          "Build your own layout — your HTML & CSS",
+          "All 8 widget summary styles",
           "All layouts — List, Grid, Masonry, Carousel & Sidebar",
-          "Photo reviews (up to 3) + 2 videos",
+          "AI-written review suggestions",
+          "Photo reviews (up to 3)",
           "Unlimited product QR codes",
           "All 10 suggestion languages",
           "All 8 UGC templates",
           "All 4 form styles (Basic, Card, Minimal, Dark)",
-          "All 4 widget summary styles",
-          "Full customization + form modal colors",
           "Review-reward discount codes",
-          "Priority support",
+          "No “Powered by Rivu” badge",
           "4-day free trial",
         ]}
         brandingRemoved
@@ -80,6 +76,17 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
         highlight
         current={currentPlan === "pro"}
       />
+
+      {/* Only shown to someone actually on the retired tier, so they can see
+          their plan is recognised rather than wondering why it vanished. */}
+      {currentPlan === "growth" && (
+        <p className="sm:col-span-2 rounded-md border border-white/10 bg-white/[0.02] p-3 text-xs text-white/50">
+          You&apos;re on the <strong className="text-white/75">Growth</strong> plan
+          (${PLANS.growth.price}/mo). It&apos;s no longer offered to new stores,
+          but yours keeps every Pro feature at the price you signed up for —
+          nothing changes unless you switch.
+        </p>
+      )}
     </section>
   );
 }

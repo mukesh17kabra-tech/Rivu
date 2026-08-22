@@ -107,18 +107,29 @@ export function startOfMonth(now: Date = new Date()): Date {
  * Wording for a merchant approaching their limit. Silence until 80% — a
  * warning shown from the first review would be noise, not a signal.
  */
+/**
+ * The warning text for a usage level, independent of any plan.
+ *
+ * Split out from usageWarning because no plan caps reviews any more — Free is
+ * unlimited — so routing this through a plan would leave the threshold logic
+ * with no way to be exercised. The mechanism stays covered, and stays correct
+ * for whenever a metered cap returns.
+ */
+export function warningForUsage(used: number, cap: number): string | null {
+  if (!Number.isFinite(cap)) return null;
+
+  if (used >= cap) {
+    return `You've used all ${cap} reviews this month. New reviews won't be saved until you upgrade or the month resets.`;
+  }
+  if (used >= cap * 0.8) {
+    return `You've used ${used} of ${cap} reviews this month.`;
+  }
+  return null;
+}
+
 export function usageWarning(
   plan: string,
   reviewsThisMonth: number
 ): string | null {
-  const cap = PLANS[planOf(plan)].reviewsPerMonthCap;
-  if (!Number.isFinite(cap)) return null;
-
-  if (reviewsThisMonth >= cap) {
-    return `You've used all ${cap} reviews this month. New reviews won't be saved until you upgrade or the month resets.`;
-  }
-  if (reviewsThisMonth >= cap * 0.8) {
-    return `You've used ${reviewsThisMonth} of ${cap} reviews this month.`;
-  }
-  return null;
+  return warningForUsage(reviewsThisMonth, PLANS[planOf(plan)].reviewsPerMonthCap);
 }

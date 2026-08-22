@@ -234,3 +234,45 @@ Self-promotion in these communities is noticed instantly and permanently.
   public one-star reviews you cannot remove.
 - Don't keep posting daily to a channel that has produced nothing. Two weeks of
   data is enough to judge.
+
+---
+
+## 5. Pricing (updated)
+
+Two tiers. Free is genuinely free: **unlimited reviews**, no trial clock, no
+card. Pro is **$14.99/mo**.
+
+The old three-tier structure priced Free at 25 reviews/month and Pro at
+$29.99. Both were wrong for this market:
+
+- Competing free plans carry unlimited reviews, so a 25/month cap meant Rivu
+  stopped working exactly when a store started succeeding. Anyone comparing
+  the two picked the unlimited one in seconds, and the cap saved nothing —
+  text reviews cost almost nothing to store.
+- $29.99 against a $15 competitor with more features is not a position you can
+  argue from, whatever the listing says.
+
+**Growth is retired** but still honoured: any merchant subscribed under it
+keeps every Pro feature at $12.99. Nobody loses a feature to a pricing change
+they did not ask for.
+
+### You must update Shopify Managed Pricing
+
+Plans live in the Partner Dashboard, not in this repo. Until you change them
+there, the code and the checkout disagree.
+
+1. Partner Dashboard → Apps → Rivu → **Pricing**
+2. Set the Pro plan to **$14.99/mo**, keep the 4-day trial
+3. **Do not delete the Growth plan** — deleting it cancels existing
+   subscribers. Hide it from new signups instead.
+4. Confirm the plan is still literally named "Pro": plan detection matches on
+   the name, so renaming it to something like "Premium" silently drops paying
+   merchants back to Free.
+
+### What stays paid, and why
+
+Video reviews. This is the one limit with a real cost behind it: media is
+stored as base64 inside Postgres, so it is the only thing here whose cost
+scales with usage. Matching a competitor's "unlimited free video" needs object
+storage first — that is the next piece of work, and it is a prerequisite, not
+a nice-to-have.

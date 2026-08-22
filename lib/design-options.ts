@@ -18,6 +18,21 @@ export type PlanTier = "free" | "growth" | "pro";
 /** Plans ordered cheapest first — used to expand "available from this tier". */
 export const PLAN_ORDER: PlanTier[] = ["free", "growth", "pro"];
 
+/**
+ * Whether a plan carries the paid entitlements.
+ *
+ * Lives here rather than beside the prices in lib/billing.ts because that
+ * module pulls in Prisma, and this one is imported by client components.
+ *
+ * "growth" is a retired tier, kept because Shopify may still report an active
+ * Growth subscription for a shop that signed up under it. A single predicate
+ * means it can't be honoured by one gate and forgotten by another — which is
+ * how a merchant ends up locked out of something they're still paying for.
+ */
+export function isPaidPlan(plan: string): boolean {
+  return plan === "pro" || plan === "growth";
+}
+
 export type DesignOption<K extends string> = {
   key: K;
   label: string;
@@ -91,10 +106,15 @@ export function displayStylesFor(plan: PlanTier): string[] {
   return allowedFor(DISPLAY_STYLES, plan);
 }
 
-/** Human-readable tier badge for the picker, e.g. "Growth+" or "Pro only". */
+/**
+ * Tier badge for the picker.
+ *
+ * Everything paid reads as "Pro" now. Options introduced at the Growth tier
+ * kept their `minPlan`, so labelling them "Growth+" would advertise a plan a
+ * new merchant cannot buy and cannot find on the pricing page.
+ */
 export function planBadge(minPlan: PlanTier): string {
-  if (minPlan === "free") return "";
-  return minPlan === "growth" ? "Growth+" : "Pro only";
+  return minPlan === "free" ? "" : "Pro";
 }
 
 /**
@@ -109,21 +129,24 @@ export function planBadge(minPlan: PlanTier): string {
  * store's shoppers would spend the app's model quota.
  */
 export function aiSuggestionsAllowed(plan: string): boolean {
-  return plan === "growth" || plan === "pro";
+  return isPaidPlan(plan);
 }
 
 /** Lowest plan that unlocks AI suggestions — drives the upgrade prompt. */
 export const AI_SUGGESTIONS_MIN_PLAN: PlanTier = "growth";
 
 /**
- * The custom widget template is a Pro feature.
+ * The custom widget template is a paid feature.
  *
  * Checked on save *and* when serving the widget, so a merchant who downgrades
  * stops rendering their custom layout immediately rather than keeping a paid
  * feature until they next touch the settings.
+ *
+ * Legacy Growth subscribers are included: they are still being charged, so
+ * excluding them would take away a feature they are paying for.
  */
 export function customTemplateAllowed(plan: string): boolean {
-  return plan === "pro";
+  return isPaidPlan(plan);
 }
 
 /** Named in the upgrade prompt — kept beside the gate so they can't disagree. */

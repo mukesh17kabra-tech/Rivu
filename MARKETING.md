@@ -110,23 +110,29 @@ The differentiator, and the reason stores using Rivu collect more.
 
 ## Pricing
 
-| | **Free** | **Growth — $12.99/mo** | **Pro — $29.99/mo** |
-|---|---|---|---|
-| Reviews per month | 25 | 500 | Unlimited |
-| Reminder emails | — | 50/mo | Unlimited |
-| Photos / videos | 1 / — | 2 / 1 | 3 / 2 |
-| Review layouts | List, Grid | + Masonry | + Carousel |
-| Summary styles | 2 | 5 | All 8 |
-| Suggestion languages | English | 6 | All 10 |
-| AI suggestions | Ready-made | ✅ AI-written | ✅ AI-written |
-| QR codes | 10 products | Unlimited | Unlimited |
-| UGC templates | 1 | 5 | All 8 |
-| "Powered by Rivu" | Shown | Removed | Removed |
-| Custom HTML layout | — | — | ✅ |
-| Reward discount codes | — | — | ✅ |
-| Google rich snippets | ✅ | ✅ | ✅ |
+| | **Free** | **Pro — $14.99/mo** |
+|---|---|---|
+| Reviews | Unlimited | Unlimited |
+| Reminder emails | — | Unlimited |
+| Photos / videos | 1 / — | 3 / 2 |
+| Review layouts | List, Grid | All — + Masonry, Carousel, Sidebar |
+| Summary styles | 2 | All 8 |
+| Suggestion languages | English | All 10 |
+| AI suggestions | Ready-made | ✅ AI-written |
+| QR codes | 10 products | Unlimited |
+| UGC templates | 1 | All 8 |
+| "Powered by Rivu" | Shown | Removed |
+| Custom HTML + CSS layout | — | ✅ |
+| Reward discount codes | — | ✅ |
+| Google rich snippets | ✅ | ✅ |
+| Import from Judge.me, Loox, Stamped, Yotpo | ✅ | ✅ |
 
-Both paid plans include a 4-day free trial.
+Free means free: unlimited reviews, no trial clock, no card. Pro includes a
+4-day free trial.
+
+Video reviews are the one paid limit with a real cost behind it rather than a
+sales tactic — media is stored inline in the database today, so it is the only
+thing here whose cost scales with use.
 
 ---
 

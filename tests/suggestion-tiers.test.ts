@@ -100,7 +100,11 @@ describe("the merchant is told what upgrading buys", () => {
 
   it("shows an upgrade prompt on free rather than hiding the feature", () => {
     expect(form).toContain("aiSuggestionsAllowed(plan)");
-    expect(form).toContain("Upgrade to Growth");
+    // Names the sellable paid tier, whatever it is currently called. This
+    // previously hardcoded "Growth", so retiring that plan left the prompt
+    // pointing at something a merchant could no longer buy.
+    expect(form).toMatch(/Upgrade to Pro/);
+    expect(form).not.toMatch(/Upgrade to Growth/);
   });
 
   it("links to the plans page", () => {

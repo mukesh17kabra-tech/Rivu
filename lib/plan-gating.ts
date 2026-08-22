@@ -26,9 +26,11 @@ export type DesignInput = {
   [key: string]: unknown;
 };
 
+// Growth is a retired tier kept for merchants who subscribed under it; it gets
+// the Pro allowance so nobody loses a feature they're still paying for.
 const LANGUAGE_CAP_BY_PLAN: Record<PlanTier, number> = {
   free: 1,
-  growth: 6,
+  growth: 10,
   pro: 10,
 };
 

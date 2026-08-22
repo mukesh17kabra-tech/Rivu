@@ -6,11 +6,22 @@ import { db } from "./db";
 // are both free/local), so caps exist mainly to nudge larger stores
 // toward paid tiers and to keep database load predictable — not because
 // any plan would otherwise lose money.
+//
+// Two tiers, not three. The competition sets the floor here: Judge.me's free
+// plan carries unlimited reviews, so a 25/month cap meant the app stopped
+// working exactly when a store started succeeding, and anyone comparing the
+// two picked the unlimited one immediately. Text reviews cost almost nothing
+// to store, so that cap bought nothing and cost every install.
+//
+// Video stays paid, and that is a real constraint rather than a sales tactic:
+// media is stored as base64 inside Postgres (see the Review model), so it is
+// the one thing here with a cost that scales with usage. Uncapping it needs
+// object storage first.
 export const PLANS = {
   free: {
     name: "Free",
     price: 0,
-    reviewsPerMonthCap: 25,
+    reviewsPerMonthCap: Infinity,
     qrProductCap: 10,
     templateCount: 1,
     photoReviewCap: 1,
@@ -19,21 +30,28 @@ export const PLANS = {
     languageCount: 1, // English only
     brandingRemoved: false, // Free plan shows "Powered by Rivu" on the widget
   },
+  /**
+   * Legacy. Retired from the pricing page in favour of two tiers, but kept as
+   * a plan key because Shopify may still report an active "Growth"
+   * subscription for a shop that signed up under it. Entitlements match Pro:
+   * anyone already paying keeps everything, and nobody gets a feature removed
+   * from under them by a pricing change they did not ask for.
+   */
   growth: {
     name: "Growth",
     price: 12.99,
-    reviewsPerMonthCap: 500,
+    reviewsPerMonthCap: Infinity,
     qrProductCap: Infinity,
-    templateCount: 5,
-    photoReviewCap: 2,
-    videoReviewCap: 1,
-    reminderMonthlyCap: 50,
-    languageCount: 6, // cap on how many languages the merchant can enable — see lib/plan-gating.ts LANGUAGE_CAP_BY_PLAN
-    brandingRemoved: true, // "Powered by Rivu" hidden on paid plans
+    templateCount: 8,
+    photoReviewCap: 3,
+    videoReviewCap: 2,
+    reminderMonthlyCap: Infinity,
+    languageCount: Infinity,
+    brandingRemoved: true,
   },
   pro: {
     name: "Pro",
-    price: 29.99,
+    price: 14.99,
     reviewsPerMonthCap: Infinity,
     qrProductCap: Infinity,
     templateCount: 8,
@@ -46,6 +64,13 @@ export const PLANS = {
 } as const;
 
 export type PlanKey = keyof typeof PLANS;
+
+/** Plans offered to new merchants. `growth` is honoured but never sold. */
+export const SELLABLE_PLANS: PlanKey[] = ["free", "pro"];
+
+// Defined in lib/design-options.ts, which imports nothing and is therefore
+// safe for client components; re-exported here so plan logic has one home.
+export { isPaidPlan } from "./design-options";
 
 /**
  * This app uses **Shopify Managed Pricing**: plans are defined in the Partner

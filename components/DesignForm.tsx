@@ -409,7 +409,7 @@ export function DesignForm({
           </div>
           {isFree && (
             <p className="mb-3 text-xs text-yellow-300/70">
-              Heading size/weight/position customization needs Growth or Pro.
+              Heading size/weight/position customization needs Pro.
             </p>
           )}
           <label className="mb-1 block text-xs text-white/50">
@@ -514,7 +514,7 @@ export function DesignForm({
         </div>
         {isFree && (
           <p className="mt-3 text-xs text-yellow-300/70">
-            Review text size/position customization needs Growth or Pro.
+            Review text size/position customization needs Pro.
           </p>
         )}
       </div>
@@ -592,7 +592,7 @@ export function DesignForm({
               Your shoppers see ready-made suggestions
             </p>
             <p className="mt-1 text-xs leading-relaxed text-amber-200/70">
-              About five hand-written lines per star rating. Upgrade to Growth for
+              About five hand-written lines per star rating. Upgrade to Pro for
               AI-written suggestions: around 120 per rating, tailored to each
               product, and each line offered to only one shopper — so no two
               reviews on your store read the same.
@@ -602,7 +602,7 @@ export function DesignForm({
               target="_top"
               className="mt-3 inline-block rounded-md bg-emerald-400 px-3.5 py-1.5 text-xs font-bold text-black transition-colors hover:bg-emerald-300"
             >
-              Upgrade to Growth
+              Upgrade to Pro
             </a>
           </div>
         )}
@@ -641,7 +641,7 @@ export function DesignForm({
         </label>
         {isFree && (
           <p className="mb-3 -mt-2 text-xs text-yellow-300/70">
-            Also needs Growth or Pro — Free plan is English-only.
+            Also needs Pro — Free plan is English-only.
           </p>
         )}
         <label className="mb-2 block text-xs text-white/50">
@@ -697,9 +697,9 @@ export function DesignForm({
           {([
             { key: "modern", label: "Modern Card", plan: "", desc: "Rating box, bars, button" },
             { key: "minimal", label: "Minimal", plan: "", desc: "Just the score — no bars" },
-            { key: "compact", label: "Compact", plan: "Growth+", desc: "Circle rating, clean bars" },
-            { key: "sidebar", label: "Left Sidebar", plan: "Growth+", desc: "Sticky left, reviews right" },
-            { key: "stacked", label: "Stacked", plan: "Growth+", desc: "Score above full-width bars" },
+            { key: "compact", label: "Compact", plan: "Pro", desc: "Circle rating, clean bars" },
+            { key: "sidebar", label: "Left Sidebar", plan: "Pro", desc: "Sticky left, reviews right" },
+            { key: "stacked", label: "Stacked", plan: "Pro", desc: "Score above full-width bars" },
             { key: "horizontal", label: "Horizontal Bar", plan: "Pro only", desc: "All in one slim row" },
             { key: "iconpct", label: "Icon + Percentage", plan: "Pro only", desc: "People icons per star with %" },
             { key: "split", label: "Split Panel", plan: "Pro only", desc: "Colour-filled score beside bars" },
@@ -905,13 +905,13 @@ export function DesignForm({
           })}
         </div>
         <p className="mt-3 text-xs text-white/40">
-          Free: Modern Card & Minimal · Growth: + Compact, Left Sidebar & Stacked · Pro: all 8
+          Free: Modern Card & Minimal · Pro: all 8 summary styles
         </p>
 
         {/* Summary block customization — locked for Free */}
         {isFree ? (
           <div className="mt-4 rounded-md border border-white/10 bg-white/[0.03] px-4 py-3">
-            <p className="text-xs text-white/40">🔒 Summary colors, width and position are available on Growth and Pro plans.</p>
+            <p className="text-xs text-white/40">🔒 Summary colors, width and position are available on Pro.</p>
           </div>
         ) : (
           <div className="mt-4 border-t border-white/10 pt-4">
@@ -946,7 +946,7 @@ export function DesignForm({
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <p className="mb-2 text-sm font-medium text-white/70">Review list bar</p>
         {isFree ? (
-          <p className="text-xs text-white/40">🔒 Filter bar and sort button colors are available on Growth and Pro plans.</p>
+          <p className="text-xs text-white/40">🔒 Filter bar and sort button colors are available on Pro.</p>
         ) : (
           <>
             <p className="mb-4 text-xs text-white/40">Controls the "3 Reviews" count label and "Most Recent" sort dropdown above the review cards.</p>
@@ -971,7 +971,7 @@ export function DesignForm({
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <p className="mb-2 text-sm font-medium text-white/70">Review card text colors</p>
         {isFree ? (
-          <p className="text-xs text-white/40">🔒 Review card text colors are available on Growth and Pro plans.</p>
+          <p className="text-xs text-white/40">🔒 Review card text colors are available on Pro.</p>
         ) : (
           <div className="grid grid-cols-3 gap-4">
             <ColorField label="Review title color" value={settings.reviewTitleColor} onChange={(v) => update("reviewTitleColor", v)} />
@@ -987,7 +987,7 @@ export function DesignForm({
         {/* Form color controls */}
         {isFree ? (
           <div className="mb-4 rounded-md border border-white/10 bg-white/[0.03] px-4 py-3">
-            <p className="text-xs text-white/40">🔒 Form background, text, and close button colors are available on Growth and Pro plans.</p>
+            <p className="text-xs text-white/40">🔒 Form background, text, and close button colors are available on Pro.</p>
           </div>
         ) : (
           <div className="mb-4 grid grid-cols-3 gap-4">
@@ -1001,7 +1001,7 @@ export function DesignForm({
         <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
           {(["basic", "card", "minimal", "dark"] as const).map((t, i) => {
             const labels = { basic: "Basic", card: "Card", minimal: "Minimal", dark: "Dark" };
-            const planLabels = { basic: "", card: "Growth+", minimal: "Growth+", dark: "Pro only" };
+            const planLabels = { basic: "", card: "Pro", minimal: "Pro", dark: "Pro" };
             const locked = (isFree && i > 0) || (plan === "growth" && i >= 3);
             const isSelected = settings.formTemplate === t;
 
@@ -1112,7 +1112,7 @@ export function DesignForm({
         </div>
 
         <p className="mt-3 text-xs text-white/40">
-          Free: Basic only · Growth: Basic, Card, Minimal · Pro: All 4 templates
+          Free: Basic only · Pro: all 4 form templates
         </p>
       </div>
 
