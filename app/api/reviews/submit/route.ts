@@ -173,5 +173,13 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return withCors(NextResponse.json({ success: true, discountCode }));
+  // The shopper is told which of the two happened, and the widget only
+  // refreshes the list when there is something new to show.
+  return withCors(
+    NextResponse.json({
+      success: true,
+      discountCode,
+      approved: shopRecord.autoApproveReviews,
+    })
+  );
 }

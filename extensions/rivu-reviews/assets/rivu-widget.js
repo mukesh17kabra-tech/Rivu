@@ -1435,6 +1435,44 @@
     }
     rewireMain();
 
+    /**
+     * Re-reads the review list after a submission.
+     *
+     * Submitting used to leave the list untouched, so a shopper wrote a review,
+     * saw "thanks", and then stared at a section that did not contain it —
+     * indistinguishable from the review having been lost. Only a page reload
+     * brought it in.
+     *
+     * Re-fetches rather than pushing the new review in locally: the server
+     * decides the id, the date, whether it is published at all, and how it
+     * changes the average and the breakdown. Reconstructing that here would be
+     * a second implementation of the summary, free to disagree with the first.
+     */
+    async function refreshReviews() {
+      try {
+        const res = await fetch(
+          API_BASE + "/api/reviews/list?shop=" + encodeURIComponent(shop) +
+          "&productId=" + encodeURIComponent(productId)
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+
+        reviews = data.reviews || reviews;
+        summary = data.summary || summary;
+        // Back to the first page: the new review is at the top under the
+        // default sort, and leaving a deeper page shown would hide it.
+        shownCount = REVIEWS_PER_PAGE;
+
+        const main = el.querySelector(".rv-main-content");
+        if (main) {
+          main.innerHTML = buildMain();
+          rewireMain();
+        }
+      } catch (e) {
+        // The review is saved either way; it will appear on the next load.
+      }
+    }
+
     // ─── Modal ────────────────────────────────────────────────────
     const backdrop = el.querySelector(".rv-modal-backdrop");
     const formContainer = el.querySelector(".rv-form-container");
@@ -1643,8 +1681,22 @@
           });
           const data = await res.json();
           if (res.ok) {
-            if(status){ status.textContent = data.discountCode ? `Thanks! Discount code: ${data.discountCode}` : "Thanks! Your review is pending approval."; status.style.color="#1e7e34"; }
+            // Older deployments of the API don't send `approved`; treating a
+            // missing value as published matches the default setting.
+            const published = data.approved !== false;
+            if (status) {
+              status.textContent = data.discountCode
+                ? `Thanks! Discount code: ${data.discountCode}`
+                : published
+                  ? "Thanks! Your review is now live."
+                  : "Thanks! Your review is pending approval.";
+              status.style.color = "#1e7e34";
+            }
             form.reset(); photoDataUrl=undefined; videoDataUrl=undefined;
+            // Only when there is something new to show. With moderation on the
+            // review is held back, and refreshing would say "pending" while the
+            // list stayed identical.
+            if (published) await refreshReviews();
             setTimeout(closeModal, 2500);
           } else {
             if(status){status.textContent=data.error||"Something went wrong.";status.style.color="#c0392b";}
