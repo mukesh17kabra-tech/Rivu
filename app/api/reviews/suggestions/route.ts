@@ -61,13 +61,39 @@ export async function GET(req: NextRequest) {
       rating,
     });
 
+    /**
+     * Drop any line that has already been used as a review here.
+     *
+     * The AI pool retires a suggestion when a shopper picks it, but the
+     * ready-made lines on the Free plan carry no id, so nothing retired them
+     * and the same sentence was offered again and again — two reviews on the
+     * same product could read word for word identically.
+     *
+     * Matched against reviews for this product rather than the whole shop
+     * because the product name is substituted into every line, so the same
+     * template produces different text elsewhere. Cheaper, and exact.
+     */
+    let offered = items;
+    if (productId) {
+      const existing = await db.review.findMany({
+        where: { shopId: shopRecord.id, productId },
+        select: { body: true },
+      });
+      // \s+, not s+ — the latter collapses runs of the letter "s" and turns
+      // "purchase" into "purchae ", so nothing would ever match.
+      const normalise = (t: string) =>
+        t.trim().toLowerCase().replace(/\s+/g, " ");
+      const used = new Set(existing.map((r) => normalise(r.body)));
+      offered = items.filter((i) => !used.has(normalise(i.text)));
+    }
+
     return withCors(
       NextResponse.json({
-        items,
+        items: offered,
         source,
         // Kept so storefront widgets cached from before this change keep
         // working — they read `suggestions` as a plain string array.
-        suggestions: items.map((i) => i.text),
+        suggestions: offered.map((i) => i.text),
       })
     );
   } catch (err) {

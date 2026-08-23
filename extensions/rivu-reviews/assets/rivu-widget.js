@@ -1568,6 +1568,14 @@
 
     function renderSuggestionBatch(batch) {
       if (!suggestionsWrap) return;
+      // Nothing left to offer — every line for this product has already been
+      // used as a review. Hide the block rather than show an empty panel with
+      // a Refresh button that cannot produce anything.
+      if (!batch.length) {
+        suggestionsWrap.innerHTML = "";
+        suggestionsWrap.style.display = "none";
+        return;
+      }
       const bodyTA = form && form.querySelector('[name="body"]');
       suggestionsWrap.style.display = "block";
       suggestionsWrap.innerHTML = `
