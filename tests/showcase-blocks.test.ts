@@ -476,3 +476,67 @@ describe("the designs from the reference screenshots", () => {
     expect(html).toContain('aria-label="Previous reviews"');
   });
 });
+
+/**
+ * Shopify's own schema rules, not just JSON validity.
+ *
+ * Every block schema parsed cleanly as JSON and the deploy still failed:
+ * Shopify rejects `"default": ""` outright, so four optional text fields took
+ * the whole release down. A malformed schema costs a full push-and-deploy
+ * round trip to discover, which is the most expensive place to find a typo.
+ */
+describe("block schemas satisfy Shopify's validation", () => {
+  const files = readdirSync(blocksDir).filter((f) => f.endsWith(".liquid"));
+
+  const schemas = files.map((file) => {
+    const src = readFileSync(path.join(blocksDir, file), "utf8");
+    const match = src.match(/{% schema %}([\s\S]*?){% endschema %}/);
+    return { file, schema: match ? JSON.parse(match[1]) : null };
+  });
+
+  it.each(schemas)("$file has no empty default", ({ file, schema }) => {
+    // An optional field simply has no default. "" is invalid, not empty.
+    for (const setting of schema?.settings ?? []) {
+      if (!("default" in setting)) continue;
+      expect(
+        setting.default,
+        `${file}: setting "${setting.id}" has an empty default — omit the key instead`
+      ).not.toBe("");
+    }
+  });
+
+  it.each(schemas)("$file gives every input an id and a label", ({ file, schema }) => {
+    for (const setting of schema?.settings ?? []) {
+      // A header is decoration and carries neither.
+      if (setting.type === "header" || setting.type === "paragraph") continue;
+      expect(setting.id, `${file}: a ${setting.type} setting has no id`).toBeTruthy();
+      expect(setting.label, `${file}: setting "${setting.id}" has no label`).toBeTruthy();
+    }
+  });
+
+  it.each(schemas)("$file keeps every select default among its options", ({ file, schema }) => {
+    // A default outside the option list leaves the picker showing nothing.
+    for (const setting of schema?.settings ?? []) {
+      if (setting.type !== "select" || !("default" in setting)) continue;
+      const values = (setting.options ?? []).map((o: { value: string }) => o.value);
+      expect(
+        values,
+        `${file}: select "${setting.id}" defaults to a value it does not offer`
+      ).toContain(setting.default);
+    }
+  });
+
+  it.each(schemas)("$file keeps every range default within its bounds", ({ file, schema }) => {
+    for (const setting of schema?.settings ?? []) {
+      if (setting.type !== "range" || !("default" in setting)) continue;
+      expect(setting.default, `${file}: range "${setting.id}" below min`).toBeGreaterThanOrEqual(setting.min);
+      expect(setting.default, `${file}: range "${setting.id}" above max`).toBeLessThanOrEqual(setting.max);
+      // Shopify requires the default to sit on a step boundary.
+      const steps = (setting.default - setting.min) / setting.step;
+      expect(
+        Math.abs(steps - Math.round(steps)) < 1e-9,
+        `${file}: range "${setting.id}" default ${setting.default} is not on a step boundary`
+      ).toBe(true);
+    }
+  });
+});
