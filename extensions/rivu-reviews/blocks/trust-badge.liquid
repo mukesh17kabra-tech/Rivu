@@ -1,0 +1,44 @@
+{% comment %}
+  Rivu Trust Badge — store-wide average and review count.
+  Add via: Customize -> Add section -> Apps -> Rivu Trust Badge
+  Small enough for a header, footer, or beside an "Add to cart" button.
+{% endcomment %}
+
+<div
+  data-rivu-showcase
+  data-shop="{{ shop.permanent_domain }}"
+  data-api-base="https://rivu-one.vercel.app"
+  data-layout="trust"
+  data-star-color="{{ block.settings.star_color }}"
+  data-card-bg="{{ block.settings.card_bg }}"
+  data-text-color="{{ block.settings.text_color }}"
+  data-radius="{{ block.settings.radius }}"
+  style="margin:{{ block.settings.spacing }}px 0;text-align:{{ block.settings.alignment }};"
+  {{ block.shopify_attributes }}
+></div>
+<script src="{{ 'rivu-showcase.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Rivu Trust Badge",
+  "target": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    { "type": "range", "id": "radius", "label": "Corner radius", "min": 0, "max": 24, "step": 2, "default": 10, "unit": "px" },
+    { "type": "range", "id": "spacing", "label": "Space above and below", "min": 0, "max": 80, "step": 4, "default": 16, "unit": "px" },
+    { "type": "color", "id": "star_color", "label": "Star colour", "default": "#f5b400" },
+    { "type": "color", "id": "card_bg", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text colour", "default": "#1a1a1a" }
+  ]
+}
+{% endschema %}
