@@ -145,7 +145,18 @@
     var productId = el.getAttribute('data-product-id');
     var apiBase = el.getAttribute('data-api-base') || GLOBAL_API_BASE;
     var starSize = parseInt(el.getAttribute('data-star-size') || '0', 10) || undefined;
-    if (!shop || !productId) return;
+    if (!shop || !productId) {
+      // Same reasoning as the review widget: a rating badge needs a product.
+      // Explain it in the theme editor, stay invisible on the storefront.
+      if (window.Shopify && window.Shopify.designMode) {
+        el.innerHTML =
+          '<p style="font-size:13px;line-height:1.5;padding:12px;border:1px dashed #c9c9d2;' +
+          'border-radius:8px;color:#6d6d78;"><strong>Rivu Rating Badge</strong><br/>' +
+          'Shows one product\'s star rating, so it only works on a product page. ' +
+          'For a store-wide rating, use <strong>Rivu Trust Badge</strong>.</p>';
+      }
+      return;
+    }
     fetchSummary(shop, productId, apiBase, function(data) {
       renderBadge(el, data, starSize, true);
     });

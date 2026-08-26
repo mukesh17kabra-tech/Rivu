@@ -238,3 +238,58 @@ describe("the theme blocks", () => {
     expect(asset).toBe(showcase);
   });
 });
+
+describe("layout controls reach the rendered markup", () => {
+  const base = {
+    rivuShowcase: "",
+    shop: "example.myshopify.com",
+    apiBase: "https://rivu.test",
+  };
+
+  it("centres the heading when the block asks for it", async () => {
+    // The heading had no alignment setting at all and was always left-aligned,
+    // which looks wrong above a centred grid.
+    const { html } = await render({ ...base, layout: "grid", heading: "Reviews", headingAlign: "center" });
+    expect(html).toContain("text-align:center");
+  });
+
+  it("leaves the heading alone when there is no heading", async () => {
+    const { html } = await render({ ...base, layout: "grid" });
+    expect(html).not.toContain("<h2");
+  });
+
+  it("constrains and centres the block when a max width is set", async () => {
+    const { el } = await render({ ...base, layout: "grid", maxWidth: "900" });
+    const style = el.style as Record<string, string>;
+    expect(style.maxWidth).toBe("900px");
+    expect(style.marginLeft).toBe("auto");
+    expect(style.marginRight).toBe("auto");
+  });
+
+  it("treats a max width of zero as full width", async () => {
+    const { el } = await render({ ...base, layout: "grid", maxWidth: "0" });
+    expect((el.style as Record<string, string>).maxWidth).toBeUndefined();
+  });
+
+  it("scales the trust badge", async () => {
+    // At its default size it was too small to read as a trust signal in a
+    // wide section, and there was no setting to change it.
+    const small = await render({ ...base, layout: "trust", badgeScale: "1" });
+    const large = await render({ ...base, layout: "trust", badgeScale: "2" });
+    expect(small.html).toContain("font-size:23px");
+    expect(large.html).toContain("font-size:46px");
+  });
+
+  it("clamps an absurd badge scale", async () => {
+    const { html } = await render({ ...base, layout: "trust", badgeScale: "99" });
+    // 2.5 is the ceiling: 23 * 2.5 rounds to 58.
+    expect(html).toContain("font-size:58px");
+  });
+
+  it("hides the product name when the block turns it off", async () => {
+    const off = await render({ ...base, layout: "grid", showProduct: "false" });
+    const on = await render({ ...base, layout: "grid", showProduct: "true" });
+    expect(on.html).toContain("The Board");
+    expect(off.html).not.toContain("The Board");
+  });
+});

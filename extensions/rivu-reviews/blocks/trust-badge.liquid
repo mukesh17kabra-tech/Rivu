@@ -1,7 +1,8 @@
 {% comment %}
-  Rivu Trust Badge — store-wide average and review count.
+  Rivu Trust Badge — your store's overall rating and review count.
   Add via: Customize -> Add section -> Apps -> Rivu Trust Badge
-  Small enough for a header, footer, or beside an "Add to cart" button.
+  Works on any page. Not product-specific — for one product's stars, use
+  Rivu Rating Badge on a product page instead.
 {% endcomment %}
 
 <div
@@ -9,6 +10,8 @@
   data-shop="{{ shop.permanent_domain }}"
   data-api-base="https://rivu-one.vercel.app"
   data-layout="trust"
+  data-badge-scale="{{ block.settings.size }}"
+  {% if block.settings.full_width %}data-max-width="{{ block.settings.max_width }}"{% endif %}
   data-star-color="{{ block.settings.star_color }}"
   data-card-bg="{{ block.settings.card_bg }}"
   data-text-color="{{ block.settings.text_color }}"
@@ -23,10 +26,10 @@
   "name": "Rivu Trust Badge",
   "target": "section",
   "settings": [
+    { "type": "header", "content": "Size and position" },
+    { "type": "range", "id": "size", "label": "Size", "min": 0.8, "max": 2.5, "step": 0.1, "default": 1.4, "info": "Scales the whole badge. 1.0 is the original size." },
     {
-      "type": "select",
-      "id": "alignment",
-      "label": "Alignment",
+      "type": "select", "id": "alignment", "label": "Alignment",
       "options": [
         { "value": "left", "label": "Left" },
         { "value": "center", "label": "Center" },
@@ -34,11 +37,15 @@
       ],
       "default": "center"
     },
-    { "type": "range", "id": "radius", "label": "Corner radius", "min": 0, "max": 24, "step": 2, "default": 10, "unit": "px" },
-    { "type": "range", "id": "spacing", "label": "Space above and below", "min": 0, "max": 80, "step": 4, "default": 16, "unit": "px" },
-    { "type": "color", "id": "star_color", "label": "Star colour", "default": "#f5b400" },
+    { "type": "checkbox", "id": "full_width", "label": "Stretch to a fixed width", "default": false, "info": "Off = the badge hugs its contents." },
+    { "type": "range", "id": "max_width", "label": "Width when stretched", "min": 200, "max": 1200, "step": 20, "default": 420, "unit": "px" },
+    { "type": "range", "id": "spacing", "label": "Space above and below", "min": 0, "max": 100, "step": 4, "default": 20, "unit": "px" },
+    { "type": "range", "id": "radius", "label": "Corner radius", "min": 0, "max": 40, "step": 2, "default": 10, "unit": "px" },
+
+    { "type": "header", "content": "Colours" },
+    { "type": "color", "id": "star_color", "label": "Stars", "default": "#f5b400" },
     { "type": "color", "id": "card_bg", "label": "Background", "default": "#ffffff" },
-    { "type": "color", "id": "text_color", "label": "Text colour", "default": "#1a1a1a" }
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#1a1a1a" }
   ]
 }
 {% endschema %}

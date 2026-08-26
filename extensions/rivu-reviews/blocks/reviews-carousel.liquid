@@ -1,7 +1,7 @@
 {% comment %}
   Rivu Reviews Carousel
   Add via: Customize -> Add section -> Apps -> Rivu Reviews Carousel
-  Works on any page: home, collection, about, footer.
+  Works on any page: home, collection, about, footer. Not product-specific.
 {% endcomment %}
 
 <div
@@ -10,14 +10,17 @@
   data-api-base="https://rivu-one.vercel.app"
   data-layout="carousel"
   data-heading="{{ block.settings.heading | escape }}"
+  data-heading-align="{{ block.settings.heading_align }}"
   data-limit="{{ block.settings.limit }}"
   data-min-rating="{{ block.settings.min_rating }}"
   data-with-media="false"
+  data-show-product="{{ block.settings.show_product }}"
+  data-columns="{{ block.settings.columns }}"
+  data-max-width="{{ block.settings.max_width }}"
   data-star-color="{{ block.settings.star_color }}"
   data-card-bg="{{ block.settings.card_bg }}"
   data-text-color="{{ block.settings.text_color }}"
   data-radius="{{ block.settings.radius }}"
-  data-columns="{{ block.settings.columns | default: 3 }}"
   style="margin:{{ block.settings.spacing }}px 0;"
   {{ block.shopify_attributes }}
 ></div>
@@ -28,15 +31,31 @@
   "name": "Rivu Reviews Carousel",
   "target": "section",
   "settings": [
-    { "type": "text", "id": "heading", "label": "Heading", "default": "What our customers say" },
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What our customers say", "info": "Leave empty to hide the heading." },
     { "type": "range", "id": "limit", "label": "Reviews to show", "min": 3, "max": 30, "step": 1, "default": 12 },
     { "type": "range", "id": "min_rating", "label": "Minimum rating", "min": 1, "max": 5, "step": 1, "default": 4 },
-    { "type": "range", "id": "columns", "label": "Columns (wall layout)", "min": 2, "max": 5, "step": 1, "default": 3 },
+    { "type": "checkbox", "id": "show_product", "label": "Show product name on each review", "default": true },
+
+    { "type": "header", "content": "Layout" },
+    {
+      "type": "select", "id": "heading_align", "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    { "type": "range", "id": "columns", "label": "Columns", "min": 1, "max": 5, "step": 1, "default": 3, "info": "Used by the Wall layout." },
+    { "type": "range", "id": "max_width", "label": "Maximum width", "min": 0, "max": 1600, "step": 40, "default": 1200, "unit": "px", "info": "0 = full width of your theme. Any other value is centred." },
+    { "type": "range", "id": "spacing", "label": "Space above and below", "min": 0, "max": 100, "step": 4, "default": 32, "unit": "px" },
     { "type": "range", "id": "radius", "label": "Corner radius", "min": 0, "max": 24, "step": 2, "default": 10, "unit": "px" },
-    { "type": "range", "id": "spacing", "label": "Space above and below", "min": 0, "max": 80, "step": 4, "default": 32, "unit": "px" },
-    { "type": "color", "id": "star_color", "label": "Star colour", "default": "#f5b400" },
+
+    { "type": "header", "content": "Colours" },
+    { "type": "color", "id": "star_color", "label": "Stars", "default": "#f5b400" },
     { "type": "color", "id": "card_bg", "label": "Card background", "default": "#ffffff" },
-    { "type": "color", "id": "text_color", "label": "Text colour", "default": "#1a1a1a" }
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#1a1a1a" }
   ]
 }
 {% endschema %}

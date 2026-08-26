@@ -254,6 +254,36 @@
 
   async function render(el) {
     const { shop, productId, productTitle, productImage } = el.dataset;
+
+    /**
+     * No product to show reviews for.
+     *
+     * This copy had no guard at all and went straight to fetching with an
+     * empty product id, leaving "Loading reviews…" on screen indefinitely. In
+     * practice it means the block was added to a page with no product — a home
+     * page or an About page. That is a merchant mistake, not a shopper's
+     * problem.
+     *
+     * The theme editor gets an explanation, because that is where it can be
+     * corrected. A live storefront gets nothing.
+     */
+    if (!shop || !productId) {
+      if (window.Shopify && window.Shopify.designMode) {
+        el.innerHTML =
+          '<p style="font-size:13px;line-height:1.5;padding:14px;border:1px dashed #c9c9d2;' +
+          'border-radius:8px;color:#6d6d78;">' +
+          "<strong>Rivu Reviews</strong><br/>This block shows reviews for one product, " +
+          "so it only works on a product page. For reviews on this page, use " +
+          "<strong>Rivu Reviews Grid</strong>, <strong>Carousel</strong>, " +
+          "<strong>Wall</strong> or <strong>Testimonials</strong> instead." +
+          "</p>";
+      } else {
+        el.innerHTML = "";
+        el.style.display = "none";
+      }
+      return;
+    }
+
     el.innerHTML = `<p style="font-size:14px;color:#aaa;padding:12px 0;">Loading reviews…</p>`;
 
     let reviews = [], summary = { total: 0, average: 0, breakdown: [] };

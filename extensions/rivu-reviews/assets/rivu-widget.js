@@ -252,7 +252,31 @@
     const { shop, productId, productTitle, productImage, apiBase } = el.dataset;
     const API_BASE = apiBase || "";
     if (!shop || !productId || !API_BASE) {
-      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:10px 0;">Rivu: missing config.</p>';
+      /**
+       * No product to show reviews for.
+       *
+       * In practice this means the block was added to a page that has no
+       * product — a home page or an About page. That is a merchant mistake,
+       * not a shopper's problem, and it used to print a red error into the
+       * storefront for every visitor to read.
+       *
+       * The theme editor gets an explanation, because that is where the
+       * mistake can actually be corrected. A live storefront gets nothing.
+       */
+      var inEditor = !!(window.Shopify && window.Shopify.designMode);
+      if (inEditor) {
+        el.innerHTML =
+          '<p style="font-size:13px;line-height:1.5;padding:14px;border:1px dashed #c9c9d2;' +
+          'border-radius:8px;color:#6d6d78;">' +
+          "<strong>Rivu Reviews</strong><br/>This block shows reviews for one product, " +
+          "so it only works on a product page. For reviews on this page, use " +
+          "<strong>Rivu Reviews Grid</strong>, <strong>Carousel</strong>, " +
+          "<strong>Wall</strong> or <strong>Testimonials</strong> instead." +
+          "</p>";
+      } else {
+        el.innerHTML = "";
+        el.style.display = "none";
+      }
       return;
     }
     el.innerHTML = `<p style="font-size:14px;color:#aaa;padding:12px 0;">Loading reviews…</p>`;

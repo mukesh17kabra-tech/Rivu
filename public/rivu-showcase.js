@@ -134,15 +134,25 @@
 
   function trustBadge(summary, opts) {
     if (!summary.total) return "";
+    // Scaled rather than fixed: at its default size it was too small to read
+    // as a trust signal in a wide section, and a merchant has no other way to
+    // change it.
+    var scale = Math.max(0.7, Math.min(2.5, opts.badgeScale));
+    var pad = Math.round(11 * scale);
     return (
-      '<div class="rivu-sc-trust" style="display:inline-flex;align-items:center;gap:11px;' +
+      '<div class="rivu-sc-trust" style="display:inline-flex;align-items:center;gap:' +
+      Math.round(11 * scale) + 'px;' +
       "border:1px solid rgba(0,0,0,.1);border-radius:" + opts.radius +
-      "px;padding:11px 16px;background:" + opts.cardBg + ";color:" + opts.textColor + ';">' +
-      '<span style="font-size:23px;font-weight:800;line-height:1;">' +
+      "px;padding:" + pad + "px " + Math.round(16 * scale) + "px;background:" +
+      opts.cardBg + ";color:" + opts.textColor + ";" +
+      (opts.maxWidth ? "width:100%;justify-content:center;box-sizing:border-box;" : "") +
+      '">' +
+      '<span style="font-size:' + Math.round(23 * scale) + 'px;font-weight:800;line-height:1;">' +
       summary.average + "</span>" +
       '<span><span style="display:flex;gap:1px;">' +
-      starsHtml(summary.average, opts.starColor, "#e0e0e0", 13) +
-      '</span><span style="display:block;font-size:11.5px;opacity:.6;margin-top:3px;">' +
+      starsHtml(summary.average, opts.starColor, "#e0e0e0", Math.round(13 * scale)) +
+      '</span><span style="display:block;font-size:' + (11.5 * scale).toFixed(1) +
+      'px;opacity:.6;margin-top:3px;">' +
       summary.total + " review" + (summary.total === 1 ? "" : "s") +
       "</span></span></div>"
     );
@@ -189,6 +199,10 @@
       textColor: d.textColor || "inherit",
       cardBg: d.cardBg || "#ffffff",
       radius: Number(d.radius) || 10,
+      headingAlign: d.headingAlign || "left",
+      // 0 means "no limit" — a section that is meant to span the theme width.
+      maxWidth: Number(d.maxWidth) || 0,
+      badgeScale: Number(d.badgeScale) || 1,
     };
   }
 
@@ -237,10 +251,19 @@
       })
       .join("");
 
+    // Constrained and centred when a max width is set, so a section does not
+    // have to span the full theme width to look deliberate.
+    if (opts.maxWidth) {
+      el.style.maxWidth = opts.maxWidth + "px";
+      el.style.marginLeft = "auto";
+      el.style.marginRight = "auto";
+    }
+
     el.innerHTML =
       (opts.heading
-        ? '<h2 style="margin:0 0 16px;font-size:20px;font-weight:700;color:' +
-          opts.textColor + ';">' + escapeHtml(opts.heading) + "</h2>"
+        ? '<h2 style="margin:0 0 16px;font-size:20px;font-weight:700;text-align:' +
+          opts.headingAlign + ';color:' + opts.textColor + ';">' +
+          escapeHtml(opts.heading) + "</h2>"
         : "") +
       layoutWrapper(body, opts);
   }
