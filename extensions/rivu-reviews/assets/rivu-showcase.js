@@ -132,6 +132,28 @@
     );
   }
 
+  /**
+   * The merchant's own wording for the badge.
+   *
+   * Tokens are substituted in a single pass. Two passes is how the rating
+   * badge once ended up printing a literal "{ rating }" on a live storefront:
+   * the second pattern matched inside what the first had already produced.
+   *
+   * The text is escaped before substitution and the values are numbers, so
+   * nothing a merchant types can become markup.
+   */
+  function badgeText(template, summary) {
+    var count = summary.total + " review" + (summary.total === 1 ? "" : "s");
+    return escapeHtml(template).replace(
+      /\{(average|count|total)\}/g,
+      function (match, token) {
+        if (token === "average") return String(summary.average);
+        if (token === "total") return String(summary.total);
+        return count;
+      }
+    );
+  }
+
   function trustBadge(summary, opts) {
     if (!summary.total) return "";
     // Scaled rather than fixed: at its default size it was too small to read
@@ -139,22 +161,48 @@
     // change it.
     var scale = Math.max(0.7, Math.min(2.5, opts.badgeScale));
     var pad = Math.round(11 * scale);
+
+    var label = opts.badgeText
+      ? badgeText(opts.badgeText, summary)
+      : escapeHtml(summary.total + " review" + (summary.total === 1 ? "" : "s"));
+
+    var scoreHtml =
+      '<span class="rivu-sc-score" style="font-size:' + Math.round(23 * scale) +
+      'px;font-weight:800;line-height:1;">' + summary.average + "</span>";
+
+    var starsBlock =
+      '<span class="rivu-sc-stars" style="display:flex;gap:1px;">' +
+      starsHtml(summary.average, opts.starColor, "#e0e0e0", Math.round(13 * scale)) +
+      "</span>";
+
+    var labelHtml =
+      '<span class="rivu-sc-label" style="font-size:' + (11.5 * scale).toFixed(1) +
+      'px;opacity:.7;white-space:nowrap;">' + label + "</span>";
+
+    /**
+     * One line, or stacked.
+     *
+     * Inline puts the score, stars and text in a single row — which is what a
+     * merchant wants when the badge sits in a header or just above an
+     * "Add to cart" button, where vertical space is the scarce thing.
+     */
+    var inner = opts.badgeInline
+      ? scoreHtml + starsBlock + labelHtml
+      : scoreHtml +
+        '<span style="display:flex;flex-direction:column;gap:' +
+        Math.round(3 * scale) + 'px;">' + starsBlock + labelHtml + "</span>";
+
     return (
       '<div class="rivu-sc-trust" style="display:inline-flex;align-items:center;gap:' +
-      Math.round(11 * scale) + 'px;' +
+      Math.round(11 * scale) + "px;" +
       "border:1px solid rgba(0,0,0,.1);border-radius:" + opts.radius +
       "px;padding:" + pad + "px " + Math.round(16 * scale) + "px;background:" +
       opts.cardBg + ";color:" + opts.textColor + ";" +
+      // Wrapping is allowed on a narrow screen even in one-line mode, so a
+      // long sentence cannot push the badge wider than the viewport.
+      (opts.badgeInline ? "flex-wrap:wrap;" : "") +
       (opts.maxWidth ? "width:100%;justify-content:center;box-sizing:border-box;" : "") +
-      '">' +
-      '<span style="font-size:' + Math.round(23 * scale) + 'px;font-weight:800;line-height:1;">' +
-      summary.average + "</span>" +
-      '<span><span style="display:flex;gap:1px;">' +
-      starsHtml(summary.average, opts.starColor, "#e0e0e0", Math.round(13 * scale)) +
-      '</span><span style="display:block;font-size:' + (11.5 * scale).toFixed(1) +
-      'px;opacity:.6;margin-top:3px;">' +
-      summary.total + " review" + (summary.total === 1 ? "" : "s") +
-      "</span></span></div>"
+      '">' + inner + "</div>"
     );
   }
 
@@ -203,6 +251,8 @@
       // 0 means "no limit" — a section that is meant to span the theme width.
       maxWidth: Number(d.maxWidth) || 0,
       badgeScale: Number(d.badgeScale) || 1,
+      badgeText: d.badgeText || "",
+      badgeInline: d.badgeInline === "true",
     };
   }
 

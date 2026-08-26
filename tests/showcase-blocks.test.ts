@@ -293,3 +293,76 @@ describe("layout controls reach the rendered markup", () => {
     expect(off.html).not.toContain("The Board");
   });
 });
+
+describe("the trust badge takes the merchant's own wording", () => {
+  const base = {
+    rivuShowcase: "",
+    shop: "example.myshopify.com",
+    apiBase: "https://rivu.test",
+    layout: "trust",
+  };
+
+  it("falls back to the review count when no text is set", async () => {
+    // Spread, never the shared object itself: the widget writes its
+    // already-rendered marker into the dataset, so passing `base` by
+    // reference poisons every later test in this block with it.
+    const { html } = await render({ ...base });
+    expect(html).toContain("3 reviews");
+  });
+
+  it("uses custom text instead", async () => {
+    const { html } = await render({ ...base, badgeText: "Trusted by our customers" });
+    expect(html).toContain("Trusted by our customers");
+    expect(html).not.toContain("3 reviews");
+  });
+
+  it("substitutes the numbers into the text", async () => {
+    const { html } = await render({
+      ...base,
+      badgeText: "Rated {average}/5 by {total} shoppers",
+    });
+    expect(html).toContain("Rated 4.8/5 by 3 shoppers");
+  });
+
+  it("substitutes {count} as the pluralised phrase", async () => {
+    const { html } = await render({ ...base, badgeText: "Based on {count}" });
+    expect(html).toContain("Based on 3 reviews");
+  });
+
+  it("pluralises correctly for a single review", async () => {
+    const { html } = await render({ ...base, badgeText: "Based on {count}" }, {
+      reviews: [],
+      summary: { total: 1, average: 5 },
+    });
+    expect(html).toContain("Based on 1 review");
+    expect(html).not.toContain("1 reviews");
+  });
+
+  it("substitutes in one pass", async () => {
+    // Two passes is how the rating badge once printed a literal "{ rating }"
+    // on a live storefront: the second pattern matched inside the first
+    // pattern's output.
+    const { html } = await render({ ...base, badgeText: "{average} {average} {count}" });
+    expect(html).toContain("4.8 4.8 3 reviews");
+    expect(html).not.toContain("{");
+  });
+
+  it("escapes anything the merchant types", async () => {
+    const { html } = await render({ ...base, badgeText: '<script>x()</script>' });
+    expect(html).not.toContain("<script>");
+    expect(html).toContain("&lt;script&gt;");
+  });
+
+  it("stacks by default", async () => {
+    const { html } = await render({ ...base });
+    expect(html).toContain("flex-direction:column");
+  });
+
+  it("puts everything on one line when asked", async () => {
+    const { html } = await render({ ...base, badgeInline: "true" });
+    expect(html).not.toContain("flex-direction:column");
+    // Still wraps on a narrow screen, so a long sentence cannot push the
+    // badge wider than the viewport.
+    expect(html).toContain("flex-wrap:wrap");
+  });
+});

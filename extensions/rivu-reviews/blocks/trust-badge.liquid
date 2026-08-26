@@ -11,6 +11,8 @@
   data-api-base="https://rivu-one.vercel.app"
   data-layout="trust"
   data-badge-scale="{{ block.settings.size }}"
+  data-badge-text="{{ block.settings.custom_text | escape }}"
+  data-badge-inline="{% if block.settings.one_line %}true{% else %}false{% endif %}"
   {% if block.settings.full_width %}data-max-width="{{ block.settings.max_width }}"{% endif %}
   data-star-color="{{ block.settings.star_color }}"
   data-card-bg="{{ block.settings.card_bg }}"
@@ -26,6 +28,14 @@
   "name": "Rivu Trust Badge",
   "target": "section",
   "settings": [
+    { "type": "header", "content": "Text" },
+    {
+      "type": "text", "id": "custom_text", "label": "Text beside the stars",
+      "default": "",
+      "info": "Leave empty for \"2 reviews\". You can use {average}, {total} and {count} — for example: Rated {average}/5 by {total} happy customers."
+    },
+    { "type": "checkbox", "id": "one_line", "label": "Show everything on one line", "default": false, "info": "Best for a header or beside an Add to cart button." },
+
     { "type": "header", "content": "Size and position" },
     { "type": "range", "id": "size", "label": "Size", "min": 0.8, "max": 2.5, "step": 0.1, "default": 1.4, "info": "Scales the whole badge. 1.0 is the original size." },
     {
