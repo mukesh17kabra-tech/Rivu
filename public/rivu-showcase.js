@@ -253,16 +253,31 @@
    * box is what makes review sections look bolted on.
    */
   function compactCard(review, opts) {
+    /**
+     * Body text clamped to a fixed number of lines.
+     *
+     * Every entry in a strip has to be the same height or the row looks
+     * ragged, and reviews vary from one line to twenty. -webkit-line-clamp is
+     * the only thing that truncates at a line boundary with an ellipsis; it is
+     * prefixed but supported everywhere that matters, and a browser without it
+     * simply shows the whole review rather than breaking.
+     */
+    var clamp =
+      "display:-webkit-box;-webkit-line-clamp:" + opts.clampLines +
+      ";-webkit-box-orient:vertical;overflow:hidden;";
+
     return (
       '<article class="rivu-sc-card rivu-sc-compact" style="color:' + opts.textColor +
-      ";padding:0 18px;box-sizing:border-box;border-left:1px solid rgba(0,0,0,.09);" +
+      ";padding:0 22px 0 0;box-sizing:border-box;" +
       (opts.layout === "carousel" || opts.layout === "strip"
-        ? "flex:0 0 auto;width:250px;"
+        ? "flex:0 0 auto;width:" + opts.compactWidth + "px;"
         : "") +
       '">' +
-      '<div style="display:flex;gap:2px;margin-bottom:9px;">' +
-      ratingRow(review.rating, opts, 16) + "</div>" +
-      '<p style="margin:0 0 7px;font-size:12.5px;">' +
+      // Tight, like a rating platform's own row — a gap between squares reads
+      // as five separate icons rather than one score.
+      '<div style="display:flex;gap:1px;margin-bottom:10px;">' +
+      ratingRow(review.rating, opts, 17) + "</div>" +
+      '<p style="margin:0 0 6px;font-size:12.5px;line-height:1.3;">' +
       '<span style="font-weight:700;">' + escapeHtml(shortName(review.customerName)) +
       "</span>" +
       '<span style="opacity:.55;"> ' + escapeHtml(timeAgo(review.createdAt)) + "</span>" +
@@ -271,10 +286,10 @@
         : "") +
       "</p>" +
       (review.reviewTitle
-        ? '<p style="margin:0 0 5px;font-size:14px;font-weight:700;line-height:1.3;">' +
+        ? '<p style="margin:0 0 5px;font-size:14.5px;font-weight:700;line-height:1.3;">' +
           escapeHtml(review.reviewTitle) + "</p>"
         : "") +
-      '<p style="margin:0;font-size:13px;line-height:1.55;opacity:.8;">' +
+      '<p style="margin:0;font-size:13px;line-height:1.5;opacity:.8;' + clamp + '">' +
       escapeHtml(review.body) + "</p></article>"
     );
   }
@@ -293,18 +308,22 @@
    * in, and the reason a strip carries more weight than a bare number.
    */
   function stripSummary(summary, opts) {
+    var countText = opts.badgeText
+      ? badgeText(opts.badgeText, summary)
+      : "Based on " + summary.total + " review" + (summary.total === 1 ? "" : "s");
+
     return (
       '<div class="rivu-sc-strip-summary" style="flex:0 0 auto;text-align:center;' +
-      'padding-right:22px;min-width:150px;">' +
-      '<p style="margin:0 0 8px;font-size:21px;font-weight:600;line-height:1.1;">' +
+      'padding-right:26px;min-width:158px;">' +
+      '<p style="margin:0 0 9px;font-size:22px;font-weight:600;line-height:1.1;">' +
       escapeHtml(opts.verdictText || verdict(summary.average)) + "</p>" +
-      '<div style="display:flex;gap:2px;justify-content:center;margin-bottom:8px;">' +
-      ratingRow(summary.average, opts, 24) + "</div>" +
-      '<p style="margin:0;font-size:12.5px;opacity:.7;">' +
-      (opts.badgeText
-        ? badgeText(opts.badgeText, summary)
-        : "Based on " + summary.total + " review" + (summary.total === 1 ? "" : "s")) +
-      "</p></div>"
+      // gap:1px, matching the review rows — the summary is the same rating
+      // read larger, not a different element.
+      '<div style="display:flex;gap:1px;justify-content:center;margin-bottom:9px;">' +
+      ratingRow(summary.average, opts, 28) + "</div>" +
+      '<p style="margin:0;font-size:12.5px;opacity:.75;' +
+      (opts.underlineCount ? "text-decoration:underline;text-underline-offset:2px;" : "") +
+      '">' + countText + "</p></div>"
     );
   }
 
@@ -407,15 +426,25 @@
    */
   function arrow(direction, opts) {
     var glyph = direction === "prev" ? "M15 18l-6-6 6-6" : "M9 18l6-6-6-6";
+    // Subtle: a thin outline circle, no shadow, small. On a rating strip a
+    // heavy button competes with the reviews it is there to serve.
+    var subtle = opts.arrowStyle === "subtle";
+    var size = subtle ? 26 : 36;
+
     return (
       '<button type="button" class="rivu-sc-arrow rivu-sc-' + direction + '"' +
       ' aria-label="' + (direction === "prev" ? "Previous" : "Next") + ' reviews"' +
       ' style="position:absolute;top:50%;transform:translateY(-50%);' +
-      (direction === "prev" ? "left:-8px;" : "right:-8px;") +
-      "z-index:2;width:36px;height:36px;border-radius:50%;border:1px solid rgba(0,0,0,.1);" +
-      "background:" + opts.cardBg + ";color:" + opts.textColor + ";cursor:pointer;" +
-      'display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12);">' +
-      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
+      (direction === "prev" ? "left:" : "right:") + (subtle ? "-30px;" : "-8px;") +
+      "z-index:2;width:" + size + "px;height:" + size + "px;border-radius:50%;" +
+      "border:1px solid rgba(0,0,0," + (subtle ? ".18" : ".1") + ");" +
+      "background:" + (subtle ? "transparent" : opts.cardBg) + ";" +
+      "color:" + opts.textColor + ";cursor:pointer;padding:0;" +
+      "display:flex;align-items:center;justify-content:center;" +
+      (subtle ? "opacity:.6;" : "box-shadow:0 2px 8px rgba(0,0,0,.12);") +
+      '">' +
+      '<svg width="' + (subtle ? 12 : 16) + '" height="' + (subtle ? 12 : 16) +
+      '" viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
       ' stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
       '<path d="' + glyph + '"/></svg></button>'
     );
@@ -489,6 +518,13 @@
       showVerified: d.showVerified !== "false",
       showArrows: d.showArrows !== "false",
       verdictText: d.verdictText || "",
+      caption: d.caption || "",
+      // Line clamp keeps every entry the same height; 3 matches the reference
+      // designs merchants ask for.
+      clampLines: Math.max(1, Math.min(10, Number(d.clampLines) || 3)),
+      compactWidth: Math.max(160, Math.min(480, Number(d.compactWidth) || 250)),
+      underlineCount: d.underlineCount === "true",
+      arrowStyle: d.arrowStyle || "solid",
     };
   }
 
@@ -582,7 +618,11 @@
           opts.headingAlign + ';color:' + opts.textColor + ';">' +
           escapeHtml(opts.heading) + "</h2>"
         : "") +
-      layoutWrapper(body, opts);
+      layoutWrapper(body, opts) +
+      (opts.caption
+        ? '<p class="rivu-sc-caption" style="margin:14px 0 0;font-size:12.5px;opacity:.55;color:' +
+          opts.textColor + ';">' + escapeHtml(opts.caption) + "</p>"
+        : "");
 
     wireArrows();
   }

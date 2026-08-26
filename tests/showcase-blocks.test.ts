@@ -34,11 +34,36 @@ const REVIEWS = [1, 2, 3].map((n) => ({
 }));
 
 /** Runs the showcase script against a stub DOM and returns what it rendered. */
+type Wired = { type: string };
+
 async function render(dataset: Record<string, string>, payload?: unknown) {
+  /**
+   * Nodes the script looks up after rendering, so wireArrows actually runs.
+   *
+   * Without querySelector it threw on every call — after innerHTML had already
+   * been assigned, so the markup assertions passed while the arrow wiring was
+   * never exercised at all and the exception vanished as an unhandled
+   * rejection.
+   */
+  const found: Record<string, { listeners: Wired[] }> = {};
+  const node = (sel: string) => {
+    if (!found[sel]) {
+      found[sel] = { listeners: [] };
+      Object.assign(found[sel], {
+        addEventListener: (type: string) => found[sel].listeners.push({ type }),
+        firstElementChild: { getBoundingClientRect: () => ({ width: 250 }) },
+        scrollBy: () => {},
+      });
+    }
+    return found[sel];
+  };
+
   const el: Record<string, unknown> = {
     dataset,
     innerHTML: "",
     style: {},
+    querySelector: (sel: string) => (el.innerHTML as string).includes(sel.slice(1)) ? node(sel) : null,
+    wiredOn: found,
   };
 
   const g = globalThis as unknown as Record<string, unknown>;
@@ -538,5 +563,144 @@ describe("block schemas satisfy Shopify's validation", () => {
         `${file}: range "${setting.id}" default ${setting.default} is not on a step boundary`
       ).toBe(true);
     }
+  });
+});
+
+describe("the testimonial strip matches the reference design", () => {
+  const base = {
+    rivuShowcase: "",
+    shop: "example.myshopify.com",
+    apiBase: "https://rivu.test",
+    layout: "strip",
+  };
+
+  it("has no divider between reviews", async () => {
+    // The reference separates columns with whitespace alone; a border between
+    // them is what makes a review row look like a table.
+    const { html } = await render({ ...base });
+    expect(html).not.toContain("border-left:1px solid");
+  });
+
+  it("clamps the review text so every column is the same height", async () => {
+    // Reviews run from one line to twenty; unclamped, the row is ragged.
+    const { html } = await render({ ...base, clampLines: "3" });
+    expect(html).toContain("-webkit-line-clamp:3");
+  });
+
+  it("lets the merchant choose how many lines", async () => {
+    const { html } = await render({ ...base, clampLines: "5" });
+    expect(html).toContain("-webkit-line-clamp:5");
+  });
+
+  it("clamps an absurd line count", async () => {
+    const { html } = await render({ ...base, clampLines: "999" });
+    expect(html).toContain("-webkit-line-clamp:10");
+  });
+
+  it("packs the stars tightly, as one score rather than five icons", async () => {
+    const { html } = await render({ ...base });
+    expect(html).toContain("gap:1px");
+    expect(html).not.toContain("gap:2px;margin-bottom:10px");
+  });
+
+  it("underlines the review count when asked", async () => {
+    const on = await render({ ...base, underlineCount: "true" });
+    const off = await render({ ...base, underlineCount: "false" });
+    expect(on.html).toContain("text-decoration:underline");
+    expect(off.html).not.toContain("text-decoration:underline");
+  });
+
+  it("renders the caption underneath", async () => {
+    const { html } = await render({ ...base, caption: "Showing our favourite reviews" });
+    expect(html).toContain("rivu-sc-caption");
+    expect(html).toContain("Showing our favourite reviews");
+  });
+
+  it("escapes the caption", async () => {
+    const { html } = await render({ ...base, caption: "<script>x()</script>" });
+    expect(html).not.toContain("<script>");
+  });
+
+  it("omits the caption when there is none", async () => {
+    const { html } = await render({ ...base });
+    expect(html).not.toContain("rivu-sc-caption");
+  });
+
+  it("uses subtle arrows on the strip", async () => {
+    const subtle = await render({ ...base, arrowStyle: "subtle" });
+    const solid = await render({ ...base, arrowStyle: "solid" });
+    // A heavy button competes with the reviews it exists to serve.
+    expect(subtle.html).toContain("width:26px");
+    expect(subtle.html).not.toContain("box-shadow:0 2px 8px");
+    expect(solid.html).toContain("width:36px");
+  });
+
+  it("lets the merchant set the column width", async () => {
+    const { html } = await render({ ...base, compactWidth: "300" });
+    expect(html).toContain("width:300px");
+  });
+
+  it("clamps an absurd column width", async () => {
+    const { html } = await render({ ...base, compactWidth: "9999" });
+    expect(html).toContain("width:480px");
+  });
+});
+
+describe("the Testimonials block", () => {
+  const src = readFileSync(path.join(blocksDir, "testimonials.liquid"), "utf8");
+  const schema = JSON.parse(src.match(/{% schema %}([\s\S]*?){% endschema %}/)![1]);
+
+  it("defaults to the rating strip", () => {
+    const style = schema.settings.find((s: { id?: string }) => s.id === "style");
+    expect(style.default).toBe("strip");
+  });
+
+  it("still offers the original pull-quote style", () => {
+    const style = schema.settings.find((s: { id?: string }) => s.id === "style");
+    expect(style.options.map((o: { value: string }) => o.value)).toContain("quotes");
+  });
+
+  it("passes every new setting through to the script", () => {
+    for (const attr of [
+      "data-clamp-lines",
+      "data-compact-width",
+      "data-underline-count",
+      "data-caption",
+      "data-arrow-style",
+      "data-verdict-text",
+    ]) {
+      expect(src, `${attr} is not passed through`).toContain(attr);
+    }
+  });
+});
+
+describe("the carousel arrows are wired, not just drawn", () => {
+  const base = {
+    rivuShowcase: "",
+    shop: "example.myshopify.com",
+    apiBase: "https://rivu.test",
+  };
+
+  it("attaches a click listener to each arrow", async () => {
+    // Markup assertions alone said nothing here: wireArrows ran after
+    // innerHTML was set, so it could throw and the tests still passed.
+    const { el } = await render({ ...base, layout: "carousel" });
+    const wired = el.wiredOn as Record<string, { listeners: { type: string }[] }>;
+
+    for (const sel of [".rivu-sc-prev", ".rivu-sc-next"]) {
+      const clicks = (wired[sel]?.listeners ?? []).filter((l) => l.type === "click");
+      expect(clicks.length, `${sel} has no click listener`).toBe(1);
+    }
+  });
+
+  it("wires nothing when the arrows are turned off", async () => {
+    const { el } = await render({ ...base, layout: "carousel", showArrows: "false" });
+    const wired = el.wiredOn as Record<string, unknown>;
+    expect(wired[".rivu-sc-next"]).toBeUndefined();
+  });
+
+  it("does not throw when there is no scroller to wire", async () => {
+    // A grid has no track; wireArrows must simply do nothing.
+    await expect(render({ ...base, layout: "grid" })).resolves.toBeTruthy();
   });
 });
