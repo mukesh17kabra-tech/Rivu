@@ -60,6 +60,91 @@
     return out;
   }
 
+  /**
+   * A solid square star, as used by Trustpilot-style rating strips.
+   *
+   * Offered alongside the classic five-point star because it is the single
+   * biggest difference between a review section that looks like a third-party
+   * widget and one that looks designed.
+   */
+  function squareSvg(fill, size) {
+    return (
+      '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" ' +
+      'style="display:block;flex-shrink:0"><rect width="24" height="24" rx="2" fill="' +
+      fill + '"/><path d="M12 5l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 4.3-.6z" ' +
+      'fill="#fff"/></svg>'
+    );
+  }
+
+  /** Chooses the star shape, then renders the row including halves. */
+  function ratingRow(rating, opts, size) {
+    if (opts.starStyle !== "square") {
+      return starsHtml(rating, opts.starColor, "#e0e0e0", size);
+    }
+
+    var n = Number(rating) || 0;
+    var out = "";
+    for (var i = 1; i <= 5; i++) {
+      var fraction = Math.max(0, Math.min(1, n - (i - 1)));
+      if (fraction >= 0.75) {
+        out += squareSvg(opts.starColor, size);
+      } else if (fraction >= 0.25) {
+        // Same clipped-overlay trick as the pointed star: no ids, so several
+        // blocks can share a page.
+        out +=
+          '<span style="position:relative;display:inline-block;width:' + size +
+          "px;height:" + size + 'px;flex-shrink:0;">' + squareSvg("#dcdce1", size) +
+          '<span style="position:absolute;top:0;left:0;width:50%;height:100%;overflow:hidden;">' +
+          squareSvg(opts.starColor, size) + "</span></span>";
+      } else {
+        out += squareSvg("#dcdce1", size);
+      }
+    }
+    return out;
+  }
+
+  /** The word a shopper reads before they read the number. */
+  function verdict(average) {
+    if (average >= 4.5) return "Excellent";
+    if (average >= 4) return "Great";
+    if (average >= 3) return "Good";
+    if (average >= 2) return "Fair";
+    return "Poor";
+  }
+
+  var VERIFIED_BADGE =
+    '<span class="rivu-sc-verified" style="display:inline-flex;align-items:center;gap:4px;' +
+    'font-size:11.5px;font-weight:700;white-space:nowrap;">' +
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">' +
+    '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 14.4l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z"/>' +
+    "</svg>Verified</span>";
+
+  /** Relative age, as review sections conventionally show it. */
+  function timeAgo(iso) {
+    var then = new Date(iso).getTime();
+    if (!then) return "";
+    var days = Math.floor((Date.now() - then) / 86400000);
+    if (days < 1) return "today";
+    if (days < 7) return days + (days === 1 ? " day ago" : " days ago");
+    if (days < 31) {
+      var w = Math.floor(days / 7);
+      return w + (w === 1 ? " week ago" : " weeks ago");
+    }
+    if (days < 365) {
+      var m = Math.floor(days / 30);
+      return m + (m === 1 ? " month ago" : " months ago");
+    }
+    var y = Math.floor(days / 365);
+    return y + (y === 1 ? " year ago" : " years ago");
+  }
+
+  /** "Greg S." — a surname initial, the way review sites shorten names. */
+  function shortName(name) {
+    var parts = String(name || "").trim().split(/\s+/);
+    if (parts.length < 2) return parts[0] || "";
+    return parts[0] + " " + parts[parts.length - 1].charAt(0).toUpperCase() + ".";
+  }
+
   function initials(name) {
     return String(name || "?").trim().slice(0, 2).toUpperCase();
   }
@@ -85,7 +170,7 @@
       (opts.layout === "wall" ? "break-inside:avoid;margin-bottom:14px;" : "") +
       '">' +
       '<div style="display:flex;gap:2px;margin-bottom:9px;">' +
-      starsHtml(review.rating, opts.starColor, "#e0e0e0", 15) +
+      ratingRow(review.rating, opts, 15) +
       "</div>" +
       (review.reviewTitle
         ? '<p style="margin:0 0 6px;font-weight:700;font-size:15px;line-height:1.35;">' +
@@ -116,6 +201,113 @@
     );
   }
 
+  /**
+   * Photo on top, then the review, then a ruled footer with the rating.
+   *
+   * The layout customers recognise from brands that take their review section
+   * seriously: the picture does the persuading and the text supports it, which
+   * is the reverse of the standard card.
+   */
+  function photoCard(review, opts) {
+    var media = review.photoUrl || review.videoUrl;
+    var isVideo = !!review.videoUrl;
+
+    return (
+      '<article class="rivu-sc-card rivu-sc-photo" style="background:' + opts.cardBg +
+      ";color:" + opts.textColor + ";border-radius:" + opts.radius +
+      "px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;" +
+      "flex-direction:column;box-sizing:border-box;" +
+      (opts.layout === "carousel" ? "flex:0 0 auto;width:300px;" : "") +
+      (opts.layout === "wall" ? "break-inside:avoid;margin-bottom:16px;" : "") +
+      '">' +
+      (media
+        ? isVideo
+          ? '<video src="' + escapeHtml(review.videoUrl) +
+            '" muted playsinline style="width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f2f2f4;"></video>'
+          : '<img src="' + escapeHtml(review.photoUrl) +
+            '" alt="" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f2f2f4;"/>'
+        // No photo: a tinted panel rather than a collapsed card, so a row of
+        // these keeps its rhythm instead of one card being half the height.
+        : '<div style="width:100%;aspect-ratio:1;background:#f2f2f4;display:flex;' +
+          'align-items:center;justify-content:center;">' +
+          '<span style="display:flex;gap:3px;opacity:.5;">' +
+          ratingRow(review.rating, opts, 20) + "</span></div>") +
+      '<div style="padding:16px 18px;display:flex;flex-direction:column;flex:1;">' +
+      '<p style="margin:0 0 16px;font-size:13.5px;line-height:1.6;flex:1;">' +
+      escapeHtml(review.body) + "</p>" +
+      '<div style="border-top:1px solid rgba(0,0,0,.08);padding-top:12px;">' +
+      '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:5px;">' +
+      '<span style="display:flex;gap:2px;">' + ratingRow(review.rating, opts, 14) + "</span>" +
+      (review.verified && opts.showVerified ? VERIFIED_BADGE : "") +
+      "</div>" +
+      '<span style="font-size:13px;font-weight:700;">' +
+      escapeHtml(shortName(review.customerName)) + "</span>" +
+      "</div></div></article>"
+    );
+  }
+
+  /**
+   * A dense entry for a rating strip: name, age, headline, two lines of text.
+   *
+   * No card border — the strip's own rules separate them, and boxes inside a
+   * box is what makes review sections look bolted on.
+   */
+  function compactCard(review, opts) {
+    return (
+      '<article class="rivu-sc-card rivu-sc-compact" style="color:' + opts.textColor +
+      ";padding:0 18px;box-sizing:border-box;border-left:1px solid rgba(0,0,0,.09);" +
+      (opts.layout === "carousel" || opts.layout === "strip"
+        ? "flex:0 0 auto;width:250px;"
+        : "") +
+      '">' +
+      '<div style="display:flex;gap:2px;margin-bottom:9px;">' +
+      ratingRow(review.rating, opts, 16) + "</div>" +
+      '<p style="margin:0 0 7px;font-size:12.5px;">' +
+      '<span style="font-weight:700;">' + escapeHtml(shortName(review.customerName)) +
+      "</span>" +
+      '<span style="opacity:.55;"> ' + escapeHtml(timeAgo(review.createdAt)) + "</span>" +
+      (review.verified && opts.showVerified
+        ? '<span style="opacity:.75;"> · </span>' + VERIFIED_BADGE
+        : "") +
+      "</p>" +
+      (review.reviewTitle
+        ? '<p style="margin:0 0 5px;font-size:14px;font-weight:700;line-height:1.3;">' +
+          escapeHtml(review.reviewTitle) + "</p>"
+        : "") +
+      '<p style="margin:0;font-size:13px;line-height:1.55;opacity:.8;">' +
+      escapeHtml(review.body) + "</p></article>"
+    );
+  }
+
+  /** Picks the card style the block asked for. */
+  function renderCard(review, opts) {
+    if (opts.cardStyle === "photo") return photoCard(review, opts);
+    if (opts.cardStyle === "compact") return compactCard(review, opts);
+    return card(review, opts);
+  }
+
+  /**
+   * The summary panel that leads a rating strip.
+   *
+   * Verdict word first, then stars, then the count — the order a shopper reads
+   * in, and the reason a strip carries more weight than a bare number.
+   */
+  function stripSummary(summary, opts) {
+    return (
+      '<div class="rivu-sc-strip-summary" style="flex:0 0 auto;text-align:center;' +
+      'padding-right:22px;min-width:150px;">' +
+      '<p style="margin:0 0 8px;font-size:21px;font-weight:600;line-height:1.1;">' +
+      escapeHtml(opts.verdictText || verdict(summary.average)) + "</p>" +
+      '<div style="display:flex;gap:2px;justify-content:center;margin-bottom:8px;">' +
+      ratingRow(summary.average, opts, 24) + "</div>" +
+      '<p style="margin:0;font-size:12.5px;opacity:.7;">' +
+      (opts.badgeText
+        ? badgeText(opts.badgeText, summary)
+        : "Based on " + summary.total + " review" + (summary.total === 1 ? "" : "s")) +
+      "</p></div>"
+    );
+  }
+
   /** A short pull-quote, for a testimonial strip. */
   function quote(review, opts) {
     return (
@@ -123,7 +315,7 @@
       (opts.layout === "carousel" ? "flex:0 0 auto;width:300px;" : "") +
       '">' +
       '<div style="display:flex;gap:2px;justify-content:center;margin-bottom:11px;">' +
-      starsHtml(review.rating, opts.starColor, "#e0e0e0", 15) +
+      ratingRow(review.rating, opts, 15) +
       "</div>" +
       '<p style="margin:0 0 11px;font-size:16px;line-height:1.6;font-style:italic;">“' +
       escapeHtml(review.body) + "”</p>" +
@@ -206,13 +398,52 @@
     );
   }
 
+  /**
+   * A round prev/next control.
+   *
+   * The carousel was scroll-only, which works on a phone and is close to
+   * invisible on a desktop — a shopper has no reason to think there is more to
+   * the right. The arrows are what make it read as a carousel.
+   */
+  function arrow(direction, opts) {
+    var glyph = direction === "prev" ? "M15 18l-6-6 6-6" : "M9 18l6-6-6-6";
+    return (
+      '<button type="button" class="rivu-sc-arrow rivu-sc-' + direction + '"' +
+      ' aria-label="' + (direction === "prev" ? "Previous" : "Next") + ' reviews"' +
+      ' style="position:absolute;top:50%;transform:translateY(-50%);' +
+      (direction === "prev" ? "left:-8px;" : "right:-8px;") +
+      "z-index:2;width:36px;height:36px;border-radius:50%;border:1px solid rgba(0,0,0,.1);" +
+      "background:" + opts.cardBg + ";color:" + opts.textColor + ";cursor:pointer;" +
+      'display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12);">' +
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
+      ' stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="' + glyph + '"/></svg></button>'
+    );
+  }
+
+  function scroller(inner, opts, gap) {
+    return (
+      '<div style="position:relative;">' +
+      (opts.showArrows ? arrow("prev", opts) : "") +
+      '<div class="rivu-sc-scroll" style="display:flex;gap:' + gap + "px;overflow-x:auto;" +
+      "scroll-behavior:smooth;padding-bottom:6px;scrollbar-width:none;" +
+      '-webkit-overflow-scrolling:touch;">' + inner + "</div>" +
+      (opts.showArrows ? arrow("next", opts) : "") +
+      "</div>"
+    );
+  }
+
   function layoutWrapper(inner, opts) {
-    if (opts.layout === "carousel") {
+    if (opts.layout === "strip") {
+      // Summary on the left, reviews scrolling beside it. Wraps on a narrow
+      // screen so the summary sits above the reviews rather than squeezing.
       return (
-        '<div class="rivu-sc-scroll" style="display:flex;gap:14px;overflow-x:auto;' +
-        'padding-bottom:6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;">' +
-        inner + "</div>"
+        '<div class="rivu-sc-strip" style="display:flex;align-items:center;' +
+        'gap:18px;flex-wrap:wrap;">' + inner + "</div>"
       );
+    }
+    if (opts.layout === "carousel") {
+      return scroller(inner, opts, 14);
     }
     if (opts.layout === "wall") {
       // CSS columns rather than grid: reviews vary in length, and a grid would
@@ -253,6 +484,11 @@
       badgeScale: Number(d.badgeScale) || 1,
       badgeText: d.badgeText || "",
       badgeInline: d.badgeInline === "true",
+      cardStyle: d.cardStyle || (d.layout === "strip" ? "compact" : "standard"),
+      starStyle: d.starStyle || "star",
+      showVerified: d.showVerified !== "false",
+      showArrows: d.showArrows !== "false",
+      verdictText: d.verdictText || "",
     };
   }
 
@@ -297,9 +533,17 @@
 
     var body = reviews
       .map(function (r) {
-        return opts.layout === "quotes" ? quote(r, opts) : card(r, opts);
+        return opts.layout === "quotes" ? quote(r, opts) : renderCard(r, opts);
       })
       .join("");
+
+    // The strip pairs its own summary panel with a scrolling list, so it
+    // assembles the two rather than wrapping the reviews alone.
+    if (opts.layout === "strip") {
+      body =
+        stripSummary(summary, opts) +
+        '<div style="flex:1;min-width:240px;">' + scroller(body, opts, 0) + "</div>";
+    }
 
     // Constrained and centred when a max width is set, so a section does not
     // have to span the full theme width to look deliberate.
@@ -309,6 +553,29 @@
       el.style.marginRight = "auto";
     }
 
+    /**
+     * Wires the arrows to the scroller they belong to.
+     *
+     * Scrolls by roughly one card rather than a fixed pixel count, so the
+     * step matches whatever width the layout is using.
+     */
+    function wireArrows() {
+      var track = el.querySelector(".rivu-sc-scroll");
+      if (!track) return;
+      var prev = el.querySelector(".rivu-sc-prev");
+      var next = el.querySelector(".rivu-sc-next");
+      var step = function () {
+        var first = track.firstElementChild;
+        return first ? first.getBoundingClientRect().width + 14 : 280;
+      };
+      if (prev) prev.addEventListener("click", function () {
+        track.scrollBy({ left: -step(), behavior: "smooth" });
+      });
+      if (next) next.addEventListener("click", function () {
+        track.scrollBy({ left: step(), behavior: "smooth" });
+      });
+    }
+
     el.innerHTML =
       (opts.heading
         ? '<h2 style="margin:0 0 16px;font-size:20px;font-weight:700;text-align:' +
@@ -316,6 +583,8 @@
           escapeHtml(opts.heading) + "</h2>"
         : "") +
       layoutWrapper(body, opts);
+
+    wireArrows();
   }
 
   function renderAll() {

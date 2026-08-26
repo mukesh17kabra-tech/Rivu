@@ -88,8 +88,17 @@ describe("the store-wide endpoint", () => {
   });
 
   it("never sends a customer email to a storefront", () => {
-    const select = route.slice(route.indexOf("select: {"), route.indexOf("// Deliberately absent"));
-    expect(select).not.toContain("customerEmail");
+    // The email IS read now, to derive the "Verified" badge — so checking the
+    // select clause proves nothing any more. What matters is that the field is
+    // dropped before the response is built, and an earlier version of this
+    // test passed while the address went out to every storefront block.
+    expect(route).toContain("const { customerEmail, ...rest } = r;");
+    expect(route).toContain("return { ...rest, verified: !!customerEmail };");
+
+    // And that the stripped list is what gets returned, not the raw rows.
+    const response = route.slice(route.indexOf("return withCors("));
+    expect(response).toContain("reviews: publicReviews,");
+    expect(response).not.toMatch(/reviews,s*$/m);
   });
 
   it("bounds the limit so a request cannot ask for the whole table", () => {
@@ -364,5 +373,106 @@ describe("the trust badge takes the merchant's own wording", () => {
     // Still wraps on a narrow screen, so a long sentence cannot push the
     // badge wider than the viewport.
     expect(html).toContain("flex-wrap:wrap");
+  });
+});
+
+describe("the designs from the reference screenshots", () => {
+  const base = {
+    rivuShowcase: "",
+    shop: "example.myshopify.com",
+    apiBase: "https://rivu.test",
+  };
+
+  it("renders photo-first cards with the image on top", async () => {
+    const { html } = await render({ ...base, layout: "carousel", cardStyle: "photo" });
+    expect(html).toContain("rivu-sc-photo");
+    // Square aspect so a row of cards keeps its rhythm.
+    expect(html).toContain("aspect-ratio:1");
+    expect(html).toContain("https://img.test/a.jpg");
+  });
+
+  it("gives a photo card without an image a panel, not a collapsed card", async () => {
+    const { html } = await render({ ...base, layout: "grid", cardStyle: "photo" }, {
+      reviews: [{ ...REVIEWS[0], photoUrl: null, videoUrl: null }],
+      summary: { total: 1, average: 5 },
+    });
+    // Otherwise one card is half the height of its neighbours.
+    expect(html).toContain("aspect-ratio:1");
+  });
+
+  it("renders the rating strip with a verdict word", async () => {
+    const { html } = await render({ ...base, layout: "strip" });
+    expect(html).toContain("rivu-sc-strip");
+    // 4.8 average.
+    expect(html).toContain("Excellent");
+    expect(html).toContain("Based on 3 reviews");
+  });
+
+  it("lets the merchant override the verdict word", async () => {
+    const { html } = await render({ ...base, layout: "strip", verdictText: "Loved" });
+    expect(html).toContain("Loved");
+    expect(html).not.toContain("Excellent");
+  });
+
+  it("picks a verdict that matches the rating", async () => {
+    const good = await render({ ...base, layout: "strip" }, {
+      reviews: [REVIEWS[0]],
+      summary: { total: 1, average: 3.2 },
+    });
+    expect(good.html).toContain("Good");
+    expect(good.html).not.toContain("Excellent");
+  });
+
+  it("renders solid square stars when asked", async () => {
+    const square = await render({ ...base, layout: "grid", starStyle: "square" });
+    const classic = await render({ ...base, layout: "grid", starStyle: "star" });
+    expect(square.html).toContain("<rect");
+    expect(classic.html).not.toContain("<rect");
+  });
+
+  it("still draws half stars in square style", async () => {
+    // The 4.5 review must not round up to five solid squares.
+    const { html } = await render({ ...base, layout: "grid", starStyle: "square" });
+    expect(html).toContain("position:relative");
+  });
+
+  it("shows a verified badge only on reviews that have one", async () => {
+    const { html } = await render({ ...base, layout: "carousel", cardStyle: "photo" }, {
+      reviews: [
+        { ...REVIEWS[0], verified: true },
+        { ...REVIEWS[1], verified: false },
+      ],
+      summary: { total: 2, average: 5 },
+    });
+    expect((html.match(/rivu-sc-verified/g) || []).length).toBe(1);
+  });
+
+  it("hides the verified badge when the block turns it off", async () => {
+    const { html } = await render(
+      { ...base, layout: "carousel", cardStyle: "photo", showVerified: "false" },
+      { reviews: [{ ...REVIEWS[0], verified: true }], summary: { total: 1, average: 5 } }
+    );
+    expect(html).not.toContain("rivu-sc-verified");
+  });
+
+  it("shortens the reviewer name the way review sites do", async () => {
+    const { html } = await render({ ...base, layout: "strip" }, {
+      reviews: [{ ...REVIEWS[0], customerName: "Gregory Sanderson" }],
+      summary: { total: 1, average: 5 },
+    });
+    expect(html).toContain("Gregory S.");
+  });
+
+  it("adds carousel arrows, and can be told not to", async () => {
+    const withArrows = await render({ ...base, layout: "carousel" });
+    const without = await render({ ...base, layout: "carousel", showArrows: "false" });
+    expect(withArrows.html).toContain("rivu-sc-next");
+    expect(without.html).not.toContain("rivu-sc-next");
+  });
+
+  it("labels the arrows for assistive technology", async () => {
+    const { html } = await render({ ...base, layout: "carousel" });
+    expect(html).toContain('aria-label="Next reviews"');
+    expect(html).toContain('aria-label="Previous reviews"');
   });
 });

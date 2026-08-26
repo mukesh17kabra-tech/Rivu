@@ -15,6 +15,10 @@
   data-min-rating="{{ block.settings.min_rating }}"
   data-with-media="false"
   data-show-product="{{ block.settings.show_product }}"
+  data-card-style="{{ block.settings.card_style }}"
+  data-star-style="{{ block.settings.star_style }}"
+  data-show-verified="{{ block.settings.show_verified }}"
+  data-show-arrows="{{ block.settings.show_arrows }}"
   data-columns="{{ block.settings.columns }}"
   data-max-width="{{ block.settings.max_width }}"
   data-star-color="{{ block.settings.star_color }}"
@@ -36,6 +40,28 @@
     { "type": "range", "id": "limit", "label": "Reviews to show", "min": 3, "max": 30, "step": 1, "default": 12 },
     { "type": "range", "id": "min_rating", "label": "Minimum rating", "min": 1, "max": 5, "step": 1, "default": 4 },
     { "type": "checkbox", "id": "show_product", "label": "Show product name on each review", "default": true },
+
+    { "type": "checkbox", "id": "show_verified", "label": "Show \"Verified\" badge", "default": true, "info": "Shown on reviews where the customer left an email." },
+
+    { "type": "header", "content": "Style" },
+    {
+      "type": "select", "id": "card_style", "label": "Card style",
+      "options": [
+        { "value": "standard", "label": "Standard — stars, text, reviewer" },
+        { "value": "photo", "label": "Photo first — large image on top" },
+        { "value": "compact", "label": "Compact — dense, no card border" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "select", "id": "star_style", "label": "Star shape",
+      "options": [
+        { "value": "star", "label": "Classic star" },
+        { "value": "square", "label": "Solid square" }
+      ],
+      "default": "star"
+    },
+    { "type": "checkbox", "id": "show_arrows", "label": "Show previous / next arrows", "default": true, "info": "Carousel layouts only." },
 
     { "type": "header", "content": "Layout" },
     {

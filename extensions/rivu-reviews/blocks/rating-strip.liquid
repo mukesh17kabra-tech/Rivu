@@ -1,0 +1,75 @@
+{% comment %}
+  Rivu Rating Strip — a verdict, your stars, and reviews scrolling beside them.
+  Add via: Customize -> Add section -> Apps -> Rivu Rating Strip
+  The layout familiar from review platforms: a summary on the left, real
+  reviews scrolling on the right. Works on any page.
+{% endcomment %}
+
+<div
+  data-rivu-showcase
+  data-shop="{{ shop.permanent_domain }}"
+  data-api-base="https://rivu-one.vercel.app"
+  data-layout="strip"
+  data-card-style="compact"
+  data-heading="{{ block.settings.heading | escape }}"
+  data-heading-align="{{ block.settings.heading_align }}"
+  data-verdict-text="{{ block.settings.verdict_text | escape }}"
+  data-badge-text="{{ block.settings.count_text | escape }}"
+  data-limit="{{ block.settings.limit }}"
+  data-min-rating="{{ block.settings.min_rating }}"
+  data-star-style="{{ block.settings.star_style }}"
+  data-show-verified="{{ block.settings.show_verified }}"
+  data-show-arrows="{{ block.settings.show_arrows }}"
+  data-max-width="{{ block.settings.max_width }}"
+  data-star-color="{{ block.settings.star_color }}"
+  data-card-bg="{{ block.settings.card_bg }}"
+  data-text-color="{{ block.settings.text_color }}"
+  data-radius="{{ block.settings.radius }}"
+  style="margin:{{ block.settings.spacing }}px 0;"
+  {{ block.shopify_attributes }}
+></div>
+<script src="{{ 'rivu-showcase.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Rivu Rating Strip",
+  "target": "section",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "", "info": "Leave empty to hide the heading." },
+    { "type": "text", "id": "verdict_text", "label": "Verdict word", "default": "", "info": "Leave empty and Rivu picks one from your rating — Excellent, Great, Good." },
+    { "type": "text", "id": "count_text", "label": "Text under the stars", "default": "", "info": "Leave empty for \"Based on 12 reviews\". You can use {average}, {total} and {count}." },
+    { "type": "range", "id": "limit", "label": "Reviews to show", "min": 3, "max": 30, "step": 1, "default": 12 },
+    { "type": "range", "id": "min_rating", "label": "Minimum rating", "min": 1, "max": 5, "step": 1, "default": 4 },
+    { "type": "checkbox", "id": "show_verified", "label": "Show \"Verified\" badge", "default": true },
+
+    { "type": "header", "content": "Style" },
+    {
+      "type": "select", "id": "star_style", "label": "Star shape",
+      "options": [
+        { "value": "square", "label": "Solid square" },
+        { "value": "star", "label": "Classic star" }
+      ],
+      "default": "square"
+    },
+    { "type": "checkbox", "id": "show_arrows", "label": "Show previous / next arrows", "default": true },
+    {
+      "type": "select", "id": "heading_align", "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    { "type": "range", "id": "max_width", "label": "Maximum width", "min": 0, "max": 1600, "step": 40, "default": 1200, "unit": "px", "info": "0 = full width of your theme." },
+    { "type": "range", "id": "spacing", "label": "Space above and below", "min": 0, "max": 100, "step": 4, "default": 40, "unit": "px" },
+    { "type": "range", "id": "radius", "label": "Corner radius", "min": 0, "max": 24, "step": 2, "default": 10, "unit": "px" },
+
+    { "type": "header", "content": "Colours" },
+    { "type": "color", "id": "star_color", "label": "Stars", "default": "#1a1a1a" },
+    { "type": "color", "id": "card_bg", "label": "Arrow background", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#1a1a1a" }
+  ]
+}
+{% endschema %}

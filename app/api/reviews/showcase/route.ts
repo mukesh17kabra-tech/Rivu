@@ -87,8 +87,22 @@ export async function GET(req: NextRequest) {
       createdAt: true,
       pinnedAt: true,
       ownerReply: true,
-      // Deliberately absent: customerEmail. Nothing on a storefront needs it.
+      // Deliberately absent: customerEmail. Nothing on a storefront needs it —
+      // but whether one exists is a useful signal, so it is reduced to a
+      // boolean below rather than sent.
+      customerEmail: true,
     },
+  });
+
+  /**
+   * "Verified" means the reviewer left a contact address.
+   *
+   * Derived here and the address dropped, so the storefront learns the one bit
+   * it needs to render a badge without the email ever leaving the server.
+   */
+  const publicReviews = reviews.map((r) => {
+    const { customerEmail, ...rest } = r;
+    return { ...rest, verified: !!customerEmail };
   });
 
   // Store-wide totals, for a trust badge or a heading above a carousel.
@@ -102,7 +116,7 @@ export async function GET(req: NextRequest) {
 
   return withCors(
     NextResponse.json({
-      reviews,
+      reviews: publicReviews,
       summary: {
         total,
         average: Math.round((aggregate._avg.rating ?? 0) * 10) / 10,
