@@ -253,7 +253,7 @@
   const REVIEWS_PER_PAGE = 10;
 
   async function render(el) {
-    const { shop, productId, productTitle, productImage } = el.dataset;
+    const { shop, productId, productTitle, productImage, productHandle } = el.dataset;
 
     /**
      * No product to show reviews for.
@@ -1705,6 +1705,7 @@
             headers: {"Content-Type":"application/json"},
             body: JSON.stringify({
               shop, productId, productTitle,
+              productHandle: productHandle || undefined,
               productImageUrl: productImage || undefined,
               rating: selectedRating,
               reviewTitle: form.reviewTitle?.value || undefined,

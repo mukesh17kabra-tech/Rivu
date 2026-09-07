@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
 
   const shopRecord = await db.shop.findUnique({
     where: { shopDomain: shop },
-    select: { id: true },
+    select: { id: true, plan: true },
   });
   if (!shopRecord) {
     return withCors(NextResponse.json({ error: "Shop not found" }, { status: 404 }));
@@ -78,6 +78,8 @@ export async function GET(req: NextRequest) {
       id: true,
       productId: true,
       productTitle: true,
+      productHandle: true,
+      productImageUrl: true,
       rating: true,
       reviewTitle: true,
       body: true,
@@ -117,6 +119,10 @@ export async function GET(req: NextRequest) {
   return withCors(
     NextResponse.json({
       reviews: publicReviews,
+      // The gallery is a paid layout; the script refuses to render it
+      // otherwise. See the note in rivu-showcase.js about why this is a
+      // feature gate rather than a data boundary.
+      plan: shopRecord.plan,
       summary: {
         total,
         average: Math.round((aggregate._avg.rating ?? 0) * 10) / 10,

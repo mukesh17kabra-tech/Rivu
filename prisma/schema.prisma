@@ -223,6 +223,15 @@ model Review {
   productTitle    String
   productImageUrl String? // used as the background/photo in generated UGC cards
 
+  // The product's URL handle, captured when the review is written.
+  //
+  // productId is not enough to build a storefront link: it may be a numeric
+  // id, a GID, or a handle from an import, and Shopify only serves
+  // /products/<handle>. Without this a photo gallery can show which product a
+  // review is about but cannot link to it. Nullable — reviews written before
+  // this have no handle, and their card simply omits the link.
+  productHandle String?
+
   // Float, not Int: shoppers can give half stars (3.5, 4.5). Whole-number
   // rows from before this change convert cleanly. The rating breakdown buckets
   // by Math.round, so a 4.5 counts toward the 5-star row.

@@ -10,6 +10,7 @@
   data-shop="{{ shop.permanent_domain }}"
   data-product-id="{{ product.id }}"
   data-product-title="{{ product.title | escape }}"
+  data-product-handle="{{ product.handle }}"
   data-product-image="{{ product.featured_image | image_url: width: 800 }}"
   data-api-base="https://rivu-one.vercel.app"
   {{ block.shopify_attributes }}

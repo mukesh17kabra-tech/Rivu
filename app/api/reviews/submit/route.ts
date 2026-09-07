@@ -13,6 +13,8 @@ const schema = z.object({
   shop: z.string().min(1),
   productId: z.string().min(1),
   productTitle: z.string().min(1),
+  // Captured so a gallery card can link back to the product.
+  productHandle: z.preprocess((val) => (val === "" ? undefined : val), z.string().max(255).optional()),
   // Empty string (e.g. a product with no image) should be treated as
   // "not provided", not as an invalid URL. Shopify's Liquid image_url
   // filter often returns protocol-relative URLs (starting with "//" with

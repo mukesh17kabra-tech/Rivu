@@ -296,6 +296,7 @@
 
   /** Picks the card style the block asked for. */
   function renderCard(review, opts) {
+    if (opts.layout === "gallery") return galleryCard(review, opts);
     if (opts.cardStyle === "photo") return photoCard(review, opts);
     if (opts.cardStyle === "compact") return compactCard(review, opts);
     return card(review, opts);
@@ -325,6 +326,201 @@
       (opts.underlineCount ? "text-decoration:underline;text-underline-offset:2px;" : "") +
       '">' + countText + "</p></div>"
     );
+  }
+
+  /** A product thumbnail and title, optionally linking to the product. */
+  function productStrip(review, opts, big) {
+    if (!review.productTitle) return "";
+    var thumb = review.productImageUrl
+      ? '<img src="' + escapeHtml(review.productImageUrl) +
+        '" alt="" loading="lazy" style="width:' + (big ? 44 : 34) + "px;height:" +
+        (big ? 44 : 34) + 'px;object-fit:cover;border-radius:5px;flex-shrink:0;background:#f2f2f4;"/>'
+      : "";
+
+    var label =
+      '<span style="font-size:' + (big ? 13 : 11.5) +
+      'px;line-height:1.35;">' + escapeHtml(review.productTitle) + "</span>";
+
+    var inner =
+      '<span style="display:flex;align-items:center;gap:9px;">' + thumb + label + "</span>";
+
+    // Linked only when the handle was captured. Reviews written before that
+    // column existed have none, and a dead link is worse than no link.
+    return review.productHandle
+      ? '<a href="/products/' + encodeURIComponent(review.productHandle) +
+        '" style="display:block;text-decoration:none;color:inherit;border-top:1px solid rgba(0,0,0,.08);' +
+        'margin-top:12px;padding-top:11px;">' + inner + "</a>"
+      : '<div style="border-top:1px solid rgba(0,0,0,.08);margin-top:12px;padding-top:11px;">' +
+        inner + "</div>";
+  }
+
+  /**
+   * One gallery tile: the photo, then who wrote it, then the review.
+   *
+   * The order matters. A photo-led wall works because the picture is the claim
+   * and the words are the evidence; leading with text turns it into a list
+   * that happens to have images.
+   */
+  function galleryCard(review, opts) {
+    var isVideo = !!review.videoUrl;
+    var media = review.videoUrl || review.photoUrl;
+
+    return (
+      '<article class="rivu-sc-card rivu-sc-tile" data-rivu-review="' +
+      escapeHtml(review.id) + '" style="background:' + opts.cardBg +
+      ";color:" + opts.textColor + ";border:1px solid rgba(0,0,0,.07);border-radius:" +
+      opts.radius + "px;overflow:hidden;break-inside:avoid;margin-bottom:16px;" +
+      'cursor:pointer;">' +
+      (media
+        ? isVideo
+          ? '<video src="' + escapeHtml(media) +
+            '" muted playsinline style="width:100%;display:block;background:#f2f2f4;"></video>'
+          : '<img src="' + escapeHtml(media) +
+            '" alt="" loading="lazy" style="width:100%;display:block;background:#f2f2f4;"/>'
+        : "") +
+      '<div style="padding:13px 15px 15px;">' +
+      '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px;">' +
+      '<span style="font-size:13.5px;font-weight:700;">' +
+      escapeHtml(shortName(review.customerName)) + "</span>" +
+      (review.verified && opts.showVerified ? VERIFIED_BADGE : "") +
+      "</div>" +
+      '<p style="margin:0 0 8px;font-size:11.5px;opacity:.5;">' +
+      escapeHtml(formatDate(review.createdAt)) + "</p>" +
+      '<div style="display:flex;gap:1px;margin-bottom:8px;">' +
+      ratingRow(review.rating, opts, 15) + "</div>" +
+      '<p style="margin:0;font-size:13.5px;line-height:1.5;">' +
+      escapeHtml(review.body) + "</p>" +
+      productStrip(review, opts, false) +
+      "</div></article>"
+    );
+  }
+
+  /** dd/mm/yyyy, as the reference galleries show it. */
+  function formatDate(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+    return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear();
+  }
+
+  /**
+   * The lightbox: the photo large, the review beside it.
+   *
+   * Built once per block and reused, rather than one dialog per tile — a wall
+   * of thirty reviews would otherwise put thirty hidden dialogs in the page.
+   *
+   * Keyboard and screen-reader behaviour is written out because a modal that
+   * traps a keyboard user is worse than no modal: Escape closes, the backdrop
+   * closes, focus moves to the close button on open and returns to the tile
+   * that opened it on close.
+   */
+  function mountLightbox(el, reviews, opts) {
+    var box = document.createElement("div");
+    box.className = "rivu-sc-lightbox";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-label", "Customer review");
+    box.hidden = true;
+    box.style.cssText =
+      "position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.6);" +
+      "display:flex;align-items:center;justify-content:center;padding:20px;";
+    document.body.appendChild(box);
+
+    var lastFocused = null;
+
+    function close() {
+      box.hidden = true;
+      box.innerHTML = "";
+      document.documentElement.style.overflow = "";
+      if (lastFocused && lastFocused.focus) lastFocused.focus();
+    }
+
+    function open(review, opener) {
+      lastFocused = opener || null;
+      var isVideo = !!review.videoUrl;
+      var media = review.videoUrl || review.photoUrl;
+
+      box.innerHTML =
+        '<div class="rivu-sc-lightbox-panel" style="background:' + opts.cardBg +
+        ";color:" + opts.textColor + ";border-radius:" + Math.max(opts.radius, 8) +
+        "px;overflow:hidden;display:flex;flex-wrap:wrap;max-width:900px;width:100%;" +
+        'max-height:90vh;">' +
+        (media
+          ? '<div style="flex:1 1 320px;min-width:280px;background:#000;display:flex;">' +
+            (isVideo
+              ? '<video src="' + escapeHtml(media) +
+                '" controls playsinline style="width:100%;max-height:90vh;object-fit:contain;"></video>'
+              : '<img src="' + escapeHtml(media) +
+                '" alt="" style="width:100%;max-height:90vh;object-fit:contain;"/>') +
+            "</div>"
+          : "") +
+        '<div style="flex:1 1 300px;min-width:260px;padding:22px;overflow-y:auto;' +
+        'display:flex;flex-direction:column;">' +
+        '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">' +
+        '<span style="font-size:16px;font-weight:700;">' +
+        escapeHtml(shortName(review.customerName)) + "</span>" +
+        (review.verified && opts.showVerified ? VERIFIED_BADGE : "") +
+        '<span style="margin-left:auto;font-size:12px;opacity:.55;">' +
+        escapeHtml(formatDate(review.createdAt)) + "</span></div>" +
+        '<div style="display:flex;gap:1px;margin:11px 0;">' +
+        ratingRow(review.rating, opts, 17) + "</div>" +
+        (review.reviewTitle
+          ? '<p style="margin:0 0 8px;font-size:15px;font-weight:700;">' +
+            escapeHtml(review.reviewTitle) + "</p>"
+          : "") +
+        '<p style="margin:0;font-size:14px;line-height:1.6;">' +
+        escapeHtml(review.body) + "</p>" +
+        (review.ownerReply
+          ? '<div style="margin-top:14px;padding:11px 13px;background:rgba(0,0,0,.04);' +
+            'border-radius:6px;"><p style="margin:0 0 3px;font-size:11px;font-weight:700;' +
+            'text-transform:uppercase;letter-spacing:.03em;opacity:.6;">Store owner reply</p>' +
+            '<p style="margin:0;font-size:13px;line-height:1.55;">' +
+            escapeHtml(review.ownerReply) + "</p></div>"
+          : "") +
+        '<div style="margin-top:auto;">' + productStrip(review, opts, true) +
+        (review.productHandle
+          ? '<a href="/products/' + encodeURIComponent(review.productHandle) +
+            '" style="display:inline-block;margin-top:12px;padding:9px 16px;border:1px solid ' +
+            "rgba(0,0,0,.15);border-radius:6px;font-size:13px;font-weight:600;" +
+            'text-decoration:none;color:inherit;">View product</a>'
+          : "") +
+        "</div></div>" +
+        '<button type="button" class="rivu-sc-lightbox-close" aria-label="Close"' +
+        ' style="position:absolute;top:16px;left:16px;width:36px;height:36px;border-radius:50%;' +
+        "border:none;background:rgba(0,0,0,.65);color:#fff;font-size:20px;line-height:1;" +
+        'cursor:pointer;">&times;</button>';
+
+      box.hidden = false;
+      // The page behind must not scroll while the dialog is open.
+      document.documentElement.style.overflow = "hidden";
+
+      var closeBtn = box.querySelector(".rivu-sc-lightbox-close");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", close);
+        closeBtn.focus();
+      }
+    }
+
+    box.addEventListener("click", function (e) {
+      // Only the backdrop closes, not a click inside the panel.
+      if (e.target === box) close();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (!box.hidden && e.key === "Escape") close();
+    });
+
+    // One delegated listener on the block, so tiles added by a later render
+    // work without re-wiring.
+    el.addEventListener("click", function (e) {
+      var tile = e.target && e.target.closest ? e.target.closest("[data-rivu-review]") : null;
+      if (!tile || !el.contains(tile)) return;
+      // A click on the product link is a navigation, not a request to zoom.
+      if (e.target.closest && e.target.closest("a")) return;
+      var id = tile.getAttribute("data-rivu-review");
+      for (var i = 0; i < reviews.length; i++) {
+        if (String(reviews[i].id) === id) { open(reviews[i], tile); return; }
+      }
+    });
   }
 
   /** A short pull-quote, for a testimonial strip. */
@@ -471,6 +667,14 @@
         'gap:18px;flex-wrap:wrap;">' + inner + "</div>"
       );
     }
+    if (opts.layout === "gallery") {
+      // CSS columns, not a grid: gallery photos vary in height and a grid
+      // leaves a ragged edge under the short ones.
+      return (
+        '<div class="rivu-sc-gallery" style="column-count:' + opts.columns +
+        ';column-gap:16px;">' + inner + "</div>"
+      );
+    }
     if (opts.layout === "carousel") {
       return scroller(inner, opts, 14);
     }
@@ -553,6 +757,33 @@
 
     var reviews = data.reviews || [];
     var summary = data.summary || { total: 0, average: 0 };
+    var plan = data.plan || "free";
+
+    /**
+     * The gallery is a paid layout.
+     *
+     * Honest about what this is: a feature gate, not a data boundary. Reviews
+     * and their photos are public on the storefront either way, so there is
+     * nothing here to keep secret — what Pro buys is the layout. The check is
+     * against the plan the server reports rather than anything the block can
+     * set, so a merchant cannot unlock it by editing Liquid.
+     *
+     * The theme editor is told why the block is empty; a live storefront shows
+     * nothing rather than an upgrade advert aimed at the wrong audience.
+     */
+    if (opts.layout === "gallery" && plan !== "pro" && plan !== "growth") {
+      if (window.Shopify && window.Shopify.designMode) {
+        el.innerHTML =
+          '<p style="font-size:13px;line-height:1.5;padding:14px;border:1px dashed #c9c9d2;' +
+          'border-radius:8px;color:#6d6d78;"><strong>Rivu Photo Gallery</strong><br/>' +
+          "The photo gallery and its lightbox are part of Pro. Your other review " +
+          "blocks keep working on the free plan.</p>";
+      } else {
+        el.innerHTML = "";
+        el.style.display = "none";
+      }
+      return;
+    }
 
     if (opts.layout === "trust") {
       el.innerHTML = trustBadge(summary, opts);
@@ -625,6 +856,12 @@
         : "");
 
     wireArrows();
+
+    // Mounted after the tiles exist, and only for the layout that has them.
+    if (opts.layout === "gallery" && !el.dataset.rvLightbox) {
+      el.dataset.rvLightbox = "1";
+      mountLightbox(el, reviews, opts);
+    }
   }
 
   function renderAll() {

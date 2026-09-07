@@ -249,7 +249,7 @@
   const REVIEWS_PER_PAGE = 10;
 
   async function render(el) {
-    const { shop, productId, productTitle, productImage, apiBase } = el.dataset;
+    const { shop, productId, productTitle, productImage, productHandle, apiBase } = el.dataset;
     const API_BASE = apiBase || "";
     if (!shop || !productId || !API_BASE) {
       /**
@@ -1700,6 +1700,7 @@
             headers: {"Content-Type":"application/json"},
             body: JSON.stringify({
               shop, productId, productTitle,
+              productHandle: productHandle || undefined,
               productImageUrl: productImage || undefined,
               rating: selectedRating,
               reviewTitle: form.reviewTitle?.value || undefined,
