@@ -182,14 +182,56 @@
 
   var injected = new Set();
 
+  /** Elements a theme is likely to use for a product's name. */
+  var TITLE_SELECTOR = '[class*="title"], [class*="name"], [class*="heading"], h2, h3, h4';
+
+  /**
+   * The element that represents this product, found by looking for its title.
+   *
+   * Guessing the container from class names does not work. Every attempt hit
+   * the same trap from a different angle: closest() considers the element
+   * itself, so Dawn's image link matched [class*="card"] via its own
+   * "card__media-link" class; and once that was fixed, the cart's media cell
+   * matched [class*="cart-item"] via "cart-item__media". Both are inner
+   * elements, so the two links to one product resolved to different containers
+   * — the duplicate badges — and the badge landed on top of the image because
+   * there was no title inside the container to sit under.
+   *
+   * Walking up until an ancestor actually contains a title element finds the
+   * cart row and the product card without knowing anything about either
+   * theme's class names.
+   */
+  function containerFor(linkEl) {
+    var node = linkEl.parentElement;
+    for (var depth = 0; depth < 5 && node; depth++) {
+      if (node.querySelector && node.querySelector(TITLE_SELECTOR)) return node;
+      node = node.parentElement;
+    }
+    // No title anywhere nearby: fall back to the immediate parent, which is
+    // what this did before, rather than skipping the product entirely.
+    return linkEl.parentElement || linkEl;
+  }
+
   function injectBadgeOnCard(linkEl) {
     var href = linkEl.getAttribute('href') || '';
     var match = href.match(/\/products\/([^?#/]+)/);
     if (!match) return;
     var handle = match[1];
 
-    // Find the product card container
-    var card = linkEl.closest('li, article, [class*="card"], [class*="product-item"], [class*="grid__item"]') || linkEl.parentElement;
+    /**
+     * The element that represents this product on the page.
+     *
+     * A cart line and most product cards contain TWO links to the same
+     * product — one wrapping the image, one wrapping the title. Cart markup
+     * matches none of the card selectors below, so this used to fall back to
+     * linkEl.parentElement, which is a different element for each of those two
+     * links. The "already injected" flag was then set on two separate nodes and
+     * both badges rendered: the duplicate stars reported in the cart drawer.
+     *
+     * Cart and line-item patterns are included, and tr, so those lines resolve
+     * to one shared container.
+     */
+    var card = containerFor(linkEl);
     if (!card) return;
 
     // Skip if already injected in this card
@@ -204,30 +246,69 @@
       // First try GID format
       fetchSummary(GLOBAL_SHOP, gid, GLOBAL_API_BASE, function(data) {
         if (data && data.total) {
-          injectStars(card, linkEl, data, CARD_STAR_SIZE);
+          injectStars(card, linkEl, data, CARD_STAR_SIZE, handle);
         } else {
           // Fall back to numeric ID format
           fetchSummary(GLOBAL_SHOP, numericId, GLOBAL_API_BASE, function(data2) {
-            if (data2 && data2.total) injectStars(card, linkEl, data2, CARD_STAR_SIZE);
+            if (data2 && data2.total) injectStars(card, linkEl, data2, CARD_STAR_SIZE, handle);
           });
         }
       });
     });
   }
 
-  function injectStars(card, linkEl, data, starSize) {
+  /** How far up to look for a badge already placed for the same product. */
+  var DEDUPE_DEPTH = 4;
+
+  /**
+   * Whether this product already has a badge nearby.
+   *
+   * Runs at injection time, not scan time: the badges arrive after two chained
+   * fetches, so at scan time there is nothing yet to find. My first attempt
+   * checked then and deduped nothing.
+   *
+   * Walks up a few ancestors rather than trusting a container selector. A cart
+   * line and a product card both hold two links to the same product — image
+   * and title — and class-substring matching resolves them to different
+   * elements: on Dawn's collection card the image link's nearest "card" is
+   * .card while the title link's is h3.card__heading. Four levels reaches the
+   * shared line or card in every theme layout checked, and stops short of a
+   * neighbouring section, so the same product shown in two different rows
+   * still gets a badge in each.
+   */
+  function badgeAlreadyNear(linkEl, handle) {
+    var node = linkEl;
+    for (var depth = 0; depth <= DEDUPE_DEPTH && node; depth++) {
+      // Never search from the body or the html element. A product shown in two
+      // separate sections is legitimate — a featured row and a recommendations
+      // row — and from the body every badge on the page looks "nearby", so the
+      // second section would silently lose its stars.
+      if (node === document.body || node === document.documentElement) break;
+      if (node.querySelector &&
+          node.querySelector('.rivu-auto-badge[data-rivu-handle="' + handle + '"]')) {
+        return true;
+      }
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function injectStars(card, linkEl, data, starSize, handle) {
     // Skip if card already has an explicit badge block OR auto-badge
     if (card.querySelector('.rivu-auto-badge') || card.querySelector('.rivu-rating-badge[data-rivu-rendered]')) return;
+    if (handle && badgeAlreadyNear(linkEl, handle)) return;
     var color = data.starColor || '#f5b400';
     var tc = data.textColor || '#555';
     var badge = document.createElement('div');
     badge.className = 'rivu-auto-badge';
+    // Tagged with the product, so the guard above can recognise its own work.
+    if (handle) badge.setAttribute('data-rivu-handle', handle);
     badge.style.cssText = 'display:flex;align-items:center;gap:3px;margin-top:4px;';
     badge.innerHTML = starsHtml(data.average, color, starSize) +
       '<span style="font-size:' + Math.max(starSize - 3, 10) + 'px;color:' + tc + ';opacity:.65;margin-left:2px;">(' + data.total + ')</span>';
 
     // Insert after the title/name element if possible, else after the link
-    var titleEl = card.querySelector('[class*="title"], [class*="name"], h2, h3');
+    var titleEl = card.querySelector(TITLE_SELECTOR);
     if (titleEl) {
       titleEl.insertAdjacentElement('afterend', badge);
     } else {
