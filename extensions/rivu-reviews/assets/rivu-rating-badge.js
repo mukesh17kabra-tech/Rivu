@@ -136,6 +136,28 @@
   }
 
   // ── MODE 1: Explicit .rivu-rating-badge divs ─────────────────────────────
+  /**
+   * Products that already have a badge placed deliberately by the merchant.
+   *
+   * On a product page the Rating Badge block sits next to the title, while
+   * auto-inject works from whichever product link it finds — a breadcrumb, a
+   * sticky bar, a related-products card. Those are different containers, so
+   * the per-container check never saw the explicit badge and the product page
+   * ended up with two ratings: one from the block and one injected.
+   *
+   * Keyed by numeric id because the two modes identify the product
+   * differently: the block is given an id or a GID, auto-inject starts from a
+   * handle and resolves it. Stripping the GID prefix puts both on the same
+   * footing.
+   */
+  var explicitProductIds = {};
+
+  function numericIdOf(value) {
+    var text = String(value || '');
+    var match = text.match(/(\d+)\s*$/);
+    return match ? match[1] : text;
+  }
+
   // Mark them so auto-inject (MODE 2) skips the same product card.
   var explicitBadges = document.querySelectorAll('.rivu-rating-badge');
   explicitBadges.forEach(function(el) {
@@ -145,6 +167,7 @@
     var productId = el.getAttribute('data-product-id');
     var apiBase = el.getAttribute('data-api-base') || GLOBAL_API_BASE;
     var starSize = parseInt(el.getAttribute('data-star-size') || '0', 10) || undefined;
+    if (productId) explicitProductIds[numericIdOf(productId)] = true;
     if (!shop || !productId) {
       // Same reasoning as the review widget: a rating badge needs a product.
       // Explain it in the theme editor, stay invisible on the storefront.
@@ -239,6 +262,10 @@
     card.dataset.rivuBadge = '1';
 
     getProductId(handle, function(numericId) {
+      // The merchant placed a badge for this product themselves. Auto-inject
+      // exists to cover products that have none, not to add a second one.
+      if (explicitProductIds[numericIdOf(numericId)]) return;
+
       // Try to match the stored productId — stored as GID in DB from QR flow,
       // or as numeric ID from product page Liquid. We try both.
       var gid = 'gid://shopify/Product/' + numericId;

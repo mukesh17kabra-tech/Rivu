@@ -65,7 +65,14 @@ export function clampDesignToPlan<T extends DesignInput>(
 
   if (isFree) {
     // Layout: Free only gets list/grid — no masonry, no split.
-    if (clamped.displayStyle === "masonry" || clamped.displayStyle === "carousel") {
+    // "photos" joins the Pro-only layouts. Listed here as well as in
+    // design-options because this is what actually enforces it on save — the
+    // picker only hides what a merchant cannot choose.
+    if (
+      clamped.displayStyle === "masonry" ||
+      clamped.displayStyle === "carousel" ||
+      clamped.displayStyle === "photos"
+    ) {
       clamped.displayStyle = DEFAULTS.displayStyle;
       lockedFields.push("displayStyle");
     }

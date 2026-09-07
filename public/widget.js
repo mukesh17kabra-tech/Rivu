@@ -506,6 +506,12 @@
       // In custom mode the class name carries the styling instead.
       const st = (css) => (custom ? "" : ' style="' + css + '"');
 
+      // Photo-gallery style leads with the picture at full card width and
+      // drops the small inline thumbnail, so the same review is not shown
+      // twice in one card.
+      const isGallery = design.displayStyle === "photos";
+      const galleryMedia = rev.videoUrl || rev.photoUrl;
+
       const isLong = rev.body && rev.body.length > 240;
       const bodyId = `rv-b-${rev.id}`;
       const topBadge = rev.isTopReviewer
@@ -582,8 +588,35 @@
         : rev.recommends === false
         ? `<div class="rv-card-recommend rv-no"${st("display:flex;align-items:center;gap:5px;font-size:12px;color:#dc2626;margin-top:6px;")}><span${st("font-size:15px;")}>👎</span> I don't recommend this product</div>`
         : "";
+      /**
+       * Per-style card chrome.
+       *
+       * Only the frame changes between styles — the contents below are the
+       * same markup in every one. Writing a separate card per style is how the
+       * two widget copies drifted apart in the first place.
+       */
+      const styleChrome = {
+        boxed:
+          `background:${cardBg};border-radius:${r}px;padding:22px;` +
+          "border:1px solid rgba(0,0,0,.1);box-shadow:0 2px 10px rgba(0,0,0,.07);",
+        compact:
+          "background:none;border:none;box-shadow:none;border-radius:0;" +
+          "padding:16px 0;border-bottom:1px solid rgba(0,0,0,.08);",
+        photos:
+          `background:${cardBg};border-radius:${r}px;padding:16px;` +
+          "border:1px solid rgba(0,0,0,.07);box-shadow:0 1px 4px rgba(0,0,0,.05);" +
+          "break-inside:avoid;margin-bottom:14px;",
+      };
+
+      const chrome =
+        styleChrome[design.displayStyle] ||
+        `background:${cardBg};border-radius:${r}px;padding:20px;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 4px rgba(0,0,0,.05);`;
+
       return `
-<div class="rv-card"${st(`background:${cardBg};color:${design.textColor};border-radius:${r}px;padding:20px;font-size:${design.reviewTextSize}px;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 4px rgba(0,0,0,.05);${design.displayStyle==='carousel'?'min-width:260px;max-width:300px;flex-shrink:0;':''}`)}>
+<div class="rv-card rv-card--${design.displayStyle}"${st(`color:${design.textColor};font-size:${design.reviewTextSize}px;${chrome}${design.displayStyle==='carousel'?'min-width:260px;max-width:300px;flex-shrink:0;':''}`)}>
+  ${isGallery && galleryMedia ? (rev.videoUrl
+    ? `<div class="rv-media-thumb rv-card-lead" data-media-url="${rev.videoUrl}" data-media-type="video"${st(`position:relative;margin:-16px -16px 14px;border-radius:${r}px ${r}px 0 0;overflow:hidden;background:#000;cursor:pointer;`)}><video src="${rev.videoUrl}"${st("width:100%;display:block;pointer-events:none;")}></video><div${st("position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2);")}><span${st("color:#fff;font-size:26px;")}>▶</span></div></div>`
+    : `<img class="rv-media-thumb rv-card-lead" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}" loading="lazy"${st(`width:calc(100% + 32px);display:block;margin:-16px -16px 14px;border-radius:${r}px ${r}px 0 0;cursor:pointer;`)}/>`) : ""}
   <div class="rv-card-inner"${st("display:flex;align-items:flex-start;gap:14px;")}>
     <div class="rv-card-avatar"${st("flex-shrink:0;")}>
       <div class="rv-avatar" style="background:${avatarColor(rev.customerName)};${custom ? "" : `width:40px;height:40px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;`}">${initials(rev.customerName)}</div>
@@ -601,8 +634,8 @@
       ${rev.reviewTitle ? `<p class="rv-card-title"${st(`margin:0 0 7px;font-weight:700;font-size:16px;font-style:italic;text-align:left;line-height:1.4;color:${design.reviewTitleColor};`)}>${rev.reviewTitle}</p>` : ""}
       ${rev.body ? `<p id="${bodyId}" class="rv-card-body${isLong ? " rv-clamped" : ""}"${st(`margin:0 0 8px;line-height:1.65;text-align:left;color:${design.reviewBodyColor};font-size:${design.reviewTextSize}px;${isLong ? "max-height:4.8em;overflow:hidden;" : ""}`)}>${rev.body}</p>` : ""}
       ${isLong ? `<button class="rv-read-more" data-target="${bodyId}"${st(`background:none;border:none;padding:0;font-size:12px;font-weight:600;color:${design.primaryColor};cursor:pointer;margin-bottom:8px;`)}>Read more</button>` : ""}
-      ${rev.videoUrl ? `<div class="rv-media-thumb rv-card-media rv-card-video" data-media-url="${rev.videoUrl}" data-media-type="video"${st("width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;background:#000;margin-bottom:8px;")}><video src="${rev.videoUrl}"${st("width:100%;height:100%;object-fit:cover;pointer-events:none;")}></video><div class="rv-card-video-play"${st("position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);")}><span${st("color:#fff;font-size:18px;")}>▶</span></div></div>` : ""}
-      ${!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb rv-card-media" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}"${st("width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;cursor:pointer;")}/>` : ""}
+      ${isGallery ? "" : (rev.videoUrl ? `<div class="rv-media-thumb rv-card-media rv-card-video" data-media-url="${rev.videoUrl}" data-media-type="video"${st("width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;background:#000;margin-bottom:8px;")}><video src="${rev.videoUrl}"${st("width:100%;height:100%;object-fit:cover;pointer-events:none;")}></video><div class="rv-card-video-play"${st("position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);")}><span${st("color:#fff;font-size:18px;")}>▶</span></div></div>` : "")}
+      ${isGallery ? "" : (!rev.videoUrl && rev.photoUrl ? `<img class="rv-media-thumb rv-card-media" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}"${st("width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;cursor:pointer;")}/>` : "")}
       ${recommendHtml}
       ${votesHtml}
       ${ownerReplyHtml}
@@ -682,6 +715,13 @@
         listWrapperStyle = `display:flex;gap:14px;overflow-x:auto;scroll-behavior:smooth;padding-bottom:4px;`;
       } else if (design.displayStyle === "masonry") {
         listWrapperStyle = `column-count:${design.gridColumns};column-gap:14px;`;
+      } else if (design.displayStyle === "photos") {
+        // Columns rather than a grid: photos vary in height, and a grid leaves
+        // a ragged edge under the short ones.
+        listWrapperStyle = `column-count:${design.gridColumns};column-gap:14px;`;
+      } else if (design.displayStyle === "compact") {
+        // The rows carry their own separators, so no gap between them.
+        listWrapperStyle = "display:flex;flex-direction:column;gap:0;";
       }
 
       // Breakdown bars

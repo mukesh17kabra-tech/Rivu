@@ -1,6 +1,7 @@
 import { PageHeader, Section } from "@/components/ui";
 import { requireShop } from "@/lib/shop-context";
 import { DesignForm, type DesignSettings } from "@/components/DesignForm";
+import type { DisplayStyle } from "@/lib/design-options";
 import { LogoUpload } from "@/components/LogoUpload";
 import { CustomTemplateForm } from "@/components/CustomTemplateForm";
 import { RatingBadgeForm } from "@/components/RatingBadgeForm";
@@ -37,7 +38,10 @@ export default async function WidgetSettingsPage({
             shop={shop}
             plan={shopRecord.plan === "pro" ? "pro" : "free"}
             initial={{
-              displayStyle: shopRecord.displayStyle as "list" | "grid" | "carousel" | "masonry",
+              // Cast to the shared union, not a hand-written copy of it: the
+              // old cast listed four keys, so a stored "photos" or "boxed"
+              // was typed as something it is not.
+              displayStyle: shopRecord.displayStyle as DisplayStyle,
               splitSummary: shopRecord.splitSummary,
               gridColumns: shopRecord.gridColumns,
               carouselVisible: shopRecord.carouselVisible,

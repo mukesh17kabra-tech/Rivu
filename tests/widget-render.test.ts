@@ -336,10 +336,13 @@ describe.each(sources)("%s renders custom CSS", (_name, source) => {
   it("drops the cards' inline styles so CSS can win", async () => {
     const html = await render(source, withCss(".rv-card { border: none }"));
 
-    expect(html).toContain('class="rv-card"');
+    // Prefix match: the card carries a style modifier now (rv-card--boxed,
+    // rv-card--photos), so an exact class match no longer finds it. The
+    // .rv-card selector a merchant writes still applies either way.
+    expect(html).toContain('class="rv-card');
     // The card must carry no inline style of its own, or the merchant's rule
     // loses to it no matter how specific they get.
-    expect(html).not.toMatch(/class="rv-card"[^>]*\sstyle=/);
+    expect(html).not.toMatch(/class="rv-card[^"]*"[^>]*\sstyle=/);
     expect(html).not.toMatch(/class="rv-card-body[^"]*"[^>]*\sstyle=/);
   });
 
@@ -361,7 +364,7 @@ describe.each(sources)("%s renders custom CSS", (_name, source) => {
       richSnippetsEnabled: false,
     });
 
-    expect(html).toMatch(/class="rv-card"[^>]*\sstyle=/);
+    expect(html).toMatch(/class="rv-card[^"]*"[^>]*\sstyle=/);
   });
 
   it("ships a default stylesheet so a bare custom layout still looks right", async () => {
@@ -471,5 +474,68 @@ describe.each(sources)("%s empty state", (_name, source) => {
     const star = html.slice(html.indexOf("No reviews yet") - 700, html.indexOf("No reviews yet"));
     expect(star).toContain("margin:0 auto");
     expect(star).not.toMatch(/<svg[^>]*style="opacity:\.85;margin-bottom:10px;"/);
+  });
+});
+
+describe.each(sources)("%s renders the review-list designs", (_name, source) => {
+  const base = {
+    customTemplateEnabled: false,
+    summaryLayout: "modern",
+    richSnippetsEnabled: false,
+    gridColumns: 3,
+  };
+
+  it("renders the boxed design", async () => {
+    const html = await render(source, { ...base, displayStyle: "boxed" });
+    expect(html).toContain("rv-card--boxed");
+    expect(html).toContain("box-shadow:0 2px 10px");
+    expect(html).toContain("loads of pop");
+  });
+
+  it("renders the compact design without card chrome", async () => {
+    const html = await render(source, { ...base, displayStyle: "compact" });
+    expect(html).toContain("rv-card--compact");
+    expect(html).toContain("border-bottom:1px solid");
+    expect(html).toContain("background:none");
+  });
+
+  it("renders the photo gallery in columns, photo first", async () => {
+    const html = await render(source, { ...base, displayStyle: "photos" }, "pro", {
+      photoUrl: "https://img.test/a.jpg",
+    });
+    expect(html).toContain("column-count:3");
+    expect(html).toContain("rv-card-lead");
+    expect(html).toContain("https://img.test/a.jpg");
+  });
+
+  it("shows the gallery photo once, not twice", async () => {
+    // The lead photo replaces the small inline thumbnail; showing both is the
+    // obvious mistake in a photo-first card.
+    const html = await render(source, { ...base, displayStyle: "photos" }, "pro", {
+      photoUrl: "https://img.test/a.jpg",
+    });
+
+    // Counting media *elements*, not URL occurrences: the lead element carries
+    // the same URL in both src and data-media-url, so counting the string
+    // reported two while only one photo actually renders.
+    expect((html.match(/data-media-url=/g) || []).length).toBe(1);
+  });
+
+  it("keeps the inline thumbnail in the other designs", async () => {
+    const html = await render(source, { ...base, displayStyle: "list" }, "pro", {
+      photoUrl: "https://img.test/a.jpg",
+    });
+    expect(html).toContain("rv-card-media");
+    expect(html).not.toContain("rv-card-lead");
+  });
+
+  it("leaves the gallery card readable when a review has no photo", async () => {
+    // A text-only review in a photo wall must still render, not collapse.
+    const html = await render(source, { ...base, displayStyle: "photos" }, "pro", {
+      photoUrl: null,
+      videoUrl: null,
+    });
+    expect(html).not.toContain("rv-card-lead");
+    expect(html).toContain("loads of pop");
   });
 });

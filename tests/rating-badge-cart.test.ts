@@ -207,3 +207,55 @@ describe("a theme with no title element near the link", () => {
     expect(badges.length).toBe(1);
   });
 });
+
+describe("a product page with the Rating Badge block", () => {
+  it("does not also inject a second badge for the same product", async () => {
+    // The reported bug: "Rating for this product" from the block, and the
+    // stars again under the title from auto-inject. The block sits in the
+    // product info; auto-inject works from whichever product link it finds, so
+    // the per-container check never saw it.
+    setUpPage(`
+      <div class="product-info">
+        <div class="rivu-rating-badge" data-shop="s.myshopify.com"
+             data-product-id="123456" data-api-base="https://rivu.test"></div>
+        <h1 class="product__title">The Complete Snowboard</h1>
+      </div>
+      <nav class="breadcrumb">
+        <a href="/products/the-complete-snowboard">The Complete Snowboard</a>
+      </nav>
+    `);
+    await run();
+    expect(document.querySelectorAll(".rivu-auto-badge").length).toBe(0);
+  });
+
+  it("matches a GID against the numeric id auto-inject resolves", async () => {
+    // The block may be given gid://shopify/Product/123456 while auto-inject
+    // starts from a handle and resolves 123456. Without normalising, the two
+    // never match and the duplicate returns.
+    setUpPage(`
+      <div class="rivu-rating-badge" data-shop="s.myshopify.com"
+           data-product-id="gid://shopify/Product/123456"
+           data-api-base="https://rivu.test"></div>
+      <div class="card">
+        <a href="/products/the-complete-snowboard"><img/></a>
+        <h3 class="card__heading"><a href="/products/the-complete-snowboard">Board</a></h3>
+      </div>
+    `);
+    await run();
+    expect(document.querySelectorAll(".rivu-auto-badge").length).toBe(0);
+  });
+
+  it("still injects for a different product on the same page", async () => {
+    // A related-products row must keep its stars.
+    setUpPage(`
+      <div class="rivu-rating-badge" data-shop="s.myshopify.com"
+           data-product-id="999" data-api-base="https://rivu.test"></div>
+      <div class="card">
+        <a href="/products/other"><img/></a>
+        <h3 class="card__heading"><a href="/products/other">Other</a></h3>
+      </div>
+    `);
+    await run();
+    expect(document.querySelectorAll(".rivu-auto-badge").length).toBe(1);
+  });
+});

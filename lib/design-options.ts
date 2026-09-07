@@ -63,6 +63,9 @@ export const DISPLAY_STYLES = [
   { key: "grid", label: "Grid", minPlan: "free", description: "Cards in a grid" },
   { key: "masonry", label: "Masonry", minPlan: "pro", description: "Staggered columns" },
   { key: "carousel", label: "Carousel", minPlan: "pro", description: "Swipeable row" },
+  { key: "boxed", label: "Boxed", minPlan: "free", description: "Bordered cards with a shadow" },
+  { key: "compact", label: "Compact", minPlan: "free", description: "Dense rows, no card" },
+  { key: "photos", label: "Photo gallery", minPlan: "pro", description: "Photo tiles, click to enlarge" },
 ] as const satisfies readonly DesignOption<string>[];
 
 /** Free-form enums with no plan tiering. */
