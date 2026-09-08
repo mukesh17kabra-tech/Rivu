@@ -7,6 +7,7 @@ import {
   ALIGNMENTS,
   BORDER_STYLES,
   DISPLAY_STYLE_KEYS,
+  CARD_DESIGN_KEYS,
   FORM_TEMPLATE_KEYS,
   SUMMARY_LAYOUT_KEYS,
 } from "@/lib/design-options";
@@ -54,6 +55,7 @@ function parseBody(body: Record<string, unknown>) {
     // because rows can predate a tightening of these rules.
     customTemplateHtml:       sanitiseTemplate(str("customTemplateHtml", "")).html || null,
     displayStyle:             oneOf("displayStyle", DISPLAY_STYLE_KEYS, "list"),
+    cardDesign:               oneOf("cardDesign", CARD_DESIGN_KEYS, "standard"),
     splitSummary:             bool("splitSummary", false),
     gridColumns:              num("gridColumns", 3, 2, 5),
     carouselVisible:          num("carouselVisible", 1, 1, 4),

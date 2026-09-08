@@ -486,21 +486,21 @@ describe.each(sources)("%s renders the review-list designs", (_name, source) => 
   };
 
   it("renders the boxed design", async () => {
-    const html = await render(source, { ...base, displayStyle: "boxed" });
+    const html = await render(source, { ...base, cardDesign: "boxed" });
     expect(html).toContain("rv-card--boxed");
     expect(html).toContain("box-shadow:0 2px 10px");
     expect(html).toContain("loads of pop");
   });
 
   it("renders the compact design without card chrome", async () => {
-    const html = await render(source, { ...base, displayStyle: "compact" });
+    const html = await render(source, { ...base, cardDesign: "compact" });
     expect(html).toContain("rv-card--compact");
     expect(html).toContain("border-bottom:1px solid");
     expect(html).toContain("background:none");
   });
 
   it("renders the photo gallery in columns, photo first", async () => {
-    const html = await render(source, { ...base, displayStyle: "photos" }, "pro", {
+    const html = await render(source, { ...base, cardDesign: "gallery" }, "pro", {
       photoUrl: "https://img.test/a.jpg",
     });
     expect(html).toContain("column-count:3");
@@ -511,7 +511,7 @@ describe.each(sources)("%s renders the review-list designs", (_name, source) => 
   it("shows the gallery photo once, not twice", async () => {
     // The lead photo replaces the small inline thumbnail; showing both is the
     // obvious mistake in a photo-first card.
-    const html = await render(source, { ...base, displayStyle: "photos" }, "pro", {
+    const html = await render(source, { ...base, cardDesign: "gallery" }, "pro", {
       photoUrl: "https://img.test/a.jpg",
     });
 
@@ -522,7 +522,7 @@ describe.each(sources)("%s renders the review-list designs", (_name, source) => 
   });
 
   it("keeps the inline thumbnail in the other designs", async () => {
-    const html = await render(source, { ...base, displayStyle: "list" }, "pro", {
+    const html = await render(source, { ...base, cardDesign: "standard" }, "pro", {
       photoUrl: "https://img.test/a.jpg",
     });
     expect(html).toContain("rv-card-media");
@@ -531,7 +531,7 @@ describe.each(sources)("%s renders the review-list designs", (_name, source) => 
 
   it("leaves the gallery card readable when a review has no photo", async () => {
     // A text-only review in a photo wall must still render, not collapse.
-    const html = await render(source, { ...base, displayStyle: "photos" }, "pro", {
+    const html = await render(source, { ...base, cardDesign: "gallery" }, "pro", {
       photoUrl: null,
       videoUrl: null,
     });

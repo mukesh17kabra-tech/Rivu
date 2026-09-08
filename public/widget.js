@@ -290,7 +290,7 @@
     const D = {
       // Every key the API sends must appear here — the merge below iterates
       // D, so a field missing from this object is silently discarded.
-      richSnippetsEnabled:true, customTemplateEnabled:false, customTemplateHtml:"", customTemplateCss:"",
+      richSnippetsEnabled:true, customTemplateEnabled:false, customTemplateHtml:"", customTemplateCss:"", cardDesign:"standard",
       displayStyle:"list", splitSummary:false, gridColumns:3, carouselVisible:1,
       arrowColor:"#111", primaryColor:"#111", starColor:"#f5b400", rangeColor:"#f5b400",
       backgroundColor:"#fff", textColor:"#333", borderRadius:8, fontFamily:"inherit",
@@ -422,23 +422,97 @@
     let selectedRating = 0, photoDataUrl, videoDataUrl, selectedLang = availableLanguages[0]?.code || "en";
 
     // ─── Lightbox ────────────────────────────────────────────────
+    /**
+     * The review popup: the photo large on one side, the review on the other.
+     *
+     * This used to show the picture alone, which is fine for a thumbnail but
+     * wrong for a photo gallery — the shopper clicks a photo because they want
+     * the story behind it, and the product it belongs to. So it carries the
+     * reviewer, the rating, the date, the review, the merchant's reply, and a
+     * link to the product.
+     *
+     * It also has to behave like a dialog and not a trap: Escape closes it, the
+     * backdrop closes it but a click inside the panel does not, the page behind
+     * stops scrolling, and focus moves in and comes back out.
+     */
     function buildLightbox() {
       const lb = document.createElement("div");
       lb.className = "rv-lightbox-root";
-      lb.innerHTML = `<div class="rv-lightbox-back" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99999;align-items:center;justify-content:center;">
-        <button class="rv-lb-close" style="position:absolute;top:20px;right:24px;background:none;border:none;font-size:28px;color:#fff;cursor:pointer;">✕</button>
-        <div class="rv-lb-content" style="max-width:90vw;max-height:88vh;"></div>
+      lb.innerHTML = `<div class="rv-lightbox-back" role="dialog" aria-modal="true" aria-label="Customer review" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;align-items:center;justify-content:center;padding:20px;">
+        <div class="rv-lb-panel" style="position:relative;display:flex;flex-wrap:wrap;background:${design.backgroundColor};color:${design.textColor};border-radius:${Math.max(r,8)}px;overflow:hidden;max-width:940px;width:100%;max-height:90vh;">
+          <button class="rv-lb-close" aria-label="Close" style="position:absolute;top:14px;left:14px;z-index:2;width:34px;height:34px;border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;font-size:19px;line-height:1;cursor:pointer;">✕</button>
+          <div class="rv-lb-media" style="flex:1 1 340px;min-width:280px;background:#000;display:flex;align-items:center;"></div>
+          <div class="rv-lb-detail" style="flex:1 1 320px;min-width:280px;padding:24px;overflow-y:auto;display:flex;flex-direction:column;"></div>
+        </div>
       </div>`;
       el.appendChild(lb);
+
       const back = lb.querySelector(".rv-lightbox-back");
-      lb.querySelector(".rv-lb-close").addEventListener("click", () => { back.style.display = "none"; lb.querySelector(".rv-lb-content").innerHTML = ""; });
-      back.addEventListener("click", e => { if (e.target === back) { back.style.display = "none"; lb.querySelector(".rv-lb-content").innerHTML = ""; } });
-      return { open(url, type) {
-        lb.querySelector(".rv-lb-content").innerHTML = type === "video"
-          ? `<video src="${url}" controls autoplay style="max-width:90vw;max-height:88vh;border-radius:8px;"></video>`
-          : `<img src="${url}" style="max-width:90vw;max-height:88vh;border-radius:8px;"/>`;
-        back.style.display = "flex";
-      }};
+      const panel = lb.querySelector(".rv-lb-panel");
+      const mediaBox = lb.querySelector(".rv-lb-media");
+      const detailBox = lb.querySelector(".rv-lb-detail");
+      let lastFocused = null;
+
+      function close() {
+        back.style.display = "none";
+        mediaBox.innerHTML = "";
+        detailBox.innerHTML = "";
+        document.documentElement.style.overflow = "";
+        if (lastFocused && lastFocused.focus) lastFocused.focus();
+      }
+
+      lb.querySelector(".rv-lb-close").addEventListener("click", close);
+      back.addEventListener("click", (e) => { if (e.target === back) close(); });
+      document.addEventListener("keydown", (e) => {
+        if (back.style.display !== "none" && e.key === "Escape") close();
+      });
+
+      return {
+        open(url, type, review, opener) {
+          lastFocused = opener || null;
+
+          mediaBox.innerHTML = url
+            ? (type === "video"
+                ? `<video src="${url}" controls autoplay playsinline style="width:100%;max-height:90vh;object-fit:contain;"></video>`
+                : `<img src="${url}" alt="" style="width:100%;max-height:90vh;object-fit:contain;"/>`)
+            : "";
+          mediaBox.style.display = url ? "flex" : "none";
+
+          if (review) {
+            const product = review.productTitle
+              ? `<div style="border-top:1px solid rgba(0,0,0,.1);margin-top:18px;padding-top:14px;">
+                   <div style="display:flex;align-items:center;gap:11px;">
+                     ${review.productImageUrl ? `<img src="${escapeHtml(review.productImageUrl)}" alt="" style="width:46px;height:46px;object-fit:cover;border-radius:6px;flex-shrink:0;background:#f2f2f4;"/>` : ""}
+                     <span style="font-size:13.5px;font-weight:600;line-height:1.35;">${escapeHtml(review.productTitle)}</span>
+                   </div>
+                   ${review.productHandle ? `<a href="/products/${encodeURIComponent(review.productHandle)}" style="display:inline-flex;align-items:center;gap:7px;margin-top:13px;padding:10px 18px;border-radius:${Math.max(r-2,6)}px;background:${design.primaryColor};color:#fff;font-size:13.5px;font-weight:600;text-decoration:none;">View product</a>` : ""}
+                 </div>`
+              : "";
+
+            detailBox.innerHTML =
+              `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                 <span style="font-size:16px;font-weight:700;">${escapeHtml(review.customerName)}</span>
+                 <span style="margin-left:auto;font-size:12.5px;color:${design.reviewMetaColor};">${new Date(review.createdAt).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})}</span>
+               </div>
+               <div style="display:flex;gap:2px;margin:12px 0;">${starsHtml(review.rating, starColor, "#e0e0e0", 17)}</div>
+               ${review.reviewTitle ? `<p style="margin:0 0 8px;font-size:15.5px;font-weight:700;line-height:1.35;">${escapeHtml(review.reviewTitle)}</p>` : ""}
+               <p style="margin:0;font-size:14px;line-height:1.65;">${escapeHtml(review.body)}</p>
+               ${review.ownerReply ? `<div style="margin-top:15px;padding:12px 14px;border-left:3px solid ${design.primaryColor};background:rgba(0,0,0,.035);border-radius:0 6px 6px 0;"><p style="margin:0 0 3px;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;opacity:.6;">Store owner reply</p><p style="margin:0;font-size:13px;line-height:1.6;">${escapeHtml(review.ownerReply)}</p></div>` : ""}
+               <div style="margin-top:auto;">${product}</div>`;
+            detailBox.style.display = "flex";
+          } else {
+            // Opened from somewhere with no review attached — show the media
+            // alone rather than an empty panel beside it.
+            detailBox.innerHTML = "";
+            detailBox.style.display = "none";
+          }
+
+          back.style.display = "flex";
+          document.documentElement.style.overflow = "hidden";
+          const closeBtn = lb.querySelector(".rv-lb-close");
+          if (closeBtn && closeBtn.focus) closeBtn.focus();
+        },
+      };
     }
 
     // ─── One review card ─────────────────────────────────────────
@@ -509,7 +583,7 @@
       // Photo-gallery style leads with the picture at full card width and
       // drops the small inline thumbnail, so the same review is not shown
       // twice in one card.
-      const isGallery = design.displayStyle === "photos";
+      const isGallery = design.cardDesign === "gallery";
       const galleryMedia = rev.videoUrl || rev.photoUrl;
 
       const isLong = rev.body && rev.body.length > 240;
@@ -602,18 +676,18 @@
         compact:
           "background:none;border:none;box-shadow:none;border-radius:0;" +
           "padding:16px 0;border-bottom:1px solid rgba(0,0,0,.08);",
-        photos:
+        gallery:
           `background:${cardBg};border-radius:${r}px;padding:16px;` +
           "border:1px solid rgba(0,0,0,.07);box-shadow:0 1px 4px rgba(0,0,0,.05);" +
           "break-inside:avoid;margin-bottom:14px;",
       };
 
       const chrome =
-        styleChrome[design.displayStyle] ||
+        styleChrome[design.cardDesign] ||
         `background:${cardBg};border-radius:${r}px;padding:20px;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 4px rgba(0,0,0,.05);`;
 
       return `
-<div class="rv-card rv-card--${design.displayStyle}"${st(`color:${design.textColor};font-size:${design.reviewTextSize}px;${chrome}${design.displayStyle==='carousel'?'min-width:260px;max-width:300px;flex-shrink:0;':''}`)}>
+<div class="rv-card rv-card--${design.cardDesign}" data-rv-review="${rev.id}"${st(`color:${design.textColor};font-size:${design.reviewTextSize}px;${chrome}${design.displayStyle==='carousel'?'min-width:260px;max-width:300px;flex-shrink:0;':''}`)}>
   ${isGallery && galleryMedia ? (rev.videoUrl
     ? `<div class="rv-media-thumb rv-card-lead" data-media-url="${rev.videoUrl}" data-media-type="video"${st(`position:relative;margin:-16px -16px 14px;border-radius:${r}px ${r}px 0 0;overflow:hidden;background:#000;cursor:pointer;`)}><video src="${rev.videoUrl}"${st("width:100%;display:block;pointer-events:none;")}></video><div${st("position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2);")}><span${st("color:#fff;font-size:26px;")}>▶</span></div></div>`
     : `<img class="rv-media-thumb rv-card-lead" data-media-url="${rev.photoUrl}" data-media-type="image" src="${rev.photoUrl}" loading="lazy"${st(`width:calc(100% + 32px);display:block;margin:-16px -16px 14px;border-radius:${r}px ${r}px 0 0;cursor:pointer;`)}/>`) : ""}
@@ -715,11 +789,16 @@
         listWrapperStyle = `display:flex;gap:14px;overflow-x:auto;scroll-behavior:smooth;padding-bottom:4px;`;
       } else if (design.displayStyle === "masonry") {
         listWrapperStyle = `column-count:${design.gridColumns};column-gap:14px;`;
-      } else if (design.displayStyle === "photos") {
+      }
+
+      // The gallery card is photo-led, so it wants columns rather than rows —
+      // but only when the merchant left the layout on its default. Choosing a
+      // layout explicitly still wins.
+      if (design.cardDesign === "gallery" && design.displayStyle === "list") {
         // Columns rather than a grid: photos vary in height, and a grid leaves
         // a ragged edge under the short ones.
         listWrapperStyle = `column-count:${design.gridColumns};column-gap:14px;`;
-      } else if (design.displayStyle === "compact") {
+      } else if (design.cardDesign === "compact" && design.displayStyle === "list") {
         // The rows carry their own separators, so no gap between them.
         listWrapperStyle = "display:flex;flex-direction:column;gap:0;";
       }
@@ -1330,7 +1409,13 @@
 
     // Wire up media thumbnails
     el.querySelectorAll(".rv-media-thumb").forEach(t => {
-      t.addEventListener("click", () => lightbox.open(t.dataset.mediaUrl, t.dataset.mediaType));
+      t.addEventListener("click", () => {
+        const card = t.closest ? t.closest("[data-rv-review]") : null;
+        const found = card
+          ? reviews.find((rv) => String(rv.id) === card.getAttribute("data-rv-review"))
+          : null;
+        lightbox.open(t.dataset.mediaUrl, t.dataset.mediaType, found, t);
+      });
     });
 
     // Read more
@@ -1482,7 +1567,17 @@
 
       const loadMore = el.querySelector(".rv-load-more");
       if (loadMore) loadMore.addEventListener("click", () => { shownCount += REVIEWS_PER_PAGE; el.querySelector(".rv-main-content").innerHTML = buildMain(); rewireMain(); });
-      el.querySelectorAll(".rv-media-thumb").forEach(t => { t.addEventListener("click", () => lightbox.open(t.dataset.mediaUrl, t.dataset.mediaType)); });
+      el.querySelectorAll(".rv-media-thumb").forEach(t => {
+        t.addEventListener("click", () => {
+          // The card carries its review id, so the popup can show the story
+          // behind the photo rather than the photo alone.
+          const card = t.closest ? t.closest("[data-rv-review]") : null;
+          const found = card
+            ? reviews.find((rv) => String(rv.id) === card.getAttribute("data-rv-review"))
+            : null;
+          lightbox.open(t.dataset.mediaUrl, t.dataset.mediaType, found, t);
+        });
+      });
       el.querySelectorAll(".rv-read-more").forEach(btn => { btn.addEventListener("click", () => { const tgt = el.querySelector(`#${btn.dataset.target}`); if (tgt) { tgt.style.maxHeight="none"; tgt.style.overflow="visible"; btn.style.display="none"; } }); });
       const openBtns = el.querySelectorAll(".rv-open-form-btn");
       openBtns.forEach(b => b.addEventListener("click", openModal));

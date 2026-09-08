@@ -6,13 +6,17 @@ import {
   formTemplatesFor,
   summaryLayoutsFor,
   displayStylesFor,
+  cardDesignsFor,
   DISPLAY_STYLES,
+  CARD_DESIGNS,
   type DisplayStyle,
+  type CardDesign,
 } from "@/lib/design-options";
 import { SUPPORTED_LANGUAGES } from "@/lib/review-suggestions";
 
 export type DesignSettings = {
   displayStyle: DisplayStyle;
+  cardDesign: CardDesign;
   splitSummary: boolean;
   gridColumns: number;
   carouselVisible: number;
@@ -209,9 +213,50 @@ export function DesignForm({
             })}
           </div>
 
+          {/* Design is a separate question from layout: "grid" says where the
+              cards go, "boxed" says what a card looks like. Combining them
+              into one list forced a merchant to give up one to get the other. */}
+          <label className="mb-2 mt-4 block text-sm font-medium text-white/70">
+            Card design
+          </label>
+          <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {CARD_DESIGNS.map((option) => {
+              const allowed = cardDesignsFor(plan).includes(option.key);
+              const selected = settings.cardDesign === option.key;
+              return (
+                <button
+                  key={option.key}
+                  onClick={() => allowed && update("cardDesign", option.key)}
+                  disabled={!allowed}
+                  title={allowed ? option.description : "Available on Pro"}
+                  className={`rounded-md border px-2 py-2 text-left transition-colors ${
+                    !allowed
+                      ? "cursor-not-allowed border-white/5 text-white/25"
+                      : selected
+                        ? "border-emerald-400 bg-emerald-400/10 text-white"
+                        : "border-white/10 text-white/50 hover:border-white/30"
+                  }`}
+                >
+                  <span className="flex items-center gap-1 text-xs font-semibold">
+                    {!allowed && "🔒"}
+                    {option.label}
+                    {option.minPlan !== "free" && (
+                      <span className="ml-auto text-[9px] font-bold uppercase tracking-wide text-amber-300/80">
+                        Pro
+                      </span>
+                    )}
+                  </span>
+                  <span className="mt-0.5 block text-[10px] leading-tight text-white/35">
+                    {option.description}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
           {(settings.displayStyle === "grid" ||
             settings.displayStyle === "masonry" ||
-            settings.displayStyle === "photos") && (
+            settings.cardDesign === "gallery") && (
             <div className="mb-2">
               <label className="mb-1 block text-xs text-white/50">
                 Columns: {settings.gridColumns}

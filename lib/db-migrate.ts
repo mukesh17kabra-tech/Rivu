@@ -4,6 +4,7 @@ import { db } from "./db";
 // commands in a single prepared statement ($executeRawUnsafe call).
 const MIGRATIONS = [
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "displayStyle" TEXT NOT NULL DEFAULT 'list'`,
+  `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "cardDesign" TEXT NOT NULL DEFAULT 'standard'`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "primaryColor" TEXT NOT NULL DEFAULT '#111111'`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "starColor" TEXT NOT NULL DEFAULT '#f5b400'`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "backgroundColor" TEXT NOT NULL DEFAULT '#ffffff'`,

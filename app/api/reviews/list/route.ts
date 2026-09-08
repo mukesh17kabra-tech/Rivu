@@ -58,6 +58,10 @@ export async function GET(req: NextRequest) {
         pinnedAt: true,
         helpfulCount: true,
         unhelpfulCount: true,
+        // Needed by the review popup: it names the product and links to it.
+        productTitle: true,
+        productHandle: true,
+        productImageUrl: true,
         body: true,
         customerName: true,
         customerEmail: true,
@@ -177,6 +181,7 @@ export async function GET(req: NextRequest) {
                                    ? prepareCustomCss(String(s.customTemplateCss ?? "")).css
                                    : "",
           displayStyle:          safe(s.displayStyle as string,           "list"),
+          cardDesign:            safe(s.cardDesign as string,             "standard"),
           splitSummary:          safe(s.splitSummary as boolean,          false),
           gridColumns:           safe(s.gridColumns as number,            3),
           carouselVisible:       safe(s.carouselVisible as number,        1),

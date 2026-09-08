@@ -29,7 +29,10 @@ model Shop {
 
   // Widget design customization — lets merchants match their store's
   // branding instead of a fixed look, and choose how reviews are laid out.
-  displayStyle    String  @default("list") // "list" | "grid" | "carousel" | "masonry" — shape of the review list itself
+  displayStyle    String  @default("list") // "list" | "grid" | "carousel" | "masonry" — how the list is arranged
+  // How each card looks, independent of the arrangement above: a merchant can
+  // put boxed cards in a grid, or the photo-gallery card in a masonry wall.
+  cardDesign      String  @default("standard") // "standard" | "boxed" | "compact" | "gallery"
   splitSummary    Boolean @default(false) // when true, shows summary+rating-bar in a sticky left column, review list (in whatever displayStyle) on the right
   gridColumns     Int     @default(3) // used for "grid" columns AND "masonry" column count
   carouselVisible Int     @default(1) // cards visible at once, carousel only

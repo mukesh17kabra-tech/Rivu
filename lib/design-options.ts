@@ -63,9 +63,22 @@ export const DISPLAY_STYLES = [
   { key: "grid", label: "Grid", minPlan: "free", description: "Cards in a grid" },
   { key: "masonry", label: "Masonry", minPlan: "pro", description: "Staggered columns" },
   { key: "carousel", label: "Carousel", minPlan: "pro", description: "Swipeable row" },
-  { key: "boxed", label: "Boxed", minPlan: "free", description: "Bordered cards with a shadow" },
+] as const satisfies readonly DesignOption<string>[];
+
+/**
+ * How each review card looks, which is a different question from how the list
+ * is arranged.
+ *
+ * These were briefly one list, and that was wrong: "grid" answers where the
+ * cards go, "boxed" answers what a card looks like, and a merchant reasonably
+ * wants a boxed card in a grid. Keeping them separate is the difference
+ * between four options and sixteen combinations.
+ */
+export const CARD_DESIGNS = [
+  { key: "standard", label: "Standard", minPlan: "free", description: "Avatar, stars, text" },
+  { key: "boxed", label: "Boxed", minPlan: "free", description: "Bordered card with a shadow" },
   { key: "compact", label: "Compact", minPlan: "free", description: "Dense rows, no card" },
-  { key: "photos", label: "Photo gallery", minPlan: "pro", description: "Photo tiles, click to enlarge" },
+  { key: "gallery", label: "Photo gallery", minPlan: "pro", description: "Photo on top, click to enlarge" },
 ] as const satisfies readonly DesignOption<string>[];
 
 /** Free-form enums with no plan tiering. */
@@ -75,6 +88,7 @@ export const BORDER_STYLES = ["solid", "dashed", "dotted", "double"] as const;
 export type SummaryLayout = (typeof SUMMARY_LAYOUTS)[number]["key"];
 export type FormTemplate = (typeof FORM_TEMPLATES)[number]["key"];
 export type DisplayStyle = (typeof DISPLAY_STYLES)[number]["key"];
+export type CardDesign = (typeof CARD_DESIGNS)[number]["key"];
 export type Alignment = (typeof ALIGNMENTS)[number];
 export type BorderStyle = (typeof BORDER_STYLES)[number];
 
@@ -86,6 +100,7 @@ function keysOf<T extends readonly DesignOption<string>[]>(options: T): string[]
 export const SUMMARY_LAYOUT_KEYS = keysOf(SUMMARY_LAYOUTS);
 export const FORM_TEMPLATE_KEYS = keysOf(FORM_TEMPLATES);
 export const DISPLAY_STYLE_KEYS = keysOf(DISPLAY_STYLES);
+export const CARD_DESIGN_KEYS = keysOf(CARD_DESIGNS);
 
 /** Keys a given plan is allowed to use, including everything below it. */
 export function allowedFor(
@@ -106,6 +121,9 @@ export function formTemplatesFor(plan: PlanTier): string[] {
 }
 export function displayStylesFor(plan: PlanTier): string[] {
   return allowedFor(DISPLAY_STYLES, plan);
+}
+export function cardDesignsFor(plan: PlanTier): string[] {
+  return allowedFor(CARD_DESIGNS, plan);
 }
 
 /** Tier badge for the picker — blank on Free, "Pro" on everything paid. */

@@ -9,6 +9,7 @@
 export const FREE_PLAN_DESIGN_DEFAULTS = {
   // Layout — Free: List and Grid only
   displayStyle:            "list",
+  cardDesign:              "standard",
   splitSummary:            false,
   gridColumns:             2,
   carouselVisible:         1,

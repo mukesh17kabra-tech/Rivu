@@ -1,5 +1,5 @@
 import { FREE_PLAN_DESIGN_DEFAULTS } from "./design-defaults";
-import { formTemplatesFor, summaryLayoutsFor } from "./design-options";
+import { cardDesignsFor, formTemplatesFor, summaryLayoutsFor } from "./design-options";
 
 // Central definition of which widget-design customizations are locked
 // behind which plan. Used server-side (to actually enforce — not just to
@@ -23,6 +23,7 @@ export type DesignInput = {
   enabledLanguages: string[];
   formTemplate: string;
   summaryLayout: string;
+  cardDesign: string;
   [key: string]: unknown;
 };
 
@@ -65,14 +66,7 @@ export function clampDesignToPlan<T extends DesignInput>(
 
   if (isFree) {
     // Layout: Free only gets list/grid — no masonry, no split.
-    // "photos" joins the Pro-only layouts. Listed here as well as in
-    // design-options because this is what actually enforces it on save — the
-    // picker only hides what a merchant cannot choose.
-    if (
-      clamped.displayStyle === "masonry" ||
-      clamped.displayStyle === "carousel" ||
-      clamped.displayStyle === "photos"
-    ) {
+    if (clamped.displayStyle === "masonry" || clamped.displayStyle === "carousel") {
       clamped.displayStyle = DEFAULTS.displayStyle;
       lockedFields.push("displayStyle");
     }
@@ -107,6 +101,14 @@ export function clampDesignToPlan<T extends DesignInput>(
       clamped.letCustomerPickLanguage = DEFAULTS.letCustomerPickLanguage;
       lockedFields.push("letCustomerPickLanguage");
     }
+  }
+
+  // Card design gating, separate from the layout above: the photo gallery is
+  // Pro, the rest are free. Enforced here because the picker only hides what a
+  // merchant cannot choose — the API is what stops it being saved.
+  if (!cardDesignsFor(plan).includes(clamped.cardDesign as string)) {
+    clamped.cardDesign = "standard";
+    lockedFields.push("cardDesign");
   }
 
   // Summary layout gating: Free=modern only, Pro=all

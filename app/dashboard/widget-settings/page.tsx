@@ -1,7 +1,7 @@
 import { PageHeader, Section } from "@/components/ui";
 import { requireShop } from "@/lib/shop-context";
 import { DesignForm, type DesignSettings } from "@/components/DesignForm";
-import type { DisplayStyle } from "@/lib/design-options";
+import type { CardDesign, DisplayStyle } from "@/lib/design-options";
 import { LogoUpload } from "@/components/LogoUpload";
 import { CustomTemplateForm } from "@/components/CustomTemplateForm";
 import { RatingBadgeForm } from "@/components/RatingBadgeForm";
@@ -42,6 +42,7 @@ export default async function WidgetSettingsPage({
               // old cast listed four keys, so a stored "photos" or "boxed"
               // was typed as something it is not.
               displayStyle: shopRecord.displayStyle as DisplayStyle,
+              cardDesign: (shopRecord.cardDesign || "standard") as CardDesign,
               splitSummary: shopRecord.splitSummary,
               gridColumns: shopRecord.gridColumns,
               carouselVisible: shopRecord.carouselVisible,
