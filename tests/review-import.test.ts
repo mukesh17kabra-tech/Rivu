@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "fs";
+import path from "path";
 import {
   parseReviewCsv,
   parseReviewDate,
@@ -284,5 +286,112 @@ describe("bad input", () => {
     );
     expect(p.totalRows).toBe(2);
     expect(p.records.length + p.skipped.reduce((n, s) => n + s.count, 0)).toBe(2);
+  });
+});
+
+/**
+ * Migrating from Loox specifically.
+ *
+ * The merchant asked whether Loox reviews can be imported directly. They can,
+ * by CSV — there is no API to pull from — so the question becomes how much of
+ * the review survives the trip.
+ */
+describe("a Loox-style export", () => {
+  it("reads its column names", () => {
+    const p = plan(
+      [
+        "product_id,product_handle,product,rating,review_content,name,email,photo,date,published",
+        "77,silver-ring,Silver Ring,5,Loved it — shines beautifully,Archana,a@test.com,https://cdn.loox.io/a.jpg,2026-06-18,true",
+      ].join("\n")
+    );
+
+    expect(p.records).toHaveLength(1);
+    expect(p.records[0]).toMatchObject({
+      productId: "77",
+      productTitle: "Silver Ring",
+      rating: 5,
+      body: "Loved it — shines beautifully",
+      customerName: "Archana",
+      photoUrl: "https://cdn.loox.io/a.jpg",
+      approved: true,
+    });
+    expect(p.records[0].createdAt?.toISOString().slice(0, 10)).toBe("2026-06-18");
+  });
+
+  it("brings the shop's replies across", () => {
+    // A merchant who has answered two hundred reviews would otherwise arrive
+    // looking as though they answer none.
+    const p = plan(
+      [
+        "product_id,product,rating,review_content,name,reply",
+        "77,Ring,5,Beautiful,Archana,Thank you so much!",
+      ].join("\n")
+    );
+    expect(p.records[0].ownerReply).toBe("Thank you so much!");
+    expect(p.warnings.join(" ")).toMatch(/replies to customers will be imported/i);
+  });
+
+  it("recognises the other names an export gives a reply", () => {
+    for (const header of ["shop_reply", "store_reply", "merchant_reply", "response"]) {
+      const p = plan(
+        [
+          `product_id,product,rating,review_content,name,${header}`,
+          "77,Ring,5,Beautiful,Archana,Our answer",
+        ].join("\n")
+      );
+      expect(p.records[0].ownerReply, header).toBe("Our answer");
+    }
+  });
+
+  it("warns that photos stay on the old app's servers", () => {
+    // This is the part that bites weeks later: the reviews are safely moved,
+    // the pictures are still being served by the app the merchant cancelled.
+    const p = plan(
+      [
+        "product_id,product,rating,review_content,name,photo",
+        "77,Ring,5,Beautiful,Archana,https://cdn.loox.io/a.jpg",
+      ].join("\n")
+    );
+    expect(p.warnings.join(" ")).toMatch(/hosted by your old review app/i);
+    expect(p.warnings.join(" ")).toMatch(/may stop loading if you cancel/i);
+  });
+
+  it("does not warn about photos that are already data URIs", () => {
+    // Those are stored in Rivu and depend on nobody.
+    const p = plan(
+      [
+        "product_id,product,rating,review_content,name,photo",
+        "77,Ring,5,Beautiful,Archana,data:image/png;base64,AAAA",
+      ].join("\n")
+    );
+    expect(p.warnings.join(" ")).not.toMatch(/hosted by your old review app/i);
+  });
+
+  it("does not warn when there are no replies", () => {
+    const p = plan(
+      ["product_id,product,rating,review_content,name", "77,Ring,5,Beautiful,Archana"].join("\n")
+    );
+    expect(p.warnings.join(" ")).not.toMatch(/replies to customers/i);
+  });
+});
+
+describe("the import route writes what the parser produced", () => {
+  const route = readFileSync(
+    path.resolve(__dirname, "../app/api/reviews/import/route.ts"),
+    "utf8"
+  );
+
+  it("stores the shop's reply", () => {
+    // These tests exercise the parser, so the route could read every reply and
+    // then drop it on the way to the database with all of them still green.
+    expect(route).toContain("ownerReply: r.ownerReply");
+  });
+
+  it("dates the reply, so it does not render as an undated block", () => {
+    expect(route).toContain("ownerReplyAt: r.ownerReply ?");
+  });
+
+  it("carries the photo through", () => {
+    expect(route).toContain("photoUrl: r.photoUrl");
   });
 });

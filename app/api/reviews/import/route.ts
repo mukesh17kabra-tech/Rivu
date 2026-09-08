@@ -95,6 +95,9 @@ export async function POST(req: NextRequest) {
       customerEmail: r.customerEmail,
       photoUrl: r.photoUrl,
       approved: r.approved,
+      // The shop's public reply, when the export carried one.
+      ownerReply: r.ownerReply,
+      ownerReplyAt: r.ownerReply ? (r.createdAt ?? new Date()) : undefined,
       // Omitted rather than defaulted to now, so Prisma's own default applies
       // and the "no date" warning above stays truthful.
       ...(r.createdAt ? { createdAt: r.createdAt } : {}),
