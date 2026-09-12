@@ -42,6 +42,8 @@ const ICONS = {
   widget: "M4 5h16v5H4V5zm0 9h7v5H4v-5zm11 0h5v5h-5v-5z",
   install: "M12 3v11m0 0 4-4m-4 4-4-4M4 17v3h16v-3",
   plan: "M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5L12 3z",
+  design: "M15.5 4.5l4 4L8 20H4v-4L15.5 4.5zM13.5 6.5l4 4",
+  help: "M12 17.5v.01M9.5 9.5a2.5 2.5 0 1 1 3.4 2.33c-.55.22-.9.75-.9 1.34v.58M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z",
 } as const;
 
 function buildGroups(query: string): Group[] {
@@ -63,14 +65,18 @@ function buildGroups(query: string): Group[] {
     {
       title: "Storefront",
       items: [
-        { key: "widget-settings", label: "Widget design", href: `/dashboard/widget-settings?${query}`, icon: <Icon path={ICONS.widget} /> },
-        { key: "installation", label: "Installation", href: `/dashboard/installation?${query}`, icon: <Icon path={ICONS.install} /> },
+        // "Widgets" rather than "Installation": the page is now a gallery of
+        // the eleven blocks, and merchants come back to it to add more — not
+        // once, to install.
+        { key: "installation", label: "Widgets", href: `/dashboard/installation?${query}`, icon: <Icon path={ICONS.widget} /> },
+        { key: "widget-settings", label: "Widget design", href: `/dashboard/widget-settings?${query}`, icon: <Icon path={ICONS.design} /> },
       ],
     },
     {
       title: "Account",
       items: [
         { key: "plans", label: "Plan", href: `/dashboard/plans?${query}`, icon: <Icon path={ICONS.plan} /> },
+        { key: "resources", label: "Help & guides", href: `/dashboard/resources?${query}`, icon: <Icon path={ICONS.help} /> },
       ],
     },
   ];

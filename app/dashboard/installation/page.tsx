@@ -1,6 +1,7 @@
 import { Card, PageHeader } from "@/components/ui";
 import { requireShop } from "@/lib/shop-context";
-import { InstallationContent } from "@/components/InstallationContent";
+import { WidgetGallery } from "@/components/WidgetGallery";
+import { ManualInstall } from "@/components/InstallationContent";
 
 export default async function InstallationPage({
   searchParams,
@@ -16,12 +17,14 @@ export default async function InstallationPage({
   return (
     <>
       <PageHeader
-        title="Installation"
-        description="Add the Rivu widget to your storefront."
+        title="Widgets"
+        description="Ten widgets for your storefront, plus the embed that powers them. Pick the ones you want."
       />
 
-      <Card>
-        <InstallationContent shop={shop} />
+      <WidgetGallery shop={shop} plan={shopRecord.plan} />
+
+      <Card className="mt-6">
+        <ManualInstall shop={shop} />
       </Card>
     </>
   );

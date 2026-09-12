@@ -1,117 +1,114 @@
-export function InstallationContent({ shop }: { shop: string }) {
-  const themeEditorUrl = `https://${shop}/admin/themes/current/editor?template=product`;
-  const collectionEditorUrl = `https://${shop}/admin/themes/current/editor?template=collection`;
+import { appUrl } from "@/lib/app-url";
+
+/**
+ * Copy-paste install for themes that don't support app blocks.
+ *
+ * Kept behind a disclosure rather than laid out in full: almost every store on
+ * a current theme should use the gallery above, and a page that opens on raw
+ * Liquid tells a merchant this app is going to be work.
+ *
+ * The snippets now carry the app's real domain. They used to say
+ * YOUR-APP-DOMAIN.vercel.app, which is only a placeholder to someone who
+ * already knows it is one — anyone who pasted it got a widget that silently
+ * never loaded.
+ */
+export function ManualInstall({ shop }: { shop: string }) {
+  const origin = appUrl() || "https://rivu-one.vercel.app";
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h3 className="mb-2 text-sm font-semibold text-white">Step 1 — Enable the App Embed</h3>
-        <p className="mb-3 text-sm text-white/60">
-          Required first. Loads the Rivu widget script globally across your store — only needed once.
-        </p>
-        <a
-          href={`${themeEditorUrl}&context=apps`}
-          target="_top"
-          className="inline-block rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300"
-        >
-          Open App Embeds →
-        </a>
-      </div>
-
-      <div className="border-t border-white/10 pt-8">
-        <h3 className="mb-2 text-sm font-semibold text-white">Step 2 — Full Reviews Widget (Product Page)</h3>
-        <p className="mb-3 text-sm text-white/60">
-          The main review section — shows average rating, star breakdown bars, review cards, and the
-          "Write a Review" form. Add the <strong className="text-white">Rivu Reviews</strong> block
-          to your product page template.
-        </p>
-        <a
-          href={themeEditorUrl}
-          target="_top"
-          className="inline-block rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90"
-        >
-          Add to Product Page →
-        </a>
-      </div>
-
-      <div className="border-t border-white/10 pt-8">
-        <h3 className="mb-2 text-sm font-semibold text-white">Step 3 — Star Badge near Product Title</h3>
-        <p className="mb-3 text-sm text-white/60">
-          Shows compact stars and review count right below the product title — clicking it
-          automatically scrolls the customer down to the full review section. Add the{" "}
-          <strong className="text-white">Rivu Rating Badge</strong> block near your product title in
-          the theme editor. Star size and text are customizable from{" "}
-          <a href={`/dashboard/widget-settings?shop=${shop}`} className="text-emerald-400 underline">
-            Widget Settings
-          </a>.
-        </p>
-        <a
-          href={themeEditorUrl}
-          target="_top"
-          className="inline-block rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90"
-        >
-          Add Rating Badge to Product Page →
-        </a>
-      </div>
-
-      <div className="border-t border-white/10 pt-8">
-        <h3 className="mb-2 text-sm font-semibold text-white">Step 4 — Stars on Collection / Product Cards</h3>
-        <p className="mb-3 text-sm text-white/60">
-          Shows the star rating on each product card in your collection listings, so shoppers can
-          see ratings before clicking into a product. Add the{" "}
-          <strong className="text-white">Rivu Rating Badge</strong> block inside your product card
-          section in the collection page editor.
-        </p>
-        <div className="mb-3 rounded-md bg-yellow-400/10 border border-yellow-400/20 px-4 py-3 text-xs text-yellow-200/80">
-          <strong>Note:</strong> Collection card app blocks are only supported in themes that use
-          the &quot;app block&quot; slot inside product cards (e.g. Dawn 10+, Sense, Craft). If
-          your theme doesn&apos;t show an option to add a block inside product cards, use the manual
-          Liquid install below.
+    <details className="group">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+        <div>
+          <h3 className="text-[15px] font-bold tracking-[-0.01em] text-white">
+            Theme doesn&apos;t support app blocks?
+          </h3>
+          <p className="mt-1 text-[13px] text-white/45">
+            Older and heavily customised themes have no &ldquo;Add block&rdquo; slot. Paste this
+            into your Liquid instead.
+          </p>
         </div>
-        <a
-          href={collectionEditorUrl}
-          target="_top"
-          className="inline-block rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90"
-        >
-          Add Stars to Collection Cards →
-        </a>
-      </div>
+        <span className="shrink-0 text-xs font-semibold text-emerald-300 group-open:hidden">
+          Show →
+        </span>
+        <span className="hidden shrink-0 text-xs font-semibold text-white/40 group-open:inline">
+          Hide
+        </span>
+      </summary>
 
-      <div className="border-t border-white/10 pt-8">
-        <h3 className="mb-2 text-sm font-semibold text-white">Manual install — Full Reviews Widget (advanced)</h3>
-        <p className="mb-3 text-sm text-white/60">
-          For themes that don&apos;t support app blocks, paste this into your product template
-          Liquid file:
-        </p>
-        <pre className="overflow-x-auto rounded-md bg-black/40 p-4 text-xs text-white/70">
+      <div className="mt-6 space-y-7 border-t border-white/[0.07] pt-6">
+        <div>
+          <h4 className="mb-2 text-sm font-semibold text-white">Full reviews widget</h4>
+          <p className="mb-3 text-[13px] text-white/50">
+            Paste into your product template, where you want the reviews to appear.
+          </p>
+          <pre className="overflow-x-auto rounded-lg bg-black/40 p-4 text-xs leading-relaxed text-white/70">
 {`<div id="review-widget"
      data-shop="{{ shop.permanent_domain }}"
      data-product-id="{{ product.id }}"
      data-product-title="{{ product.title | escape }}"
      data-product-image="{{ product.featured_image | image_url: width: 800 }}">
 </div>
-<script src="https://YOUR-APP-DOMAIN.vercel.app/widget.js" async></script>`}
-        </pre>
-      </div>
+<script src="${origin}/widget.js" async></script>`}
+          </pre>
+        </div>
 
-      <div className="border-t border-white/10 pt-8">
-        <h3 className="mb-2 text-sm font-semibold text-white">Manual install — Rating Badge on Product Cards (advanced)</h3>
-        <p className="mb-3 text-sm text-white/60">
-          To add the compact star badge inside product card snippets (e.g.{" "}
-          <code className="text-emerald-300">card-product.liquid</code>) manually:
-        </p>
-        <pre className="overflow-x-auto rounded-md bg-black/40 p-4 text-xs text-white/70">
+        <div>
+          <h4 className="mb-2 text-sm font-semibold text-white">Rating badge on product cards</h4>
+          <p className="mb-3 text-[13px] text-white/50">
+            Paste inside your product card snippet — usually{" "}
+            <code className="rounded bg-white/[0.06] px-1 py-0.5 text-emerald-300">
+              card-product.liquid
+            </code>
+            .
+          </p>
+          <pre className="overflow-x-auto rounded-lg bg-black/40 p-4 text-xs leading-relaxed text-white/70">
 {`<div class="rivu-rating-badge"
      data-shop="{{ shop.permanent_domain }}"
      data-product-id="{{ product.id }}"
-     data-api-base="https://YOUR-APP-DOMAIN.vercel.app">
+     data-api-base="${origin}">
 </div>`}
-        </pre>
-        <p className="mt-2 text-xs text-white/40">
-          The badge script is loaded automatically by the App Embed (Step 1). Make sure the App
-          Embed is enabled before adding this snippet.
+          </pre>
+          <p className="mt-2 text-[11px] text-white/35">
+            The badge script comes from the App Embed, so enable that first or this renders
+            nothing.
+          </p>
+        </div>
+
+        <div>
+          <h4 className="mb-2 text-sm font-semibold text-white">Store-wide reviews anywhere</h4>
+          <p className="mb-3 text-[13px] text-white/50">
+            Reviews from across your store, on any page. Swap <code className="text-emerald-300">layout</code>{" "}
+            for <code className="text-emerald-300">grid</code>,{" "}
+            <code className="text-emerald-300">carousel</code>,{" "}
+            <code className="text-emerald-300">wall</code>,{" "}
+            <code className="text-emerald-300">quotes</code>,{" "}
+            <code className="text-emerald-300">trust</code> or{" "}
+            <code className="text-emerald-300">gallery</code>.
+          </p>
+          <pre className="overflow-x-auto rounded-lg bg-black/40 p-4 text-xs leading-relaxed text-white/70">
+{`<div data-rivu-showcase
+     data-shop="{{ shop.permanent_domain }}"
+     data-api-base="${origin}"
+     data-layout="grid"
+     data-columns="3"
+     data-limit="12">
+</div>
+<script src="${origin}/rivu-showcase.js" async></script>`}
+          </pre>
+        </div>
+
+        <p className="text-[12px] text-white/35">
+          Stuck on your theme? Send us the theme name from{" "}
+          <a
+            href={`https://${shop}/admin/themes`}
+            target="_top"
+            className="text-emerald-300 underline underline-offset-2"
+          >
+            Online Store → Themes
+          </a>{" "}
+          and we&apos;ll send back the exact snippet and where it goes.
         </p>
       </div>
-    </div>
+    </details>
   );
 }
