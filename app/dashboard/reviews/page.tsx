@@ -5,6 +5,7 @@ import { ImportWizard } from "@/components/ImportWizard";
 import { ReviewsTable } from "@/components/ReviewsTable";
 import { ModerationToggle } from "@/components/ModerationToggle";
 import { requireShop } from "@/lib/shop-context";
+import { FixProductLinks } from "@/components/FixProductLinks";
 
 export default async function ReviewsDashboard({
   searchParams,
@@ -25,6 +26,12 @@ export default async function ReviewsDashboard({
 
   const pendingCount = reviews.filter((r: { approved: boolean }) => !r.approved).length;
 
+  // Counted across the whole table, not just the 200 shown, because the offer
+  // to repair them is about all of them.
+  const missingHandles = await db.review.count({
+    where: { shopId: shopRecord.id, productHandle: null },
+  });
+
   return (
     <>
       <PageHeader
@@ -41,6 +48,8 @@ export default async function ReviewsDashboard({
         initialAutoApprove={shopRecord.autoApproveReviews}
         pendingCount={pendingCount}
       />
+
+      <FixProductLinks shop={shop} missing={missingHandles} />
 
       <ImportWizard shop={shop} />
       <ImportExportBar shop={shop} />

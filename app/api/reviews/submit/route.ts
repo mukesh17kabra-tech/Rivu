@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { createReviewRewardDiscount } from "@/lib/shopify";
+import { resolveProductHandle } from "@/lib/product-handle";
 import {
   checkReviewQuota,
   checkVideoAllowed,
@@ -124,6 +125,23 @@ export async function POST(req: NextRequest) {
     videoUrl = undefined;
   }
 
+  /**
+   * The product's storefront handle, looked up when the submitter didn't send
+   * one.
+   *
+   * Only the product-page widget ever sends it. A review left through a QR
+   * code or a review-request email arrives with a product id and a title and
+   * nothing else — and every "View product" link in Rivu is /products/<handle>,
+   * with no equivalent route by id. Without this, those reviews show the
+   * product name as dead text forever.
+   *
+   * Resolution is soft: if Shopify is slow or the product is gone, the review
+   * still saves. A missing link is a small loss; a dropped review is somebody's
+   * lost writing.
+   */
+  const productHandle =
+    data.productHandle || (await resolveProductHandle(shop, data.productId));
+
   // Published immediately unless the merchant has turned moderation on.
   // Holding every review back by default made the storefront look empty and
   // the app look broken, with no hint that anything was waiting.
@@ -131,6 +149,7 @@ export async function POST(req: NextRequest) {
     data: {
       shopId: shopRecord.id,
       ...data,
+      productHandle: productHandle || undefined,
       videoUrl,
       // After the spread, not before it. `data` cannot carry `approved` today
       // because the schema doesn't declare it and zod strips unknown keys, but
