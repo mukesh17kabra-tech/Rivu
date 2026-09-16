@@ -776,11 +776,59 @@
     var cols = Math.max(1, Math.min(opts.columns, count || opts.columns));
     var style = "column-count:" + cols + ";column-gap:" + gap + "px;";
     if (cols < opts.columns) {
-      // 340px is about the width one column gets in a 1200px section at four
-      // columns — so a lone tile is the size it would have been in a full row.
-      style += "max-width:" + (cols * 340 + (cols - 1) * gap) + "px;margin:0 auto;";
+      /**
+       * Wider tiles the fewer there are.
+       *
+       * 340px is about the width one column gets in a 1200px section at four
+       * columns. At that size a single review sits as a small tile in a large
+       * empty section and reads as something that failed to load. Letting one
+       * or two grow makes a sparse section look chosen rather than leftover —
+       * and no amount of layout can invent photos a store does not have yet.
+       */
+      var tile = cols === 1 ? 460 : cols === 2 ? 390 : 340;
+      style += "max-width:" + (cols * tile + (cols - 1) * gap) + "px;margin:0 auto;";
     }
     return '<div class="' + cls + '" style="' + style + '">' + inner + "</div>";
+  }
+
+  /**
+   * Explains a half-empty wall — in the theme editor only.
+   *
+   * A merchant who sets a gallery to four columns and sees one photo in a
+   * wide section concludes the app is broken. It is not: the store has one
+   * review with a photo, and there is nothing else to put there. Saying so
+   * where they are already looking is the difference between a support
+   * message and a merchant who knows what to do next.
+   *
+   * Shopify.designMode is true only inside the theme editor, so a shopper
+   * never sees this. Same rule as the Pro-gate notice above: help the person
+   * configuring the block, never lecture the person buying.
+   */
+  function sparseNote(count, opts) {
+    // `typeof` rather than a bare `window`: this runs before anything else in
+    // the render, and a bare reference throws outright where window does not
+    // exist — which would take the whole block down, not just the note.
+    var editing =
+      typeof window !== "undefined" && window.Shopify && window.Shopify.designMode;
+    if (!editing) return "";
+    if (opts.layout !== "gallery" && opts.layout !== "wall") return "";
+    if (count >= opts.columns) return "";
+
+    var subject = opts.layout === "gallery" ? "photo" : "review";
+    var extra = opts.withMedia
+      ? ' Turning off <strong>"Only reviews with a photo or video"</strong> would ' +
+        "include your text reviews here too."
+      : " It will fill out on its own as more reviews come in.";
+
+    return (
+      '<p class="rivu-sc-editor-note" style="font-size:13px;line-height:1.5;margin:0 0 14px;' +
+      "padding:11px 13px;border:1px dashed #c9c9d2;border-radius:8px;color:#6d6d78;" +
+      'background:#fafafc;">Only <strong>' + count + " " + subject +
+      (count === 1 ? "" : "s") + "</strong> to show, but this block is set to <strong>" +
+      opts.columns + " columns</strong>, so it looks empty. The " + subject +
+      (count === 1 ? " is" : "s are") + " shown larger and centred instead." + extra +
+      "<br/><em>Only you can see this note — shoppers never do.</em></p>"
+    );
   }
 
   function layoutWrapper(inner, opts, count) {
@@ -991,6 +1039,7 @@
     }
 
     el.innerHTML =
+      sparseNote(reviews.length, opts) +
       (opts.heading
         ? '<h2 style="margin:0 0 16px;font-size:20px;font-weight:700;text-align:' +
           opts.headingAlign + ';color:' + opts.textColor + ';">' +

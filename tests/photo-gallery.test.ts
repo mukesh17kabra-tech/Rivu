@@ -398,3 +398,76 @@ describe("the product handle is captured when a review is written", () => {
     expect(src).toContain('data-product-handle="{{ product.handle }}"');
   });
 });
+
+describe("the theme-editor note about a half-empty wall", () => {
+  /**
+   * A merchant who sets four columns and sees one photo concludes the app is
+   * broken. It is not — their store has one review with a photo. Saying so
+   * where they are already looking is the whole point.
+   *
+   * The hard requirement is the second test: a shopper must never see it.
+   */
+  function editing(on: boolean) {
+    (globalThis as unknown as Record<string, unknown>).Shopify = on
+      ? { designMode: true }
+      : undefined;
+  }
+
+  afterEach(() => editing(false));
+
+  it("explains the emptiness while the merchant is editing", async () => {
+    editing(true);
+    const el = await run(setUp(BASE));
+    const html = el.innerHTML as string;
+    expect(html).toContain("rivu-sc-editor-note");
+    expect(html).toContain("2 photos");
+    expect(html).toContain("4 columns");
+  });
+
+  it("never shows it on a storefront", async () => {
+    // The storefront is not the audience for our configuration advice.
+    editing(false);
+    const el = await run(setUp(BASE));
+    expect(el.innerHTML as string).not.toContain("rivu-sc-editor-note");
+  });
+
+  it("stays quiet when the wall is full", async () => {
+    editing(true);
+    const el = await run(setUp({ ...BASE, columns: "2" }));
+    expect(el.innerHTML as string).not.toContain("rivu-sc-editor-note");
+  });
+
+  it("points at the photo-only filter, which is the usual cause", async () => {
+    editing(true);
+    const el = await run(setUp({ ...BASE, withMedia: "true" }));
+    expect(el.innerHTML as string).toContain("Only reviews with a photo or video");
+  });
+
+  it("does not blame the filter when it is already off", async () => {
+    editing(true);
+    const el = await run(setUp({ ...BASE, withMedia: "false" }));
+    const html = el.innerHTML as string;
+    expect(html).toContain("rivu-sc-editor-note");
+    expect(html).not.toContain("Only reviews with a photo or video");
+  });
+});
+
+describe("a lone review is sized so it looks chosen", () => {
+  it("grows a single tile rather than leaving it small in a wide section", async () => {
+    const one = [REVIEWS[0]];
+    document.body.innerHTML = "";
+    const el = document.createElement("div");
+    el.setAttribute("data-rivu-showcase", "");
+    for (const [k, v] of Object.entries(BASE)) {
+      el.setAttribute("data-" + k.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase()), v);
+    }
+    document.body.appendChild(el);
+    vi.stubGlobal("fetch", vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ reviews: one, summary: { total: 1, average: 5 }, plan: "pro" }),
+    })));
+    await run(el);
+    expect(el.innerHTML).toContain("column-count:1");
+    expect(el.innerHTML).toContain("max-width:460px");
+  });
+});
