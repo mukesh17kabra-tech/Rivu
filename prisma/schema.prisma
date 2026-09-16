@@ -248,6 +248,21 @@ model Review {
 
   recommends Boolean? // null = customer didn't answer; true = recommends; false = does not recommend
 
+  // Where the reviewer says they are, e.g. "Abu Dhabi, UAE". Optional and
+  // typed by the customer — Rivu does not geolocate anyone. Shown as a small
+  // pill on the spotlight card, because "someone near me bought this" is one
+  // of the few things that persuades as strongly as the review itself.
+  customerLocation String?
+
+  // True only when this review can be tied to a real order.
+  //
+  // Distinct from having an email address, which proves nothing. This is set
+  // when the reviewer's email matches a PendingReviewRequest for the same
+  // product — that row was created from an orders/create webhook, so there is
+  // an order behind it. Only these may be labelled "Verified Purchase";
+  // everything else says "Verified" at most.
+  verifiedPurchase Boolean @default(false)
+
   // The merchant's public answer to a review, shown beneath it on the
   // storefront. Answering a critical review well reassures the next shopper
   // more than the review itself worried them, which is why every established

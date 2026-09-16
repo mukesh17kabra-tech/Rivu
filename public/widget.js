@@ -1271,6 +1271,7 @@
         <input name="customerName" required placeholder="Your Name *" style="${inp()}" ${inp_focus(design.primaryColor)}/>
         <input name="customerEmail" type="email" placeholder="Email (Optional)" style="${inp()}" ${inp_focus(design.primaryColor)}/>
       </div>
+      <input name="customerLocation" maxlength="60" placeholder="Where are you from? (optional)" style="${inp()}" ${inp_focus(design.primaryColor)}/>
       <input name="reviewTitle" maxlength="150" placeholder="Give your review a headline (optional)" style="${inp("font-weight:600;")}" ${inp_focus(design.primaryColor)}/>
       <textarea name="body" required minlength="10" placeholder="What did you like or dislike?" style="${inp("min-height:90px;resize:vertical;")}" ${inp_focus(design.primaryColor)}></textarea>
       ${recBox}
@@ -1304,6 +1305,7 @@
         <input name="customerName" required placeholder="Your Name *" style="${inp()}" ${inp_focus(design.primaryColor)}/>
         <input name="customerEmail" type="email" placeholder="Email (Optional)" style="${inp()}" ${inp_focus(design.primaryColor)}/>
       </div>
+      <input name="customerLocation" maxlength="60" placeholder="Where are you from? (optional)" style="${inp()}" ${inp_focus(design.primaryColor)}/>
       <input name="reviewTitle" maxlength="150" placeholder="Review Title *" style="${inp("font-weight:600;")}" ${inp_focus(design.primaryColor)}/>
       <textarea name="body" required minlength="10" placeholder="Share details of your experience..." style="${inp("min-height:90px;resize:vertical;")}" ${inp_focus(design.primaryColor)}></textarea>
       ${recBox}
@@ -1332,7 +1334,8 @@
       <input name="customerName" required placeholder="Name *" style="${inp()}" ${inp_focus(design.primaryColor)}/>
       <input name="customerEmail" type="email" placeholder="Email (optional)" style="${inp()}" ${inp_focus(design.primaryColor)}/>
     </div>
-    <input name="reviewTitle" maxlength="150" placeholder="Review Title (optional)" style="${inp("font-weight:600;")}" ${inp_focus(design.primaryColor)}/>
+    <input name="customerLocation" maxlength="60" placeholder="Where are you from? (optional)" style="${inp()}" ${inp_focus(design.primaryColor)}/>
+      <input name="reviewTitle" maxlength="150" placeholder="Review Title (optional)" style="${inp("font-weight:600;")}" ${inp_focus(design.primaryColor)}/>
     <textarea name="body" required minlength="10" placeholder="Tell us about your experience…" style="${inp("min-height:80px;resize:none;")}" ${inp_focus(design.primaryColor)}></textarea>
     ${recBox}
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -1365,6 +1368,7 @@
       <input name="customerName" required placeholder="Your Name *" style="${inp()}" ${inp_focus("rgba(245,180,0,.6)")}/>
       <input name="customerEmail" type="email" placeholder="Email (Optional)" style="${inp()}" ${inp_focus("rgba(245,180,0,.6)")}/>
     </div>
+    <input name="customerLocation" maxlength="60" placeholder="Where are you from? (optional)" style="${inp()}" ${inp_focus("rgba(245,180,0,.6)")}/>
     <textarea name="body" required minlength="10" placeholder="Tell us about your experience…" style="${inp("min-height:90px;resize:vertical;")}" ${inp_focus("rgba(245,180,0,.6)")}></textarea>
     ${recBox}
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -1847,6 +1851,7 @@
               body: form.body.value,
               customerName: form.customerName.value,
               customerEmail: form.customerEmail?.value || undefined,
+              customerLocation: form.customerLocation?.value || undefined,
               recommends,
               photoUrl: photoDataUrl,
               videoUrl: videoDataUrl,

@@ -45,6 +45,13 @@ const schema = z.object({
   // Optional — used only to prevent a second reminder email once someone
   // has reviewed, not required for the review itself.
   customerEmail: z.preprocess((val) => (val === "" ? undefined : val), z.string().email().optional()),
+  // Where they say they are — "Abu Dhabi, UAE". Optional, typed by the
+  // customer, never geolocated. Capped short because it is rendered as a
+  // small pill, and a sentence pasted in here would wreck the card.
+  customerLocation: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.string().max(60).optional()
+  ),
   // Either a real URL or a base64 data URI (data:image/...) from the
   // storefront's photo upload input.
   photoUrl: z.preprocess(
@@ -142,6 +149,29 @@ export async function POST(req: NextRequest) {
   const productHandle =
     data.productHandle || (await resolveProductHandle(shop, data.productId));
 
+  /**
+   * Whether this review can actually be tied to a purchase.
+   *
+   * A PendingReviewRequest row is created from an orders/create webhook, so a
+   * match on (shop, product, email) means there is a real order behind this
+   * review. That — and only that — earns the words "Verified Purchase" on a
+   * storefront.
+   *
+   * Having an email address does not. Anyone can type one. The existing
+   * "Verified" badge means no more than that, and conflating the two would put
+   * a claim on the merchant's storefront that neither they nor we could
+   * support if a shopper, or a regulator, asked.
+   */
+  const verifiedPurchase = data.customerEmail
+    ? (await db.pendingReviewRequest.count({
+        where: {
+          shopId: shopRecord.id,
+          productId: data.productId,
+          customerEmail: data.customerEmail,
+        },
+      })) > 0
+    : false;
+
   // Published immediately unless the merchant has turned moderation on.
   // Holding every review back by default made the storefront look empty and
   // the app look broken, with no hint that anything was waiting.
@@ -150,6 +180,7 @@ export async function POST(req: NextRequest) {
       shopId: shopRecord.id,
       ...data,
       productHandle: productHandle || undefined,
+      verifiedPurchase,
       videoUrl,
       // After the spread, not before it. `data` cannot carry `approved` today
       // because the schema doesn't declare it and zod strips unknown keys, but

@@ -54,6 +54,8 @@ export async function GET(req: NextRequest) {
         reviewTitle: true,
         recommends: true,
         ownerReply: true,
+        customerLocation: true,
+        verifiedPurchase: true,
         ownerReplyAt: true,
         pinnedAt: true,
         helpfulCount: true,

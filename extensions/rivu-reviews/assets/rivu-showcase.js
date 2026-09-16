@@ -119,6 +119,21 @@
     '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 14.4l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z"/>' +
     "</svg>Verified</span>";
 
+  /**
+   * The stronger claim, for reviews tied to an actual order.
+   *
+   * Set only where the reviewer's email matched a pending review request, and
+   * those rows come from an orders/create webhook — so there is an order
+   * behind every one of these. Never rendered from `verified` alone, which
+   * means nothing more than "typed an email address".
+   */
+  var VERIFIED_PURCHASE_BADGE =
+    '<span class="rivu-sc-verified rivu-sc-verified-purchase" style="display:inline-flex;' +
+    'align-items:center;gap:4px;font-size:11.5px;font-weight:700;white-space:nowrap;">' +
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">' +
+    '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 14.4l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z"/>' +
+    "</svg>Verified Purchase</span>";
+
   /** Relative age, as review sections conventionally show it. */
   function timeAgo(iso) {
     var then = new Date(iso).getTime();
@@ -303,14 +318,17 @@
    * through: a thumbnail and its name in their own panel, then a button
    * straight to the product page.
    *
-   * Two things the reference design has that this deliberately does not:
+   * The location pill and the "Verified Purchase" wording are both shown only
+   * when they are true, and both were absent until the data behind them
+   * existed:
    *
-   *  - A city ("Sharjah, UAE"). Rivu never collects where a reviewer is, and
-   *    printing a plausible-looking one would be inventing evidence on someone
-   *    else's storefront.
-   *  - The words "Verified Purchase". `verified` here means the reviewer left
-   *    an email address, which is not proof they bought anything. The badge
-   *    says "Verified", which is what we can actually stand behind.
+   *  - The city is whatever the reviewer typed in the optional field on the
+   *    review form. Nobody is geolocated, and a review without one simply has
+   *    no pill rather than a guessed city.
+   *  - "Verified Purchase" appears only where the review matches an order.
+   *    A reviewer who merely left an email gets "Verified", which is all that
+   *    proves. The difference matters: the stronger claim on a storefront has
+   *    to be one the merchant could defend.
    */
   function spotlightCard(review, opts) {
     var accentSoft = tint(opts.accentColor, 0.16);
@@ -330,6 +348,23 @@
       // a product has no image.
       : '<span style="width:40px;height:40px;border-radius:6px;flex-shrink:0;' +
         'background:rgba(0,0,0,.05);"></span>';
+
+    /**
+     * "📍 Abu Dhabi, UAE" — only when the reviewer actually said so.
+     *
+     * A pin glyph rather than an image, so it needs no request and inherits
+     * the accent colour. Absent entirely when the field is empty: a card with
+     * no pill is fine, a card with an invented city is not.
+     */
+    var locationPill = review.customerLocation
+      ? '<p class="rivu-sc-spot-location" style="display:inline-flex;align-items:center;gap:5px;' +
+        "margin:0 0 12px;padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:600;" +
+        "background:" + accentWash + ";color:" + opts.accentColor + ";" +
+        'align-self:flex-start;max-width:100%;">' +
+        '<span aria-hidden="true">📍</span><span style="overflow:hidden;' +
+        'text-overflow:ellipsis;white-space:nowrap;">' +
+        escapeHtml(review.customerLocation) + "</span></p>"
+      : "";
 
     var productPanel = review.productTitle
       ? '<div class="rivu-sc-spot-product" style="display:flex;align-items:center;gap:10px;' +
@@ -369,6 +404,7 @@
       // reviews still line their buttons up.
       '<p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;flex:1;' + clamp + '">' +
       escapeHtml(review.body) + "</p>" +
+      locationPill +
       productPanel +
       // Wraps rather than squeezing: in a narrow column the button was taking
       // the width the name needed and every reviewer became "Rashid…". A
@@ -385,8 +421,12 @@
       '<span style="display:block;font-size:13px;font-weight:700;overflow:hidden;' +
       'text-overflow:ellipsis;white-space:nowrap;">' +
       escapeHtml(shortName(review.customerName)) + "</span>" +
-      (review.verified && opts.showVerified
-        ? '<span style="display:block;opacity:.7;">' + VERIFIED_BADGE + "</span>"
+      // "Verified Purchase" is reserved for reviews matched to a real order;
+      // an email address alone earns the plainer "Verified".
+      (opts.showVerified && (review.verifiedPurchase || review.verified)
+        ? '<span style="display:block;opacity:.7;">' +
+          (review.verifiedPurchase ? VERIFIED_PURCHASE_BADGE : VERIFIED_BADGE) +
+          "</span>"
         : "") +
       "</span>" + button + "</div></article>"
     );

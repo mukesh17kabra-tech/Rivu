@@ -89,6 +89,8 @@ export async function GET(req: NextRequest) {
       createdAt: true,
       pinnedAt: true,
       ownerReply: true,
+      customerLocation: true,
+      verifiedPurchase: true,
       // Deliberately absent: customerEmail. Nothing on a storefront needs it —
       // but whether one exists is a useful signal, so it is reduced to a
       // boolean below rather than sent.

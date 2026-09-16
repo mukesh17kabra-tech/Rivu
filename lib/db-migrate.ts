@@ -67,6 +67,8 @@ const MIGRATIONS = [
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "ownerReplyAt" TIMESTAMP(3)`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "pinnedAt" TIMESTAMP(3)`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "productHandle" TEXT`,
+  `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "customerLocation" TEXT`,
+  `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "verifiedPurchase" BOOLEAN NOT NULL DEFAULT false`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "helpfulCount" INTEGER NOT NULL DEFAULT 0`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "unhelpfulCount" INTEGER NOT NULL DEFAULT 0`,
   `CREATE INDEX IF NOT EXISTS "Review_shopId_pinnedAt_idx" ON "Review"("shopId", "pinnedAt")`,

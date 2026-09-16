@@ -39,6 +39,10 @@ export function ReviewFlow({
   const [body, setBody] = useState("");
   const [reviewTitle, setReviewTitle] = useState("");
   const [customerName, setCustomerName] = useState("");
+  // Optional, and typed by the customer — Rivu never geolocates anyone. Shown
+  // as a small pill on the storefront, because "someone near me bought this"
+  // persuades nearly as strongly as the review itself.
+  const [customerLocation, setCustomerLocation] = useState("");
   const [photoDataUrl, setPhotoDataUrl] = useState<string | undefined>();
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -178,6 +182,7 @@ export function ReviewFlow({
           body,
           customerName: customerName || "Anonymous",
           customerEmail: email || undefined,
+          customerLocation: customerLocation.trim() || undefined,
           photoUrl: photoDataUrl,
         }),
       });
@@ -388,6 +393,20 @@ export function ReviewFlow({
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="Optional"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Where are you from?
+              </label>
+              <input
+                type="text"
+                value={customerLocation}
+                onChange={(e) => setCustomerLocation(e.target.value)}
+                placeholder="Optional — e.g. Dubai, UAE"
+                maxLength={60}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
               />
             </div>
