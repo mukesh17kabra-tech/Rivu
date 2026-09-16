@@ -471,3 +471,65 @@ describe("a lone review is sized so it looks chosen", () => {
     expect(el.innerHTML).toContain("max-width:460px");
   });
 });
+
+describe("the lightbox must not cover the storefront", () => {
+  /**
+   * The bug this exists to stop coming back.
+   *
+   * The backdrop was created with `box.hidden = true` AND an inline
+   * `display:flex`. `hidden` works through the user-agent rule
+   * `[hidden] { display: none }`, and an inline style beats a UA stylesheet
+   * rule outright — so the element was never hidden at all. Every page with a
+   * photo gallery block carried a fixed, full-viewport, 60%-black panel at
+   * z-index 2147483000 over the whole shop, swallowing every click.
+   *
+   * The existing tests asserted `box.hidden === true`, which was perfectly
+   * true and completely beside the point. These assert what a shopper would
+   * actually see. Never check the flag when you can check the effect.
+   */
+  async function mount() {
+    const el = await run(setUp(BASE));
+    return {
+      el,
+      box: document.querySelector(".rivu-sc-lightbox") as HTMLElement,
+    };
+  }
+
+  it("is not painted over the page before anything is clicked", async () => {
+    const { box } = await mount();
+    expect(box, "no lightbox was mounted").toBeTruthy();
+    expect(box.style.display).toBe("none");
+  });
+
+  it("keeps display and the hidden attribute agreeing, closed and open", async () => {
+    // Setting one without the other is exactly how this broke.
+    const { el, box } = await mount();
+    expect(box.hidden).toBe(true);
+    expect(box.style.display).toBe("none");
+
+    (el.querySelector(".rivu-sc-tile") as HTMLElement).click();
+    expect(box.hidden).toBe(false);
+    expect(box.style.display).toBe("flex");
+
+    (box.querySelector(".rivu-sc-lightbox-close") as HTMLElement).click();
+    expect(box.hidden).toBe(true);
+    expect(box.style.display).toBe("none");
+  });
+
+  it("never leaves a dark full-screen backdrop showing while closed", async () => {
+    // The overlay is what the merchant saw; assert on the thing itself rather
+    // than on how it happens to be hidden.
+    const { box } = await mount();
+    expect(box.style.background).toContain("rgba(0, 0, 0");
+    expect(box.style.position).toBe("fixed");
+    // ...which is only acceptable because it is not displayed.
+    expect(box.style.display).toBe("none");
+  });
+
+  it("closes fully on Escape, not just by flag", async () => {
+    const { el, box } = await mount();
+    (el.querySelector(".rivu-sc-tile") as HTMLElement).click();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    expect(box.style.display).toBe("none");
+  });
+});

@@ -519,16 +519,34 @@
     box.setAttribute("role", "dialog");
     box.setAttribute("aria-modal", "true");
     box.setAttribute("aria-label", "Customer review");
+    /**
+     * Hidden by `display`, not by the `hidden` attribute alone.
+     *
+     * `hidden` works through the user-agent rule `[hidden] { display: none }`.
+     * An inline `display:flex` beats a UA stylesheet rule outright, so setting
+     * both left this element permanently visible: a fixed, full-viewport,
+     * 60%-black panel at the top of the z-index stack, sitting over the entire
+     * storefront and swallowing every click, on any page carrying a photo
+     * gallery block.
+     *
+     * The attribute is kept for assistive technology, but `display` is what
+     * actually shows and hides it, and the two are always set together.
+     */
     box.hidden = true;
     box.style.cssText =
       "position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.6);" +
-      "display:flex;align-items:center;justify-content:center;padding:20px;";
+      "display:none;align-items:center;justify-content:center;padding:20px;";
     document.body.appendChild(box);
+
+    function setOpen(open) {
+      box.hidden = !open;
+      box.style.display = open ? "flex" : "none";
+    }
 
     var lastFocused = null;
 
     function close() {
-      box.hidden = true;
+      setOpen(false);
       box.innerHTML = "";
       document.documentElement.style.overflow = "";
       if (lastFocused && lastFocused.focus) lastFocused.focus();
@@ -589,7 +607,7 @@
         "border:none;background:rgba(0,0,0,.65);color:#fff;font-size:20px;line-height:1;" +
         'cursor:pointer;">&times;</button>';
 
-      box.hidden = false;
+      setOpen(true);
       // The page behind must not scroll while the dialog is open.
       document.documentElement.style.overflow = "hidden";
 
