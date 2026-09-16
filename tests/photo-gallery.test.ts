@@ -107,7 +107,32 @@ describe("the gallery wall", () => {
     const el = await run(setUp(BASE));
     expect(el.querySelector(".rivu-sc-gallery")).toBeTruthy();
     expect(el.querySelectorAll(".rivu-sc-tile").length).toBe(2);
-    expect((el.innerHTML as string)).toContain("column-count:4");
+  });
+
+  it("does not strand two reviews across four columns", async () => {
+    /**
+     * What a merchant saw on a fresh store.
+     *
+     * The block asks for four columns; a new store has one or two reviews. CSS
+     * columns put them in the first column and left three empty, so the
+     * gallery rendered as a thin tile beside a large blank rectangle — which
+     * reads as broken rather than as new, at the exact moment a merchant is
+     * deciding whether the app works.
+     */
+    const el = await run(setUp(BASE));
+    const html = el.innerHTML as string;
+    expect(html).toContain("column-count:2");
+    expect(html).not.toContain("column-count:4");
+    // Capped and centred, so two reviews do not stretch into two enormous
+    // tiles instead.
+    expect(html).toMatch(/max-width:\d+px;margin:0 auto/);
+  });
+
+  it("leaves a full row alone, since that is what is live today", async () => {
+    const el = await run(setUp({ ...BASE, columns: "2" }));
+    const html = el.innerHTML as string;
+    expect(html).toContain("column-count:2");
+    expect(html).not.toContain("margin:0 auto");
   });
 
   it("leads with the photo", async () => {

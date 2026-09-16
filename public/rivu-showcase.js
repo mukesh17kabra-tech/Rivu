@@ -757,7 +757,33 @@
     );
   }
 
-  function layoutWrapper(inner, opts) {
+  /**
+   * A CSS-columns block that does not strand its content when reviews are few.
+   *
+   * `column-count: 4` with one review puts that review in the first of four
+   * columns and leaves three empty — so a new store's photo gallery rendered
+   * as a thin tile against a large blank rectangle, which reads as broken
+   * rather than as new. It is the state every store is in on day one, which
+   * is the worst possible time to look broken.
+   *
+   * So the column count drops to the number of reviews, and the block is then
+   * capped and centred so a single review does not stretch into one enormous
+   * full-width tile instead. The cap applies ONLY when there are fewer reviews
+   * than columns: a store with enough reviews to fill the row renders exactly
+   * as it did before, which matters because this is live on storefronts.
+   */
+  function columnBox(cls, inner, opts, count, gap) {
+    var cols = Math.max(1, Math.min(opts.columns, count || opts.columns));
+    var style = "column-count:" + cols + ";column-gap:" + gap + "px;";
+    if (cols < opts.columns) {
+      // 340px is about the width one column gets in a 1200px section at four
+      // columns — so a lone tile is the size it would have been in a full row.
+      style += "max-width:" + (cols * 340 + (cols - 1) * gap) + "px;margin:0 auto;";
+    }
+    return '<div class="' + cls + '" style="' + style + '">' + inner + "</div>";
+  }
+
+  function layoutWrapper(inner, opts, count) {
     if (opts.layout === "strip") {
       // Summary on the left, reviews scrolling beside it. Wraps on a narrow
       // screen so the summary sits above the reviews rather than squeezing.
@@ -769,10 +795,7 @@
     if (opts.layout === "gallery") {
       // CSS columns, not a grid: gallery photos vary in height and a grid
       // leaves a ragged edge under the short ones.
-      return (
-        '<div class="rivu-sc-gallery" style="column-count:' + opts.columns +
-        ';column-gap:16px;">' + inner + "</div>"
-      );
+      return columnBox("rivu-sc-gallery", inner, opts, count, 16);
     }
     if (opts.layout === "carousel") {
       return scroller(inner, opts, 14);
@@ -780,10 +803,7 @@
     if (opts.layout === "wall") {
       // CSS columns rather than grid: reviews vary in length, and a grid would
       // leave ragged gaps under the short ones.
-      return (
-        '<div class="rivu-sc-wall" style="column-count:' + opts.columns +
-        ';column-gap:14px;">' + inner + "</div>"
-      );
+      return columnBox("rivu-sc-wall", inner, opts, count, 14);
     }
     return (
       '<div class="rivu-sc-grid" style="display:grid;gap:14px;' +
@@ -976,7 +996,7 @@
           opts.headingAlign + ';color:' + opts.textColor + ';">' +
           escapeHtml(opts.heading) + "</h2>"
         : "") +
-      layoutWrapper(body, opts) +
+      layoutWrapper(body, opts, reviews.length) +
       (opts.caption
         ? '<p class="rivu-sc-caption" style="margin:14px 0 0;font-size:12.5px;opacity:.55;color:' +
           opts.textColor + ';">' + escapeHtml(opts.caption) + "</p>"

@@ -158,8 +158,22 @@ describe("the showcase script renders each layout", () => {
   });
 
   it("renders a wall in columns", async () => {
-    const { html } = await render({ ...base, layout: "wall", columns: "4" });
+    // Four reviews for four columns: enough to fill the row, so the block
+    // renders at the requested count and full width, exactly as before.
+    const four = [...REVIEWS, { ...REVIEWS[0], id: "r4" }];
+    const { html } = await render({ ...base, layout: "wall", columns: "4" }, {
+      reviews: four,
+      summary: { total: 4, average: 4.8 },
+    });
     expect(html).toContain("column-count:4");
+    expect(html).not.toContain("max-width:");
+  });
+
+  it("narrows the wall to the reviews it actually has", async () => {
+    // Three reviews across four columns left one column empty and squeezed
+    // the content into three quarters of the section.
+    const { html } = await render({ ...base, layout: "wall", columns: "4" });
+    expect(html).toContain("column-count:3");
   });
 
   it("renders quotes for a testimonial strip", async () => {
