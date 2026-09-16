@@ -26,7 +26,22 @@ export const PLANS = {
     templateCount: 1,
     photoReviewCap: 1,
     videoReviewCap: 0,
-    reminderMonthlyCap: 0, // no automated reminders on Free
+    /**
+     * Free sends a real, limited number of review requests.
+     *
+     * It used to send none, and that was the mistake that made Free feel like
+     * a demo. Almost every review a store collects comes from the email that
+     * asks for it — so a Free merchant could display reviews beautifully and
+     * had no way to get any. Free looked useless and Pro looked compulsory,
+     * which is what "too expensive" usually means from someone who uninstalled
+     * within five minutes of installing.
+     *
+     * 50 a month is enough to work: a small store fills its product pages and
+     * sees Rivu actually earn its place. It is not enough to scale on, so a
+     * store that outgrows it upgrades with reviews already on the page and a
+     * concrete reason — rather than being asked to pay before seeing anything.
+     */
+    reminderMonthlyCap: 50,
     languageCount: 1, // English only
     brandingRemoved: false, // Free plan shows "Powered by Rivu" on the widget
   },

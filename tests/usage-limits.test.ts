@@ -175,8 +175,19 @@ describe("reminder emails are advertised only while they can actually send", () 
   // was unsubscribed and nothing queued the rows the cron sends from. They are
   // back only because all three parts now exist. If any part is removed again,
   // this fails rather than leaving a paid promise the app cannot keep.
-  it("the cards advertise them", () => {
-    expect(cards).toContain("reminder emails/month");
+  it("the cards advertise them on both plans", () => {
+    // Free's allowance has to be on the Free card, not implied by Pro's.
+    // Merchants compare the two columns, and a blank is read as "none".
+    expect(cards).toContain("50 automatic review request emails/month");
+    expect(cards).toContain("Unlimited review request emails");
+  });
+
+  it("the cards match the plan the code actually enforces", () => {
+    // Advertising and enforcement drifting apart is how the listing became
+    // inaccurate last time. The number is stated once here and checked.
+    expect(PLANS.free.reminderMonthlyCap).toBe(50);
+    expect(cards).toContain(String(PLANS.free.reminderMonthlyCap));
+    expect(PLANS.pro.reminderMonthlyCap).toBe(Infinity);
   });
 
   it("the orders webhook is subscribed, not commented out", () => {
@@ -198,11 +209,29 @@ describe("reminder emails are advertised only while they can actually send", () 
   });
 });
 
-describe("monthly reminder allowance", () => {
-  it("sends none on free", () => {
-    const check = checkReminderQuota("free", 0);
+describe("monthly review-request allowance", () => {
+  /**
+   * Free used to send none, and that was the mistake.
+   *
+   * Almost every review a store collects comes from the email that asks for
+   * it, so a Free merchant could display reviews and had no way to get any.
+   * Free read as a demo and Pro as compulsory — which is what "too expensive"
+   * means from someone who uninstalled five minutes after installing.
+   */
+  it("gives free a real allowance, not zero", () => {
+    expect(checkReminderQuota("free", 0).allowed).toBe(true);
+    expect(checkReminderQuota("free", 49).allowed).toBe(true);
+  });
+
+  it("stops free at its cap", () => {
+    const check = checkReminderQuota("free", 50);
     expect(check.allowed).toBe(false);
     expect(check.allowed === false && check.upgradeTo).toBe("pro");
+  });
+
+  it("tells a capped store the requests resume, so nobody thinks it broke", () => {
+    const check = checkReminderQuota("free", 50);
+    expect(check.allowed === false && check.reason).toContain("next month");
   });
 
   it("never limits pro", () => {
@@ -210,7 +239,8 @@ describe("monthly reminder allowance", () => {
   });
 
   it("treats an unknown plan as free", () => {
-    expect(checkReminderQuota("mystery", 0).allowed).toBe(false);
+    expect(checkReminderQuota("mystery", 0).allowed).toBe(true);
+    expect(checkReminderQuota("mystery", 50).allowed).toBe(false);
   });
 });
 

@@ -67,7 +67,7 @@ Only claims the app can back up today:
 - **Rich snippets** — star ratings in Google results, on by default
 - **QR codes** — collect reviews from packaging or in person
 - **One-step migration** — Judge.me, Loox, Stamped, Yotpo, or any CSV
-- **Free plan** — no trial clock
+- **Free plan** — no trial clock, and it collects reviews: 50 automatic review request emails a month, not zero
 
 Do **not** list: Top Reviewer streak badges (removed).
 

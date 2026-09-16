@@ -29,6 +29,7 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
         price={priceLabel("free")}
         perks={[
           "Unlimited reviews",
+          "50 automatic review request emails/month",
           "Photo reviews (up to 1)",
           "Import from Judge.me, Loox, Stamped & Yotpo",
           "Google rich snippets (star ratings in search)",
@@ -53,7 +54,7 @@ export function PlanCards({ shop, currentPlan }: { shop: string; currentPlan: st
         perks={[
           "Everything in Free, plus:",
           "Video reviews",
-          "Unlimited reminder emails/month",
+          "Unlimited review request emails (Free sends 50/month)",
           "Build your own layout — your HTML & CSS",
           "All 8 widget summary styles",
           "All layouts — List, Grid, Masonry, Carousel & Sidebar",

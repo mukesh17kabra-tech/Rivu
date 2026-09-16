@@ -113,7 +113,7 @@ The differentiator, and the reason stores using Rivu collect more.
 | | **Free** | **Pro — $14.99/mo** |
 |---|---|---|
 | Reviews | Unlimited | Unlimited |
-| Reminder emails | — | Unlimited |
+| Review request emails | 50/month | Unlimited |
 | Photos / videos | 1 / — | 3 / 2 |
 | Review layouts | List, Grid | All — + Masonry, Carousel, Sidebar |
 | Summary styles | 2 | All 8 |

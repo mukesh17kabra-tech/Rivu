@@ -60,9 +60,12 @@ export function rewardCodesAllowed(plan: string): boolean {
 }
 
 /**
- * Monthly reminder-email allowance. Free sends none: the plans advertise
- * reminders as a paid feature, and sending on Free would give away the thing
- * Pro is bought for.
+ * Monthly review-request allowance.
+ *
+ * Free gets a real number rather than zero — see the note on the plan itself.
+ * A store that reaches the cap has reviews on its pages already, which is a
+ * far better moment to mention Pro than the pricing screen Shopify shows
+ * before the merchant has seen the app at all.
  */
 export function checkReminderQuota(plan: string, sentThisMonth: number): QuotaCheck {
   const key = planOf(plan);
@@ -72,9 +75,11 @@ export function checkReminderQuota(plan: string, sentThisMonth: number): QuotaCh
 
   return {
     allowed: false,
-    reason: cap === 0
-      ? "Automated reminder emails are available on the Pro plan."
-      : `This store has sent its ${cap} reminder emails for this month.`,
+    // Says what happens next, not just what stopped. Requests resume next
+    // month either way, so a merchant who does not upgrade is not stranded.
+    reason:
+      `This store has sent its ${cap} review requests for this month. ` +
+      `More will send next month, or Pro removes the limit.`,
     upgradeTo: "pro",
   };
 }
