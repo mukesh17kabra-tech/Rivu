@@ -294,11 +294,110 @@
     );
   }
 
+  /**
+   * A spotlight card: the review, the product it is about, and a way to buy it.
+   *
+   * Every other card style ends at the reviewer's name, which is exactly where
+   * a shopper reading a home-page carousel runs out of road — they have just
+   * been persuaded and there is nothing to click. This one carries the product
+   * through: a thumbnail and its name in their own panel, then a button
+   * straight to the product page.
+   *
+   * Two things the reference design has that this deliberately does not:
+   *
+   *  - A city ("Sharjah, UAE"). Rivu never collects where a reviewer is, and
+   *    printing a plausible-looking one would be inventing evidence on someone
+   *    else's storefront.
+   *  - The words "Verified Purchase". `verified` here means the reviewer left
+   *    an email address, which is not proof they bought anything. The badge
+   *    says "Verified", which is what we can actually stand behind.
+   */
+  function spotlightCard(review, opts) {
+    var accentSoft = tint(opts.accentColor, 0.16);
+    var accentWash = tint(opts.accentColor, 0.05);
+    // Clamped so a row of cards keeps one height: reviews run from one line to
+    // twenty, and the product panel and button below have to line up across
+    // the row or the carousel looks broken.
+    var clamp =
+      "display:-webkit-box;-webkit-line-clamp:" + opts.clampLines +
+      ";-webkit-box-orient:vertical;overflow:hidden;";
+
+    var thumb = review.productImageUrl
+      ? '<img src="' + escapeHtml(review.productImageUrl) +
+        '" alt="" loading="lazy" style="width:40px;height:40px;object-fit:contain;' +
+        'border-radius:6px;flex-shrink:0;background:#fff;"/>'
+      // A tinted square rather than nothing, so the panel keeps its shape when
+      // a product has no image.
+      : '<span style="width:40px;height:40px;border-radius:6px;flex-shrink:0;' +
+        'background:rgba(0,0,0,.05);"></span>';
+
+    var productPanel = review.productTitle
+      ? '<div class="rivu-sc-spot-product" style="display:flex;align-items:center;gap:10px;' +
+        "border:1px solid " + accentSoft + ";background:" + accentWash +
+        ';border-radius:10px;padding:9px 11px;margin-bottom:14px;">' +
+        thumb +
+        '<span style="font-size:12.5px;font-weight:700;line-height:1.35;">' +
+        escapeHtml(review.productTitle) + "</span></div>"
+      : "";
+
+    // Only when the handle was captured. Reviews written before that column
+    // existed have none, and a button that goes nowhere is worse than none.
+    var button = review.productHandle
+      ? '<a class="rivu-sc-spot-btn" href="/products/' +
+        encodeURIComponent(review.productHandle) +
+        '" style="flex-shrink:0;text-decoration:none;background:' + opts.accentColor +
+        ";color:" + opts.accentTextColor + ";font-size:12px;font-weight:700;" +
+        'border-radius:999px;padding:8px 15px;white-space:nowrap;">' +
+        escapeHtml(opts.viewProductText) + "</a>"
+      : "";
+
+    return (
+      '<article class="rivu-sc-card rivu-sc-spotlight" style="background:' + opts.cardBg +
+      ";color:" + opts.textColor + ";border:1px solid rgba(0,0,0,.06);border-radius:" +
+      Math.max(opts.radius, 12) + "px;padding:18px;box-sizing:border-box;" +
+      "box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;" +
+      (opts.layout === "carousel" ? "flex:0 0 auto;width:300px;" : "") +
+      (opts.layout === "wall" ? "break-inside:avoid;margin-bottom:16px;" : "") +
+      '">' +
+      '<div style="display:flex;gap:2px;margin-bottom:11px;">' +
+      ratingRow(review.rating, opts, 15) + "</div>" +
+      (review.reviewTitle
+        ? '<p style="margin:0 0 6px;font-weight:700;font-size:14.5px;line-height:1.35;">' +
+          escapeHtml(review.reviewTitle) + "</p>"
+        : "") +
+      // flex:1 pushes the panel and footer to the bottom, so short and long
+      // reviews still line their buttons up.
+      '<p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;flex:1;' + clamp + '">' +
+      escapeHtml(review.body) + "</p>" +
+      productPanel +
+      // Wraps rather than squeezing: in a narrow column the button was taking
+      // the width the name needed and every reviewer became "Rashid…". A
+      // button on its own second line is far better than an unreadable name.
+      '<div style="display:flex;align-items:center;gap:10px;row-gap:11px;flex-wrap:wrap;' +
+      'border-top:1px solid rgba(0,0,0,.07);padding-top:13px;">' +
+      '<span style="width:32px;height:32px;border-radius:50%;background:' +
+      avatarColor(review.customerName) +
+      ';color:#fff;display:flex;align-items:center;justify-content:center;font-size:11.5px;' +
+      'font-weight:700;flex-shrink:0;">' + escapeHtml(initials(review.customerName)) + "</span>" +
+      // 92px keeps a real name on the line before the button is allowed to
+      // wrap, instead of the name shrinking to an ellipsis first.
+      '<span style="min-width:92px;flex:1;">' +
+      '<span style="display:block;font-size:13px;font-weight:700;overflow:hidden;' +
+      'text-overflow:ellipsis;white-space:nowrap;">' +
+      escapeHtml(shortName(review.customerName)) + "</span>" +
+      (review.verified && opts.showVerified
+        ? '<span style="display:block;opacity:.7;">' + VERIFIED_BADGE + "</span>"
+        : "") +
+      "</span>" + button + "</div></article>"
+    );
+  }
+
   /** Picks the card style the block asked for. */
   function renderCard(review, opts) {
     if (opts.layout === "gallery") return galleryCard(review, opts);
     if (opts.cardStyle === "photo") return photoCard(review, opts);
     if (opts.cardStyle === "compact") return compactCard(review, opts);
+    if (opts.cardStyle === "spotlight") return spotlightCard(review, opts);
     return card(review, opts);
   }
 
@@ -706,7 +805,9 @@
       showProduct: d.showProduct !== "false",
       heading: d.heading || "",
       columns: Number(d.columns) || 3,
-      minCard: Number(d.minCard) || 240,
+      // Spotlight carries a product panel and a button, so it needs more width
+      // than a plain card before the grid starts stacking things awkwardly.
+      minCard: Number(d.minCard) || (d.cardStyle === "spotlight" ? 290 : 240),
       starColor: d.starColor || "#f5b400",
       textColor: d.textColor || "inherit",
       cardBg: d.cardBg || "#ffffff",
@@ -729,7 +830,33 @@
       compactWidth: Math.max(160, Math.min(480, Number(d.compactWidth) || 250)),
       underlineCount: d.underlineCount === "true",
       arrowStyle: d.arrowStyle || "solid",
+      // Spotlight cards only. Defaults to the theme's text colour rather than
+      // a colour of our own: a dark pill sits correctly on any storefront,
+      // where a brand colour we picked would clash with most of them.
+      accentColor: d.accentColor || d.textColor || "#1a1a1a",
+      accentTextColor: d.accentTextColor || "#ffffff",
+      viewProductText: d.viewProductText || "View product",
     };
+  }
+
+  /**
+   * The accent colour at low opacity, for the product panel behind it.
+   *
+   * Derived rather than configured: two more colour settings to keep in sync
+   * is how a merchant ends up with a panel that fights its own button.
+   * Anything that is not a 3- or 6-digit hex (a CSS variable, a named colour)
+   * falls back to neutral grey, which is safe everywhere.
+   */
+  function tint(color, alpha) {
+    var hex = String(color || "").trim();
+    var m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex);
+    if (!m) return "rgba(0,0,0," + alpha + ")";
+    var h = m[1];
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    return (
+      "rgba(" + parseInt(h.slice(0, 2), 16) + "," + parseInt(h.slice(2, 4), 16) +
+      "," + parseInt(h.slice(4, 6), 16) + "," + alpha + ")"
+    );
   }
 
   async function render(el) {

@@ -16,6 +16,8 @@
   data-with-media="false"
   data-show-product="{{ block.settings.show_product }}"
   data-card-style="{{ block.settings.card_style }}"
+  data-accent-color="{{ block.settings.accent_color }}"
+  data-view-product-text="{{ block.settings.view_product_text | escape }}"
   data-star-style="{{ block.settings.star_style }}"
   data-show-verified="{{ block.settings.show_verified }}"
   data-show-arrows="{{ block.settings.show_arrows }}"
@@ -49,10 +51,12 @@
       "options": [
         { "value": "standard", "label": "Standard — stars, text, reviewer" },
         { "value": "photo", "label": "Photo first — large image on top" },
-        { "value": "compact", "label": "Compact — dense, no card border" }
+        { "value": "compact", "label": "Compact — dense, no card border" },
+        { "value": "spotlight", "label": "Spotlight — product shown, with a buy button" }
       ],
       "default": "standard"
     },
+    { "type": "text", "id": "view_product_text", "label": "Spotlight button text", "default": "View product", "info": "Spotlight card style only." },
     {
       "type": "select", "id": "star_style", "label": "Star shape",
       "options": [
@@ -80,6 +84,7 @@
 
     { "type": "header", "content": "Colours" },
     { "type": "color", "id": "star_color", "label": "Stars", "default": "#f5b400" },
+    { "type": "color", "id": "accent_color", "label": "Spotlight button", "default": "#1a1a1a", "info": "Spotlight card style only." },
     { "type": "color", "id": "card_bg", "label": "Card background", "default": "#ffffff" },
     { "type": "color", "id": "text_color", "label": "Text", "default": "#1a1a1a" }
   ]
