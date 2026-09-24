@@ -7,97 +7,135 @@ does; if a feature changes, change the copy in the same commit.
 
 ## 1. App Store listing
 
-### Before you paste anything: get the numbers
+### Which search you are trying to win
 
-Partner Dashboard → Apps → Rivu → Analytics. Three figures decide which half of
-this document matters:
+Checked on the live App Store, 24 September 2026:
 
-| Impressions | Installs | What it means | Where to spend time |
-|---|---|---|---|
-| Near zero | Near zero | Nobody finds you | Keywords, below |
-| Healthy | Near zero | They find you and leave | Listing page + reviews |
+| Search | Apps competing | Where Rivu ranks |
+|---|---|---|
+| `rivu` | 873 | **#2** |
+| `product reviews` | 7,271 | not on page 1 |
+| `qr code reviews` | 3,717 | not on page 1 |
 
-Rewriting copy when the problem is that you have no impressions is wasted
-effort, and vice versa.
+That table is the whole diagnosis. Rivu is found only by merchants who already
+know the name, and nobody knows the name.
+
+**"Product reviews" is not winnable and chasing it is wasted effort.** Page one
+is Judge.me (47,395 reviews, and buying the ad slot on top of that), Loox
+(9,662), AG (3,158), Vitals (2,950), Junip (1,156). Rivu has three. Shopify
+ranks on relevance, installs and reviews; there is no copy that closes that gap.
+
+**"QR code reviews" is winnable.** Page one there is QR *generators* that know
+nothing about reviews, and review apps that treat QR as a footnote. Nothing on
+it does both properly. Rivu does — and is absent from the page entirely.
+
+So: stop competing for the big term, own the small one. A merchant who searches
+"qr code reviews" wants exactly the thing Rivu is best at, and there are only a
+few thousand apps in their way instead of seven thousand with a decade of head
+start.
 
 ### App name
 
-Shopify weights the app name heavily in search, and merchants search for what
-they want, not for brand names nobody knows yet.
+Shopify weights the name heavily. 30 characters.
 
 ```
-Rivu Product Reviews & UGC
+Rivu: QR Code Product Reviews
 ```
 
-Reasoning: "Product Reviews" is the phrase merchants actually type. "UGC" picks
-up photo/video-review searches. The brand stays first so it still reads as a
-name.
+29 characters. This is strictly better than `Rivu Product Reviews & UGC`: it
+keeps "Product Reviews" *and* adds the term Rivu can actually rank for. "UGC"
+goes — nobody types it, and it was spending name characters on nothing.
 
 ### Tagline (short description)
 
+62 characters.
+
 ```
-Photo & video reviews, review request emails, and a widget that matches your theme
+Collect reviews with QR codes, email & your product page
 ```
 
-Three concrete things, no adjectives. "Matches your theme" is the wedge —
-merchants complain constantly that review widgets look bolted on.
+Three collection routes, no adjectives. QR first because that is the wedge.
+
+### Introduction
+
+100 characters. This is the line under the icon, and for most merchants it is
+all they read.
+
+```
+Put a QR code in every parcel. Customers scan, review, and photos go on your page.
+```
+
+Concrete and physical. It describes a thing the merchant can picture doing
+tomorrow, which is more persuasive than any feature list.
 
 ### Long description opening
 
-The first two lines are all most merchants read. Lead with the switch, because
-almost everyone you can win is already using something else.
+500 characters. Lead with the QR flow, because that is what they searched for,
+then the migration line — almost everyone worth winning already uses something
+else.
 
 ```
-Already using Judge.me, Loox, Stamped or Yotpo? Export your reviews as CSV and
-import them into Rivu in one step — original dates and ratings kept, nothing
-retyped, and you can see exactly what will import before it does.
+Print a QR code on your packing slip or a card in the box. Customers scan it,
+leave a review with photos, and it appears on your product page — no email
+needed, no app for them to install.
 
-Rivu collects reviews with photos and video, emails your customers to ask for
-them after they order, and shows the results in a widget you can actually make
-look like your store.
+You also get automated review request emails after each order, and a widget
+you can make look like your store rather than like a plugin.
+
+Already on Judge.me, Loox, Stamped or Yotpo? Import your CSV in one step.
+Original dates, photos and your replies all come across.
 ```
 
 ### Feature bullets
 
-Only claims the app can back up today:
+Five, 80 characters each. Only claims the app can back up today.
 
-- **Photo and video reviews** — collected on your product page, no redirect
-- **Automatic review request emails** — sent after an order, with your branding
-- **Eight widget layouts** — plus full HTML/CSS control on Pro
-- **Rich snippets** — star ratings in Google results, on by default
-- **QR codes** — collect reviews from packaging or in person
+- **QR code reviews** — print on packaging, customers scan and review in seconds
+- **Automatic request emails** — 50/month free, unlimited on Pro
+- **11 storefront widgets** — galleries, carousels, walls, badges, rating strips
 - **One-step migration** — Judge.me, Loox, Stamped, Yotpo, or any CSV
-- **Free plan** — no trial clock, and it collects reviews: 50 automatic review request emails a month, not zero
+- **Free plan that collects** — no trial clock, no card, reviews from day one
 
 Do **not** list: Top Reviewer streak badges (removed).
 
 ### Search terms
 
-Fill every available slot; these are the phrases merchants type:
+Ranked. The Partner Dashboard limits how many you get — fill from the top.
 
 ```
-product reviews, photo reviews, video reviews, review app, customer reviews,
-review widget, judge.me alternative, loox alternative, ugc, star ratings,
-google rich snippets, review request email, qr code reviews
+qr code reviews
+photo reviews
+product reviews
+judge.me alternative
+loox alternative
 ```
 
-The `X alternative` terms matter most — someone typing them has already decided
-to switch and is choosing between options.
+QR terms first: they are the ones Rivu can place on. The `X alternative` terms
+earn their slot because a merchant typing one has already decided to switch and
+is only choosing between options.
 
 ### Screenshots — in this order
 
-The first two are what people actually see; treat the rest as optional.
+The first two are what people actually see.
 
-1. **The widget on a real product page.** Not the admin. Merchants buy the thing
-   their customers will see.
-2. **The same widget in three different designs, side by side.** This is your
-   differentiator and no competitor screenshot shows it.
-3. The import preview screen, captioned "Bring your reviews from Judge.me,
-   Loox, Stamped or Yotpo".
-4. The review request email.
-5. The dashboard.
+1. **A QR code on a packing slip, and the review form it opens on a phone.**
+   Nothing else on that search page shows this. It explains the whole product
+   without a word of copy.
+2. **The widget on a real product page** — the spotlight design, with photos.
+   Not the admin. Merchants buy what their customers will see.
+3. **The photo gallery with the lightbox open.**
+4. The import preview, captioned "Bring your reviews from Judge.me, Loox,
+   Stamped or Yotpo".
+5. The widgets gallery, showing all eleven.
 
 A common mistake is leading with the admin dashboard. Nobody buys a dashboard.
+
+### The listing is currently out of date
+
+It still says "five display styles to choose from". Rivu ships eleven theme
+blocks, four layouts, four card designs and eight summary styles. A merchant
+comparing it against Judge.me reads "five" and stops. Fix this in the same pass
+as everything above.
 
 ---
 
