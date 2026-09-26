@@ -18,19 +18,23 @@ export default async function ReviewsDashboard({
   // of dead-ending them on "Shop not found. Please reinstall the app."
   const { shop, shopRecord } = await requireShop(shopParam, host);
 
-  const reviews = await db.review.findMany({
-    where: { shopId: shopRecord.id },
-    orderBy: { createdAt: "desc" },
-    take: 200,
-  });
+  // Together rather than one after the other: they do not depend on each
+  // other, and two sequential round trips to Postgres is two the merchant
+  // waits through before the page paints.
+  const [reviews, missingHandles] = await Promise.all([
+    db.review.findMany({
+      where: { shopId: shopRecord.id },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    }),
+    // Counted across the whole table, not just the 200 shown, because the
+    // offer to repair them is about all of them.
+    db.review.count({
+      where: { shopId: shopRecord.id, productHandle: null },
+    }),
+  ]);
 
   const pendingCount = reviews.filter((r: { approved: boolean }) => !r.approved).length;
-
-  // Counted across the whole table, not just the 200 shown, because the offer
-  // to repair them is about all of them.
-  const missingHandles = await db.review.count({
-    where: { shopId: shopRecord.id, productHandle: null },
-  });
 
   return (
     <>

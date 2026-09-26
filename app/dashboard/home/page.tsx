@@ -15,31 +15,42 @@ export default async function DashboardHome({
   // of dead-ending them on "Shop not found. Please reinstall the app."
   const { shop, shopRecord } = await requireShop(shopParam, host);
 
-  const [total, pending, allRatings, recentReviews] = await Promise.all([
+  // Computed before the queries so the month count can join them rather than
+  // waiting for them: it used to run on its own afterwards, which cost a whole
+  // extra round trip to Postgres before the page could render anything.
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const [total, pending, ratingAgg, recentReviews, thisMonth] = await Promise.all([
     db.review.count({ where: { shopId: shopRecord.id } }),
     db.review.count({ where: { shopId: shopRecord.id, approved: false } }),
-    db.review.findMany({ where: { shopId: shopRecord.id }, select: { rating: true } }),
+    /**
+     * Averaged by Postgres rather than in JavaScript.
+     *
+     * This used to select every rating in the shop and reduce them here — a
+     * store with 5,000 reviews shipped 5,000 rows across the wire to compute
+     * one number, and the cost grew with the merchant's success.
+     */
+    db.review.aggregate({
+      where: { shopId: shopRecord.id },
+      _avg: { rating: true },
+    }),
     db.review.findMany({
       where: { shopId: shopRecord.id },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
+    db.review.count({
+      where: { shopId: shopRecord.id, createdAt: { gte: startOfMonth } },
+    }),
   ]);
 
-  const average = allRatings.length
-    ? Math.round(
-        (allRatings.reduce((s: number, r: { rating: number }) => s + r.rating, 0) /
-          allRatings.length) *
-          10
-      ) / 10
+  // One decimal, and 0 for a shop with no reviews — _avg is null then, and
+  // "NaN ★" on an empty dashboard is a bad first impression.
+  const average = ratingAgg._avg.rating
+    ? Math.round(ratingAgg._avg.rating * 10) / 10
     : 0;
-
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-  const thisMonth = await db.review.count({
-    where: { shopId: shopRecord.id, createdAt: { gte: startOfMonth } },
-  });
 
   const query = shopQuery(shop, host);
   const quotaWarning = usageWarning(shopRecord.plan, thisMonth);
