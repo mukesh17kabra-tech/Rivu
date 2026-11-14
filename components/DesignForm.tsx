@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   aiSuggestionsAllowed,
   formTemplatesFor,
@@ -169,7 +169,16 @@ export function DesignForm({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
+      {/* The cards below used to run as one flat column of fifteen identical
+          bordered boxes with no labels between them, so a merchant had to
+          remember which box held which control. The <Group> headings below add
+          no inputs and change no values — they only name what each run of
+          cards is for. */}
+      <Group
+        title="Layout"
+        description="The overall shape of the widget. The preview updates as you change anything on this page."
+      >
       {/* Top row: Layout + live preview side by side, compact */}
       <div className="grid grid-cols-2 gap-6">
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
@@ -371,7 +380,12 @@ export function DesignForm({
           </div>
         </div>
       </div>
+      </Group>
 
+      <Group
+        title="Colors & font"
+        description="Your brand colors and typeface. These apply to the whole widget."
+      >
       {/* Colors — 4 in a row */}
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <p className="mb-3 text-sm font-medium text-white/70">Colors</p>
@@ -400,7 +414,6 @@ export function DesignForm({
       </div>
 
       {/* Typography + shape */}
-      <div className="grid grid-cols-2 gap-6">
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
           <label className="mb-2 block text-sm font-medium text-white/70">Font</label>
           <select
@@ -426,7 +439,12 @@ export function DesignForm({
             className="w-full"
           />
         </div>
+      </Group>
 
+      <Group
+        title="Text & spacing"
+        description="The heading above the reviews, how big the review text is, and how much room the widget takes on the page."
+      >
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
           <label className="mb-2 block text-sm font-medium text-white/70">Widget heading</label>
           <input
@@ -562,7 +580,6 @@ export function DesignForm({
             theme's page background is also white.
           </p>
         </div>
-      </div>
 
       {/* Review text appearance */}
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
@@ -656,6 +673,12 @@ export function DesignForm({
         </div>
       </div>
 
+      </Group>
+
+      <Group
+        title="Review suggestions"
+        description="Optional prompts shown to a customer who is stuck on what to write."
+      >
       {/* Suggestions */}
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -778,6 +801,12 @@ export function DesignForm({
         </p>
       </div>
 
+      </Group>
+
+      <Group
+        title="Review list"
+        description="The rating summary at the top, the filter bar, and the review cards themselves."
+      >
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <p className="mb-4 text-sm font-medium text-white/70">Widget summary style</p>
         <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
@@ -1063,6 +1092,12 @@ export function DesignForm({
         )}
       </div>
 
+      </Group>
+
+      <Group
+        title="Review form"
+        description="The box a customer actually types their review into."
+      >
       <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
         <p className="mb-4 text-sm font-medium text-white/70">Review form style</p>
 
@@ -1197,7 +1232,7 @@ export function DesignForm({
           Free: Basic only · Pro: all 4 form templates
         </p>
       </div>
-
+      </Group>
 
       <button
         onClick={handleSave}
@@ -1218,6 +1253,41 @@ export function DesignForm({
         </p>
       )}
     </div>
+  );
+}
+
+/**
+ * A labelled run of setting cards.
+ *
+ * Deliberately not components/ui.tsx's <Section>: this form is already
+ * rendered *inside* a Section on the Widget settings page, so reusing it would
+ * put a bordered card inside a bordered card inside a bordered card. This is a
+ * heading and a rule, with no box of its own — the cards underneath keep their
+ * own borders and do the visual separating.
+ */
+function Group({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-6">
+      <div className="border-b border-white/[0.07] pb-2.5">
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/45">
+          {title}
+        </h3>
+        {description && (
+          <p className="mt-1 text-[12px] leading-relaxed text-white/35">
+            {description}
+          </p>
+        )}
+      </div>
+      {children}
+    </section>
   );
 }
 
