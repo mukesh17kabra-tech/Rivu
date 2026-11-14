@@ -98,7 +98,7 @@ export function Sidebar({
   const groups = buildGroups(qs.toString());
 
   return (
-    <aside className="w-full shrink-0 border-b border-black/[0.09] bg-[#0E1013] md:sticky md:top-0 md:h-screen md:w-[240px] md:border-b-0 md:border-r">
+    <aside className="w-full shrink-0 border-b border-black/[0.09] bg-white md:sticky md:top-0 md:h-screen md:w-[240px] md:border-b-0 md:border-r">
       <div className="flex items-center gap-2.5 px-5 py-5">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#111418] text-sm font-extrabold text-white">
           R
