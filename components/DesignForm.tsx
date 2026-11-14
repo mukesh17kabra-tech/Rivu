@@ -117,6 +117,15 @@ const SAMPLE_REVIEWS = [
   { rating: 4, body: "Really good quality, delivery was a bit slow though.", customerName: "Rohan M." },
 ];
 
+const TAB_TITLES = [
+  "Layout",
+  "Colors & font",
+  "Text & spacing",
+  "Review suggestions",
+  "Review list",
+  "Review form",
+];
+
 export function DesignForm({
   shop,
   plan,
@@ -128,6 +137,7 @@ export function DesignForm({
 }) {
   const [settings, setSettings] = useState<DesignSettings>(initial);
   const [saving, setSaving] = useState(false);
+  const [tab, setTab] = useState(0);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [lockedMsg, setLockedMsg] = useState<string[]>([]);
@@ -169,18 +179,39 @@ export function DesignForm({
   }
 
   return (
-    <div className="space-y-10">
-      {/* The cards below used to run as one flat column of fifteen identical
-          bordered boxes with no labels between them, so a merchant had to
-          remember which box held which control. The <Group> headings below add
-          no inputs and change no values — they only name what each run of
-          cards is for. */}
+    <div className="space-y-6">
+      {/* This page used to be one flat column of fifteen identical bordered
+          boxes with no labels, so a merchant had to scroll past all of them to
+          find one control. The cards are now split across the six tabs below,
+          and the preview is hoisted out of the tabs so it stays on screen while
+          you change colours, text or spacing. Tabs only hide cards with CSS —
+          every input stays mounted, so switching tabs never loses an unsaved
+          change, and Save still saves the whole form at once. */}
+      <div className="sticky top-0 z-10 -mx-1 bg-[#0B0D0F] px-1 pt-1 pb-3">
+        <LivePreview settings={settings} />
+      </div>
+
+      <div className="flex flex-wrap gap-1 border-b border-white/10">
+        {TAB_TITLES.map((title, i) => (
+          <button
+            key={title}
+            type="button"
+            onClick={() => setTab(i)}
+            className={`-mb-px rounded-t-md border-b-2 px-3 py-2 text-[12px] font-medium transition-colors ${
+              tab === i
+                ? "border-emerald-400 text-white"
+                : "border-transparent text-white/45 hover:text-white/70"
+            }`}
+          >
+            {title}
+          </button>
+        ))}
+      </div>
       <Group
+        hidden={tab !== 0}
         title="Layout"
         description="The overall shape of the widget. The preview updates as you change anything on this page."
       >
-      {/* Top row: Layout + live preview side by side, compact */}
-      <div className="grid grid-cols-2 gap-6">
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
           <label className="mb-2 block text-sm font-medium text-white/70">Layout</label>
           {/* Read from lib/design-options.ts rather than restated here. The
@@ -300,89 +331,10 @@ export function DesignForm({
 
         </div>
 
-        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
-          <p className="mb-2 text-xs font-medium text-white/50">Live preview — updates as you change settings</p>
-          <div
-            className="overflow-auto rounded-lg"
-            style={{
-              maxHeight: "340px",
-              fontFamily: settings.fontFamily,
-              border: settings.showBorder ? `${settings.borderWidth}px ${settings.borderStyle} ${settings.borderColor}` : "none",
-              borderRadius: `${settings.borderRadius}px`,
-              padding: "14px",
-              backgroundColor: "transparent",
-            }}
-          >
-            {/* Summary block */}
-            <div style={{
-              display: "flex", alignItems: "center", gap: "14px",
-              padding: "12px 14px", marginBottom: "10px",
-              background: settings.summaryBgColor,
-              color: settings.summaryTextColor,
-              borderRadius: `${settings.borderRadius}px`,
-              flexWrap: "wrap",
-            }}>
-              <div style={{ textAlign: "center", flexShrink: 0 }}>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: settings.summaryTextColor, lineHeight: 1 }}>4.8</div>
-                <div style={{ color: settings.starColor, fontSize: "12px", margin: "3px 0 2px" }}>{"★".repeat(5)}</div>
-                <div style={{ fontSize: "9px", color: settings.summaryTextColor, opacity: 0.6 }}>Based on 13 reviews</div>
-              </div>
-              <div style={{ flex: 1, minWidth: "100px" }}>
-                {([["\u2605 5", 77], ["\u2605 4", 23], ["\u2605 3", 0], ["\u2605 2", 0], ["\u2605 1", 0]] as [string, number][]).map(([label, pct]) => (
-                  <div key={label} style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
-                    <span style={{ width: "38px", fontSize: "8px", color: settings.summaryTextColor, opacity: 0.65, flexShrink: 0 }}>{label}</span>
-                    <div style={{ flex: 1, height: "5px", backgroundColor: "#e0e0e0", borderRadius: "3px", overflow: "hidden" }}>
-                      <div style={{ width: `${pct}%`, height: "100%", backgroundColor: settings.rangeColor, borderRadius: "3px" }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <button style={{ background: settings.primaryGradient || settings.primaryColor, color: "#fff", border: "none", borderRadius: `${settings.borderRadius}px`, padding: "7px 12px", fontSize: "9px", fontWeight: 700, cursor: "default", flexShrink: 0 }}>
-                ✏ Write a Review
-              </button>
-            </div>
-
-            {/* Filter bar */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", paddingBottom: "8px", borderBottom: `1px solid ${settings.borderColor || "#eee"}` }}>
-              <span style={{ fontSize: `${Math.max(settings.reviewCountFontSize - 2, 9)}px`, color: settings.filterTextColor, fontWeight: 500 }}>3 Reviews</span>
-              <span style={{ fontSize: "9px", color: settings.sortTextColor, border: `1px solid ${settings.sortBorderColor}`, background: settings.sortBgColor, padding: "3px 7px", borderRadius: "5px" }}>Most Recent ▾</span>
-            </div>
-
-            {/* Review cards */}
-            <div style={
-              settings.displayStyle === "grid"
-                ? { display: "grid", gridTemplateColumns: `repeat(${Math.min(settings.gridColumns, 2)}, 1fr)`, gap: "7px" }
-                : { display: "flex", flexDirection: "column", gap: "7px" }
-            }>
-              {SAMPLE_REVIEWS.map((rev, i) => (
-                <div key={i} style={{
-                  background: settings.backgroundGradient || settings.backgroundColor,
-                  borderRadius: `${settings.borderRadius}px`,
-                  padding: "9px 11px",
-                  border: "1px solid rgba(0,0,0,.06)",
-                  fontFamily: settings.fontFamily,
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "5px" }}>
-                    <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: ["#7c3aed","#0891b2"][i % 2], color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "8px", fontWeight: 700, flexShrink: 0 }}>
-                      {rev.customerName.slice(0,2).toUpperCase()}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: "9px", fontWeight: 700, color: settings.textColor }}>{rev.customerName}</div>
-                      <div style={{ fontSize: "8px", color: settings.reviewMetaColor }}>6 days ago</div>
-                    </div>
-                  </div>
-                  <div style={{ color: settings.starColor, fontSize: "10px", marginBottom: "4px" }}>{"★".repeat(rev.rating)}{"☆".repeat(5-rev.rating)}</div>
-                  {i === 0 && <p style={{ margin: "0 0 3px", fontSize: `${Math.max(settings.reviewTextSize - 3, 8)}px`, fontWeight: 700, fontStyle: "italic", color: settings.reviewTitleColor }}>Great product!</p>}
-                  <p style={{ margin: 0, fontSize: `${Math.max(settings.reviewTextSize - 3, 8)}px`, color: settings.reviewBodyColor, lineHeight: 1.5 }}>{rev.body.slice(0, 60)}…</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
       </Group>
 
       <Group
+        hidden={tab !== 1}
         title="Colors & font"
         description="Your brand colors and typeface. These apply to the whole widget."
       >
@@ -442,6 +394,7 @@ export function DesignForm({
       </Group>
 
       <Group
+        hidden={tab !== 2}
         title="Text & spacing"
         description="The heading above the reviews, how big the review text is, and how much room the widget takes on the page."
       >
@@ -676,6 +629,7 @@ export function DesignForm({
       </Group>
 
       <Group
+        hidden={tab !== 3}
         title="Review suggestions"
         description="Optional prompts shown to a customer who is stuck on what to write."
       >
@@ -804,6 +758,7 @@ export function DesignForm({
       </Group>
 
       <Group
+        hidden={tab !== 4}
         title="Review list"
         description="The rating summary at the top, the filter bar, and the review cards themselves."
       >
@@ -1095,6 +1050,7 @@ export function DesignForm({
       </Group>
 
       <Group
+        hidden={tab !== 5}
         title="Review form"
         description="The box a customer actually types their review into."
       >
@@ -1268,14 +1224,18 @@ export function DesignForm({
 function Group({
   title,
   description,
+  hidden,
   children,
 }: {
   title: string;
   description?: string;
+  hidden?: boolean;
   children: ReactNode;
 }) {
   return (
-    <section className="space-y-6">
+    // Hidden with CSS rather than unmounted: the inputs underneath keep their
+    // DOM state, and a half-typed heading survives a trip to another tab.
+    <section className={hidden ? "hidden" : "space-y-6"} aria-hidden={hidden}>
       <div className="border-b border-white/[0.07] pb-2.5">
         <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/45">
           {title}
@@ -1411,6 +1371,92 @@ function ColorField({
           onChange={(e) => onChange(e.target.value)}
           className="w-full min-w-0 rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white disabled:opacity-40"
         />
+      </div>
+    </div>
+  );
+}
+
+function LivePreview({ settings }: { settings: DesignSettings }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
+      <p className="mb-2 text-xs font-medium text-white/50">Live preview — updates as you change settings</p>
+      <div
+        className="overflow-auto rounded-lg"
+        style={{
+          // Shorter than it was as a half-width column: this now sits pinned
+          // above every tab, so it has to leave room for the controls.
+          maxHeight: "220px",
+          fontFamily: settings.fontFamily,
+          border: settings.showBorder ? `${settings.borderWidth}px ${settings.borderStyle} ${settings.borderColor}` : "none",
+          borderRadius: `${settings.borderRadius}px`,
+          padding: "14px",
+          backgroundColor: "transparent",
+        }}
+      >
+        {/* Summary block */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: "14px",
+          padding: "12px 14px", marginBottom: "10px",
+          background: settings.summaryBgColor,
+          color: settings.summaryTextColor,
+          borderRadius: `${settings.borderRadius}px`,
+          flexWrap: "wrap",
+        }}>
+          <div style={{ textAlign: "center", flexShrink: 0 }}>
+            <div style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: settings.summaryTextColor, lineHeight: 1 }}>4.8</div>
+            <div style={{ color: settings.starColor, fontSize: "12px", margin: "3px 0 2px" }}>{"★".repeat(5)}</div>
+            <div style={{ fontSize: "9px", color: settings.summaryTextColor, opacity: 0.6 }}>Based on 13 reviews</div>
+          </div>
+          <div style={{ flex: 1, minWidth: "100px" }}>
+            {([["\u2605 5", 77], ["\u2605 4", 23], ["\u2605 3", 0], ["\u2605 2", 0], ["\u2605 1", 0]] as [string, number][]).map(([label, pct]) => (
+              <div key={label} style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
+                <span style={{ width: "38px", fontSize: "8px", color: settings.summaryTextColor, opacity: 0.65, flexShrink: 0 }}>{label}</span>
+                <div style={{ flex: 1, height: "5px", backgroundColor: "#e0e0e0", borderRadius: "3px", overflow: "hidden" }}>
+                  <div style={{ width: `${pct}%`, height: "100%", backgroundColor: settings.rangeColor, borderRadius: "3px" }} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <button style={{ background: settings.primaryGradient || settings.primaryColor, color: "#fff", border: "none", borderRadius: `${settings.borderRadius}px`, padding: "7px 12px", fontSize: "9px", fontWeight: 700, cursor: "default", flexShrink: 0 }}>
+            ✏ Write a Review
+          </button>
+        </div>
+
+        {/* Filter bar */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", paddingBottom: "8px", borderBottom: `1px solid ${settings.borderColor || "#eee"}` }}>
+          <span style={{ fontSize: `${Math.max(settings.reviewCountFontSize - 2, 9)}px`, color: settings.filterTextColor, fontWeight: 500 }}>3 Reviews</span>
+          <span style={{ fontSize: "9px", color: settings.sortTextColor, border: `1px solid ${settings.sortBorderColor}`, background: settings.sortBgColor, padding: "3px 7px", borderRadius: "5px" }}>Most Recent ▾</span>
+        </div>
+
+        {/* Review cards */}
+        <div style={
+          settings.displayStyle === "grid"
+            ? { display: "grid", gridTemplateColumns: `repeat(${Math.min(settings.gridColumns, 2)}, 1fr)`, gap: "7px" }
+            : { display: "flex", flexDirection: "column", gap: "7px" }
+        }>
+          {SAMPLE_REVIEWS.map((rev, i) => (
+            <div key={i} style={{
+              background: settings.backgroundGradient || settings.backgroundColor,
+              borderRadius: `${settings.borderRadius}px`,
+              padding: "9px 11px",
+              border: "1px solid rgba(0,0,0,.06)",
+              fontFamily: settings.fontFamily,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "5px" }}>
+                <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: ["#7c3aed","#0891b2"][i % 2], color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "8px", fontWeight: 700, flexShrink: 0 }}>
+                  {rev.customerName.slice(0,2).toUpperCase()}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "9px", fontWeight: 700, color: settings.textColor }}>{rev.customerName}</div>
+                  <div style={{ fontSize: "8px", color: settings.reviewMetaColor }}>6 days ago</div>
+                </div>
+              </div>
+              <div style={{ color: settings.starColor, fontSize: "10px", marginBottom: "4px" }}>{"★".repeat(rev.rating)}{"☆".repeat(5-rev.rating)}</div>
+              {i === 0 && <p style={{ margin: "0 0 3px", fontSize: `${Math.max(settings.reviewTextSize - 3, 8)}px`, fontWeight: 700, fontStyle: "italic", color: settings.reviewTitleColor }}>Great product!</p>}
+              <p style={{ margin: 0, fontSize: `${Math.max(settings.reviewTextSize - 3, 8)}px`, color: settings.reviewBodyColor, lineHeight: 1.5 }}>{rev.body.slice(0, 60)}…</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
