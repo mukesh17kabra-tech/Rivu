@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { DESIGN_THEMES, matchTheme } from "@/lib/design-themes";
 import {
   aiSuggestionsAllowed,
   formTemplatesFor,
@@ -138,6 +139,10 @@ export function DesignForm({
   const [settings, setSettings] = useState<DesignSettings>(initial);
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState(0);
+  // Simple by default. Sixty controls is the right answer for a merchant who
+  // wants one exact shade changed and the wrong first thing to show everyone
+  // else, so the page opens on five choices and keeps the rest one click away.
+  const [advanced, setAdvanced] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [lockedMsg, setLockedMsg] = useState<string[]>([]);
@@ -146,8 +151,35 @@ export function DesignForm({
   const isPro = plan === "pro";
   const languageCap = plan === "free" ? 1 : 10;
 
+  // A merchant who went to Advanced once is not a beginner next time.
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem("rivu.design.advanced") === "1") {
+        setAdvanced(true);
+      }
+    } catch {
+      // Blocked storage — stay on the simple view, which is the safe default.
+    }
+  }, []);
+
   function update<K extends keyof DesignSettings>(key: K, value: DesignSettings[K]) {
     setSettings((s) => ({ ...s, [key]: value }));
+    setSaved(false);
+  }
+
+  /**
+   * Applies a theme's twenty-odd values in one state update.
+   *
+   * Spread rather than a loop of update() calls: twenty separate setState
+   * calls off one click is twenty renders of a preview that reads every one
+   * of those values, and only the last would be correct in the preview while
+   * the rest flickered. Nothing outside the theme's own keys is touched, so a
+   * merchant's heading text, widths and spacing survive a theme change.
+   */
+  function applyTheme(key: string) {
+    const theme = DESIGN_THEMES.find((t) => t.key === key);
+    if (!theme) return;
+    setSettings((s) => ({ ...s, ...theme.values }));
     setSaved(false);
   }
 
@@ -191,7 +223,36 @@ export function DesignForm({
         <LivePreview settings={settings} />
       </div>
 
-      <div className="flex flex-wrap gap-1 border-b border-white/10">
+      {!advanced && (
+        <SimplePanel
+          settings={settings}
+          plan={plan}
+          update={update}
+          applyTheme={applyTheme}
+        />
+      )}
+
+      <button
+        type="button"
+        onClick={() => {
+          setAdvanced((a) => {
+            try {
+              window.localStorage.setItem("rivu.design.advanced", a ? "0" : "1");
+            } catch {
+              // Private browsing and blocked storage: the toggle still works
+              // for this visit, it just will not be remembered.
+            }
+            return !a;
+          });
+        }}
+        className="block text-[12px] font-medium text-white/40 underline underline-offset-4 hover:text-white/70"
+      >
+        {advanced
+          ? "← Back to the simple view"
+          : "Advanced — every colour, size and spacing setting"}
+      </button>
+
+      <div className={advanced ? "flex flex-wrap gap-1 border-b border-white/10" : "hidden"}>
         {TAB_TITLES.map((title, i) => (
           <button
             key={title}
@@ -207,6 +268,7 @@ export function DesignForm({
           </button>
         ))}
       </div>
+      <div className={advanced ? "space-y-10" : "hidden"}>
       <Group
         hidden={tab !== 0}
         title="Layout"
@@ -1189,6 +1251,7 @@ export function DesignForm({
         </p>
       </div>
       </Group>
+      </div>
 
       <button
         onClick={handleSave}
@@ -1371,6 +1434,171 @@ function ColorField({
           onChange={(e) => onChange(e.target.value)}
           className="w-full min-w-0 rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white disabled:opacity-40"
         />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The five choices that decide what the widget actually looks like.
+ *
+ * Everything here also exists in the Advanced tabs; this is not a second set
+ * of settings but a shorter route to the same values, so nothing can drift
+ * between the two views. A merchant who never opens Advanced still gets a
+ * widget that matches their store.
+ */
+function SimplePanel({
+  settings,
+  plan,
+  update,
+  applyTheme,
+}: {
+  settings: DesignSettings;
+  plan: "free" | "pro";
+  update: <K extends keyof DesignSettings>(key: K, value: DesignSettings[K]) => void;
+  applyTheme: (key: string) => void;
+}) {
+  const active = matchTheme(settings as unknown as Record<string, unknown>);
+
+  return (
+    <div className="space-y-5">
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <label className="mb-1 block text-sm font-medium text-white/70">
+          Pick a look
+        </label>
+        <p className="mb-3 text-xs text-white/35">
+          Sets the colours, corners and card style together. You can change any
+          of it afterwards.
+        </p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+          {DESIGN_THEMES.map((theme) => (
+            <button
+              key={theme.key}
+              type="button"
+              onClick={() => applyTheme(theme.key)}
+              title={theme.description}
+              className={`rounded-md border p-3 text-left transition-colors ${
+                active === theme.key
+                  ? "border-emerald-400 bg-emerald-400/10"
+                  : "border-white/10 bg-white/[0.02] hover:border-white/25"
+              }`}
+            >
+              <div className="mb-2 flex gap-1">
+                {theme.swatch.map((c) => (
+                  <span
+                    key={c}
+                    className="h-4 w-4 rounded-full border border-white/20"
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+              <div className="text-xs font-semibold text-white/85">
+                {theme.label}
+              </div>
+              <div className="mt-0.5 text-[10px] leading-snug text-white/35">
+                {theme.description}
+              </div>
+            </button>
+          ))}
+        </div>
+        {active === null && (
+          <p className="mt-3 text-[11px] text-white/30">
+            Your own colours — no theme selected. Picking one replaces them.
+          </p>
+        )}
+      </div>
+
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <label className="mb-2 block text-sm font-medium text-white/70">
+          How the reviews are arranged
+        </label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {DISPLAY_STYLES.map((option) => {
+            const allowed = displayStylesFor(plan).includes(option.key);
+            const selected = settings.displayStyle === option.key;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => allowed && update("displayStyle", option.key)}
+                disabled={!allowed}
+                title={allowed ? option.description : "Available on Pro"}
+                className={`rounded-md border px-2 py-2 text-left transition-colors ${
+                  selected
+                    ? "border-emerald-400 bg-emerald-400/10"
+                    : "border-white/10 bg-white/[0.02] hover:border-white/25"
+                } ${allowed ? "" : "cursor-not-allowed opacity-40"}`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-white/85">
+                    {option.label}
+                  </span>
+                  {!allowed && (
+                    <span className="text-[9px] font-bold text-yellow-300/80">
+                      PRO
+                    </span>
+                  )}
+                </div>
+                <div className="mt-0.5 text-[10px] text-white/35">
+                  {option.description}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+          <label className="mb-2 block text-sm font-medium text-white/70">
+            Heading above the reviews
+          </label>
+          <input
+            type="text"
+            value={settings.widgetTitle}
+            onChange={(e) => update("widgetTitle", e.target.value)}
+            placeholder="Customer Reviews"
+            className="w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
+          />
+        </div>
+
+        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+          <label className="mb-2 block text-sm font-medium text-white/70">
+            Corner roundness: {settings.borderRadius}px
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={24}
+            value={settings.borderRadius}
+            onChange={(e) => update("borderRadius", Number(e.target.value))}
+            className="w-full"
+          />
+          <p className="mt-1 text-[11px] text-white/30">
+            0 = sharp corners, 24 = fully rounded cards.
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+        <label className="mb-1 block text-sm font-medium text-white/70">
+          Your two colours
+        </label>
+        <p className="mb-3 text-xs text-white/35">
+          The button colour and the star colour — the two a shopper notices.
+        </p>
+        <div className="grid grid-cols-2 gap-4">
+          <ColorField
+            label="Button colour"
+            value={settings.primaryColor}
+            onChange={(v) => update("primaryColor", v)}
+          />
+          <ColorField
+            label="Star colour"
+            value={settings.starColor}
+            onChange={(v) => update("starColor", v)}
+          />
+        </div>
       </div>
     </div>
   );
