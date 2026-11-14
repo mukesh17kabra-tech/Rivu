@@ -97,7 +97,7 @@ export function SupportInbox({ apiKey, initialShop }: { apiKey: string; initialS
       {/* Shop list */}
       <div className="w-72 flex-shrink-0 border-r border-black/[0.10] overflow-y-auto">
         <div className="border-b border-black/[0.10] p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-400/80">Rivu</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-700/80">Rivu</p>
           <h1 className="mt-1 text-lg font-semibold">Support Inbox</h1>
         </div>
         {shops.length === 0 ? (
@@ -114,7 +114,7 @@ export function SupportInbox({ apiKey, initialShop }: { apiKey: string; initialS
               <div className="flex items-center justify-between">
                 <p className="truncate text-sm font-medium text-[#111418]">{s.shop}</p>
                 {s.unreadCount > 0 && (
-                  <span className="ml-2 flex-shrink-0 rounded-full bg-emerald-400 px-1.5 py-0.5 text-[10px] font-bold text-black">
+                  <span className="ml-2 flex-shrink-0 rounded-full bg-[#111418] px-1.5 py-0.5 text-[10px] font-bold text-white">
                     {s.unreadCount}
                   </span>
                 )}
@@ -148,7 +148,7 @@ export function SupportInbox({ apiKey, initialShop }: { apiKey: string; initialS
                     key={m.id}
                     className={`max-w-md rounded-xl p-3 text-sm ${
                       m.fromDeveloper
-                        ? "ml-auto bg-emerald-400/20 text-emerald-100"
+                        ? "ml-auto bg-[#111418] text-white"
                         : "bg-black/[0.04] text-black/80"
                     }`}
                   >
@@ -170,7 +170,7 @@ export function SupportInbox({ apiKey, initialShop }: { apiKey: string; initialS
                 <img src={imageDataUrl} alt="preview" className="h-12 w-12 rounded object-cover" />
                 <button
                   onClick={() => setImageDataUrl(null)}
-                  className="text-xs text-red-400 hover:underline"
+                  className="text-xs text-red-600 hover:underline"
                 >
                   Remove
                 </button>
@@ -192,7 +192,7 @@ export function SupportInbox({ apiKey, initialShop }: { apiKey: string; initialS
               <button
                 onClick={sendReply}
                 disabled={sending || (!reply.trim() && !imageDataUrl)}
-                className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300 disabled:opacity-50"
+                className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2f35] disabled:opacity-50"
               >
                 {sending ? "Sending..." : "Send"}
               </button>

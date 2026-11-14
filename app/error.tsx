@@ -41,7 +41,7 @@ export default function AppError({
           <button
             type="button"
             onClick={reset}
-            className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-emerald-300"
+            className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2a2f35]"
           >
             Try again
           </button>

@@ -88,7 +88,7 @@ function PlanCard({
   brandingShown?: boolean; brandingRemoved?: boolean;
 }) {
   return (
-    <div className={`rounded-lg border p-6 flex flex-col ${highlight ? "border-emerald-400/40 bg-emerald-400/[0.06]" : "border-black/[0.10] bg-black/[0.02]"}`}>
+    <div className={`rounded-lg border p-6 flex flex-col ${highlight ? "border-[#111418]/40 bg-[#111418]/[0.06]" : "border-black/[0.10] bg-black/[0.02]"}`}>
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-black/50 uppercase tracking-wide">{name}</p>
         {current && <span className="rounded-full bg-black/[0.07] px-2 py-0.5 text-[10px] uppercase tracking-wide text-black/58">Current</span>}
@@ -105,9 +105,9 @@ function PlanCard({
         </div>
       )}
       {brandingRemoved && (
-        <div className="mt-3 flex items-center gap-2 rounded-md border border-emerald-400/30 bg-emerald-400/10 px-3 py-2">
-          <span className="text-emerald-400">✓</span>
-          <span className="text-xs text-emerald-300">
+        <div className="mt-3 flex items-center gap-2 rounded-md border border-emerald-600/22 bg-emerald-50 px-3 py-2">
+          <span className="text-emerald-700">✓</span>
+          <span className="text-xs text-emerald-700">
             <strong>&quot;Powered by Rivu&quot;</strong> branding removed
           </span>
         </div>
@@ -116,7 +116,7 @@ function PlanCard({
       <ul className="mt-4 space-y-2 text-sm text-black/65 flex-1">
         {perks.map((perk) => (
           <li key={perk} className="flex gap-2">
-            <span className="text-emerald-400 flex-shrink-0">·</span>
+            <span className="text-emerald-700 flex-shrink-0">·</span>
             {perk}
           </li>
         ))}
@@ -128,7 +128,7 @@ function PlanCard({
           target="_top"
           className={`mt-5 inline-block rounded-md px-4 py-2 text-center text-sm font-medium transition-colors ${
             highlight
-              ? "bg-emerald-400 text-black hover:bg-emerald-300"
+              ? "bg-[#111418] text-white hover:bg-[#2a2f35]"
               : "bg-black/[0.07] text-[#111418] hover:bg-black/[0.12]"
           }`}
         >

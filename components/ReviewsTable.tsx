@@ -220,8 +220,8 @@ export function ReviewsTable({
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs ${
                         review.approved
-                          ? "bg-emerald-400/20 text-emerald-300"
-                          : "bg-yellow-400/20 text-yellow-300"
+                          ? "bg-emerald-50 text-emerald-700"
+                          : "bg-amber-50 text-amber-800"
                       }`}
                     >
                       {review.approved ? "Published" : "Pending"}
@@ -234,7 +234,7 @@ export function ReviewsTable({
                     <button
                       onClick={() => toggleApproved(review)}
                       disabled={busyId === review.id}
-                      className="mr-3 text-xs font-medium text-emerald-400 hover:underline disabled:opacity-50"
+                      className="mr-3 text-xs font-medium text-emerald-700 hover:underline disabled:opacity-50"
                     >
                       {review.approved ? "Unpublish" : "Publish"}
                     </button>
@@ -250,7 +250,7 @@ export function ReviewsTable({
                       <button
                         onClick={() => togglePin(review)}
                         disabled={busyId === review.id}
-                        className="mr-3 text-xs font-medium text-amber-300 hover:underline disabled:opacity-50"
+                        className="mr-3 text-xs font-medium text-amber-700 hover:underline disabled:opacity-50"
                       >
                         {review.pinnedAt ? "Unpin" : "Pin to top"}
                       </button>
@@ -264,7 +264,7 @@ export function ReviewsTable({
                     <button
                       onClick={() => deleteReview(review)}
                       disabled={busyId === review.id}
-                      className="text-xs font-medium text-red-400 hover:underline disabled:opacity-50"
+                      className="text-xs font-medium text-red-600 hover:underline disabled:opacity-50"
                     >
                       Delete
                     </button>
@@ -288,7 +288,7 @@ export function ReviewsTable({
                         <button
                           onClick={() => saveReply(review, replyDraft)}
                           disabled={busyId === review.id}
-                          className="rounded-md bg-emerald-400 px-3.5 py-1.5 text-xs font-bold text-black hover:bg-emerald-300 disabled:opacity-60"
+                          className="rounded-md bg-[#111418] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#2a2f35] disabled:opacity-60"
                         >
                           {busyId === review.id ? "Saving…" : "Save reply"}
                         </button>
@@ -305,7 +305,7 @@ export function ReviewsTable({
                               saveReply(review, "");
                             }}
                             disabled={busyId === review.id}
-                            className="ml-auto text-xs font-medium text-red-400/80 hover:underline disabled:opacity-50"
+                            className="ml-auto text-xs font-medium text-red-600/80 hover:underline disabled:opacity-50"
                           >
                             Remove reply
                           </button>
@@ -350,7 +350,7 @@ export function ReviewsTable({
                             ))}
                           </select>
                           {allowedTemplateCount < TEMPLATES.length && (
-                            <p className="text-[11px] text-yellow-300/80">
+                            <p className="text-[11px] text-amber-700/80">
                               {TEMPLATES.length - allowedTemplateCount} more template
                               {TEMPLATES.length - allowedTemplateCount === 1 ? "" : "s"} available on
                               a higher plan.{" "}

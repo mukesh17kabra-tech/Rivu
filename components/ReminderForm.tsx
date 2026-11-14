@@ -101,7 +101,7 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
             setSettings((s) => ({ ...s, reminderEnabled: e.target.checked }));
             setSaved(false);
           }}
-          className="h-4 w-4 accent-emerald-400"
+          className="h-4 w-4 accent-[#111418]"
         />
         <span className="text-sm text-[#111418]">Automatically email customers to leave a review</span>
       </label>
@@ -157,10 +157,10 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
             />
             <p className="mt-2 text-xs text-black/45">
               Available variables:{" "}
-              <code className="text-emerald-300">{"{{first_name}}"}</code>,{" "}
-              <code className="text-emerald-300">{"{{shop_name}}"}</code>,{" "}
-              <code className="text-emerald-300">{"{{review_link}}"}</code>,{" "}
-              <code className="text-emerald-300">{"{{product_name}}"}</code>
+              <code className="text-emerald-700">{"{{first_name}}"}</code>,{" "}
+              <code className="text-emerald-700">{"{{shop_name}}"}</code>,{" "}
+              <code className="text-emerald-700">{"{{review_link}}"}</code>,{" "}
+              <code className="text-emerald-700">{"{{product_name}}"}</code>
             </p>
           </div>
         </>
@@ -169,7 +169,7 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300 disabled:opacity-60"
+        className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>
@@ -206,13 +206,13 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
         </p>
 
         {testResult?.ok && (
-          <p className="mt-3 rounded-md border border-emerald-400/30 bg-emerald-400/[0.08] px-3 py-2 text-xs text-emerald-300">
+          <p className="mt-3 rounded-md border border-emerald-600/22 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
             Test email sent to {testResult.to}. If it doesn&apos;t arrive within a
             minute or two, check your spam folder.
           </p>
         )}
         {testResult && !testResult.ok && (
-          <p className="mt-3 rounded-md border border-red-400/30 bg-red-400/[0.08] px-3 py-2 text-xs text-red-300">
+          <p className="mt-3 rounded-md border border-red-600/25 bg-red-400/[0.08] px-3 py-2 text-xs text-red-600">
             {testResult.message}
           </p>
         )}

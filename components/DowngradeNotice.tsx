@@ -90,13 +90,13 @@ export function DowngradeNotice({ currentPlan, shop }: { currentPlan: string; sh
             "Multi-language suggestions (English only now)",
           ].map((item) => (
             <li key={item} className="flex items-start gap-2">
-              <span className="mt-0.5 flex-shrink-0 text-red-400">✕</span>
+              <span className="mt-0.5 flex-shrink-0 text-red-600">✕</span>
               <span>{item}</span>
             </li>
           ))}
         </ul>
 
-        <div className="mb-5 rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-xs text-emerald-300">
+        <div className="mb-5 rounded-lg border border-emerald-600/18 bg-emerald-50 px-4 py-3 text-xs text-emerald-700">
           ✓ All your reviews, photos, and customer data are completely safe.
           Only the visual design has been reset.
         </div>
@@ -107,7 +107,7 @@ export function DowngradeNotice({ currentPlan, shop }: { currentPlan: string; sh
           </p>
         )}
         {done && (
-          <p className="mb-3 text-center text-xs text-emerald-400">
+          <p className="mb-3 text-center text-xs text-emerald-700">
             ✓ Design reset complete.
           </p>
         )}
@@ -116,7 +116,7 @@ export function DowngradeNotice({ currentPlan, shop }: { currentPlan: string; sh
           <a
             href={`/dashboard/plans?shop=${shop}`}
             target="_top"
-            className="flex-1 rounded-lg bg-emerald-400 px-4 py-2.5 text-center text-sm font-bold text-black hover:bg-emerald-300"
+            className="flex-1 rounded-lg bg-[#111418] px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-[#2a2f35]"
           >
             Upgrade to restore
           </a>

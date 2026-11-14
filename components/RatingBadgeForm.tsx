@@ -61,16 +61,16 @@ export function RatingBadgeForm({
         className="mb-2 w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
       />
       <p className="mb-4 text-xs text-black/45">
-        <code className="rounded bg-black/[0.05] px-1 text-emerald-300">{"{rating}"}</code> becomes the stars,{" "}
-        <code className="rounded bg-black/[0.05] px-1 text-emerald-300">{"{average}"}</code> the score (e.g. 4.5), and{" "}
-        <code className="rounded bg-black/[0.05] px-1 text-emerald-300">{"{count}"}</code> the review count.
-        Example: <code className="rounded bg-black/[0.05] px-1 text-emerald-300">{"{rating} {average} · {count}"}</code>.
+        <code className="rounded bg-black/[0.05] px-1 text-emerald-700">{"{rating}"}</code> becomes the stars,{" "}
+        <code className="rounded bg-black/[0.05] px-1 text-emerald-700">{"{average}"}</code> the score (e.g. 4.5), and{" "}
+        <code className="rounded bg-black/[0.05] px-1 text-emerald-700">{"{count}"}</code> the review count.
+        Example: <code className="rounded bg-black/[0.05] px-1 text-emerald-700">{"{rating} {average} · {count}"}</code>.
         Your wording is kept as typed — only the first letter is capitalised.
       </p>
       <p className="mb-4 text-xs text-black/45">
-        Preview: <span className="text-yellow-300">{preview}</span>
+        Preview: <span className="text-amber-700">{preview}</span>
         {previewBroken && (
-          <span className="ml-2 text-amber-300">
+          <span className="ml-2 text-amber-700">
             — unknown placeholder; only {"{rating}"}, {"{average}"} and {"{count}"} are replaced.
           </span>
         )}
@@ -97,7 +97,7 @@ export function RatingBadgeForm({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300 disabled:opacity-60"
+        className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>

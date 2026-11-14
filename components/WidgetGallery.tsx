@@ -173,13 +173,13 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
     <div className="space-y-6">
       {/* The embed is not one widget among eleven — nothing below works until
           it is on, so it gets its own row rather than a card in the grid. */}
-      <section className="rounded-xl border border-emerald-400/25 bg-emerald-400/[0.06] p-5">
+      <section className="rounded-xl border border-[#111418]/25 bg-[#111418]/[0.06] p-5">
         <div className="flex flex-wrap items-center gap-5">
           <div className="w-[200px] shrink-0">
             <PreviewAppEmbed />
           </div>
           <div className="min-w-[220px] flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-300">
+            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-700">
               Turn this on first
             </p>
             <h3 className="mt-1 text-[17px] font-bold tracking-[-0.01em] text-[#111418]">
@@ -193,7 +193,7 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
             <a
               href={editorUrl(shop, "embed")}
               target="_top"
-              className="mt-3.5 inline-block rounded-md bg-emerald-400 px-4 py-2 text-[13px] font-semibold text-black transition-colors hover:bg-emerald-300"
+              className="mt-3.5 inline-block rounded-md bg-[#111418] px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#2a2f35]"
             >
               Open App Embeds →
             </a>
@@ -230,12 +230,12 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
                       {w.blockName}
                     </h4>
                     {pro && (
-                      <span className="shrink-0 rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-amber-300">
+                      <span className="shrink-0 rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-amber-700">
                         Pro
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-[12px] font-medium text-emerald-300/80">
+                  <p className="mt-0.5 text-[12px] font-medium text-emerald-700/80">
                     {w.tagline}
                   </p>
                   <p className="mt-2 text-[12.5px] leading-relaxed text-black/50">{w.detail}</p>

@@ -57,7 +57,7 @@ export function ImportExportBar({ shop }: { shop: string }) {
         review app can read.
       </span>
 
-      {error && <span className="text-xs text-red-400">{error}</span>}
+      {error && <span className="text-xs text-red-600">{error}</span>}
     </div>
   );
 }

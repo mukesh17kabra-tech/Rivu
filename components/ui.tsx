@@ -86,7 +86,7 @@ export function Section({
   const heading = (
     <div className="flex items-start gap-3">
       {step !== undefined && (
-        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400 text-[11px] font-extrabold text-black">
+        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#111418] text-[11px] font-extrabold text-white">
           {step}
         </span>
       )}
@@ -165,8 +165,8 @@ export function Badge({
 }) {
   const tones = {
     neutral: "bg-black/[0.05] text-black/58 ring-black/[0.10]",
-    success: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
-    warning: "bg-amber-400/10 text-amber-300 ring-amber-400/20",
+    success: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+    warning: "bg-amber-50 text-amber-800 ring-amber-600/20",
   };
   return (
     <span

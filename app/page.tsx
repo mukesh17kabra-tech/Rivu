@@ -193,7 +193,7 @@ function LandingPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-white px-6 text-[#1a1d21]">
       <div className="w-full max-w-md text-center">
-        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-emerald-400/80">
+        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-emerald-700/80">
           Shopify App
         </p>
         <h1 className="mb-4 text-3xl font-semibold">Rivu</h1>
@@ -220,11 +220,11 @@ function LandingPage() {
               placeholder="my-store.myshopify.com"
               pattern="[a-zA-Z0-9][a-zA-Z0-9-]*\.myshopify\.com"
               title="Enter your full .myshopify.com domain"
-              className="min-w-0 flex-1 rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418] placeholder:text-black/38 focus:border-emerald-400/60 focus:outline-none"
+              className="min-w-0 flex-1 rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418] placeholder:text-black/38 focus:border-[#111418]/60 focus:outline-none"
             />
             <button
               type="submit"
-              className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-emerald-300"
+              className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2a2f35]"
             >
               Install
             </button>

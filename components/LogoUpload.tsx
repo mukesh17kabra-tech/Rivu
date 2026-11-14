@@ -86,7 +86,7 @@ export function LogoUpload({
           <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
         </label>
         {logoUrl && (
-          <button onClick={handleRemove} className="text-xs text-red-400 hover:underline">
+          <button onClick={handleRemove} className="text-xs text-red-600 hover:underline">
             Remove
           </button>
         )}
@@ -115,7 +115,7 @@ export function LogoUpload({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300 disabled:opacity-60"
+        className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>

@@ -68,7 +68,7 @@ export function ReviewCard({
           <button
             onClick={() => moderate("approve")}
             disabled={busy}
-            className="rounded-md bg-emerald-400 px-3 py-1.5 text-xs font-medium text-black hover:bg-emerald-300 disabled:opacity-60"
+            className="rounded-md bg-[#111418] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
           >
             Approve
           </button>
@@ -122,7 +122,7 @@ export function ReviewCard({
             <button
               onClick={() => moderate("reject")}
               disabled={busy}
-              className="inline-block rounded-md bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-300 hover:bg-red-500/20 disabled:opacity-60"
+              className="inline-block rounded-md bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-500/20 disabled:opacity-60"
             >
               Delete review
             </button>

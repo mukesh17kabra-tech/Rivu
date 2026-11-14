@@ -38,7 +38,7 @@ export function RewardForm({ shop, initial }: { shop: string; initial: RewardSet
             setSettings((s) => ({ ...s, rewardEnabled: e.target.checked }));
             setSaved(false);
           }}
-          className="h-4 w-4 accent-emerald-400"
+          className="h-4 w-4 accent-[#111418]"
         />
         <span className="text-sm text-[#111418]">Give a discount for every review</span>
       </label>
@@ -57,7 +57,7 @@ export function RewardForm({ shop, initial }: { shop: string; initial: RewardSet
                   }}
                   className={`flex-1 rounded-md border px-3 py-2 text-sm transition-colors ${
                     settings.rewardType === type
-                      ? "border-emerald-400 bg-emerald-400/10 text-[#111418]"
+                      ? "border-[#111418] bg-black/[0.04] text-[#111418]"
                       : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                   }`}
                 >
@@ -94,7 +94,7 @@ export function RewardForm({ shop, initial }: { shop: string; initial: RewardSet
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300 disabled:opacity-60"
+        className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>

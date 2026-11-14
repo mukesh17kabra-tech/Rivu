@@ -95,19 +95,19 @@ export function CustomTemplateForm({
 
   if (!allowed) {
     return (
-      <div className="rounded-lg border border-amber-400/25 bg-amber-400/[0.07] p-5">
-        <p className="text-sm font-bold text-amber-200">Build your own layout</p>
-        <p className="mt-1.5 text-[13px] leading-relaxed text-amber-200/75">
+      <div className="rounded-lg border border-amber-600/25 bg-amber-400/[0.07] p-5">
+        <p className="text-sm font-bold text-amber-800">Build your own layout</p>
+        <p className="mt-1.5 text-[13px] leading-relaxed text-amber-800/75">
           On Pro you can write your own HTML for the review section and drop in{" "}
-          <code className="rounded bg-black/[0.05] px-1 text-amber-100">{"{{stars}}"}</code>,{" "}
-          <code className="rounded bg-black/[0.05] px-1 text-amber-100">{"{{review_list}}"}</code>{" "}
+          <code className="rounded bg-black/[0.05] px-1 text-amber-800">{"{{stars}}"}</code>,{" "}
+          <code className="rounded bg-black/[0.05] px-1 text-amber-800">{"{{review_list}}"}</code>{" "}
           and the rest wherever you want them — so the widget matches your theme
           exactly instead of approximately.
         </p>
         <a
           href={`/dashboard/plans?shop=${encodeURIComponent(shop)}`}
           target="_top"
-          className="mt-3 inline-block rounded-md bg-emerald-400 px-3.5 py-1.5 text-xs font-bold text-black transition-colors hover:bg-emerald-300"
+          className="mt-3 inline-block rounded-md bg-[#111418] px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#2a2f35]"
         >
           Upgrade to Pro
         </a>
@@ -125,7 +125,7 @@ export function CustomTemplateForm({
             setEnabled(e.target.checked);
             setSaved(false);
           }}
-          className="h-4 w-4 accent-emerald-400"
+          className="h-4 w-4 accent-[#111418]"
         />
         <span className="text-sm text-[#111418]">
           Use my own layout instead of the built-in one
@@ -144,7 +144,7 @@ export function CustomTemplateForm({
               key={preset.key}
               type="button"
               onClick={() => loadPreset(preset.key)}
-              className="rounded-md border border-black/[0.10] bg-black/[0.05] p-3 text-left transition-colors hover:border-emerald-400/40 hover:bg-emerald-400/[0.06]"
+              className="rounded-md border border-black/[0.10] bg-black/[0.05] p-3 text-left transition-colors hover:border-[#111418]/40 hover:bg-[#111418]/[0.06]"
             >
               <span className="block text-[13px] font-bold text-[#111418]">
                 {preset.label}
@@ -170,7 +170,7 @@ export function CustomTemplateForm({
               setHtml(STARTER_TEMPLATE);
               setSaved(false);
             }}
-            className="text-xs font-medium text-emerald-400 hover:text-emerald-300"
+            className="text-xs font-medium text-emerald-700 hover:text-emerald-800"
           >
             Load blank starter
           </button>
@@ -234,7 +234,7 @@ export function CustomTemplateForm({
               className="flex items-baseline gap-2 rounded px-2 py-1 text-left hover:bg-black/[0.035]"
               title={`Insert {{${v.name}}}`}
             >
-              <code className="shrink-0 text-[11px] text-emerald-300">
+              <code className="shrink-0 text-[11px] text-emerald-700">
                 {`{{${v.name}}}`}
               </code>
               <span className="text-[11px] text-black/45">{v.description}</span>
@@ -246,14 +246,14 @@ export function CustomTemplateForm({
       {/* Warnings are shown before saving, not after — the merchant should
           never discover on their live storefront that half their markup went. */}
       {removed.length > 0 && (
-        <div className="rounded-md border border-amber-400/25 bg-amber-400/[0.07] p-3 text-xs text-amber-200">
+        <div className="rounded-md border border-amber-600/25 bg-amber-400/[0.07] p-3 text-xs text-amber-800">
           <p className="font-semibold">This will be removed when you save:</p>
-          <ul className="mt-1 list-inside list-disc space-y-0.5 text-amber-200/80">
+          <ul className="mt-1 list-inside list-disc space-y-0.5 text-amber-800/80">
             {removed.map((r) => (
               <li key={r}>{r}</li>
             ))}
           </ul>
-          <p className="mt-1.5 text-amber-200/60">
+          <p className="mt-1.5 text-amber-800/60">
             Scripts and event handlers run on your customers&apos; browsers, so
             they can&apos;t be allowed here.
           </p>
@@ -261,9 +261,9 @@ export function CustomTemplateForm({
       )}
 
       {cssRemoved.length > 0 && (
-        <div className="rounded-md border border-amber-400/25 bg-amber-400/[0.07] p-3 text-xs text-amber-200">
+        <div className="rounded-md border border-amber-600/25 bg-amber-400/[0.07] p-3 text-xs text-amber-800">
           <p className="font-semibold">Your CSS will be changed on save:</p>
-          <ul className="mt-1 list-inside list-disc space-y-0.5 text-amber-200/80">
+          <ul className="mt-1 list-inside list-disc space-y-0.5 text-amber-800/80">
             {cssRemoved.map((r) => (
               <li key={r}>{r}</li>
             ))}
@@ -272,7 +272,7 @@ export function CustomTemplateForm({
       )}
 
       {unknown.length > 0 && (
-        <p className="rounded-md border border-amber-400/25 bg-amber-400/[0.07] p-3 text-xs text-amber-200">
+        <p className="rounded-md border border-amber-600/25 bg-amber-400/[0.07] p-3 text-xs text-amber-800">
           Unknown placeholder{unknown.length === 1 ? "" : "s"}:{" "}
           {unknown.map((u) => `{{${u}}}`).join(", ")} — these will show as-is on
           your storefront.
@@ -283,11 +283,11 @@ export function CustomTemplateForm({
         <button
           onClick={handleSave}
           disabled={saving}
-          className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-bold text-black hover:bg-emerald-300 disabled:opacity-60"
+          className="rounded-md bg-[#111418] px-4 py-2 text-sm font-bold text-white hover:bg-[#2a2f35] disabled:opacity-60"
         >
           {saving ? "Saving…" : saved ? "Saved ✓" : "Save layout"}
         </button>
-        {error && <span className="text-xs text-red-300">{error}</span>}
+        {error && <span className="text-xs text-red-600">{error}</span>}
       </div>
     </div>
   );

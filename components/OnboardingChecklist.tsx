@@ -56,7 +56,7 @@ export function OnboardingChecklist({ shop, host }: { shop: string; host?: strin
           <div
             key={step.key}
             className={`flex items-center justify-between rounded-md border p-4 ${
-              done[step.key] ? "border-emerald-400/20 bg-emerald-400/[0.03] opacity-60" : "border-black/[0.10]"
+              done[step.key] ? "border-[#111418]/20 bg-[#111418]/[0.03] opacity-60" : "border-black/[0.10]"
             }`}
           >
             <div>
@@ -73,7 +73,7 @@ export function OnboardingChecklist({ shop, host }: { shop: string; host?: strin
               </a>
               <button
                 onClick={() => markDone(step.key)}
-                className="whitespace-nowrap text-xs text-emerald-400 hover:underline"
+                className="whitespace-nowrap text-xs text-emerald-700 hover:underline"
               >
                 Mark done
               </button>

@@ -101,7 +101,7 @@ export function ImportWizard({ shop }: { shop: string }) {
       </p>
 
       <div className="mt-3.5 flex flex-wrap items-center gap-3">
-        <label className="cursor-pointer rounded-md bg-emerald-400 px-4 py-2 text-xs font-bold text-black hover:bg-emerald-300">
+        <label className="cursor-pointer rounded-md bg-[#111418] px-4 py-2 text-xs font-bold text-white hover:bg-[#2a2f35]">
           {busy && !preview ? "Checking file…" : "Choose CSV file"}
           <input
             type="file"
@@ -117,13 +117,13 @@ export function ImportWizard({ shop }: { shop: string }) {
       </div>
 
       {error && (
-        <p className="mt-3 rounded-md border border-red-400/25 bg-red-400/[0.07] p-3 text-xs text-red-200">
+        <p className="mt-3 rounded-md border border-red-600/25 bg-red-400/[0.07] p-3 text-xs text-red-700">
           {error}
         </p>
       )}
 
       {done !== null && (
-        <p className="mt-3 rounded-md border border-emerald-400/25 bg-emerald-400/[0.07] p-3 text-xs text-emerald-200">
+        <p className="mt-3 rounded-md border border-emerald-600/20 bg-emerald-50 p-3 text-xs text-emerald-700">
           Imported {done} review{done === 1 ? "" : "s"}. Refreshing…
         </p>
       )}
@@ -136,7 +136,7 @@ export function ImportWizard({ shop }: { shop: string }) {
 
           <div className="mt-2.5 flex flex-wrap gap-5 text-[13px]">
             <span className="text-[#111418]">
-              <strong className="text-emerald-300">{preview.willImport}</strong>{" "}
+              <strong className="text-emerald-700">{preview.willImport}</strong>{" "}
               to import
             </span>
             {preview.alreadyPresent > 0 && (
@@ -150,7 +150,7 @@ export function ImportWizard({ shop }: { shop: string }) {
           {/* Warnings are things that will import but won't behave as expected —
               worth reading before, not discovering afterwards. */}
           {preview.warnings.length > 0 && (
-            <ul className="mt-3 space-y-1.5 text-xs text-amber-200/90">
+            <ul className="mt-3 space-y-1.5 text-xs text-amber-800/90">
               {preview.warnings.map((w) => (
                 <li key={w} className="rounded border border-amber-400/20 bg-amber-400/[0.06] p-2.5">
                   {w}
@@ -196,7 +196,7 @@ export function ImportWizard({ shop }: { shop: string }) {
                       <td className="py-1.5 pr-3">{s.customerName}</td>
                       <td className="py-1.5 pr-3">{s.rating}★</td>
                       <td className="py-1.5 pr-3">
-                        {s.date ?? <span className="text-amber-300/70">today</span>}
+                        {s.date ?? <span className="text-amber-700/70">today</span>}
                       </td>
                       <td className="py-1.5 text-black/50">{s.body}</td>
                     </tr>
@@ -211,7 +211,7 @@ export function ImportWizard({ shop }: { shop: string }) {
               type="button"
               onClick={handleConfirm}
               disabled={busy || preview.willImport === 0}
-              className="rounded-md bg-emerald-400 px-4 py-2 text-xs font-bold text-black hover:bg-emerald-300 disabled:opacity-50"
+              className="rounded-md bg-[#111418] px-4 py-2 text-xs font-bold text-white hover:bg-[#2a2f35] disabled:opacity-50"
             >
               {busy
                 ? "Importing…"

@@ -97,13 +97,13 @@ export function ModerationToggle({
             checked={autoApprove}
             disabled={saving}
             onChange={(e) => toggle(e.target.checked)}
-            className="h-4 w-4 accent-emerald-400"
+            className="h-4 w-4 accent-[#111418]"
           />
         </label>
       </div>
 
       {!autoApprove && pendingCount > 0 && (
-        <p className="mt-3 rounded-lg border border-amber-400/25 bg-amber-400/[0.08] px-3 py-2 text-[13px] text-amber-200">
+        <p className="mt-3 rounded-lg border border-amber-600/25 bg-amber-400/[0.08] px-3 py-2 text-[13px] text-amber-800">
           {pendingCount} review{pendingCount === 1 ? "" : "s"} waiting for approval —
           {pendingCount === 1 ? " it isn't" : " they aren't"} visible on your storefront yet.
         </p>
@@ -113,8 +113,8 @@ export function ModerationToggle({
           pending. It was held back before the setting was turned on, and
           nothing on screen said so. */}
       {autoApprove && pendingCount > 0 && (
-        <div className="mt-3 rounded-lg border border-amber-400/25 bg-amber-400/[0.08] px-3 py-2.5">
-          <p className="text-[13px] leading-relaxed text-amber-200">
+        <div className="mt-3 rounded-lg border border-amber-600/25 bg-amber-400/[0.08] px-3 py-2.5">
+          <p className="text-[13px] leading-relaxed text-amber-800">
             {pendingCount === 1
               ? "1 review is still pending"
               : `${pendingCount} reviews are still pending`}{" "}
@@ -136,7 +136,7 @@ export function ModerationToggle({
           </button>
         </div>
       )}
-      {error && <p className="mt-3 text-[13px] text-red-300">{error}</p>}
+      {error && <p className="mt-3 text-[13px] text-red-600">{error}</p>}
     </div>
   );
 }

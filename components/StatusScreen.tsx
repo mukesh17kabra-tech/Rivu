@@ -22,7 +22,7 @@ export function StatusScreen({
   secondaryAction?: { label: string; href: string };
   tone?: "neutral" | "warning";
 }) {
-  const accent = tone === "warning" ? "text-amber-400/90" : "text-emerald-400/80";
+  const accent = tone === "warning" ? "text-amber-400/90" : "text-emerald-700/80";
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-white px-6 text-[#1a1d21]">
@@ -38,7 +38,7 @@ export function StatusScreen({
             {primaryAction && (
               <Link
                 href={primaryAction.href}
-                className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-emerald-300"
+                className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2a2f35]"
               >
                 {primaryAction.label}
               </Link>

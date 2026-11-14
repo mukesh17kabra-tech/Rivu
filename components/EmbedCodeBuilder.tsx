@@ -138,7 +138,7 @@ export function EmbedCodeBuilder({ shop, origin }: { shop: string; origin: strin
               aria-pressed={on}
               className={`rounded-lg border p-3.5 text-left transition-colors ${
                 on
-                  ? "border-emerald-400/50 bg-emerald-400/[0.08]"
+                  ? "border-[#111418]/50 bg-[#111418]/[0.08]"
                   : "border-black/[0.10] bg-black/[0.02] hover:border-black/[0.18]"
               }`}
             >
@@ -165,17 +165,17 @@ export function EmbedCodeBuilder({ shop, origin }: { shop: string; origin: strin
             setText(e.target.value);
             setCopied(false);
           }}
-          className="w-full rounded-lg border border-black/[0.13] bg-black/[0.05] px-3.5 py-2.5 text-[13px] text-[#111418] outline-none focus:border-emerald-400/60"
+          className="w-full rounded-lg border border-black/[0.13] bg-black/[0.05] px-3.5 py-2.5 text-[13px] text-[#111418] outline-none focus:border-[#111418]/60"
           placeholder="Write anything you like"
         />
         {active.key !== "spotlight" && (
           <p className="mt-2 text-[11.5px] leading-relaxed text-black/42">
             Write whatever you want. These three fill themselves in with your real numbers:{" "}
-            <code className="rounded bg-black/[0.055] px-1 py-0.5 text-emerald-300">{"{count}"}</code>{" "}
+            <code className="rounded bg-black/[0.055] px-1 py-0.5 text-emerald-700">{"{count}"}</code>{" "}
             becomes &ldquo;128 reviews&rdquo;,{" "}
-            <code className="rounded bg-black/[0.055] px-1 py-0.5 text-emerald-300">{"{total}"}</code>{" "}
+            <code className="rounded bg-black/[0.055] px-1 py-0.5 text-emerald-700">{"{total}"}</code>{" "}
             becomes &ldquo;128&rdquo;, and{" "}
-            <code className="rounded bg-black/[0.055] px-1 py-0.5 text-emerald-300">
+            <code className="rounded bg-black/[0.055] px-1 py-0.5 text-emerald-700">
               {"{average}"}
             </code>{" "}
             becomes &ldquo;4.9&rdquo;.
@@ -189,7 +189,7 @@ export function EmbedCodeBuilder({ shop, origin }: { shop: string; origin: strin
           <button
             type="button"
             onClick={copy}
-            className="rounded-md bg-emerald-400 px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-colors hover:bg-emerald-300"
+            className="rounded-md bg-[#111418] px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-[#2a2f35]"
           >
             {copied ? "Copied ✓" : "Copy code"}
           </button>

@@ -64,7 +64,7 @@ export default async function QRCodesPage({
             <a
               href={genericQrUrl}
               download="rivu-review-qr.png"
-              className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-bold text-black hover:bg-emerald-300"
+              className="rounded-md bg-[#111418] px-4 py-2 text-sm font-bold text-white hover:bg-[#2a2f35]"
             >
               Download QR
             </a>
@@ -78,20 +78,20 @@ export default async function QRCodesPage({
       >
 
           {needsReauth ? (
-            <div className="rounded-lg border border-amber-400/25 bg-amber-400/[0.08] p-4">
-              <p className="text-sm text-amber-200">
+            <div className="rounded-lg border border-amber-600/25 bg-amber-400/[0.08] p-4">
+              <p className="text-sm text-amber-800">
                 Rivu needs permission to read your products again.
               </p>
               <a
                 href={`/api/auth?${shopQuery(shop, host)}`}
                 target="_top"
-                className="mt-3 inline-block rounded-md bg-emerald-400 px-4 py-2 text-sm font-bold text-black hover:bg-emerald-300"
+                className="mt-3 inline-block rounded-md bg-[#111418] px-4 py-2 text-sm font-bold text-white hover:bg-[#2a2f35]"
               >
                 Reconnect Rivu
               </a>
             </div>
           ) : fetchError ? (
-            <p className="rounded-lg border border-red-400/25 bg-red-400/[0.08] p-4 text-sm text-red-300">
+            <p className="rounded-lg border border-red-600/25 bg-red-400/[0.08] p-4 text-sm text-red-600">
               Couldn&apos;t load products: {fetchError}
             </p>
           ) : (
@@ -119,18 +119,18 @@ export default async function QRCodesPage({
           )}
 
           {hiddenProducts > 0 && (
-            <div className="mt-4 rounded-lg border border-amber-400/25 bg-amber-400/[0.08] p-4">
-              <p className="text-sm text-amber-200">
+            <div className="mt-4 rounded-lg border border-amber-600/25 bg-amber-400/[0.08] p-4">
+              <p className="text-sm text-amber-800">
                 {hiddenProducts} more product{hiddenProducts === 1 ? "" : "s"} not
                 shown — your plan covers per-product codes for {qrLimit}.
               </p>
-              <p className="mt-1 text-xs text-amber-200/70">
+              <p className="mt-1 text-xs text-amber-800/70">
                 The store-wide code above already works for every product, so
                 you only need these for a checkout thank-you page.
               </p>
               <a
                 href={`/dashboard/plans?${shopQuery(shop, host)}`}
-                className="mt-3 inline-block rounded-md bg-emerald-400 px-3.5 py-1.5 text-xs font-bold text-black hover:bg-emerald-300"
+                className="mt-3 inline-block rounded-md bg-[#111418] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#2a2f35]"
               >
                 Upgrade for unlimited
               </a>

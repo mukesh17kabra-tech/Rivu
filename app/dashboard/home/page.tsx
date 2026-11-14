@@ -66,7 +66,7 @@ export default async function DashboardHome({
       {/* Deliberately dark — the one call-to-action on an otherwise empty
           dashboard, so it should carry some weight. */}
       {total === 0 && (
-        <Card className="mb-5 !border-emerald-400/30 !bg-emerald-400/[0.07]">
+        <Card className="mb-5 !border-[#111418]/30 !bg-[#111418]/[0.07]">
           <p className="text-sm font-bold text-[#111418]">
             👋 New here? Add the widget to your storefront
           </p>
@@ -75,7 +75,7 @@ export default async function DashboardHome({
           </p>
           <Link
             href={`/dashboard/installation?${query}`}
-            className="mt-3 inline-block rounded-lg bg-emerald-400 px-4 py-2 text-sm font-bold text-black transition-colors hover:bg-emerald-300"
+            className="mt-3 inline-block rounded-lg bg-[#111418] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#2a2f35]"
           >
             Open the installation guide →
           </Link>
@@ -83,11 +83,11 @@ export default async function DashboardHome({
       )}
 
       {quotaWarning && (
-        <Card className="mb-5 !border-amber-400/25 !bg-amber-400/[0.07]">
-          <p className="text-sm font-bold text-amber-200">{quotaWarning}</p>
+        <Card className="mb-5 !border-amber-600/25 !bg-amber-400/[0.07]">
+          <p className="text-sm font-bold text-amber-800">{quotaWarning}</p>
           <Link
             href={`/dashboard/plans?${query}`}
-            className="mt-2.5 inline-block rounded-md bg-emerald-400 px-3.5 py-1.5 text-xs font-bold text-black transition-colors hover:bg-emerald-300"
+            className="mt-2.5 inline-block rounded-md bg-[#111418] px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#2a2f35]"
           >
             See plans
           </Link>
@@ -181,7 +181,7 @@ function MilestoneBar({ total }: { total: number }) {
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-black/[0.06]">
         <div
-          className="h-full rounded-full bg-emerald-400 transition-all"
+          className="h-full rounded-full bg-[#111418] transition-all"
           style={{ width: `${progress}%` }}
         />
       </div>

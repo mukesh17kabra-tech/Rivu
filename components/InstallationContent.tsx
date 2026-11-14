@@ -27,7 +27,7 @@ export function ManualInstall({ shop }: { shop: string }) {
             into your Liquid instead.
           </p>
         </div>
-        <span className="shrink-0 text-xs font-semibold text-emerald-300 group-open:hidden">
+        <span className="shrink-0 text-xs font-semibold text-emerald-700 group-open:hidden">
           Show →
         </span>
         <span className="hidden shrink-0 text-xs font-semibold text-black/45 group-open:inline">
@@ -56,7 +56,7 @@ export function ManualInstall({ shop }: { shop: string }) {
           <h4 className="mb-2 text-sm font-semibold text-[#111418]">Rating badge on product cards</h4>
           <p className="mb-3 text-[13px] text-black/50">
             Paste inside your product card snippet — usually{" "}
-            <code className="rounded bg-black/[0.05] px-1 py-0.5 text-emerald-300">
+            <code className="rounded bg-black/[0.05] px-1 py-0.5 text-emerald-700">
               card-product.liquid
             </code>
             .
@@ -77,13 +77,13 @@ export function ManualInstall({ shop }: { shop: string }) {
         <div>
           <h4 className="mb-2 text-sm font-semibold text-[#111418]">Store-wide reviews anywhere</h4>
           <p className="mb-3 text-[13px] text-black/50">
-            Reviews from across your store, on any page. Swap <code className="text-emerald-300">layout</code>{" "}
-            for <code className="text-emerald-300">grid</code>,{" "}
-            <code className="text-emerald-300">carousel</code>,{" "}
-            <code className="text-emerald-300">wall</code>,{" "}
-            <code className="text-emerald-300">quotes</code>,{" "}
-            <code className="text-emerald-300">trust</code> or{" "}
-            <code className="text-emerald-300">gallery</code>.
+            Reviews from across your store, on any page. Swap <code className="text-emerald-700">layout</code>{" "}
+            for <code className="text-emerald-700">grid</code>,{" "}
+            <code className="text-emerald-700">carousel</code>,{" "}
+            <code className="text-emerald-700">wall</code>,{" "}
+            <code className="text-emerald-700">quotes</code>,{" "}
+            <code className="text-emerald-700">trust</code> or{" "}
+            <code className="text-emerald-700">gallery</code>.
           </p>
           <pre className="overflow-x-auto rounded-lg bg-black/[0.055] p-4 text-xs leading-relaxed text-black/65">
 {`<div data-rivu-showcase
@@ -102,7 +102,7 @@ export function ManualInstall({ shop }: { shop: string }) {
           <a
             href={`https://${shop}/admin/themes`}
             target="_top"
-            className="text-emerald-300 underline underline-offset-2"
+            className="text-emerald-700 underline underline-offset-2"
           >
             Online Store → Themes
           </a>{" "}

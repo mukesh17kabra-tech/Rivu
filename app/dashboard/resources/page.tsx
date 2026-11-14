@@ -28,7 +28,7 @@ function GuideList({ guides }: { guides: Guide[] }) {
             <a
               href={g.action.href}
               target={g.action.href.startsWith("http") ? "_top" : undefined}
-              className="mt-2 inline-block text-[12px] font-semibold text-emerald-300 hover:text-emerald-200"
+              className="mt-2 inline-block text-[12px] font-semibold text-emerald-700 hover:text-emerald-800"
             >
               {g.action.label} →
             </a>
@@ -203,7 +203,7 @@ export default async function ResourcesPage({
         </div>
       </Card>
 
-      <Card className="border-emerald-400/25 bg-emerald-400/[0.06]">
+      <Card className="border-[#111418]/25 bg-[#111418]/[0.06]">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="text-[16px] font-bold tracking-[-0.01em] text-[#111418]">
@@ -216,7 +216,7 @@ export default async function ResourcesPage({
               you rather than talk you through it.
             </p>
           </div>
-          <span className="shrink-0 rounded-md border border-emerald-400/40 px-4 py-2 text-[13px] font-semibold text-emerald-300">
+          <span className="shrink-0 rounded-md border border-black/[0.18] px-4 py-2 text-[13px] font-semibold text-black/65">
             Chat is bottom-right ↘
           </span>
         </div>

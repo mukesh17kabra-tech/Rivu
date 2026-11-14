@@ -262,7 +262,7 @@ export function DesignForm({
             onClick={() => setTab(i)}
             className={`-mb-px rounded-t-md border-b-2 px-3 py-2 text-[12px] font-medium transition-colors ${
               tab === i
-                ? "border-emerald-400 text-[#111418]"
+                ? "border-[#111418] text-[#111418]"
                 : "border-transparent text-black/48 hover:text-black/65"
             }`}
           >
@@ -297,7 +297,7 @@ export function DesignForm({
                     !allowed
                       ? "cursor-not-allowed border-black/[0.06] text-black/35"
                       : selected
-                        ? "border-emerald-400 bg-emerald-400/10 text-[#111418]"
+                        ? "border-[#111418] bg-black/[0.04] text-[#111418]"
                         : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                   }`}
                 >
@@ -305,7 +305,7 @@ export function DesignForm({
                     {!allowed && "🔒"}
                     {option.label}
                     {option.minPlan !== "free" && (
-                      <span className="ml-auto text-[9px] font-bold uppercase tracking-wide text-amber-300/80">
+                      <span className="ml-auto text-[9px] font-bold uppercase tracking-wide text-amber-700/80">
                         Pro
                       </span>
                     )}
@@ -338,7 +338,7 @@ export function DesignForm({
                     !allowed
                       ? "cursor-not-allowed border-black/[0.06] text-black/35"
                       : selected
-                        ? "border-emerald-400 bg-emerald-400/10 text-[#111418]"
+                        ? "border-[#111418] bg-black/[0.04] text-[#111418]"
                         : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                   }`}
                 >
@@ -346,7 +346,7 @@ export function DesignForm({
                     {!allowed && "🔒"}
                     {option.label}
                     {option.minPlan !== "free" && (
-                      <span className="ml-auto text-[9px] font-bold uppercase tracking-wide text-amber-300/80">
+                      <span className="ml-auto text-[9px] font-bold uppercase tracking-wide text-amber-700/80">
                         Pro
                       </span>
                     )}
@@ -491,7 +491,7 @@ export function DesignForm({
                 onClick={() => update("headingBold", !settings.headingBold)}
                 className={`w-full rounded-md border px-2 py-1.5 text-xs transition-colors ${
                   settings.headingBold
-                    ? "border-emerald-400 bg-emerald-400/10 text-[#111418] font-bold"
+                    ? "border-[#111418] bg-black/[0.04] text-[#111418] font-bold"
                     : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                 }`}
               >
@@ -512,7 +512,7 @@ export function DesignForm({
             </div>
           </div>
           {isFree && (
-            <p className="mb-3 text-xs text-yellow-300/70">
+            <p className="mb-3 text-xs text-amber-700/70">
               Heading size/weight/position customization needs Pro.
             </p>
           )}
@@ -551,7 +551,7 @@ export function DesignForm({
               type="checkbox"
               checked={settings.showBorder}
               onChange={(e) => update("showBorder", e.target.checked)}
-              className="h-4 w-4 accent-emerald-400"
+              className="h-4 w-4 accent-[#111418]"
             />
             <span className="text-sm text-black/72">Show border around widget</span>
           </label>
@@ -623,7 +623,7 @@ export function DesignForm({
                   onClick={() => update("reviewTextAlign", align)}
                   className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
                     settings.reviewTextAlign === align
-                      ? "border-emerald-400 bg-emerald-400/10 text-[#111418]"
+                      ? "border-[#111418] bg-black/[0.04] text-[#111418]"
                       : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                   }`}
                 >
@@ -634,7 +634,7 @@ export function DesignForm({
           </div>
         </div>
         {isFree && (
-          <p className="mt-3 text-xs text-yellow-300/70">
+          <p className="mt-3 text-xs text-amber-700/70">
             Review text size/position customization needs Pro.
           </p>
         )}
@@ -679,7 +679,7 @@ export function DesignForm({
                 onClick={() => update("formAlign", align)}
                 className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
                   settings.formAlign === align
-                    ? "border-emerald-400 bg-emerald-400/10 text-[#111418]"
+                    ? "border-[#111418] bg-black/[0.04] text-[#111418]"
                     : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                 }`}
               >
@@ -702,7 +702,7 @@ export function DesignForm({
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-medium text-black/65">Review suggestions</p>
           {aiSuggestionsAllowed(plan) ? (
-            <span className="rounded-full bg-emerald-400/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-300 ring-1 ring-emerald-400/20">
+            <span className="rounded-full bg-[#111418] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white ring-1 ring-[#111418]">
               ✨ AI-written
             </span>
           ) : (
@@ -715,11 +715,11 @@ export function DesignForm({
         {/* The feature is never simply hidden on Free — the merchant can see
             what they already have and exactly what upgrading changes. */}
         {!aiSuggestionsAllowed(plan) && (
-          <div className="mb-4 rounded-lg border border-amber-400/25 bg-amber-400/[0.07] p-3.5">
-            <p className="text-[13px] font-semibold text-amber-200">
+          <div className="mb-4 rounded-lg border border-amber-600/25 bg-amber-400/[0.07] p-3.5">
+            <p className="text-[13px] font-semibold text-amber-800">
               Your shoppers see ready-made suggestions
             </p>
-            <p className="mt-1 text-xs leading-relaxed text-amber-200/70">
+            <p className="mt-1 text-xs leading-relaxed text-amber-800/70">
               About five hand-written lines per star rating. Upgrade to Pro for
               AI-written suggestions: around 120 per rating, tailored to each
               product, and each line offered to only one shopper — so no two
@@ -728,7 +728,7 @@ export function DesignForm({
             <a
               href={`/dashboard/plans?shop=${encodeURIComponent(shop)}`}
               target="_top"
-              className="mt-3 inline-block rounded-md bg-emerald-400 px-3.5 py-1.5 text-xs font-bold text-black transition-colors hover:bg-emerald-300"
+              className="mt-3 inline-block rounded-md bg-[#111418] px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#2a2f35]"
             >
               Upgrade to Pro
             </a>
@@ -740,7 +740,7 @@ export function DesignForm({
               type="checkbox"
               checked={settings.showSuggestionsOnWebsite}
               onChange={(e) => update("showSuggestionsOnWebsite", e.target.checked)}
-              className="h-4 w-4 accent-emerald-400"
+              className="h-4 w-4 accent-[#111418]"
             />
             <span className="text-sm text-black/72">On website widget</span>
           </label>
@@ -749,7 +749,7 @@ export function DesignForm({
               type="checkbox"
               checked={settings.showSuggestionsOnQr}
               onChange={(e) => update("showSuggestionsOnQr", e.target.checked)}
-              className="h-4 w-4 accent-emerald-400"
+              className="h-4 w-4 accent-[#111418]"
             />
             <span className="text-sm text-black/72">On QR-scan page</span>
           </label>
@@ -760,7 +760,7 @@ export function DesignForm({
             checked={settings.letCustomerPickLanguage}
             disabled={isFree}
             onChange={(e) => update("letCustomerPickLanguage", e.target.checked)}
-            className="h-4 w-4 accent-emerald-400 disabled:opacity-40"
+            className="h-4 w-4 accent-[#111418] disabled:opacity-40"
           />
           <span className={`text-sm ${isFree ? "text-black/38" : "text-black/72"}`}>
             {isFree ? "🔒 " : ""}Let customers choose their own language (shows a dropdown on the
@@ -768,7 +768,7 @@ export function DesignForm({
           </span>
         </label>
         {isFree && (
-          <p className="mb-3 -mt-2 text-xs text-yellow-300/70">
+          <p className="mb-3 -mt-2 text-xs text-amber-700/70">
             Also needs Pro — Free plan is English-only.
           </p>
         )}
@@ -785,7 +785,7 @@ export function DesignForm({
                 key={lang.code}
                 className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1.5 text-xs transition-colors ${
                   checked
-                    ? "border-emerald-400 bg-emerald-400/10 text-[#111418]"
+                    ? "border-[#111418] bg-black/[0.04] text-[#111418]"
                     : disabled
                     ? "cursor-not-allowed border-black/[0.06] text-black/35"
                     : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
@@ -805,7 +805,7 @@ export function DesignForm({
                       );
                     }
                   }}
-                  className="h-3 w-3 accent-emerald-400"
+                  className="h-3 w-3 accent-[#111418]"
                 />
                 {lang.label}
               </label>
@@ -851,7 +851,7 @@ export function DesignForm({
                 disabled={locked}
                 className={`group flex flex-col overflow-hidden rounded-lg border transition-all ${
                   locked ? "cursor-not-allowed border-black/[0.06] opacity-40"
-                  : isSelected ? "border-emerald-400 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]"
+                  : isSelected ? "border-[#111418] shadow-[0_0_0_2px_rgba(17,20,24,0.25)]"
                   : "border-black/[0.10] hover:border-black/[0.25]"
                 }`}
               >
@@ -1053,7 +1053,7 @@ export function DesignForm({
                 <div className="flex gap-1">
                   {(["left","center","right"] as const).map((pos) => (
                     <button key={pos} onClick={() => update("summaryPosition", pos)}
-                      className={`flex-1 rounded py-1.5 text-xs capitalize transition-colors ${settings.summaryPosition === pos ? "bg-emerald-400/20 text-emerald-300 border border-emerald-400/40" : "border border-black/[0.10] text-black/45 hover:border-black/[0.25]"}`}>
+                      className={`flex-1 rounded py-1.5 text-xs capitalize transition-colors ${settings.summaryPosition === pos ? "bg-[#111418] text-white border border-[#111418]/40" : "border border-black/[0.10] text-black/45 hover:border-black/[0.25]"}`}>
                       {pos}
                     </button>
                   ))}
@@ -1163,7 +1163,7 @@ export function DesignForm({
                   locked
                     ? "cursor-not-allowed border-black/[0.06] opacity-40"
                     : isSelected
-                    ? "border-emerald-400 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]"
+                    ? "border-[#111418] shadow-[0_0_0_2px_rgba(17,20,24,0.25)]"
                     : "border-black/[0.10] hover:border-black/[0.25]"
                 }`}
               >
@@ -1258,15 +1258,15 @@ export function DesignForm({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-300 disabled:opacity-60"
+        className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>
       {saveError && (
-        <p className="mt-2 text-xs text-red-400">{saveError}</p>
+        <p className="mt-2 text-xs text-red-600">{saveError}</p>
       )}
       {lockedMsg.length > 0 && (
-        <p className="mt-2 text-xs text-yellow-300/80">
+        <p className="mt-2 text-xs text-amber-700/80">
           Some choices need a higher plan and were kept at their default: {lockedMsg.join(", ")}.{" "}
           <a href={`/dashboard/plans?shop=${shop}`} className="underline">
             View plans
@@ -1350,7 +1350,7 @@ function GradientBackgroundField({
           <button
             onClick={() => onGradientChange(null)}
             className={`rounded px-1.5 py-0.5 text-[10px] ${
-              !isGradient ? "bg-emerald-400/20 text-emerald-300" : "text-black/45"
+              !isGradient ? "bg-[#111418] text-white" : "text-black/45"
             }`}
           >
             Solid
@@ -1358,7 +1358,7 @@ function GradientBackgroundField({
           <button
             onClick={() => onGradientChange(buildGradient(colorA, colorB))}
             className={`rounded px-1.5 py-0.5 text-[10px] ${
-              isGradient ? "bg-emerald-400/20 text-emerald-300" : "text-black/45"
+              isGradient ? "bg-[#111418] text-white" : "text-black/45"
             }`}
           >
             Gradient
@@ -1481,7 +1481,7 @@ function SimplePanel({
               title={theme.description}
               className={`rounded-md border p-3 text-left transition-colors ${
                 active === theme.key
-                  ? "border-emerald-400 bg-emerald-400/10"
+                  ? "border-[#111418] bg-black/[0.04]"
                   : "border-black/[0.10] bg-black/[0.02] hover:border-black/[0.22]"
               }`}
             >
@@ -1527,7 +1527,7 @@ function SimplePanel({
                 title={allowed ? option.description : "Available on Pro"}
                 className={`rounded-md border px-2 py-2 text-left transition-colors ${
                   selected
-                    ? "border-emerald-400 bg-emerald-400/10"
+                    ? "border-[#111418] bg-black/[0.04]"
                     : "border-black/[0.10] bg-black/[0.02] hover:border-black/[0.22]"
                 } ${allowed ? "" : "cursor-not-allowed opacity-40"}`}
               >
@@ -1536,7 +1536,7 @@ function SimplePanel({
                     {option.label}
                   </span>
                   {!allowed && (
-                    <span className="text-[9px] font-bold text-yellow-300/80">
+                    <span className="text-[9px] font-bold text-amber-700/80">
                       PRO
                     </span>
                   )}

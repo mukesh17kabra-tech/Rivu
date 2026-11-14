@@ -100,7 +100,7 @@ export function Sidebar({
   return (
     <aside className="w-full shrink-0 border-b border-black/[0.09] bg-[#0E1013] md:sticky md:top-0 md:h-screen md:w-[240px] md:border-b-0 md:border-r">
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-400 text-sm font-extrabold text-black">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#111418] text-sm font-extrabold text-white">
           R
         </span>
         <div className="min-w-0">
@@ -133,7 +133,7 @@ export function Sidebar({
                           : "font-medium text-black/55 hover:bg-black/[0.035] hover:text-[#111418]"
                       }`}
                     >
-                      <span className={isActive ? "text-emerald-400" : "text-black/42"}>
+                      <span className={isActive ? "text-[#111418]" : "text-black/42"}>
                         {item.icon}
                       </span>
                       {item.label}

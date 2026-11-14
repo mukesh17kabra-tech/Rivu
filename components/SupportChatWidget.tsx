@@ -145,7 +145,7 @@ export function SupportChatWidget({ shop }: { shop: string }) {
                   className={`max-w-[85%] rounded-xl p-2.5 text-xs ${
                     m.fromDeveloper
                       ? "bg-black/[0.06] text-black/80"
-                      : "ml-auto bg-emerald-400/20 text-emerald-100"
+                      : "ml-auto bg-[#111418] text-white"
                   }`}
                 >
                   {m.message && m.message !== "📷 Image" && (
@@ -169,7 +169,7 @@ export function SupportChatWidget({ shop }: { shop: string }) {
               <img src={imageDataUrl} alt="preview" className="h-10 w-10 rounded object-cover" />
               <button
                 onClick={() => setImageDataUrl(null)}
-                className="text-xs text-red-400 hover:underline"
+                className="text-xs text-red-600 hover:underline"
               >
                 Remove
               </button>
@@ -197,7 +197,7 @@ export function SupportChatWidget({ shop }: { shop: string }) {
             <button
               onClick={send}
               disabled={sending || (!text.trim() && !imageDataUrl)}
-              className="rounded-lg bg-emerald-400 px-3 py-1.5 text-xs font-semibold text-black disabled:opacity-50"
+              className="rounded-lg bg-[#111418] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
             >
               {sending ? "…" : "Send"}
             </button>
@@ -209,13 +209,13 @@ export function SupportChatWidget({ shop }: { shop: string }) {
       <div className="relative" style={{ display: "flex", justifyContent: "flex-end" }}>
         <button
           onClick={() => { setOpen((o) => !o); setUnreadCount(0); }}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-400 text-xl text-black shadow-lg hover:bg-emerald-300"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-[#111418] text-xl text-white shadow-lg hover:bg-[#2a2f35]"
         >
           💬
         </button>
         {unreadCount > 0 && !open && (
           <span
-            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-[#111418]"
+            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
           >
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>

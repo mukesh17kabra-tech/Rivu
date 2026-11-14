@@ -47,7 +47,7 @@ export function FixProductLinks({ shop, missing }: { shop: string; missing: numb
   }
 
   return (
-    <div className="mb-6 rounded-lg border border-amber-400/25 bg-amber-400/[0.06] p-4">
+    <div className="mb-6 rounded-lg border border-amber-600/25 bg-amber-400/[0.06] p-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
           <p className="text-[13.5px] font-bold text-[#111418]">
@@ -83,7 +83,7 @@ export function FixProductLinks({ shop, missing }: { shop: string; missing: numb
           )}
 
           {state === "error" && (
-            <p className="mt-2 text-[12.5px] text-red-300">
+            <p className="mt-2 text-[12.5px] text-red-600">
               That didn&apos;t work. Please try again in a moment.
             </p>
           )}
