@@ -62,7 +62,10 @@
     var color = data.starColor || '#f5b400';
     var tc = data.textColor || '#555';
     var size = starSize || data.ratingBadgeStarSize || 16;
-    var template = data.ratingBadgeTemplate || '{rating}';
+    // Bare stars with nothing beside them read as decoration, not as a
+    // rating. This fallback only applies when the summary response carries no
+    // template at all; the shop's own setting always wins.
+    var template = data.ratingBadgeTemplate || '{rating} {average} · {count}';
 
     // Sentence case, not Title Case. The old version capitalised every word,
     // turning "rating for this product" into "Rating For This Product", which

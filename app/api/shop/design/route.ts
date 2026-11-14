@@ -77,6 +77,8 @@ function parseBody(body: Record<string, unknown>) {
     headingBold:              bool("headingBold", true),
     headingAlign:             oneOf("headingAlign", [...ALIGNMENTS], "left"),
     topSpacing:               num("topSpacing", 24, 0, 120),
+    // Negative on purpose — see the schema comment on bottomSpacing.
+    bottomSpacing:            num("bottomSpacing", 0, -80, 120),
     showBorder:               bool("showBorder", false),
     borderColor:              color("borderColor", "#e0e0e0"),
     borderWidth:              num("borderWidth", 1, 1, 6),

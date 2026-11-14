@@ -37,6 +37,7 @@ export const FREE_PLAN_DESIGN_DEFAULTS = {
   headingBold:             true,
   headingAlign:            "center",
   topSpacing:              24,
+  bottomSpacing:           0,
   showBorder:              false,
   borderColor:             "#e0e0e0",
   borderWidth:             1,

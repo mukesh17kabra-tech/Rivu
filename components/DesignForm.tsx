@@ -38,6 +38,7 @@ export type DesignSettings = {
   headingBold: boolean;
   headingAlign: "left" | "center" | "right";
   topSpacing: number;
+  bottomSpacing: number;
   showBorder: boolean;
   borderColor: string;
   borderWidth: number;
@@ -492,6 +493,24 @@ export function DesignForm({
             onChange={(e) => update("topSpacing", Number(e.target.value))}
             className="w-full"
           />
+          <label className="mb-1 block text-xs text-white/50">
+            Bottom spacing: {settings.bottomSpacing}px
+          </label>
+          <input
+            type="range"
+            min={-80}
+            max={120}
+            step={4}
+            value={settings.bottomSpacing}
+            onChange={(e) => update("bottomSpacing", Number(e.target.value))}
+            className="w-full"
+          />
+          <p className="mb-1 text-xs text-white/40">
+            Too much empty space under the reviews is usually your theme
+            section&apos;s own padding, which the app cannot see. Drag this
+            below 0 to pull whatever follows the reviews up into that padding
+            and close the gap.
+          </p>
           <label className="mt-3 flex items-center gap-2 border-t border-white/10 pt-3">
             <input
               type="checkbox"

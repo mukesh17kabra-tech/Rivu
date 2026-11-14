@@ -61,6 +61,11 @@ model Shop {
   headingBold     Boolean @default(false)
   headingAlign    String  @default("center") // "left" | "center" | "right" — independent from the review-card text alignment. Centred by default: left-aligned reads as broken inside the centred widget column, especially before any reviews exist.
   topSpacing      Int     @default(24) // px — space above the widget, since themes often butt it right up against other content
+  // px — space below the widget. Negative is allowed and is the point of the
+  // setting: the gap under the widget is usually the theme section's own
+  // bottom padding, which the app cannot see or change, so the only lever is
+  // to pull the widget's bottom edge up into it.
+  bottomSpacing   Int     @default(0)
   showBorder      Boolean @default(true) // subtle border around the whole widget — helps it stand out against a plain white theme background
   borderColor     String  @default("#e0e0e0")
   borderWidth     Int     @default(1) // px
@@ -81,7 +86,13 @@ model Shop {
   // Customizable text template for the compact "Rivu Rating Badge" block
   // (used on product cards / near the title) — {rating} is replaced with
   // the actual star icons for that product's average rating.
-  ratingBadgeTemplate String @default("{rating}")
+  //
+  // The default used to be "{rating}" alone, which rendered five bare stars
+  // with nothing beside them: on a product page that reads as decoration
+  // rather than a rating, and it hides the two numbers shoppers actually
+  // look for. Merchants can still cut it back to "{rating}" in
+  // Widget settings → Rating Badge.
+  ratingBadgeTemplate String @default("{rating} {average} · {count}")
   ratingBadgeStarSize Int    @default(16) // px — controls how big the stars appear in the rating badge block on product pages and collection cards
 
   // Which summary+header layout to use for the review widget:

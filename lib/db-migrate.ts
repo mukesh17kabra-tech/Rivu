@@ -19,6 +19,7 @@ const MIGRATIONS = [
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "widgetMaxWidth" INTEGER NOT NULL DEFAULT 900`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "widgetTitle" TEXT NOT NULL DEFAULT 'Customer Reviews'`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "topSpacing" INTEGER NOT NULL DEFAULT 24`,
+  `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "bottomSpacing" INTEGER NOT NULL DEFAULT 0`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "showSuggestionsOnWebsite" BOOLEAN NOT NULL DEFAULT true`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "showSuggestionsOnQr" BOOLEAN NOT NULL DEFAULT false`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "suggestionLanguage" TEXT NOT NULL DEFAULT 'en'`,
@@ -56,7 +57,18 @@ const MIGRATIONS = [
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "formTextColor" TEXT NOT NULL DEFAULT '#1a1a2e'`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "formCloseColor" TEXT NOT NULL DEFAULT '#999999'`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "ratingBadgeStarSize" INTEGER NOT NULL DEFAULT 16`,
-  `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "ratingBadgeTemplate" TEXT NOT NULL DEFAULT '{rating}'`,
+  `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "ratingBadgeTemplate" TEXT NOT NULL DEFAULT '{rating} {average} · {count}'`,
+  // The column shipped with '{rating}' as its default, so every shop that
+  // never opened Widget settings → Rating Badge shows five bare stars and no
+  // numbers. ADD COLUMN IF NOT EXISTS does not revisit existing rows, so the
+  // new default alone would only reach shops installing from now on.
+  //
+  // Scoped to the exact old default string: a merchant who typed their own
+  // wording is left alone. One who deliberately chose bare stars gets the
+  // numbers back once and can remove them again — the alternative is leaving
+  // every existing shop on the version they complained about.
+  `ALTER TABLE "Shop" ALTER COLUMN "ratingBadgeTemplate" SET DEFAULT '{rating} {average} · {count}'`,
+  `UPDATE "Shop" SET "ratingBadgeTemplate" = '{rating} {average} · {count}' WHERE "ratingBadgeTemplate" = '{rating}'`,
   `ALTER TABLE "Shop" ADD COLUMN IF NOT EXISTS "splitSummary" BOOLEAN NOT NULL DEFAULT false`,
   `ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "reviewTitle" TEXT`,
   // Half-star ratings. Widening Int -> double precision preserves every

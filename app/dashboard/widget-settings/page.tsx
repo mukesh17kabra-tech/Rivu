@@ -64,6 +64,7 @@ export default async function WidgetSettingsPage({
               headingBold: shopRecord.headingBold,
               headingAlign: shopRecord.headingAlign as "left" | "center" | "right",
               topSpacing: shopRecord.topSpacing,
+              bottomSpacing: shopRecord.bottomSpacing,
               showBorder: shopRecord.showBorder,
               borderColor: shopRecord.borderColor,
               borderWidth: shopRecord.borderWidth,

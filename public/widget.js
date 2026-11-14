@@ -297,7 +297,7 @@
       reviewTextSize:14, reviewTextAlign:"left", formAlign:"center",
       formMaxWidth:540, widgetMaxWidth:900, widgetTitle:"CUSTOMER REVIEWS",
       headingFontSize:14, headingBold:true, headingAlign:"center",
-      topSpacing:24, showBorder:false, borderColor:"#e0e0e0", borderWidth:1, borderStyle:"solid",
+      topSpacing:24, bottomSpacing:0, showBorder:false, borderColor:"#e0e0e0", borderWidth:1, borderStyle:"solid",
       backgroundGradient:null, primaryGradient:null,
       letCustomerPickLanguage:false, showSuggestionsOnWebsite:true,
       formTemplate:"basic",
@@ -1129,7 +1129,7 @@
 </div>` : "";
 
       const poweredBy = plan === "free"
-        ? `<p style="margin-top:20px;font-size:13px;font-weight:700;color:#888;text-align:center;letter-spacing:.01em;">Powered by <a href="https://rivu-one.vercel.app" target="_blank" rel="noopener" style="color:#555;text-decoration:none;font-weight:800;">Rivu</a></p>`
+        ? `<p style="margin:20px 0 0;font-size:13px;font-weight:700;color:#888;text-align:center;letter-spacing:.01em;">&#10022; AI powered &middot; Powered by <a href="https://rivu-one.vercel.app" target="_blank" rel="noopener" style="color:#555;text-decoration:none;font-weight:800;">Rivu</a></p>`
         : "";
 
       // Carousel: fixed card width + prev/next arrow buttons
@@ -1399,7 +1399,7 @@
       '<div class="rv-main-content">' + buildMain() + '</div>';
 
     el.innerHTML = `
-<div class="rv-root" style="font-family:${design.fontFamily};max-width:1440px;width:100%;margin-top:${design.topSpacing}px;margin-left:auto;margin-right:auto;color:${design.textColor};${borderStr}"><div style="max-width:${design.widgetMaxWidth}px;width:100%;margin:0 auto;">
+<div class="rv-root" style="font-family:${design.fontFamily};max-width:1440px;width:100%;margin-top:${design.topSpacing}px;margin-bottom:${Number(design.bottomSpacing) || 0}px;margin-left:auto;margin-right:auto;color:${design.textColor};${borderStr}"><div style="max-width:${design.widgetMaxWidth}px;width:100%;margin:0 auto;">
   ${innerBody}
 </div></div>
 

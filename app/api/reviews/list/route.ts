@@ -205,6 +205,7 @@ export async function GET(req: NextRequest) {
           headingBold:           safe(s.headingBold as boolean,           true),
           headingAlign:          safe(s.headingAlign as string,           "left"),
           topSpacing:            safe(s.topSpacing as number,             24),
+          bottomSpacing:         safe(s.bottomSpacing as number,          0),
           showBorder:            safe(s.showBorder as boolean,            false),
           borderColor:           safe(s.borderColor as string,            "#e0e0e0"),
           borderWidth:           safe(s.borderWidth as number,            1),
