@@ -21,7 +21,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
   return (
     // The sidebar and the scrolling content sit side by side, so navigation
     // stays put while a long settings page scrolls.
-    <div className="flex min-h-screen flex-col bg-[#0B0D0F] text-[#E7E9EA] md:flex-row">
+    <div className="flex min-h-screen flex-col bg-white text-[#1a1d21] md:flex-row">
       {shop && <Sidebar shop={shop} host={host} plan={plan} />}
 
       <main className="min-w-0 flex-1">

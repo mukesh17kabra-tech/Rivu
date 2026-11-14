@@ -77,11 +77,11 @@ export function ModerationToggle({
   }
 
   return (
-    <div className="mb-5 rounded-xl border border-white/[0.08] bg-white/[0.025] p-5">
+    <div className="mb-5 rounded-xl border border-black/[0.09] bg-black/[0.025] p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[15px] font-bold text-white">Publishing</p>
-          <p className="mt-1 text-[13px] leading-relaxed text-white/45">
+          <p className="text-[15px] font-bold text-[#111418]">Publishing</p>
+          <p className="mt-1 text-[13px] leading-relaxed text-black/48">
             {autoApprove
               ? "New reviews appear on your storefront straight away."
               : "New reviews stay hidden until you approve them here."}
@@ -89,7 +89,7 @@ export function ModerationToggle({
         </div>
 
         <label className="flex cursor-pointer items-center gap-3">
-          <span className="text-[13px] font-medium text-white/70">
+          <span className="text-[13px] font-medium text-black/65">
             Publish automatically
           </span>
           <input

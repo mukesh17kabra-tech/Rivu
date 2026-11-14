@@ -24,7 +24,7 @@ export default function AppError({
   }, [error]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#0B0D0F] px-6 text-[#E7E9EA]">
+    <main className="flex min-h-screen items-center justify-center bg-white px-6 text-[#1a1d21]">
       <div className="w-full max-w-md text-center">
         <p className="mb-2 text-xs uppercase tracking-[0.2em] text-amber-400/90">
           Rivu
@@ -32,7 +32,7 @@ export default function AppError({
         <h1 className="mb-3 text-2xl font-semibold tracking-tight">
           Something went wrong on our side
         </h1>
-        <p className="text-sm leading-relaxed text-white/60">
+        <p className="text-sm leading-relaxed text-black/58">
           Your reviews and settings are safe. This is usually a temporary
           hiccup — retrying normally clears it.
         </p>
@@ -47,14 +47,14 @@ export default function AppError({
           </button>
           <Link
             href="/"
-            className="rounded-md border border-white/15 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:border-white/30 hover:text-white"
+            className="rounded-md border border-black/[0.14] px-4 py-2 text-sm font-medium text-black/72 transition-colors hover:border-black/[0.25] hover:text-[#111418]"
           >
             Back to dashboard
           </Link>
         </div>
 
         {error.digest && (
-          <p className="mt-6 font-mono text-xs text-white/25">
+          <p className="mt-6 font-mono text-xs text-black/35">
             Reference: {error.digest}
           </p>
         )}

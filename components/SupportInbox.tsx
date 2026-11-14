@@ -93,33 +93,33 @@ export function SupportInbox({ apiKey, initialShop }: { apiKey: string; initialS
   }
 
   return (
-    <main className="flex min-h-screen bg-[#0B0D0F] text-[#E7E9EA] font-sans">
+    <main className="flex min-h-screen bg-white text-[#1a1d21] font-sans">
       {/* Shop list */}
-      <div className="w-72 flex-shrink-0 border-r border-white/10 overflow-y-auto">
-        <div className="border-b border-white/10 p-4">
+      <div className="w-72 flex-shrink-0 border-r border-black/[0.10] overflow-y-auto">
+        <div className="border-b border-black/[0.10] p-4">
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-400/80">Rivu</p>
           <h1 className="mt-1 text-lg font-semibold">Support Inbox</h1>
         </div>
         {shops.length === 0 ? (
-          <p className="p-4 text-sm text-white/40">No messages yet.</p>
+          <p className="p-4 text-sm text-black/45">No messages yet.</p>
         ) : (
           shops.map((s) => (
             <button
               key={s.shop}
               onClick={() => openShop(s.shop)}
-              className={`block w-full border-b border-white/5 p-4 text-left transition-colors ${
-                selectedShop === s.shop ? "bg-white/[0.05]" : "hover:bg-white/[0.02]"
+              className={`block w-full border-b border-black/[0.06] p-4 text-left transition-colors ${
+                selectedShop === s.shop ? "bg-black/[0.04]" : "hover:bg-black/[0.02]"
               }`}
             >
               <div className="flex items-center justify-between">
-                <p className="truncate text-sm font-medium text-white">{s.shop}</p>
+                <p className="truncate text-sm font-medium text-[#111418]">{s.shop}</p>
                 {s.unreadCount > 0 && (
                   <span className="ml-2 flex-shrink-0 rounded-full bg-emerald-400 px-1.5 py-0.5 text-[10px] font-bold text-black">
                     {s.unreadCount}
                   </span>
                 )}
               </div>
-              <p className="mt-1 truncate text-xs text-white/40">
+              <p className="mt-1 truncate text-xs text-black/45">
                 {s.lastFromDeveloper ? "You: " : ""}
                 {s.lastMessage}
               </p>
@@ -131,17 +131,17 @@ export function SupportInbox({ apiKey, initialShop }: { apiKey: string; initialS
       {/* Conversation */}
       <div className="flex flex-1 flex-col">
         {!selectedShop ? (
-          <div className="flex flex-1 items-center justify-center text-sm text-white/40">
+          <div className="flex flex-1 items-center justify-center text-sm text-black/45">
             Select a shop to view the conversation.
           </div>
         ) : (
           <>
-            <div className="border-b border-white/10 p-4">
-              <p className="text-sm font-medium text-white">{selectedShop}</p>
+            <div className="border-b border-black/[0.10] p-4">
+              <p className="text-sm font-medium text-[#111418]">{selectedShop}</p>
             </div>
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
               {messages.length === 0 ? (
-                <p className="text-sm text-white/40">No messages yet.</p>
+                <p className="text-sm text-black/45">No messages yet.</p>
               ) : (
                 messages.map((m) => (
                   <div
@@ -149,7 +149,7 @@ export function SupportInbox({ apiKey, initialShop }: { apiKey: string; initialS
                     className={`max-w-md rounded-xl p-3 text-sm ${
                       m.fromDeveloper
                         ? "ml-auto bg-emerald-400/20 text-emerald-100"
-                        : "bg-white/[0.05] text-white/90"
+                        : "bg-black/[0.04] text-black/80"
                     }`}
                   >
                     {m.message && m.message !== "📷 Image" && <p>{m.message}</p>}
@@ -166,7 +166,7 @@ export function SupportInbox({ apiKey, initialShop }: { apiKey: string; initialS
             </div>
 
             {imageDataUrl && (
-              <div className="flex items-center gap-2 border-t border-white/10 px-4 pt-2">
+              <div className="flex items-center gap-2 border-t border-black/[0.10] px-4 pt-2">
                 <img src={imageDataUrl} alt="preview" className="h-12 w-12 rounded object-cover" />
                 <button
                   onClick={() => setImageDataUrl(null)}
@@ -177,8 +177,8 @@ export function SupportInbox({ apiKey, initialShop }: { apiKey: string; initialS
               </div>
             )}
 
-            <div className="flex gap-2 border-t border-white/10 p-4">
-              <label className="cursor-pointer text-white/40 hover:text-white text-xl self-center">
+            <div className="flex gap-2 border-t border-black/[0.10] p-4">
+              <label className="cursor-pointer text-black/45 hover:text-[#111418] text-xl self-center">
                 📎
                 <input type="file" accept="image/*" onChange={handleImage} className="hidden" />
               </label>
@@ -186,7 +186,7 @@ export function SupportInbox({ apiKey, initialShop }: { apiKey: string; initialS
                 value={reply}
                 onChange={(e) => setReply(e.target.value)}
                 placeholder="Type a reply..."
-                className="flex-1 rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
+                className="flex-1 rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
                 rows={2}
               />
               <button

@@ -21,7 +21,7 @@
 function Bar({ w, h = 12 }: { w: string; h?: number }) {
   return (
     <span
-      className="block rounded-md bg-white/[0.06]"
+      className="block rounded-md bg-black/[0.05]"
       style={{ width: w, height: h }}
     />
   );
@@ -29,7 +29,7 @@ function Bar({ w, h = 12 }: { w: string; h?: number }) {
 
 function CardSkeleton() {
   return (
-    <section className="rounded-xl border border-white/[0.08] bg-white/[0.025] p-5">
+    <section className="rounded-xl border border-black/[0.09] bg-black/[0.025] p-5">
       <div className="space-y-3">
         <Bar w="38%" h={14} />
         <Bar w="100%" h={10} />

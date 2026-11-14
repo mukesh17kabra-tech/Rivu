@@ -53,13 +53,13 @@ export function ReviewCard({
   const imageUrl = `/api/ugc/generate?reviewId=${review.id}&template=${template}&format=${format}`;
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+    <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
       <div className="mb-2 flex items-center gap-1 text-yellow-400">
         {"★".repeat(review.rating)}
         {"☆".repeat(5 - review.rating)}
       </div>
-      <p className="mb-2 text-sm text-white/80 leading-relaxed">{review.body}</p>
-      <p className="mb-4 text-xs text-white/40">
+      <p className="mb-2 text-sm text-black/72 leading-relaxed">{review.body}</p>
+      <p className="mb-4 text-xs text-black/45">
         {review.customerName} · {review.productTitle}
       </p>
 
@@ -75,18 +75,18 @@ export function ReviewCard({
           <button
             onClick={() => moderate("reject")}
             disabled={busy}
-            className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-60"
+            className="rounded-md bg-black/[0.07] px-3 py-1.5 text-xs font-medium text-[#111418] hover:bg-black/[0.12] disabled:opacity-60"
           >
             Reject
           </button>
         </div>
       ) : (
-        <div className="space-y-3 border-t border-white/10 pt-4">
+        <div className="space-y-3 border-t border-black/[0.10] pt-4">
           <div className="flex gap-2">
             <select
               value={template}
               onChange={(e) => setTemplate(e.target.value)}
-              className="rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
+              className="rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-xs text-[#111418]"
             >
               {TEMPLATES.map((t) => (
                 <option key={t.value} value={t.value} style={{ color: "#000" }}>
@@ -97,7 +97,7 @@ export function ReviewCard({
             <select
               value={format}
               onChange={(e) => setFormat(e.target.value)}
-              className="rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
+              className="rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-xs text-[#111418]"
             >
               {FORMATS.map((f) => (
                 <option key={f.value} value={f.value} style={{ color: "#000" }}>
@@ -109,13 +109,13 @@ export function ReviewCard({
           <img
             src={imageUrl}
             alt="UGC preview"
-            className="w-full max-w-[220px] rounded-md border border-white/10"
+            className="w-full max-w-[220px] rounded-md border border-black/[0.10]"
           />
           <div className="flex gap-2">
             <a
               href={imageUrl}
               download={`review-${review.id}.png`}
-              className="inline-block rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20"
+              className="inline-block rounded-md bg-black/[0.07] px-3 py-1.5 text-xs font-medium text-[#111418] hover:bg-black/[0.12]"
             >
               Download image
             </a>

@@ -44,10 +44,10 @@ export function OnboardingChecklist({ shop, host }: { shop: string; host?: strin
   ];
 
   return (
-    <section className="mb-8 rounded-lg border border-white/10 bg-white/[0.02] p-5">
+    <section className="mb-8 rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm font-medium text-white">🚀 Finish setting up Rivu</p>
-        <button onClick={() => setDismissed(true)} className="text-xs text-white/40 hover:text-white/70">
+        <p className="text-sm font-medium text-[#111418]">🚀 Finish setting up Rivu</p>
+        <button onClick={() => setDismissed(true)} className="text-xs text-black/45 hover:text-black/65">
           Dismiss
         </button>
       </div>
@@ -56,18 +56,18 @@ export function OnboardingChecklist({ shop, host }: { shop: string; host?: strin
           <div
             key={step.key}
             className={`flex items-center justify-between rounded-md border p-4 ${
-              done[step.key] ? "border-emerald-400/20 bg-emerald-400/[0.03] opacity-60" : "border-white/10"
+              done[step.key] ? "border-emerald-400/20 bg-emerald-400/[0.03] opacity-60" : "border-black/[0.10]"
             }`}
           >
             <div>
-              <p className="text-sm font-medium text-white">{step.title}</p>
-              <p className="mt-0.5 text-xs text-white/50">{step.body}</p>
+              <p className="text-sm font-medium text-[#111418]">{step.title}</p>
+              <p className="mt-0.5 text-xs text-black/50">{step.body}</p>
             </div>
             <div className="flex items-center gap-3">
               <a
                 href={step.href}
                 target="_top"
-                className="whitespace-nowrap rounded-md bg-white text-black px-3 py-1.5 text-xs font-medium hover:bg-white/90"
+                className="whitespace-nowrap rounded-md bg-[#111418] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#2a2f35]"
               >
                 {step.cta} →
               </a>

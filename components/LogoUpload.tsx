@@ -64,9 +64,9 @@ export function LogoUpload({
   }
 
   return (
-    <div className="max-w-md rounded-lg border border-white/10 bg-white/[0.02] p-6">
-      <p className="mb-1 text-sm font-medium text-white">Logo on shareable graphics</p>
-      <p className="mb-4 text-xs text-white/50">
+    <div className="max-w-md rounded-lg border border-black/[0.10] bg-black/[0.02] p-6">
+      <p className="mb-1 text-sm font-medium text-[#111418]">Logo on shareable graphics</p>
+      <p className="mb-4 text-xs text-black/50">
         Shown as a watermark in the corner of every UGC card generated from your reviews —
         helps with brand recall when customers share them.
       </p>
@@ -81,7 +81,7 @@ export function LogoUpload({
       )}
 
       <div className="mb-4 flex items-center gap-3">
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-white/15 px-3 py-1.5 text-xs text-white hover:border-white/30">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-black/[0.14] px-3 py-1.5 text-xs text-[#111418] hover:border-black/[0.25]">
           {logoUrl ? "Change logo" : "Upload logo"}
           <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
         </label>
@@ -94,7 +94,7 @@ export function LogoUpload({
 
       {logoUrl && (
         <div className="mb-4">
-          <label className="mb-2 block text-xs font-medium text-white/50">
+          <label className="mb-2 block text-xs font-medium text-black/50">
             Watermark size: {logoSize}px
           </label>
           <input

@@ -24,11 +24,11 @@ export function PageHeader({
   return (
     <header className="mb-7 flex flex-wrap items-start justify-between gap-4">
       <div>
-        <h1 className="text-[28px] font-extrabold leading-tight tracking-[-0.03em] text-white">
+        <h1 className="text-[28px] font-extrabold leading-tight tracking-[-0.03em] text-[#111418]">
           {title}
         </h1>
         {description && (
-          <p className="mt-1.5 text-[13px] text-white/45">{description}</p>
+          <p className="mt-1.5 text-[13px] text-black/48">{description}</p>
         )}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
@@ -47,7 +47,7 @@ export function Card({
 }) {
   return (
     <section
-      className={`rounded-xl border border-white/[0.08] bg-white/[0.025] ${
+      className={`rounded-xl border border-black/[0.09] bg-black/[0.025] ${
         padded ? "p-5" : ""
       } ${className}`}
     >
@@ -91,9 +91,9 @@ export function Section({
         </span>
       )}
       <div>
-        <h2 className="text-[17px] font-bold tracking-[-0.01em] text-white">{title}</h2>
+        <h2 className="text-[17px] font-bold tracking-[-0.01em] text-[#111418]">{title}</h2>
         {description && (
-          <p className="mt-1 text-[13px] leading-relaxed text-white/45">{description}</p>
+          <p className="mt-1 text-[13px] leading-relaxed text-black/48">{description}</p>
         )}
       </div>
     </div>
@@ -107,14 +107,14 @@ export function Section({
         <details className="group" open={defaultOpen}>
           <summary className="flex cursor-pointer list-none items-start justify-between gap-4 [&::-webkit-details-marker]:hidden">
             {heading}
-            <span className="mt-1 shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-white/35 group-open:hidden">
+            <span className="mt-1 shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-black/42 group-open:hidden">
               Open
             </span>
-            <span className="mt-1 hidden shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-white/35 group-open:inline">
+            <span className="mt-1 hidden shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-black/42 group-open:inline">
               Close
             </span>
           </summary>
-          <div className="mt-5 border-t border-white/[0.07] pt-5">{children}</div>
+          <div className="mt-5 border-t border-black/[0.08] pt-5">{children}</div>
         </details>
       </Card>
     );
@@ -122,7 +122,7 @@ export function Section({
 
   return (
     <Card className="mb-5">
-      <div className="mb-5 flex items-start justify-between gap-4 border-b border-white/[0.07] pb-4">
+      <div className="mb-5 flex items-start justify-between gap-4 border-b border-black/[0.08] pb-4">
         {heading}
         {actions}
       </div>
@@ -144,14 +144,14 @@ export function Stat({
 }) {
   return (
     <Card>
-      <p className="text-[11px] font-bold uppercase tracking-[0.09em] text-white/35">
+      <p className="text-[11px] font-bold uppercase tracking-[0.09em] text-black/42">
         {label}
       </p>
-      <p className="mt-2.5 text-[32px] font-extrabold leading-none tracking-[-0.03em] text-white tabular-nums">
+      <p className="mt-2.5 text-[32px] font-extrabold leading-none tracking-[-0.03em] text-[#111418] tabular-nums">
         {value}
         {suffix}
       </p>
-      {hint && <p className="mt-2 text-xs text-white/35">{hint}</p>}
+      {hint && <p className="mt-2 text-xs text-black/42">{hint}</p>}
     </Card>
   );
 }
@@ -164,7 +164,7 @@ export function Badge({
   tone?: "neutral" | "success" | "warning";
 }) {
   const tones = {
-    neutral: "bg-white/[0.06] text-white/60 ring-white/10",
+    neutral: "bg-black/[0.05] text-black/58 ring-black/[0.10]",
     success: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
     warning: "bg-amber-400/10 text-amber-300 ring-amber-400/20",
   };

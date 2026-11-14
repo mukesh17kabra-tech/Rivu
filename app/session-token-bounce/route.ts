@@ -37,9 +37,9 @@ export async function GET(req: NextRequest) {
     apiKey
   )}" src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
 </head>
-<body style="margin:0;background:#0B0D0F">
+<body style="margin:0;background:#ffffff">
   <noscript>
-    <p style="padding:20px;color:#E7E9EA;font-family:system-ui,sans-serif">
+    <p style="padding:20px;color:#1a1d21;font-family:system-ui,sans-serif">
       Rivu needs JavaScript to authenticate with Shopify.
       <a href="${escapeAttribute(reload)}" style="color:#34d399">Continue</a>
     </p>

@@ -169,16 +169,16 @@ export function ReviewsTable({
 
   if (reviews.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed border-white/15 p-6 text-sm text-white/40">
+      <p className="rounded-lg border border-dashed border-black/[0.14] p-6 text-sm text-black/45">
         No reviews yet. Once shoppers submit reviews, they&apos;ll show up here.
       </p>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-white/10">
+    <div className="overflow-x-auto rounded-lg border border-black/[0.10]">
       <table className="w-full text-left text-sm">
-        <thead className="bg-white/[0.03] text-white/50">
+        <thead className="bg-black/[0.03] text-black/50">
           <tr>
             <th className="px-4 py-3 font-medium">Reviewer</th>
             <th className="px-4 py-3 font-medium">Product</th>
@@ -194,21 +194,21 @@ export function ReviewsTable({
             const ugcOpen = ugcOpenId === review.id;
             return (
               <Fragment key={review.id}>
-                <tr className="border-t border-white/5 align-top">
+                <tr className="border-t border-black/[0.06] align-top">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-white">{review.customerName}</p>
+                    <p className="font-medium text-[#111418]">{review.customerName}</p>
                     {review.customerEmail && (
-                      <p className="text-xs text-white/40">{review.customerEmail}</p>
+                      <p className="text-xs text-black/45">{review.customerEmail}</p>
                     )}
                   </td>
-                  <td className="max-w-[220px] px-4 py-3 text-white/70">
+                  <td className="max-w-[220px] px-4 py-3 text-black/65">
                     <p className="truncate">{review.productTitle}</p>
                     {review.reviewTitle && (
-                      <p className="mt-1 max-w-[220px] truncate text-xs font-medium italic text-white/60">
+                      <p className="mt-1 max-w-[220px] truncate text-xs font-medium italic text-black/58">
                         {review.reviewTitle}
                       </p>
                     )}
-                    <p className="mt-1 max-w-[220px] truncate text-xs text-white/40">{review.body}</p>
+                    <p className="mt-1 max-w-[220px] truncate text-xs text-black/45">{review.body}</p>
                   </td>
                   <td className="px-4 py-3 text-yellow-400 whitespace-nowrap">
                     {/* Rounded: String.repeat truncates, so a 4.5 would draw
@@ -227,7 +227,7 @@ export function ReviewsTable({
                       {review.approved ? "Published" : "Pending"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-white/40 whitespace-nowrap">
+                  <td className="px-4 py-3 text-black/45 whitespace-nowrap">
                     {review.createdAt.toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
@@ -257,7 +257,7 @@ export function ReviewsTable({
                     )}
                     <button
                       onClick={() => toggleReply(review)}
-                      className="mr-3 text-xs font-medium text-white/60 hover:underline"
+                      className="mr-3 text-xs font-medium text-black/58 hover:underline"
                     >
                       {review.ownerReply ? "Edit reply" : "Reply"}
                     </button>
@@ -271,9 +271,9 @@ export function ReviewsTable({
                   </td>
                 </tr>
                 {replyOpenId === review.id && (
-                  <tr className="border-t border-white/5 bg-white/[0.015]">
+                  <tr className="border-t border-black/[0.06] bg-black/[0.015]">
                     <td colSpan={6} className="px-4 py-4">
-                      <label className="mb-1.5 block text-xs font-medium text-white/50">
+                      <label className="mb-1.5 block text-xs font-medium text-black/50">
                         Your public reply — shown under this review on your storefront
                       </label>
                       <textarea
@@ -282,7 +282,7 @@ export function ReviewsTable({
                         rows={3}
                         maxLength={2000}
                         placeholder="Thanks for the feedback — we've passed this on to our team."
-                        className="w-full rounded-md border border-white/15 bg-black/40 px-3 py-2 text-sm text-white"
+                        className="w-full rounded-md border border-black/[0.14] bg-black/[0.055] px-3 py-2 text-sm text-[#111418]"
                       />
                       <div className="mt-2 flex items-center gap-3">
                         <button
@@ -294,7 +294,7 @@ export function ReviewsTable({
                         </button>
                         <button
                           onClick={() => setReplyOpenId(null)}
-                          className="text-xs font-medium text-white/45 hover:text-white/70"
+                          className="text-xs font-medium text-black/48 hover:text-black/65"
                         >
                           Cancel
                         </button>
@@ -315,14 +315,14 @@ export function ReviewsTable({
                   </tr>
                 )}
                 {ugcOpen && (
-                  <tr className="border-t border-white/5 bg-white/[0.015]">
+                  <tr className="border-t border-black/[0.06] bg-black/[0.015]">
                     <td colSpan={6} className="px-4 py-4">
                       <div className="flex items-start gap-4">
                         <div className="space-y-2">
                           <select
                             value={template}
                             onChange={(e) => setTemplate(e.target.value)}
-                            className="rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
+                            className="rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-xs text-[#111418]"
                           >
                             {TEMPLATES.map((t, i) => {
                               const locked = i >= allowedTemplateCount;
@@ -341,7 +341,7 @@ export function ReviewsTable({
                           <select
                             value={format}
                             onChange={(e) => setFormat(e.target.value)}
-                            className="ml-2 rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
+                            className="ml-2 rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-xs text-[#111418]"
                           >
                             {FORMATS.map((f) => (
                               <option key={f.value} value={f.value} style={{ color: "#000" }}>
@@ -363,7 +363,7 @@ export function ReviewsTable({
                             <a
                               href={imageUrl}
                               download={`review-${review.id}.png`}
-                              className="inline-block rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20"
+                              className="inline-block rounded-md bg-black/[0.07] px-3 py-1.5 text-xs font-medium text-[#111418] hover:bg-black/[0.12]"
                             >
                               Download image
                             </a>
@@ -373,7 +373,7 @@ export function ReviewsTable({
                         <img
                           src={imageUrl}
                           alt="UGC preview"
-                          className="w-full max-w-[320px] rounded-md border border-white/10"
+                          className="w-full max-w-[320px] rounded-md border border-black/[0.10]"
                         />
                       </div>
                     </td>

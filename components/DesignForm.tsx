@@ -247,14 +247,14 @@ export function DesignForm({
             return !a;
           });
         }}
-        className="block text-[12px] font-medium text-white/40 underline underline-offset-4 hover:text-white/70"
+        className="block text-[12px] font-medium text-black/45 underline underline-offset-4 hover:text-black/65"
       >
         {advanced
           ? "← Back to the simple view"
           : "Advanced — every colour, size and spacing setting"}
       </button>
 
-      <div className={advanced ? "flex flex-wrap gap-1 border-b border-white/10" : "hidden"}>
+      <div className={advanced ? "flex flex-wrap gap-1 border-b border-black/[0.10]" : "hidden"}>
         {TAB_TITLES.map((title, i) => (
           <button
             key={title}
@@ -262,8 +262,8 @@ export function DesignForm({
             onClick={() => setTab(i)}
             className={`-mb-px rounded-t-md border-b-2 px-3 py-2 text-[12px] font-medium transition-colors ${
               tab === i
-                ? "border-emerald-400 text-white"
-                : "border-transparent text-white/45 hover:text-white/70"
+                ? "border-emerald-400 text-[#111418]"
+                : "border-transparent text-black/48 hover:text-black/65"
             }`}
           >
             {title}
@@ -276,8 +276,8 @@ export function DesignForm({
         title="Layout"
         description="The overall shape of the widget. The preview updates as you change anything on this page."
       >
-        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-          <label className="mb-2 block text-sm font-medium text-white/70">Layout</label>
+        <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+          <label className="mb-2 block text-sm font-medium text-black/65">Layout</label>
           {/* Read from lib/design-options.ts rather than restated here. The
               previous hardcoded list of four had its own copy of the locking
               rules, so a new layout appeared in the widget but never in this
@@ -295,10 +295,10 @@ export function DesignForm({
                   title={allowed ? option.description : "Available on Pro"}
                   className={`rounded-md border px-2 py-2 text-left transition-colors ${
                     !allowed
-                      ? "cursor-not-allowed border-white/5 text-white/25"
+                      ? "cursor-not-allowed border-black/[0.06] text-black/35"
                       : selected
-                        ? "border-emerald-400 bg-emerald-400/10 text-white"
-                        : "border-white/10 text-white/50 hover:border-white/30"
+                        ? "border-emerald-400 bg-emerald-400/10 text-[#111418]"
+                        : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                   }`}
                 >
                   <span className="flex items-center gap-1 text-xs font-semibold">
@@ -310,7 +310,7 @@ export function DesignForm({
                       </span>
                     )}
                   </span>
-                  <span className="mt-0.5 block text-[10px] leading-tight text-white/35">
+                  <span className="mt-0.5 block text-[10px] leading-tight text-black/42">
                     {option.description}
                   </span>
                 </button>
@@ -321,7 +321,7 @@ export function DesignForm({
           {/* Design is a separate question from layout: "grid" says where the
               cards go, "boxed" says what a card looks like. Combining them
               into one list forced a merchant to give up one to get the other. */}
-          <label className="mb-2 mt-4 block text-sm font-medium text-white/70">
+          <label className="mb-2 mt-4 block text-sm font-medium text-black/65">
             Card design
           </label>
           <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -336,10 +336,10 @@ export function DesignForm({
                   title={allowed ? option.description : "Available on Pro"}
                   className={`rounded-md border px-2 py-2 text-left transition-colors ${
                     !allowed
-                      ? "cursor-not-allowed border-white/5 text-white/25"
+                      ? "cursor-not-allowed border-black/[0.06] text-black/35"
                       : selected
-                        ? "border-emerald-400 bg-emerald-400/10 text-white"
-                        : "border-white/10 text-white/50 hover:border-white/30"
+                        ? "border-emerald-400 bg-emerald-400/10 text-[#111418]"
+                        : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                   }`}
                 >
                   <span className="flex items-center gap-1 text-xs font-semibold">
@@ -351,7 +351,7 @@ export function DesignForm({
                       </span>
                     )}
                   </span>
-                  <span className="mt-0.5 block text-[10px] leading-tight text-white/35">
+                  <span className="mt-0.5 block text-[10px] leading-tight text-black/42">
                     {option.description}
                   </span>
                 </button>
@@ -363,7 +363,7 @@ export function DesignForm({
             settings.displayStyle === "masonry" ||
             settings.cardDesign === "gallery") && (
             <div className="mb-2">
-              <label className="mb-1 block text-xs text-white/50">
+              <label className="mb-1 block text-xs text-black/50">
                 Columns: {settings.gridColumns}
               </label>
               <input
@@ -379,7 +379,7 @@ export function DesignForm({
 
           {settings.displayStyle === "carousel" && (
             <div className="mb-2">
-              <label className="mb-1 block text-xs text-white/50">
+              <label className="mb-1 block text-xs text-black/50">
                 Cards visible: {settings.carouselVisible}
               </label>
               <input
@@ -403,8 +403,8 @@ export function DesignForm({
         description="Your brand colors and typeface. These apply to the whole widget."
       >
       {/* Colors — 4 in a row */}
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <p className="mb-3 text-sm font-medium text-white/70">Colors</p>
+      <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+        <p className="mb-3 text-sm font-medium text-black/65">Colors</p>
         <div className="grid grid-cols-5 gap-4">
           <GradientBackgroundField
             label="Primary"
@@ -430,12 +430,12 @@ export function DesignForm({
       </div>
 
       {/* Typography + shape */}
-        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-          <label className="mb-2 block text-sm font-medium text-white/70">Font</label>
+        <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+          <label className="mb-2 block text-sm font-medium text-black/65">Font</label>
           <select
             value={settings.fontFamily}
             onChange={(e) => { update("fontFamily", e.target.value); loadGoogleFont(e.target.value); }}
-            className="mb-4 w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
+            className="mb-4 w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
           >
             {FONT_OPTIONS.map((f) => (
               <option key={f.value} value={f.value} style={{ color: "#000" }}>
@@ -443,7 +443,7 @@ export function DesignForm({
               </option>
             ))}
           </select>
-          <label className="mb-1 block text-xs text-white/50">
+          <label className="mb-1 block text-xs text-black/50">
             Corner roundness: {settings.borderRadius}px
           </label>
           <input
@@ -462,18 +462,18 @@ export function DesignForm({
         title="Text & spacing"
         description="The heading above the reviews, how big the review text is, and how much room the widget takes on the page."
       >
-        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-          <label className="mb-2 block text-sm font-medium text-white/70">Widget heading</label>
+        <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+          <label className="mb-2 block text-sm font-medium text-black/65">Widget heading</label>
           <input
             type="text"
             value={settings.widgetTitle}
             onChange={(e) => update("widgetTitle", e.target.value)}
-            className="mb-3 w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
+            className="mb-3 w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
             maxLength={100}
           />
           <div className={`mb-3 grid grid-cols-3 gap-3 ${isFree ? "pointer-events-none opacity-40" : ""}`}>
             <div>
-              <label className="mb-1 block text-xs text-white/50">
+              <label className="mb-1 block text-xs text-black/50">
                 {isFree ? "🔒 " : ""}Size: {settings.headingFontSize}px
               </label>
               <input
@@ -486,24 +486,24 @@ export function DesignForm({
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-white/50">Weight</label>
+              <label className="mb-1 block text-xs text-black/50">Weight</label>
               <button
                 onClick={() => update("headingBold", !settings.headingBold)}
                 className={`w-full rounded-md border px-2 py-1.5 text-xs transition-colors ${
                   settings.headingBold
-                    ? "border-emerald-400 bg-emerald-400/10 text-white font-bold"
-                    : "border-white/10 text-white/50 hover:border-white/30"
+                    ? "border-emerald-400 bg-emerald-400/10 text-[#111418] font-bold"
+                    : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                 }`}
               >
                 {settings.headingBold ? "Bold" : "Regular"}
               </button>
             </div>
             <div>
-              <label className="mb-1 block text-xs text-white/50">Position</label>
+              <label className="mb-1 block text-xs text-black/50">Position</label>
               <select
                 value={settings.headingAlign}
                 onChange={(e) => update("headingAlign", e.target.value as "left" | "center" | "right")}
-                className="w-full rounded-md border border-white/15 bg-white/[0.03] px-2 py-1.5 text-xs text-white"
+                className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1.5 text-xs text-[#111418]"
               >
                 <option value="left" style={{ color: "#000" }}>Left</option>
                 <option value="center" style={{ color: "#000" }}>Center</option>
@@ -516,7 +516,7 @@ export function DesignForm({
               Heading size/weight/position customization needs Pro.
             </p>
           )}
-          <label className="mb-1 block text-xs text-white/50">
+          <label className="mb-1 block text-xs text-black/50">
             Top spacing: {settings.topSpacing}px
           </label>
           <input
@@ -528,7 +528,7 @@ export function DesignForm({
             onChange={(e) => update("topSpacing", Number(e.target.value))}
             className="w-full"
           />
-          <label className="mb-1 block text-xs text-white/50">
+          <label className="mb-1 block text-xs text-black/50">
             Bottom spacing: {settings.bottomSpacing}px
           </label>
           <input
@@ -540,20 +540,20 @@ export function DesignForm({
             onChange={(e) => update("bottomSpacing", Number(e.target.value))}
             className="w-full"
           />
-          <p className="mb-1 text-xs text-white/40">
+          <p className="mb-1 text-xs text-black/45">
             Too much empty space under the reviews is usually your theme
             section&apos;s own padding, which the app cannot see. Drag this
             below 0 to pull whatever follows the reviews up into that padding
             and close the gap.
           </p>
-          <label className="mt-3 flex items-center gap-2 border-t border-white/10 pt-3">
+          <label className="mt-3 flex items-center gap-2 border-t border-black/[0.10] pt-3">
             <input
               type="checkbox"
               checked={settings.showBorder}
               onChange={(e) => update("showBorder", e.target.checked)}
               className="h-4 w-4 accent-emerald-400"
             />
-            <span className="text-sm text-white/80">Show border around widget</span>
+            <span className="text-sm text-black/72">Show border around widget</span>
           </label>
           {settings.showBorder && (
             <div className="mt-3 grid grid-cols-3 gap-3">
@@ -563,7 +563,7 @@ export function DesignForm({
                 onChange={(v) => update("borderColor", v)}
               />
               <div>
-                <label className="mb-1 block text-xs text-white/50">
+                <label className="mb-1 block text-xs text-black/50">
                   Width: {settings.borderWidth}px
                 </label>
                 <input
@@ -576,13 +576,13 @@ export function DesignForm({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-white/50">Style</label>
+                <label className="mb-1 block text-xs text-black/50">Style</label>
                 <select
                   value={settings.borderStyle}
                   onChange={(e) =>
                     update("borderStyle", e.target.value as "solid" | "dashed" | "dotted" | "double")
                   }
-                  className="w-full rounded-md border border-white/15 bg-white/[0.03] px-2 py-1.5 text-xs text-white"
+                  className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1.5 text-xs text-[#111418]"
                 >
                   <option value="solid" style={{ color: "#000" }}>Solid</option>
                   <option value="dashed" style={{ color: "#000" }}>Dashed</option>
@@ -592,17 +592,17 @@ export function DesignForm({
               </div>
             </div>
           )}
-          <p className="mt-2 text-xs text-white/40">
+          <p className="mt-2 text-xs text-black/45">
             Helps the widget stand out against a plain background — recommended if your
             theme's page background is also white.
           </p>
         </div>
 
       {/* Review text appearance */}
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+      <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
         <div className={`grid grid-cols-2 gap-6 ${isFree ? "pointer-events-none opacity-40" : ""}`}>
           <div>
-            <label className="mb-1 block text-xs text-white/50">
+            <label className="mb-1 block text-xs text-black/50">
               {isFree ? "🔒 " : ""}Review text size: {settings.reviewTextSize}px
             </label>
             <input
@@ -615,7 +615,7 @@ export function DesignForm({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-white/50">Review text position</label>
+            <label className="mb-1 block text-xs text-black/50">Review text position</label>
             <div className="flex gap-1">
               {(["left", "center", "right"] as const).map((align) => (
                 <button
@@ -623,8 +623,8 @@ export function DesignForm({
                   onClick={() => update("reviewTextAlign", align)}
                   className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
                     settings.reviewTextAlign === align
-                      ? "border-emerald-400 bg-emerald-400/10 text-white"
-                      : "border-white/10 text-white/50 hover:border-white/30"
+                      ? "border-emerald-400 bg-emerald-400/10 text-[#111418]"
+                      : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                   }`}
                 >
                   {align}
@@ -641,9 +641,9 @@ export function DesignForm({
       </div>
 
       {/* Sizing */}
-      <div className="grid grid-cols-3 gap-6 rounded-lg border border-white/10 bg-white/[0.02] p-5">
+      <div className="grid grid-cols-3 gap-6 rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
         <div>
-          <label className="mb-1 block text-xs text-white/50">
+          <label className="mb-1 block text-xs text-black/50">
             Container width: {settings.widgetMaxWidth}px
           </label>
           <input
@@ -657,7 +657,7 @@ export function DesignForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-white/50">
+          <label className="mb-1 block text-xs text-black/50">
             Form width: {settings.formMaxWidth}px
           </label>
           <input
@@ -671,7 +671,7 @@ export function DesignForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-white/50">Form alignment</label>
+          <label className="mb-1 block text-xs text-black/50">Form alignment</label>
           <div className="flex gap-1">
             {(["left", "center", "right"] as const).map((align) => (
               <button
@@ -679,8 +679,8 @@ export function DesignForm({
                 onClick={() => update("formAlign", align)}
                 className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
                   settings.formAlign === align
-                    ? "border-emerald-400 bg-emerald-400/10 text-white"
-                    : "border-white/10 text-white/50 hover:border-white/30"
+                    ? "border-emerald-400 bg-emerald-400/10 text-[#111418]"
+                    : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                 }`}
               >
                 {align}
@@ -698,15 +698,15 @@ export function DesignForm({
         description="Optional prompts shown to a customer who is stuck on what to write."
       >
       {/* Suggestions */}
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+      <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-medium text-white/70">Review suggestions</p>
+          <p className="text-sm font-medium text-black/65">Review suggestions</p>
           {aiSuggestionsAllowed(plan) ? (
             <span className="rounded-full bg-emerald-400/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-300 ring-1 ring-emerald-400/20">
               ✨ AI-written
             </span>
           ) : (
-            <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white/50 ring-1 ring-white/10">
+            <span className="rounded-full bg-black/[0.05] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-black/50 ring-1 ring-black/[0.10]">
               Ready-made
             </span>
           )}
@@ -742,7 +742,7 @@ export function DesignForm({
               onChange={(e) => update("showSuggestionsOnWebsite", e.target.checked)}
               className="h-4 w-4 accent-emerald-400"
             />
-            <span className="text-sm text-white/80">On website widget</span>
+            <span className="text-sm text-black/72">On website widget</span>
           </label>
           <label className="flex items-center gap-2">
             <input
@@ -751,7 +751,7 @@ export function DesignForm({
               onChange={(e) => update("showSuggestionsOnQr", e.target.checked)}
               className="h-4 w-4 accent-emerald-400"
             />
-            <span className="text-sm text-white/80">On QR-scan page</span>
+            <span className="text-sm text-black/72">On QR-scan page</span>
           </label>
         </div>
         <label className="mb-4 flex items-center gap-2">
@@ -762,7 +762,7 @@ export function DesignForm({
             onChange={(e) => update("letCustomerPickLanguage", e.target.checked)}
             className="h-4 w-4 accent-emerald-400 disabled:opacity-40"
           />
-          <span className={`text-sm ${isFree ? "text-white/30" : "text-white/80"}`}>
+          <span className={`text-sm ${isFree ? "text-black/38" : "text-black/72"}`}>
             {isFree ? "🔒 " : ""}Let customers choose their own language (shows a dropdown on the
             review form)
           </span>
@@ -772,7 +772,7 @@ export function DesignForm({
             Also needs Pro — Free plan is English-only.
           </p>
         )}
-        <label className="mb-2 block text-xs text-white/50">
+        <label className="mb-2 block text-xs text-black/50">
           Enabled languages ({settings.enabledLanguages.length}/{languageCap})
         </label>
         <div className="grid grid-cols-5 gap-2">
@@ -785,10 +785,10 @@ export function DesignForm({
                 key={lang.code}
                 className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1.5 text-xs transition-colors ${
                   checked
-                    ? "border-emerald-400 bg-emerald-400/10 text-white"
+                    ? "border-emerald-400 bg-emerald-400/10 text-[#111418]"
                     : disabled
-                    ? "cursor-not-allowed border-white/5 text-white/25"
-                    : "border-white/10 text-white/50 hover:border-white/30"
+                    ? "cursor-not-allowed border-black/[0.06] text-black/35"
+                    : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
                 }`}
               >
                 <input
@@ -812,7 +812,7 @@ export function DesignForm({
             );
           })}
         </div>
-        <p className="mt-2 text-xs text-white/40">
+        <p className="mt-2 text-xs text-black/45">
           {plan === "free"
             ? "Free plan is English-only."
             : `Pick up to ${languageCap} languages your customers can write reviews in.`}
@@ -826,8 +826,8 @@ export function DesignForm({
         title="Review list"
         description="The rating summary at the top, the filter bar, and the review cards themselves."
       >
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <p className="mb-4 text-sm font-medium text-white/70">Widget summary style</p>
+      <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+        <p className="mb-4 text-sm font-medium text-black/65">Widget summary style</p>
         <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
           {([
             { key: "modern", label: "Modern Card", plan: "", desc: "Rating box, bars, button" },
@@ -850,9 +850,9 @@ export function DesignForm({
                 onClick={() => !locked && update("summaryLayout", item.key)}
                 disabled={locked}
                 className={`group flex flex-col overflow-hidden rounded-lg border transition-all ${
-                  locked ? "cursor-not-allowed border-white/5 opacity-40"
+                  locked ? "cursor-not-allowed border-black/[0.06] opacity-40"
                   : isSelected ? "border-emerald-400 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]"
-                  : "border-white/10 hover:border-white/30"
+                  : "border-black/[0.10] hover:border-black/[0.25]"
                 }`}
               >
                 {/* Mini visual preview of each summary style */}
@@ -1022,38 +1022,38 @@ export function DesignForm({
                     </div>
                   )}
                 </div>
-                <div className="flex items-center justify-between px-3 py-2 bg-white/[0.04]">
-                  <span className="text-xs font-medium text-white">
+                <div className="flex items-center justify-between px-3 py-2 bg-black/[0.035]">
+                  <span className="text-xs font-medium text-[#111418]">
                     {locked ? "🔒 " : isSelected ? "✓ " : ""}{item.label}
                   </span>
                   {item.plan && (
-                    <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50">{item.plan}</span>
+                    <span className="rounded-full bg-black/[0.07] px-1.5 py-0.5 text-[9px] text-black/50">{item.plan}</span>
                   )}
                 </div>
               </button>
             );
           })}
         </div>
-        <p className="mt-3 text-xs text-white/40">
+        <p className="mt-3 text-xs text-black/45">
           Free: Modern Card & Minimal · Pro: all 8 summary styles
         </p>
 
         {/* Summary block customization — locked for Free */}
         {isFree ? (
-          <div className="mt-4 rounded-md border border-white/10 bg-white/[0.03] px-4 py-3">
-            <p className="text-xs text-white/40">🔒 Summary colors, width and position are available on Pro.</p>
+          <div className="mt-4 rounded-md border border-black/[0.10] bg-black/[0.03] px-4 py-3">
+            <p className="text-xs text-black/45">🔒 Summary colors, width and position are available on Pro.</p>
           </div>
         ) : (
-          <div className="mt-4 border-t border-white/10 pt-4">
+          <div className="mt-4 border-t border-black/[0.10] pt-4">
             <div className="mb-3 grid grid-cols-3 gap-4">
               <ColorField label="Summary background" value={settings.summaryBgColor} onChange={(v) => update("summaryBgColor", v)} />
               <ColorField label="Summary text color" value={settings.summaryTextColor} onChange={(v) => update("summaryTextColor", v)} />
               <div>
-                <label className="mb-1 block text-xs text-white/50">Position</label>
+                <label className="mb-1 block text-xs text-black/50">Position</label>
                 <div className="flex gap-1">
                   {(["left","center","right"] as const).map((pos) => (
                     <button key={pos} onClick={() => update("summaryPosition", pos)}
-                      className={`flex-1 rounded py-1.5 text-xs capitalize transition-colors ${settings.summaryPosition === pos ? "bg-emerald-400/20 text-emerald-300 border border-emerald-400/40" : "border border-white/10 text-white/40 hover:border-white/30"}`}>
+                      className={`flex-1 rounded py-1.5 text-xs capitalize transition-colors ${settings.summaryPosition === pos ? "bg-emerald-400/20 text-emerald-300 border border-emerald-400/40" : "border border-black/[0.10] text-black/45 hover:border-black/[0.25]"}`}>
                       {pos}
                     </button>
                   ))}
@@ -1061,29 +1061,29 @@ export function DesignForm({
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-xs text-white/50">
+              <label className="mb-1 block text-xs text-black/50">
                 Summary width: {settings.summaryWidth >= 320 ? `${settings.summaryWidth}px` : "Full width"}
               </label>
               <input type="range" min={300} max={1220} step={20} value={Math.max(settings.summaryWidth, 300)}
                 onChange={(e) => update("summaryWidth", Number(e.target.value))} className="w-full" />
-              <p className="mt-1 text-[10px] text-white/30">300 = full width · higher values shrink the summary block. For Left Sidebar this sets the sidebar column width.</p>
+              <p className="mt-1 text-[10px] text-black/38">300 = full width · higher values shrink the summary block. For Left Sidebar this sets the sidebar column width.</p>
             </div>
           </div>
         )}
       </div>
 
       {/* Review list bar */}
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <p className="mb-2 text-sm font-medium text-white/70">Review list bar</p>
+      <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+        <p className="mb-2 text-sm font-medium text-black/65">Review list bar</p>
         {isFree ? (
-          <p className="text-xs text-white/40">🔒 Filter bar and sort button colors are available on Pro.</p>
+          <p className="text-xs text-black/45">🔒 Filter bar and sort button colors are available on Pro.</p>
         ) : (
           <>
-            <p className="mb-4 text-xs text-white/40">Controls the "3 Reviews" count label and "Most Recent" sort dropdown above the review cards.</p>
+            <p className="mb-4 text-xs text-black/45">Controls the "3 Reviews" count label and "Most Recent" sort dropdown above the review cards.</p>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <ColorField label='Count text color ("3 Reviews")' value={settings.filterTextColor} onChange={(v) => update("filterTextColor", v)} />
               <div>
-                <label className="mb-1 block text-xs text-white/50">Count font size: {settings.reviewCountFontSize}px</label>
+                <label className="mb-1 block text-xs text-black/50">Count font size: {settings.reviewCountFontSize}px</label>
                 <input type="range" min={10} max={20} value={settings.reviewCountFontSize}
                   onChange={(e) => update("reviewCountFontSize", Number(e.target.value))} className="w-full" />
               </div>
@@ -1098,10 +1098,10 @@ export function DesignForm({
       </div>
 
       {/* Review card text colors */}
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <p className="mb-2 text-sm font-medium text-white/70">Review card text colors</p>
+      <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+        <p className="mb-2 text-sm font-medium text-black/65">Review card text colors</p>
         {isFree ? (
-          <p className="text-xs text-white/40">🔒 Review card text colors are available on Pro.</p>
+          <p className="text-xs text-black/45">🔒 Review card text colors are available on Pro.</p>
         ) : (
           <div className="grid grid-cols-3 gap-4">
             <ColorField label="Review title color" value={settings.reviewTitleColor} onChange={(v) => update("reviewTitleColor", v)} />
@@ -1118,13 +1118,13 @@ export function DesignForm({
         title="Review form"
         description="The box a customer actually types their review into."
       >
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <p className="mb-4 text-sm font-medium text-white/70">Review form style</p>
+      <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+        <p className="mb-4 text-sm font-medium text-black/65">Review form style</p>
 
         {/* Form color controls */}
         {isFree ? (
-          <div className="mb-4 rounded-md border border-white/10 bg-white/[0.03] px-4 py-3">
-            <p className="text-xs text-white/40">🔒 Form background, text, and close button colors are available on Pro.</p>
+          <div className="mb-4 rounded-md border border-black/[0.10] bg-black/[0.03] px-4 py-3">
+            <p className="text-xs text-black/45">🔒 Form background, text, and close button colors are available on Pro.</p>
           </div>
         ) : (
           <div className="mb-4 grid grid-cols-3 gap-4">
@@ -1161,10 +1161,10 @@ export function DesignForm({
                 disabled={locked}
                 className={`group relative flex flex-col overflow-hidden rounded-lg border transition-all ${
                   locked
-                    ? "cursor-not-allowed border-white/5 opacity-40"
+                    ? "cursor-not-allowed border-black/[0.06] opacity-40"
                     : isSelected
                     ? "border-emerald-400 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]"
-                    : "border-white/10 hover:border-white/30"
+                    : "border-black/[0.10] hover:border-black/[0.25]"
                 }`}
               >
                 {/* Mini form preview — accurate visual of each template */}
@@ -1233,12 +1233,12 @@ export function DesignForm({
                 </div>
 
                 {/* Name + plan label */}
-                <div className={`flex items-center justify-between px-3 py-2 ${t === "dark" ? "bg-[#1a1a2e]/80" : "bg-white/[0.04]"}`}>
-                  <span className="text-xs font-medium text-white">
+                <div className={`flex items-center justify-between px-3 py-2 ${t === "dark" ? "bg-[#1a1a2e]/80" : "bg-black/[0.035]"}`}>
+                  <span className="text-xs font-medium text-[#111418]">
                     {locked ? "🔒 " : isSelected ? "✓ " : ""}{labels[t]}
                   </span>
                   {planLabels[t] && (
-                    <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50">
+                    <span className="rounded-full bg-black/[0.07] px-1.5 py-0.5 text-[9px] text-black/50">
                       {planLabels[t]}
                     </span>
                   )}
@@ -1248,7 +1248,7 @@ export function DesignForm({
           })}
         </div>
 
-        <p className="mt-3 text-xs text-white/40">
+        <p className="mt-3 text-xs text-black/45">
           Free: Basic only · Pro: all 4 form templates
         </p>
       </div>
@@ -1301,12 +1301,12 @@ function Group({
     // Hidden with CSS rather than unmounted: the inputs underneath keep their
     // DOM state, and a half-typed heading survives a trip to another tab.
     <section className={hidden ? "hidden" : "space-y-6"} aria-hidden={hidden}>
-      <div className="border-b border-white/[0.07] pb-2.5">
-        <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/45">
+      <div className="border-b border-black/[0.08] pb-2.5">
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-black/48">
           {title}
         </h3>
         {description && (
-          <p className="mt-1 text-[12px] leading-relaxed text-white/35">
+          <p className="mt-1 text-[12px] leading-relaxed text-black/42">
             {description}
           </p>
         )}
@@ -1345,12 +1345,12 @@ function GradientBackgroundField({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <label className="block text-xs text-white/50">{label}</label>
+        <label className="block text-xs text-black/50">{label}</label>
         <div className="flex gap-1">
           <button
             onClick={() => onGradientChange(null)}
             className={`rounded px-1.5 py-0.5 text-[10px] ${
-              !isGradient ? "bg-emerald-400/20 text-emerald-300" : "text-white/40"
+              !isGradient ? "bg-emerald-400/20 text-emerald-300" : "text-black/45"
             }`}
           >
             Solid
@@ -1358,7 +1358,7 @@ function GradientBackgroundField({
           <button
             onClick={() => onGradientChange(buildGradient(colorA, colorB))}
             className={`rounded px-1.5 py-0.5 text-[10px] ${
-              isGradient ? "bg-emerald-400/20 text-emerald-300" : "text-white/40"
+              isGradient ? "bg-emerald-400/20 text-emerald-300" : "text-black/45"
             }`}
           >
             Gradient
@@ -1371,16 +1371,16 @@ function GradientBackgroundField({
             type="color"
             value={colorA}
             onChange={(e) => onGradientChange(buildGradient(e.target.value, colorB))}
-            className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent"
+            className="h-8 w-8 cursor-pointer rounded border border-black/[0.14] bg-transparent"
           />
           <input
             type="color"
             value={colorB}
             onChange={(e) => onGradientChange(buildGradient(colorA, e.target.value))}
-            className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent"
+            className="h-8 w-8 cursor-pointer rounded border border-black/[0.14] bg-transparent"
           />
           <div
-            className="h-8 flex-1 rounded border border-white/15"
+            className="h-8 flex-1 rounded border border-black/[0.14]"
             style={{ background: gradientValue || undefined }}
           />
         </div>
@@ -1390,13 +1390,13 @@ function GradientBackgroundField({
             type="color"
             value={solidValue}
             onChange={(e) => onSolidChange(e.target.value)}
-            className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent"
+            className="h-8 w-8 cursor-pointer rounded border border-black/[0.14] bg-transparent"
           />
           <input
             type="text"
             value={solidValue}
             onChange={(e) => onSolidChange(e.target.value)}
-            className="w-full min-w-0 rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white"
+            className="w-full min-w-0 rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-xs text-[#111418]"
           />
         </div>
       )}
@@ -1417,7 +1417,7 @@ function ColorField({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-white/50">
+      <label className="mb-1 block text-xs text-black/50">
         {locked ? "🔒 " : ""}
         {label}
       </label>
@@ -1427,14 +1427,14 @@ function ColorField({
           value={value}
           disabled={locked}
           onChange={(e) => onChange(e.target.value)}
-          className="h-8 w-8 cursor-pointer rounded border border-white/15 bg-transparent disabled:cursor-not-allowed disabled:opacity-40"
+          className="h-8 w-8 cursor-pointer rounded border border-black/[0.14] bg-transparent disabled:cursor-not-allowed disabled:opacity-40"
         />
         <input
           type="text"
           value={value}
           disabled={locked}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full min-w-0 rounded-md border border-white/15 bg-white/[0.03] px-2 py-1 text-xs text-white disabled:opacity-40"
+          className="w-full min-w-0 rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-xs text-[#111418] disabled:opacity-40"
         />
       </div>
     </div>
@@ -1464,11 +1464,11 @@ function SimplePanel({
 
   return (
     <div className="space-y-5">
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <label className="mb-1 block text-sm font-medium text-white/70">
+      <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+        <label className="mb-1 block text-sm font-medium text-black/65">
           Pick a look
         </label>
-        <p className="mb-3 text-xs text-white/35">
+        <p className="mb-3 text-xs text-black/42">
           Sets the colours, corners and card style together. You can change any
           of it afterwards.
         </p>
@@ -1482,36 +1482,36 @@ function SimplePanel({
               className={`rounded-md border p-3 text-left transition-colors ${
                 active === theme.key
                   ? "border-emerald-400 bg-emerald-400/10"
-                  : "border-white/10 bg-white/[0.02] hover:border-white/25"
+                  : "border-black/[0.10] bg-black/[0.02] hover:border-black/[0.22]"
               }`}
             >
               <div className="mb-2 flex gap-1">
                 {theme.swatch.map((c) => (
                   <span
                     key={c}
-                    className="h-4 w-4 rounded-full border border-white/20"
+                    className="h-4 w-4 rounded-full border border-black/[0.18]"
                     style={{ backgroundColor: c }}
                   />
                 ))}
               </div>
-              <div className="text-xs font-semibold text-white/85">
+              <div className="text-xs font-semibold text-black/75">
                 {theme.label}
               </div>
-              <div className="mt-0.5 text-[10px] leading-snug text-white/35">
+              <div className="mt-0.5 text-[10px] leading-snug text-black/42">
                 {theme.description}
               </div>
             </button>
           ))}
         </div>
         {active === null && (
-          <p className="mt-3 text-[11px] text-white/30">
+          <p className="mt-3 text-[11px] text-black/38">
             Your own colours — no theme selected. Picking one replaces them.
           </p>
         )}
       </div>
 
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <label className="mb-2 block text-sm font-medium text-white/70">
+      <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+        <label className="mb-2 block text-sm font-medium text-black/65">
           How the reviews are arranged
         </label>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -1528,11 +1528,11 @@ function SimplePanel({
                 className={`rounded-md border px-2 py-2 text-left transition-colors ${
                   selected
                     ? "border-emerald-400 bg-emerald-400/10"
-                    : "border-white/10 bg-white/[0.02] hover:border-white/25"
+                    : "border-black/[0.10] bg-black/[0.02] hover:border-black/[0.22]"
                 } ${allowed ? "" : "cursor-not-allowed opacity-40"}`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-white/85">
+                  <span className="text-xs font-semibold text-black/75">
                     {option.label}
                   </span>
                   {!allowed && (
@@ -1541,7 +1541,7 @@ function SimplePanel({
                     </span>
                   )}
                 </div>
-                <div className="mt-0.5 text-[10px] text-white/35">
+                <div className="mt-0.5 text-[10px] text-black/42">
                   {option.description}
                 </div>
               </button>
@@ -1551,8 +1551,8 @@ function SimplePanel({
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-          <label className="mb-2 block text-sm font-medium text-white/70">
+        <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+          <label className="mb-2 block text-sm font-medium text-black/65">
             Heading above the reviews
           </label>
           <input
@@ -1560,12 +1560,12 @@ function SimplePanel({
             value={settings.widgetTitle}
             onChange={(e) => update("widgetTitle", e.target.value)}
             placeholder="Customer Reviews"
-            className="w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
+            className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
           />
         </div>
 
-        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-          <label className="mb-2 block text-sm font-medium text-white/70">
+        <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+          <label className="mb-2 block text-sm font-medium text-black/65">
             Corner roundness: {settings.borderRadius}px
           </label>
           <input
@@ -1576,17 +1576,17 @@ function SimplePanel({
             onChange={(e) => update("borderRadius", Number(e.target.value))}
             className="w-full"
           />
-          <p className="mt-1 text-[11px] text-white/30">
+          <p className="mt-1 text-[11px] text-black/38">
             0 = sharp corners, 24 = fully rounded cards.
           </p>
         </div>
       </div>
 
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
-        <label className="mb-1 block text-sm font-medium text-white/70">
+      <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
+        <label className="mb-1 block text-sm font-medium text-black/65">
           Your two colours
         </label>
-        <p className="mb-3 text-xs text-white/35">
+        <p className="mb-3 text-xs text-black/42">
           The button colour and the star colour — the two a shopper notices.
         </p>
         <div className="grid grid-cols-2 gap-4">
@@ -1608,8 +1608,8 @@ function SimplePanel({
 
 function LivePreview({ settings }: { settings: DesignSettings }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
-      <p className="mb-2 text-xs font-medium text-white/50">Live preview — updates as you change settings</p>
+    <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-4">
+      <p className="mb-2 text-xs font-medium text-black/50">Live preview — updates as you change settings</p>
       <div
         className="overflow-hidden rounded-lg"
         style={{

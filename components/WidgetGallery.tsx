@@ -182,10 +182,10 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
             <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-300">
               Turn this on first
             </p>
-            <h3 className="mt-1 text-[17px] font-bold tracking-[-0.01em] text-white">
+            <h3 className="mt-1 text-[17px] font-bold tracking-[-0.01em] text-[#111418]">
               Rivu App Embed
             </h3>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-white/55">
+            <p className="mt-1.5 text-[13px] leading-relaxed text-black/55">
               Loads the Rivu script on your storefront. Every widget below stays
               blank until this is enabled — it only has to be done once, and it
               adds nothing visible on its own.
@@ -203,10 +203,10 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
 
       <div>
         <div className="mb-3 flex items-baseline justify-between gap-3">
-          <h3 className="text-[15px] font-bold tracking-[-0.01em] text-white">
+          <h3 className="text-[15px] font-bold tracking-[-0.01em] text-[#111418]">
             {WIDGETS.length} widgets you can add
           </h3>
-          <p className="text-xs text-white/35">
+          <p className="text-xs text-black/42">
             Add from the theme editor, style them here in Rivu.
           </p>
         </div>
@@ -220,13 +220,13 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
             return (
               <article
                 key={w.key}
-                className="flex flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.025]"
+                className="flex flex-col overflow-hidden rounded-xl border border-black/[0.09] bg-black/[0.025]"
               >
                 <div className="p-2.5 pb-0">{PREVIEWS[w.key]}</div>
 
                 <div className="flex flex-1 flex-col p-4">
                   <div className="flex items-start justify-between gap-2">
-                    <h4 className="text-[14px] font-bold tracking-[-0.01em] text-white">
+                    <h4 className="text-[14px] font-bold tracking-[-0.01em] text-[#111418]">
                       {w.blockName}
                     </h4>
                     {pro && (
@@ -238,10 +238,10 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
                   <p className="mt-0.5 text-[12px] font-medium text-emerald-300/80">
                     {w.tagline}
                   </p>
-                  <p className="mt-2 text-[12.5px] leading-relaxed text-white/50">{w.detail}</p>
+                  <p className="mt-2 text-[12.5px] leading-relaxed text-black/50">{w.detail}</p>
 
-                  <p className="mt-3 text-[11px] text-white/30">
-                    <span className="font-semibold text-white/45">Goes on:</span> {w.where}
+                  <p className="mt-3 text-[11px] text-black/38">
+                    <span className="font-semibold text-black/48">Goes on:</span> {w.where}
                   </p>
 
                   <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
@@ -256,22 +256,22 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
                       <a
                         href={editorUrl(shop, w.template)}
                         target="_top"
-                        className="rounded-md bg-white px-3 py-1.5 text-[12.5px] font-semibold text-black transition-colors hover:bg-white/90"
+                        className="rounded-md bg-[#111418] px-3 py-1.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-[#2a2f35]"
                       >
                         Add to theme →
                       </a>
                     )}
                     <a
                       href={designHref}
-                      className="rounded-md border border-white/15 px-3 py-1.5 text-[12.5px] font-semibold text-white/75 transition-colors hover:border-white/30 hover:text-white"
+                      className="rounded-md border border-black/[0.14] px-3 py-1.5 text-[12.5px] font-semibold text-black/68 transition-colors hover:border-black/[0.25] hover:text-[#111418]"
                     >
                       Customize
                     </a>
                   </div>
 
-                  <p className="mt-2.5 text-[11px] leading-relaxed text-white/25">
+                  <p className="mt-2.5 text-[11px] leading-relaxed text-black/35">
                     Opens {TEMPLATE_LABEL[w.template]} — choose{" "}
-                    <span className="text-white/40">Add block → Apps → {w.blockName}</span>
+                    <span className="text-black/45">Add block → Apps → {w.blockName}</span>
                   </p>
                 </div>
               </article>

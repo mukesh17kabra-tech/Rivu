@@ -67,10 +67,10 @@ export default async function DashboardHome({
           dashboard, so it should carry some weight. */}
       {total === 0 && (
         <Card className="mb-5 !border-emerald-400/30 !bg-emerald-400/[0.07]">
-          <p className="text-sm font-bold text-white">
+          <p className="text-sm font-bold text-[#111418]">
             👋 New here? Add the widget to your storefront
           </p>
-          <p className="mt-1 text-[13px] text-white/60">
+          <p className="mt-1 text-[13px] text-black/58">
             Reviews start appearing here once the widget is live on your product pages.
           </p>
           <Link
@@ -108,23 +108,23 @@ export default async function DashboardHome({
       </section>
 
       <Card padded={false}>
-        <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-3.5">
-          <h2 className="text-[15px] font-bold text-white">Recent reviews</h2>
+        <div className="flex items-center justify-between border-b border-black/[0.08] px-5 py-3.5">
+          <h2 className="text-[15px] font-bold text-[#111418]">Recent reviews</h2>
           <Link
             href={`/dashboard/reviews?${query}`}
-            className="text-[13px] font-medium text-white/45 transition-colors hover:text-white"
+            className="text-[13px] font-medium text-black/48 transition-colors hover:text-[#111418]"
           >
             View all →
           </Link>
         </div>
 
         {recentReviews.length === 0 ? (
-          <p className="px-5 py-10 text-center text-sm text-white/35">No reviews yet.</p>
+          <p className="px-5 py-10 text-center text-sm text-black/42">No reviews yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="text-[11px] font-bold uppercase tracking-[0.08em] text-white/35">
+                <tr className="text-[11px] font-bold uppercase tracking-[0.08em] text-black/42">
                   <th className="px-5 py-2.5 font-semibold">Reviewer</th>
                   <th className="px-5 py-2.5 font-semibold">Rating</th>
                   <th className="px-5 py-2.5 font-semibold">Product</th>
@@ -140,15 +140,15 @@ export default async function DashboardHome({
                     productTitle: string;
                     createdAt: Date;
                   }) => (
-                    <tr key={r.id} className="border-t border-white/[0.07]">
-                      <td className="px-5 py-3 font-medium text-white">{r.customerName}</td>
+                    <tr key={r.id} className="border-t border-black/[0.08]">
+                      <td className="px-5 py-3 font-medium text-[#111418]">{r.customerName}</td>
                       <td className="whitespace-nowrap px-5 py-3 text-amber-500">
                         {/* Rounded — String.repeat truncates a fraction. */}
                         {"★".repeat(Math.round(r.rating))}
-                        <span className="text-white/15">{"★".repeat(5 - Math.round(r.rating))}</span>
+                        <span className="text-black/25">{"★".repeat(5 - Math.round(r.rating))}</span>
                       </td>
-                      <td className="px-5 py-3 text-white/55">{r.productTitle}</td>
-                      <td className="whitespace-nowrap px-5 py-3 text-white/35">
+                      <td className="px-5 py-3 text-black/55">{r.productTitle}</td>
+                      <td className="whitespace-nowrap px-5 py-3 text-black/42">
                         {r.createdAt.toLocaleDateString()}
                       </td>
                     </tr>
@@ -172,14 +172,14 @@ function MilestoneBar({ total }: { total: number }) {
   return (
     <Card className="mb-5">
       <div className="mb-2.5 flex items-center justify-between">
-        <p className="text-sm font-bold text-white">
+        <p className="text-sm font-bold text-[#111418]">
           {total} review{total === 1 ? "" : "s"} collected
         </p>
-        <p className="text-[13px] text-white/40">
+        <p className="text-[13px] text-black/45">
           {next - total} more to reach {next}
         </p>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.08]">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-black/[0.06]">
         <div
           className="h-full rounded-full bg-emerald-400 transition-all"
           style={{ width: `${progress}%` }}

@@ -81,7 +81,7 @@ export async function GET(req: NextRequest) {
   <meta charset="utf-8">
   <title>Rivu installed</title>
 </head>
-<body style="margin:0;background:#0B0D0F;color:#E7E9EA;font-family:system-ui,sans-serif">
+<body style="margin:0;background:#ffffff;color:#1a1d21;font-family:system-ui,sans-serif">
   <p style="padding:20px">Install complete. Opening Rivu…</p>
   <p style="padding:0 20px">
     <a href="${escapeAttribute(embeddedUrl)}" target="_top" style="color:#34d399">
@@ -156,7 +156,7 @@ function errorPage(
   <meta charset="utf-8">
   <title>${escapeAttribute(title)}</title>
 </head>
-<body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0B0D0F;color:#E7E9EA;font-family:system-ui,sans-serif">
+<body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#ffffff;color:#1a1d21;font-family:system-ui,sans-serif">
   <div style="max-width:28rem;padding:24px;text-align:center">
     <p style="margin:0 0 8px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:rgba(251,191,36,.9)">Rivu</p>
     <h1 style="margin:0 0 12px;font-size:22px;font-weight:600">${escapeAttribute(title)}</h1>

@@ -98,15 +98,15 @@ export function Sidebar({
   const groups = buildGroups(qs.toString());
 
   return (
-    <aside className="w-full shrink-0 border-b border-white/[0.08] bg-[#0E1013] md:sticky md:top-0 md:h-screen md:w-[240px] md:border-b-0 md:border-r">
+    <aside className="w-full shrink-0 border-b border-black/[0.09] bg-[#0E1013] md:sticky md:top-0 md:h-screen md:w-[240px] md:border-b-0 md:border-r">
       <div className="flex items-center gap-2.5 px-5 py-5">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-400 text-sm font-extrabold text-black">
           R
         </span>
         <div className="min-w-0">
-          <p className="truncate text-[15px] font-extrabold tracking-[-0.01em] text-white">Rivu</p>
+          <p className="truncate text-[15px] font-extrabold tracking-[-0.01em] text-[#111418]">Rivu</p>
           {plan && (
-            <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/35">
+            <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-black/42">
               {plan} plan
             </p>
           )}
@@ -116,7 +116,7 @@ export function Sidebar({
       <nav className="px-3 pb-6">
         {groups.map((group) => (
           <div key={group.title} className="mb-5">
-            <p className="px-2.5 pb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30">
+            <p className="px-2.5 pb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-black/38">
               {group.title}
             </p>
             <ul className="space-y-0.5">
@@ -129,11 +129,11 @@ export function Sidebar({
                       aria-current={isActive ? "page" : undefined}
                       className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors ${
                         isActive
-                          ? "bg-white/[0.07] font-semibold text-white"
-                          : "font-medium text-white/55 hover:bg-white/[0.04] hover:text-white"
+                          ? "bg-black/[0.055] font-semibold text-[#111418]"
+                          : "font-medium text-black/55 hover:bg-black/[0.035] hover:text-[#111418]"
                       }`}
                     >
-                      <span className={isActive ? "text-emerald-400" : "text-white/35"}>
+                      <span className={isActive ? "text-emerald-400" : "text-black/42"}>
                         {item.icon}
                       </span>
                       {item.label}

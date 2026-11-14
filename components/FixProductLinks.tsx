@@ -50,7 +50,7 @@ export function FixProductLinks({ shop, missing }: { shop: string; missing: numb
     <div className="mb-6 rounded-lg border border-amber-400/25 bg-amber-400/[0.06] p-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
-          <p className="text-[13.5px] font-bold text-white">
+          <p className="text-[13.5px] font-bold text-[#111418]">
             {state === "done" && result
               ? "Product links repaired"
               : `${missing} review${missing === 1 ? "" : "s"} can't link to ${
@@ -59,7 +59,7 @@ export function FixProductLinks({ shop, missing }: { shop: string; missing: numb
           </p>
 
           {state === "done" && result ? (
-            <p className="mt-1 text-[12.5px] leading-relaxed text-white/55">
+            <p className="mt-1 text-[12.5px] leading-relaxed text-black/55">
               {result.updated} now link to their product.
               {result.unresolved > 0 && (
                 <>
@@ -74,7 +74,7 @@ export function FixProductLinks({ shop, missing }: { shop: string; missing: numb
               )}
             </p>
           ) : (
-            <p className="mt-1 text-[12.5px] leading-relaxed text-white/55">
+            <p className="mt-1 text-[12.5px] leading-relaxed text-black/55">
               Reviews left through a QR code or a review request, and imported reviews,
               never recorded which page the product lives on. They show the product name,
               but a shopper can&apos;t click through to buy it. This looks each one up in

@@ -53,7 +53,7 @@ export default async function QRCodesPage({
         description="Recommended — works for every product, so you only print one code."
       >
         <div>
-          <p className="mb-4 text-sm text-white/55 leading-relaxed max-w-2xl">
+          <p className="mb-4 text-sm text-black/55 leading-relaxed max-w-2xl">
             Print this single QR code on packing slips, thank-you cards, or receipts —
             it works for every product. When a customer scans it, they enter the email they
             ordered with, and Rivu automatically looks up what they bought so they can
@@ -101,14 +101,14 @@ export default async function QRCodesPage({
                 return (
                   <div
                     key={product.id}
-                    className="rounded-lg border border-white/[0.08] bg-white/[0.025] p-3 text-center"
+                    className="rounded-lg border border-black/[0.09] bg-black/[0.025] p-3 text-center"
                   >
                     <img src={qrUrl} alt={`QR for ${product.title}`} className="mx-auto mb-2 w-full rounded-md bg-white p-1" />
-                    <p className="mb-2 text-xs text-white/60 truncate">{product.title}</p>
+                    <p className="mb-2 text-xs text-black/58 truncate">{product.title}</p>
                     <a
                       href={qrUrl}
                       download={`review-qr-${product.id}.png`}
-                      className="inline-block rounded-md bg-white/[0.08] px-2 py-1 text-[11px] font-semibold text-white hover:bg-white/[0.14]"
+                      className="inline-block rounded-md bg-black/[0.06] px-2 py-1 text-[11px] font-semibold text-[#111418] hover:bg-black/[0.09]"
                     >
                       Download
                     </a>

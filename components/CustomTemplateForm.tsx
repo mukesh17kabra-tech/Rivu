@@ -99,8 +99,8 @@ export function CustomTemplateForm({
         <p className="text-sm font-bold text-amber-200">Build your own layout</p>
         <p className="mt-1.5 text-[13px] leading-relaxed text-amber-200/75">
           On Pro you can write your own HTML for the review section and drop in{" "}
-          <code className="rounded bg-black/30 px-1 text-amber-100">{"{{stars}}"}</code>,{" "}
-          <code className="rounded bg-black/30 px-1 text-amber-100">{"{{review_list}}"}</code>{" "}
+          <code className="rounded bg-black/[0.05] px-1 text-amber-100">{"{{stars}}"}</code>,{" "}
+          <code className="rounded bg-black/[0.05] px-1 text-amber-100">{"{{review_list}}"}</code>{" "}
           and the rest wherever you want them — so the widget matches your theme
           exactly instead of approximately.
         </p>
@@ -127,15 +127,15 @@ export function CustomTemplateForm({
           }}
           className="h-4 w-4 accent-emerald-400"
         />
-        <span className="text-sm text-white">
+        <span className="text-sm text-[#111418]">
           Use my own layout instead of the built-in one
         </span>
       </label>
 
       {/* A ready-made design is a far better starting point than an empty box —
           each one loads markup and matching CSS, then stays fully editable. */}
-      <div className="rounded-md border border-white/10 bg-white/[0.02] p-3.5">
-        <p className="mb-2.5 text-xs font-bold uppercase tracking-wide text-white/40">
+      <div className="rounded-md border border-black/[0.10] bg-black/[0.02] p-3.5">
+        <p className="mb-2.5 text-xs font-bold uppercase tracking-wide text-black/45">
           Start from a design
         </p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -144,18 +144,18 @@ export function CustomTemplateForm({
               key={preset.key}
               type="button"
               onClick={() => loadPreset(preset.key)}
-              className="rounded-md border border-white/10 bg-black/30 p-3 text-left transition-colors hover:border-emerald-400/40 hover:bg-emerald-400/[0.06]"
+              className="rounded-md border border-black/[0.10] bg-black/[0.05] p-3 text-left transition-colors hover:border-emerald-400/40 hover:bg-emerald-400/[0.06]"
             >
-              <span className="block text-[13px] font-bold text-white">
+              <span className="block text-[13px] font-bold text-[#111418]">
                 {preset.label}
               </span>
-              <span className="mt-1 block text-[11px] leading-snug text-white/45">
+              <span className="mt-1 block text-[11px] leading-snug text-black/48">
                 {preset.description}
               </span>
             </button>
           ))}
         </div>
-        <p className="mt-2.5 text-[11px] text-white/35">
+        <p className="mt-2.5 text-[11px] text-black/42">
           Loading a design replaces both boxes below. Edit them freely
           afterwards — nothing is locked.
         </p>
@@ -163,7 +163,7 @@ export function CustomTemplateForm({
 
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <label className="text-xs text-white/50">Your HTML</label>
+          <label className="text-xs text-black/50">Your HTML</label>
           <button
             type="button"
             onClick={() => {
@@ -183,13 +183,13 @@ export function CustomTemplateForm({
           }}
           spellCheck={false}
           placeholder={STARTER_TEMPLATE}
-          className="min-h-[260px] w-full rounded-md border border-white/15 bg-black/40 px-3 py-2 font-mono text-xs leading-relaxed text-white"
+          className="min-h-[260px] w-full rounded-md border border-black/[0.14] bg-black/[0.055] px-3 py-2 font-mono text-xs leading-relaxed text-[#111418]"
         />
       </div>
 
       <div>
         <div className="mb-2 flex items-center justify-between gap-3">
-          <label className="text-xs text-white/50">Your CSS</label>
+          <label className="text-xs text-black/50">Your CSS</label>
           {css.trim() !== "" && (
             <button
               type="button"
@@ -197,7 +197,7 @@ export function CustomTemplateForm({
                 setCss("");
                 setSaved(false);
               }}
-              className="text-xs font-medium text-white/40 hover:text-white/70"
+              className="text-xs font-medium text-black/45 hover:text-black/65"
             >
               Clear
             </button>
@@ -211,15 +211,15 @@ export function CustomTemplateForm({
           }}
           spellCheck={false}
           placeholder={".rv-ed-score {\n  font-size: 62px;\n  font-weight: 300;\n}"}
-          className="min-h-[200px] w-full rounded-md border border-white/15 bg-black/40 px-3 py-2 font-mono text-xs leading-relaxed text-white"
+          className="min-h-[200px] w-full rounded-md border border-black/[0.14] bg-black/[0.055] px-3 py-2 font-mono text-xs leading-relaxed text-[#111418]"
         />
-        <p className="mt-1.5 text-[11px] leading-relaxed text-white/35">
+        <p className="mt-1.5 text-[11px] leading-relaxed text-black/42">
           {CSS_SCOPE_NOTE}
         </p>
       </div>
 
-      <div className="rounded-md border border-white/10 bg-white/[0.02] p-3.5">
-        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-white/40">
+      <div className="rounded-md border border-black/[0.10] bg-black/[0.02] p-3.5">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-black/45">
           Available placeholders
         </p>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
@@ -231,13 +231,13 @@ export function CustomTemplateForm({
                 setHtml((current) => `${current}{{${v.name}}}`);
                 setSaved(false);
               }}
-              className="flex items-baseline gap-2 rounded px-2 py-1 text-left hover:bg-white/[0.04]"
+              className="flex items-baseline gap-2 rounded px-2 py-1 text-left hover:bg-black/[0.035]"
               title={`Insert {{${v.name}}}`}
             >
               <code className="shrink-0 text-[11px] text-emerald-300">
                 {`{{${v.name}}}`}
               </code>
-              <span className="text-[11px] text-white/40">{v.description}</span>
+              <span className="text-[11px] text-black/45">{v.description}</span>
             </button>
           ))}
         </div>

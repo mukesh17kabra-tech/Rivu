@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
     process.env.SHOPIFY_API_KEY || ""
   )}" src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
 </head>
-<body style="margin:0;background:#0B0D0F;color:#E7E9EA;font-family:system-ui,sans-serif">
+<body style="margin:0;background:#ffffff;color:#1a1d21;font-family:system-ui,sans-serif">
   <p style="padding:20px">Redirecting to Shopify to authorize Rivu…</p>
   <p style="padding:0 20px">
     <a href="${escapeAttribute(installUrl)}" target="_top" style="color:#34d399">

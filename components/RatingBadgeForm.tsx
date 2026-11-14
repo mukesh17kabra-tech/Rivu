@@ -44,30 +44,30 @@ export function RatingBadgeForm({
   const previewBroken = hasUnrenderedPlaceholder(preview);
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
-      <p className="mb-1 text-sm font-medium text-white">Rating Badge</p>
-      <p className="mb-4 text-xs text-white/50">
+    <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-6">
+      <p className="mb-1 text-sm font-medium text-[#111418]">Rating Badge</p>
+      <p className="mb-4 text-xs text-black/50">
         Compact star widget shown near the product title and on collection cards
         (via the &quot;Rivu Rating Badge&quot; Shopify block). Clicking the badge
         on a product page scrolls the customer down to the full review section automatically.
       </p>
 
-      <label className="mb-1 block text-xs text-white/50">Badge text template</label>
+      <label className="mb-1 block text-xs text-black/50">Badge text template</label>
       <input
         type="text"
         value={template}
         onChange={(e) => setTemplate(e.target.value)}
         maxLength={150}
-        className="mb-2 w-full rounded-md border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-white"
+        className="mb-2 w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
       />
-      <p className="mb-4 text-xs text-white/40">
-        <code className="rounded bg-black/30 px-1 text-emerald-300">{"{rating}"}</code> becomes the stars,{" "}
-        <code className="rounded bg-black/30 px-1 text-emerald-300">{"{average}"}</code> the score (e.g. 4.5), and{" "}
-        <code className="rounded bg-black/30 px-1 text-emerald-300">{"{count}"}</code> the review count.
-        Example: <code className="rounded bg-black/30 px-1 text-emerald-300">{"{rating} {average} · {count}"}</code>.
+      <p className="mb-4 text-xs text-black/45">
+        <code className="rounded bg-black/[0.05] px-1 text-emerald-300">{"{rating}"}</code> becomes the stars,{" "}
+        <code className="rounded bg-black/[0.05] px-1 text-emerald-300">{"{average}"}</code> the score (e.g. 4.5), and{" "}
+        <code className="rounded bg-black/[0.05] px-1 text-emerald-300">{"{count}"}</code> the review count.
+        Example: <code className="rounded bg-black/[0.05] px-1 text-emerald-300">{"{rating} {average} · {count}"}</code>.
         Your wording is kept as typed — only the first letter is capitalised.
       </p>
-      <p className="mb-4 text-xs text-white/40">
+      <p className="mb-4 text-xs text-black/45">
         Preview: <span className="text-yellow-300">{preview}</span>
         {previewBroken && (
           <span className="ml-2 text-amber-300">
@@ -76,7 +76,7 @@ export function RatingBadgeForm({
         )}
       </p>
 
-      <label className="mb-1 block text-xs text-white/50">
+      <label className="mb-1 block text-xs text-black/50">
         Star size: {starSize}px
       </label>
       <input
@@ -89,7 +89,7 @@ export function RatingBadgeForm({
       />
 
       {/* Live size preview */}
-      <div className="mb-4 flex items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3 py-2">
+      <div className="mb-4 flex items-center gap-2 rounded-md border border-black/[0.10] bg-black/[0.03] px-3 py-2">
         <span style={{ fontSize: `${starSize}px`, color: "#f5b400", lineHeight: 1 }}>★★★★☆</span>
         <span style={{ fontSize: `${Math.max(starSize - 4, 10)}px`, color: "#999" }}>128 reviews</span>
       </div>

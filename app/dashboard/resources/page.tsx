@@ -19,11 +19,11 @@ type Guide = { title: string; body: string; action?: { label: string; href: stri
 
 function GuideList({ guides }: { guides: Guide[] }) {
   return (
-    <ul className="divide-y divide-white/[0.07]">
+    <ul className="divide-y divide-black/[0.08]">
       {guides.map((g) => (
         <li key={g.title} className="py-3.5 first:pt-0 last:pb-0">
-          <p className="text-[13.5px] font-semibold text-white">{g.title}</p>
-          <p className="mt-1 text-[12.5px] leading-relaxed text-white/50">{g.body}</p>
+          <p className="text-[13.5px] font-semibold text-[#111418]">{g.title}</p>
+          <p className="mt-1 text-[12.5px] leading-relaxed text-black/50">{g.body}</p>
           {g.action && (
             <a
               href={g.action.href}
@@ -50,8 +50,8 @@ function Panel({
 }) {
   return (
     <Card>
-      <h2 className="text-[16px] font-bold tracking-[-0.01em] text-white">{title}</h2>
-      <p className="mb-4 mt-1 text-[12.5px] text-white/40">{description}</p>
+      <h2 className="text-[16px] font-bold tracking-[-0.01em] text-[#111418]">{title}</h2>
+      <p className="mb-4 mt-1 text-[12.5px] text-black/45">{description}</p>
       {children}
     </Card>
   );
@@ -193,8 +193,8 @@ export default async function ResourcesPage({
       </div>
 
       <Card className="mb-5">
-        <h2 className="text-[16px] font-bold tracking-[-0.01em] text-white">Common questions</h2>
-        <p className="mb-4 mt-1 text-[12.5px] text-white/40">
+        <h2 className="text-[16px] font-bold tracking-[-0.01em] text-[#111418]">Common questions</h2>
+        <p className="mb-4 mt-1 text-[12.5px] text-black/45">
           The things merchants write in about most.
         </p>
         <div className="grid gap-x-8 md:grid-cols-2">
@@ -206,10 +206,10 @@ export default async function ResourcesPage({
       <Card className="border-emerald-400/25 bg-emerald-400/[0.06]">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-[16px] font-bold tracking-[-0.01em] text-white">
+            <h2 className="text-[16px] font-bold tracking-[-0.01em] text-[#111418]">
               Still stuck? Ask us directly.
             </h2>
-            <p className="mt-1 max-w-xl text-[12.5px] leading-relaxed text-white/55">
+            <p className="mt-1 max-w-xl text-[12.5px] leading-relaxed text-black/55">
               Use the chat button in the bottom corner of any page — it goes straight to the person
               who builds Rivu, not a ticket queue, and you can attach a screenshot. Tell us your
               theme name and what you expected to see; that is normally enough for us to fix it for
