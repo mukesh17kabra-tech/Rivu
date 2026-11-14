@@ -99,7 +99,11 @@ export default async function WidgetSettingsPage({
         />
       </Section>
 
+      {/* Folded shut. These three are set once and rarely revisited, and
+          leaving them open made the page a long scroll past settings the
+          merchant was not looking for. */}
       <Section
+        collapsible
         step={2}
         title="Rating badge"
         description="The compact star line shown near your product title and on collection cards."
@@ -112,6 +116,7 @@ export default async function WidgetSettingsPage({
       </Section>
 
       <Section
+        collapsible
         step={3}
         title="Build your own layout"
         description="Pro — write your own HTML and place the stars, reviews and buttons exactly where you want them."
@@ -126,6 +131,7 @@ export default async function WidgetSettingsPage({
       </Section>
 
       <Section
+        collapsible
         step={4}
         title="Store logo"
         description="Watermarked onto the shareable graphics Rivu generates from your reviews."

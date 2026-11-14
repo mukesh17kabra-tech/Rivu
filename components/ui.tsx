@@ -66,6 +66,8 @@ export function Section({
   step,
   children,
   actions,
+  collapsible = false,
+  defaultOpen = false,
 }: {
   title: string;
   description?: ReactNode;
@@ -73,23 +75,55 @@ export function Section({
   step?: number;
   children: ReactNode;
   actions?: ReactNode;
+  /**
+   * Fold the section shut until the merchant opens it. For the secondary
+   * blocks on a long page: the whole page is otherwise one scroll past
+   * settings most merchants touch once and never again.
+   */
+  collapsible?: boolean;
+  defaultOpen?: boolean;
 }) {
+  const heading = (
+    <div className="flex items-start gap-3">
+      {step !== undefined && (
+        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400 text-[11px] font-extrabold text-black">
+          {step}
+        </span>
+      )}
+      <div>
+        <h2 className="text-[17px] font-bold tracking-[-0.01em] text-white">{title}</h2>
+        {description && (
+          <p className="mt-1 text-[13px] leading-relaxed text-white/45">{description}</p>
+        )}
+      </div>
+    </div>
+  );
+
+  if (collapsible) {
+    // <details> rather than React state: this renders on the server, and the
+    // open/shut behaviour is the browser's, so it works before hydration.
+    return (
+      <Card className="mb-5">
+        <details className="group" open={defaultOpen}>
+          <summary className="flex cursor-pointer list-none items-start justify-between gap-4 [&::-webkit-details-marker]:hidden">
+            {heading}
+            <span className="mt-1 shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-white/35 group-open:hidden">
+              Open
+            </span>
+            <span className="mt-1 hidden shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-white/35 group-open:inline">
+              Close
+            </span>
+          </summary>
+          <div className="mt-5 border-t border-white/[0.07] pt-5">{children}</div>
+        </details>
+      </Card>
+    );
+  }
+
   return (
     <Card className="mb-5">
       <div className="mb-5 flex items-start justify-between gap-4 border-b border-white/[0.07] pb-4">
-        <div className="flex items-start gap-3">
-          {step !== undefined && (
-            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400 text-[11px] font-extrabold text-black">
-              {step}
-            </span>
-          )}
-          <div>
-            <h2 className="text-[17px] font-bold tracking-[-0.01em] text-white">{title}</h2>
-            {description && (
-              <p className="mt-1 text-[13px] leading-relaxed text-white/45">{description}</p>
-            )}
-          </div>
-        </div>
+        {heading}
         {actions}
       </div>
       {children}

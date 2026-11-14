@@ -219,9 +219,11 @@ export function DesignForm({
           you change colours, text or spacing. Tabs only hide cards with CSS —
           every input stays mounted, so switching tabs never loses an unsaved
           change, and Save still saves the whole form at once. */}
-      <div className="sticky top-0 z-10 -mx-1 bg-[#0B0D0F] px-1 pt-1 pb-3">
-        <LivePreview settings={settings} />
-      </div>
+      {/* Not pinned. Sticking it to the top meant it slid over the cards as
+          you scrolled and carried its own scrollbar — two scrollbars on one
+          page reads as broken. It now sits at the top and scrolls away like
+          any other block. */}
+      <LivePreview settings={settings} />
 
       {!advanced && (
         <SimplePanel
@@ -1609,11 +1611,12 @@ function LivePreview({ settings }: { settings: DesignSettings }) {
     <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
       <p className="mb-2 text-xs font-medium text-white/50">Live preview — updates as you change settings</p>
       <div
-        className="overflow-auto rounded-lg"
+        className="overflow-hidden rounded-lg"
         style={{
-          // Shorter than it was as a half-width column: this now sits pinned
-          // above every tab, so it has to leave room for the controls.
-          maxHeight: "220px",
+          // Clipped, not scrollable. A scrollbar inside the preview invited
+          // scrolling it instead of the page, and the mock below the fold adds
+          // nothing — the colours, corners and type are all visible up here.
+          maxHeight: "240px",
           fontFamily: settings.fontFamily,
           border: settings.showBorder ? `${settings.borderWidth}px ${settings.borderStyle} ${settings.borderColor}` : "none",
           borderRadius: `${settings.borderRadius}px`,
