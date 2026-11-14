@@ -209,29 +209,81 @@
   var TITLE_SELECTOR = '[class*="title"], [class*="name"], [class*="heading"], h2, h3, h4';
 
   /**
-   * The element that represents this product, found by looking for its title.
+   * How far up to look for the element that represents one product.
    *
-   * Guessing the container from class names does not work. Every attempt hit
-   * the same trap from a different angle: closest() considers the element
-   * itself, so Dawn's image link matched [class*="card"] via its own
-   * "card__media-link" class; and once that was fixed, the cart's media cell
-   * matched [class*="cart-item"] via "cart-item__media". Both are inner
-   * elements, so the two links to one product resolved to different containers
-   * — the duplicate badges — and the badge landed on top of the image because
-   * there was no title inside the container to sit under.
-   *
-   * Walking up until an ancestor actually contains a title element finds the
-   * cart row and the product card without knowing anything about either
-   * theme's class names.
+   * Was 5, which a carousel can exceed on its own — slide, inner, media
+   * wrapper, aspect-ratio box — leaving the walk short of the card and falling
+   * back to the image link's parent. Raised for headroom rather than because
+   * it caused the reported bug; that one was the placement below.
    */
-  function containerFor(linkEl) {
+  var CARD_DEPTH = 8;
+
+  function handleOf(el) {
+    var match = (el.getAttribute('href') || '').match(/\/products\/([^?#/]+)/);
+    return match ? match[1] : null;
+  }
+
+  /**
+   * A link to this product that carries its *name* rather than its picture.
+   *
+   * A card holds two links to the same product. Telling them apart by class
+   * name never worked across themes; telling them apart by what is inside them
+   * does, and needs to know nothing about the theme: the name link has text and
+   * no image, the media link has an image.
+   */
+  function isNameLink(el, handle) {
+    if (!el || handleOf(el) !== handle) return false;
+    if (el.querySelector && el.querySelector('img, picture, svg')) return false;
+    return (el.textContent || '').trim().length > 0;
+  }
+
+  function nameLinkIn(node, handle) {
+    if (!node.querySelectorAll) return null;
+    var links = node.querySelectorAll('a[href*="/products/"]');
+    for (var i = 0; i < links.length; i++) {
+      if (isNameLink(links[i], handle)) return links[i];
+    }
+    return null;
+  }
+
+  /**
+   * The element that represents this product.
+   *
+   * Requires the candidate to contain *both* this product's name link and an
+   * image. That pairing is what makes the two links agree on one container,
+   * which is what stops the duplicate badges:
+   *
+   *   image link  → media wrapper has the image but no name  → keep walking
+   *   title link  → heading has the name but no image        → keep walking
+   *   both        → the card                                  → stop
+   *
+   * An earlier version asked only whether an ancestor contained a title
+   * element. The heading's own wrapper satisfied that for the title link while
+   * the image link had to climb to the card, so the two resolved differently
+   * and each got its own badge.
+   */
+  function containerFor(linkEl, handle) {
     var node = linkEl.parentElement;
-    for (var depth = 0; depth < 5 && node; depth++) {
+    var depth;
+
+    if (handle) {
+      for (depth = 0; depth < CARD_DEPTH && node; depth++) {
+        if (node === document.body || node === document.documentElement) break;
+        if (nameLinkIn(node, handle) && node.querySelector('img, picture')) return node;
+        node = node.parentElement;
+      }
+    }
+
+    // No name-and-image pairing nearby — a text-only row, or a theme that puts
+    // the name in a plain element rather than a link. Fall back to the first
+    // ancestor holding something title-shaped.
+    node = linkEl.parentElement;
+    for (depth = 0; depth < CARD_DEPTH && node; depth++) {
+      if (node === document.body || node === document.documentElement) break;
       if (node.querySelector && node.querySelector(TITLE_SELECTOR)) return node;
       node = node.parentElement;
     }
-    // No title anywhere nearby: fall back to the immediate parent, which is
-    // what this did before, rather than skipping the product entirely.
+
     return linkEl.parentElement || linkEl;
   }
 
@@ -254,7 +306,7 @@
      * Cart and line-item patterns are included, and tr, so those lines resolve
      * to one shared container.
      */
-    var card = containerFor(linkEl);
+    var card = containerFor(linkEl, handle);
     if (!card) return;
 
     // Skip if already injected in this card
@@ -334,13 +386,51 @@
     badge.innerHTML = starsHtml(data.average, color, starSize) +
       '<span style="font-size:' + Math.max(starSize - 3, 10) + 'px;color:' + tc + ';opacity:.65;margin-left:2px;">(' + data.total + ')</span>';
 
-    // Insert after the title/name element if possible, else after the link
-    var titleEl = card.querySelector(TITLE_SELECTOR);
-    if (titleEl) {
-      titleEl.insertAdjacentElement('afterend', badge);
-    } else {
-      linkEl.insertAdjacentElement('afterend', badge);
+    placeUnderTitle(card, badge, handle);
+  }
+
+  /**
+   * Put the badge directly below the product's name.
+   *
+   * Preference order, and why:
+   *
+   * 1. The name link's outermost title wrapper inside the card. Starting from
+   *    the link the theme itself uses for the product name is the only signal
+   *    that is reliable across themes, and climbing to its heading keeps the
+   *    stars below the whole title rather than wedged into it.
+   * 2. The first title-shaped element that holds no image. The unfiltered
+   *    version of this could match a wrapper inside the media area, which put
+   *    the stars over the photo.
+   * 3. The end of the card. The old fallback inserted after whichever link was
+   *    found first — usually the image link — so on a deeply nested card the
+   *    badge landed on top of the picture. Below the price is not ideal;
+   *    on top of the photo is a bug.
+   */
+  function placeUnderTitle(card, badge, handle) {
+    var nameLink = handle ? nameLinkIn(card, handle) : null;
+
+    if (nameLink) {
+      // Climb to the heading that wraps the link, but never past the card.
+      var target = nameLink;
+      var node = nameLink.parentElement;
+      for (var depth = 0; depth < CARD_DEPTH && node && node !== card; depth++) {
+        if (node.matches && node.matches(TITLE_SELECTOR)) target = node;
+        node = node.parentElement;
+      }
+      target.insertAdjacentElement('afterend', badge);
+      return;
     }
+
+    var candidates = card.querySelectorAll(TITLE_SELECTOR);
+    for (var i = 0; i < candidates.length; i++) {
+      var el = candidates[i];
+      if (el.querySelector && el.querySelector('img, picture')) continue;
+      if (!(el.textContent || '').trim()) continue;
+      el.insertAdjacentElement('afterend', badge);
+      return;
+    }
+
+    card.appendChild(badge);
   }
 
   function scanCards() {

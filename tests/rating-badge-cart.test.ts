@@ -191,6 +191,93 @@ describe("where the cart badge lands", () => {
   });
 });
 
+/**
+ * Reported on a live store: the stars rendered over the top-left of the
+ * product photo instead of under the name.
+ *
+ * The card picks its insertion point with a loose class-substring selector and
+ * takes the *first* match in document order. A sale label sitting on the photo
+ * carries "name" in its class, so it matched before the real title did and the
+ * stars were inserted next to it — inside the overlay, on top of the image.
+ */
+const CAROUSEL_SLIDE = `
+  <div class="product-carousel">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide">
+        <div class="product-item">
+          <div class="product-item__inner">
+            <div class="product-item__media">
+              <div class="media-wrapper" style="position:relative">
+                <span class="label__name">New</span>
+                <a href="/products/pink-petal-co-ord" class="media-link">
+                  <img src="/pink.jpg"/>
+                </a>
+              </div>
+            </div>
+            <div class="product-item__info">
+              <h3 class="product-item__title">
+                <a href="/products/pink-petal-co-ord">Pink Petal Co-ord</a>
+              </h3>
+              <span class="price">Rs. 2,222.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+describe("a deeply nested carousel card", () => {
+  it("gets exactly one badge", async () => {
+    setUpPage(CAROUSEL_SLIDE);
+    const badges = await run();
+    expect(badges.length).toBe(1);
+  });
+
+  it("keeps the stars off the product image", async () => {
+    // The actual complaint. Anywhere inside the media wrapper is wrong.
+    setUpPage(CAROUSEL_SLIDE);
+    await run();
+    const media = document.querySelector(".product-item__media");
+    expect(media?.querySelectorAll(".rivu-auto-badge").length).toBe(0);
+  });
+
+  it("puts them directly below the title", async () => {
+    setUpPage(CAROUSEL_SLIDE);
+    await run();
+    const title = document.querySelector(".product-item__title");
+    expect(title?.nextElementSibling?.className).toContain("rivu-auto-badge");
+  });
+
+  it("puts them above the price, not after it", async () => {
+    // "Below the title" has to mean between the title and the price; landing
+    // at the end of the card would also be out of the image and still wrong.
+    setUpPage(CAROUSEL_SLIDE);
+    await run();
+    const badge = document.querySelector(".rivu-auto-badge");
+    expect(badge?.nextElementSibling?.className).toContain("price");
+  });
+});
+
+describe("a card whose media wrapper is title-shaped", () => {
+  it("does not treat the image wrapper as the product name", async () => {
+    // [class*="name"] and friends match loosely. A wrapper around the photo
+    // can satisfy the selector, and inserting after it puts the stars on the
+    // picture — so a candidate holding an image is never the title.
+    setUpPage(`
+      <div class="card">
+        <div class="card__image-name-wrap">
+          <a href="/products/one"><img/></a>
+        </div>
+        <div class="card__title">One</div>
+      </div>
+    `);
+    await run();
+    const title = document.querySelector(".card__title");
+    expect(title?.nextElementSibling?.className).toContain("rivu-auto-badge");
+  });
+});
+
 describe("a theme with no title element near the link", () => {
   it("still gets only one badge", async () => {
     // containerFor gives up after five levels and falls back to the link's
