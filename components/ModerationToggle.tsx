@@ -81,7 +81,7 @@ export function ModerationToggle({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-[15px] font-bold text-[#111418]">Publishing</p>
-          <p className="mt-1 text-[13px] leading-relaxed text-black/48">
+          <p className="mt-1 text-sm leading-relaxed text-black/60">
             {autoApprove
               ? "New reviews appear on your storefront straight away."
               : "New reviews stay hidden until you approve them here."}
@@ -89,7 +89,7 @@ export function ModerationToggle({
         </div>
 
         <label className="flex cursor-pointer items-center gap-3">
-          <span className="text-[13px] font-medium text-black/65">
+          <span className="text-sm font-medium text-black/72">
             Publish automatically
           </span>
           <input
@@ -103,7 +103,7 @@ export function ModerationToggle({
       </div>
 
       {!autoApprove && pendingCount > 0 && (
-        <p className="mt-3 rounded-lg border border-amber-600/25 bg-amber-400/[0.08] px-3 py-2 text-[13px] text-amber-800">
+        <p className="mt-3 rounded-lg border border-amber-600/25 bg-amber-400/[0.08] px-3 py-2 text-sm text-amber-800">
           {pendingCount} review{pendingCount === 1 ? "" : "s"} waiting for approval —
           {pendingCount === 1 ? " it isn't" : " they aren't"} visible on your storefront yet.
         </p>
@@ -114,7 +114,7 @@ export function ModerationToggle({
           nothing on screen said so. */}
       {autoApprove && pendingCount > 0 && (
         <div className="mt-3 rounded-lg border border-amber-600/25 bg-amber-400/[0.08] px-3 py-2.5">
-          <p className="text-[13px] leading-relaxed text-amber-800">
+          <p className="text-sm leading-relaxed text-amber-800">
             {pendingCount === 1
               ? "1 review is still pending"
               : `${pendingCount} reviews are still pending`}{" "}
@@ -126,7 +126,7 @@ export function ModerationToggle({
             type="button"
             onClick={publishAll}
             disabled={publishing}
-            className="mt-2.5 rounded-md bg-amber-400 px-3 py-1.5 text-xs font-bold text-black transition-colors hover:bg-amber-300 disabled:opacity-60"
+            className="mt-2.5 rounded-md bg-amber-400 px-3 py-1.5 text-[13px] font-bold text-black transition-colors hover:bg-amber-300 disabled:opacity-60"
           >
             {publishing
               ? "Publishing…"
@@ -136,7 +136,7 @@ export function ModerationToggle({
           </button>
         </div>
       )}
-      {error && <p className="mt-3 text-[13px] text-red-600">{error}</p>}
+      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
     </div>
   );
 }

@@ -53,7 +53,7 @@ export default async function QRCodesPage({
         description="Recommended — works for every product, so you only print one code."
       >
         <div>
-          <p className="mb-4 text-sm text-black/55 leading-relaxed max-w-2xl">
+          <p className="mb-4 text-[15px] text-black/65 leading-relaxed max-w-2xl">
             Print this single QR code on packing slips, thank-you cards, or receipts —
             it works for every product. When a customer scans it, they enter the email they
             ordered with, and Rivu automatically looks up what they bought so they can
@@ -64,7 +64,7 @@ export default async function QRCodesPage({
             <a
               href={genericQrUrl}
               download="rivu-review-qr.png"
-              className="rounded-md bg-[#111418] px-4 py-2 text-sm font-bold text-white hover:bg-[#2a2f35]"
+              className="rounded-md bg-[#111418] px-4 py-2 text-[15px] font-bold text-white hover:bg-[#2a2f35]"
             >
               Download QR
             </a>
@@ -79,19 +79,19 @@ export default async function QRCodesPage({
 
           {needsReauth ? (
             <div className="rounded-lg border border-amber-600/25 bg-amber-400/[0.08] p-4">
-              <p className="text-sm text-amber-800">
+              <p className="text-[15px] text-amber-800">
                 Rivu needs permission to read your products again.
               </p>
               <a
                 href={`/api/auth?${shopQuery(shop, host)}`}
                 target="_top"
-                className="mt-3 inline-block rounded-md bg-[#111418] px-4 py-2 text-sm font-bold text-white hover:bg-[#2a2f35]"
+                className="mt-3 inline-block rounded-md bg-[#111418] px-4 py-2 text-[15px] font-bold text-white hover:bg-[#2a2f35]"
               >
                 Reconnect Rivu
               </a>
             </div>
           ) : fetchError ? (
-            <p className="rounded-lg border border-red-600/25 bg-red-400/[0.08] p-4 text-sm text-red-600">
+            <p className="rounded-lg border border-red-600/25 bg-red-400/[0.08] p-4 text-[15px] text-red-600">
               Couldn&apos;t load products: {fetchError}
             </p>
           ) : (
@@ -104,11 +104,11 @@ export default async function QRCodesPage({
                     className="rounded-lg border border-black/[0.09] bg-black/[0.025] p-3 text-center"
                   >
                     <img src={qrUrl} alt={`QR for ${product.title}`} className="mx-auto mb-2 w-full rounded-md bg-white p-1" />
-                    <p className="mb-2 text-xs text-black/58 truncate">{product.title}</p>
+                    <p className="mb-2 text-[13px] text-black/68 truncate">{product.title}</p>
                     <a
                       href={qrUrl}
                       download={`review-qr-${product.id}.png`}
-                      className="inline-block rounded-md bg-black/[0.06] px-2 py-1 text-[11px] font-semibold text-[#111418] hover:bg-black/[0.09]"
+                      className="inline-block rounded-md bg-black/[0.06] px-2 py-1 text-[12px] font-semibold text-[#111418] hover:bg-black/[0.09]"
                     >
                       Download
                     </a>
@@ -120,17 +120,17 @@ export default async function QRCodesPage({
 
           {hiddenProducts > 0 && (
             <div className="mt-4 rounded-lg border border-amber-600/25 bg-amber-400/[0.08] p-4">
-              <p className="text-sm text-amber-800">
+              <p className="text-[15px] text-amber-800">
                 {hiddenProducts} more product{hiddenProducts === 1 ? "" : "s"} not
                 shown — your plan covers per-product codes for {qrLimit}.
               </p>
-              <p className="mt-1 text-xs text-amber-800/70">
+              <p className="mt-1 text-[13px] text-amber-800/70">
                 The store-wide code above already works for every product, so
                 you only need these for a checkout thank-you page.
               </p>
               <a
                 href={`/dashboard/plans?${shopQuery(shop, host)}`}
-                className="mt-3 inline-block rounded-md bg-[#111418] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#2a2f35]"
+                className="mt-3 inline-block rounded-md bg-[#111418] px-3.5 py-1.5 text-[13px] font-bold text-white hover:bg-[#2a2f35]"
               >
                 Upgrade for unlimited
               </a>

@@ -127,24 +127,24 @@ export function SupportChatWidget({ shop }: { shop: string }) {
           className="flex h-[420px] w-80 flex-col rounded-xl border border-black/[0.10] bg-white shadow-2xl overflow-hidden"
         >
           <div className="flex items-center justify-between border-b border-black/[0.10] px-4 py-3">
-            <p className="text-sm font-semibold text-[#111418]">Support</p>
-            <button onClick={() => setOpen(false)} className="text-lg text-black/45 hover:text-[#111418]">
+            <p className="text-[15px] font-semibold text-[#111418]">Support</p>
+            <button onClick={() => setOpen(false)} className="text-lg text-black/58 hover:text-[#111418]">
               ✕
             </button>
           </div>
 
           <div className="flex-1 space-y-2 overflow-y-auto p-3">
             {messages.length === 0 ? (
-              <p className="text-xs text-black/45">
+              <p className="text-[13px] text-black/58">
                 Send us a message and we&apos;ll get back to you here.
               </p>
             ) : (
               messages.map((m) => (
                 <div
                   key={m.id}
-                  className={`max-w-[85%] rounded-xl p-2.5 text-xs ${
+                  className={`max-w-[85%] rounded-xl p-2.5 text-[13px] ${
                     m.fromDeveloper
-                      ? "bg-black/[0.06] text-black/80"
+                      ? "bg-black/[0.06] text-black/85"
                       : "ml-auto bg-[#111418] text-white"
                   }`}
                 >
@@ -169,7 +169,7 @@ export function SupportChatWidget({ shop }: { shop: string }) {
               <img src={imageDataUrl} alt="preview" className="h-10 w-10 rounded object-cover" />
               <button
                 onClick={() => setImageDataUrl(null)}
-                className="text-xs text-red-600 hover:underline"
+                className="text-[13px] text-red-600 hover:underline"
               >
                 Remove
               </button>
@@ -177,7 +177,7 @@ export function SupportChatWidget({ shop }: { shop: string }) {
           )}
 
           <div className="flex gap-2 border-t border-black/[0.10] p-3">
-            <label className="cursor-pointer text-black/45 hover:text-[#111418] text-lg">
+            <label className="cursor-pointer text-black/58 hover:text-[#111418] text-lg">
               📎
               <input
                 type="file"
@@ -192,12 +192,12 @@ export function SupportChatWidget({ shop }: { shop: string }) {
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
               placeholder="Type a message..."
-              className="flex-1 rounded-lg border border-black/[0.14] bg-black/[0.03] px-2.5 py-1.5 text-xs text-[#111418]"
+              className="flex-1 rounded-lg border border-black/[0.14] bg-black/[0.03] px-2.5 py-1.5 text-[13px] text-[#111418]"
             />
             <button
               onClick={send}
               disabled={sending || (!text.trim() && !imageDataUrl)}
-              className="rounded-lg bg-[#111418] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+              className="rounded-lg bg-[#111418] px-3 py-1.5 text-[13px] font-semibold text-white disabled:opacity-50"
             >
               {sending ? "…" : "Send"}
             </button>
@@ -215,7 +215,7 @@ export function SupportChatWidget({ shop }: { shop: string }) {
         </button>
         {unreadCount > 0 && !open && (
           <span
-            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white"
           >
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>

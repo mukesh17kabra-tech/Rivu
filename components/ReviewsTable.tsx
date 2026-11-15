@@ -169,7 +169,7 @@ export function ReviewsTable({
 
   if (reviews.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed border-black/[0.14] p-6 text-sm text-black/45">
+      <p className="rounded-lg border border-dashed border-black/[0.14] p-6 text-[15px] text-black/58">
         No reviews yet. Once shoppers submit reviews, they&apos;ll show up here.
       </p>
     );
@@ -177,8 +177,8 @@ export function ReviewsTable({
 
   return (
     <div className="overflow-x-auto rounded-lg border border-black/[0.10]">
-      <table className="w-full text-left text-sm">
-        <thead className="bg-black/[0.03] text-black/50">
+      <table className="w-full text-left text-[15px]">
+        <thead className="bg-black/[0.03] text-black/62">
           <tr>
             <th className="px-4 py-3 font-medium">Reviewer</th>
             <th className="px-4 py-3 font-medium">Product</th>
@@ -198,17 +198,17 @@ export function ReviewsTable({
                   <td className="px-4 py-3">
                     <p className="font-medium text-[#111418]">{review.customerName}</p>
                     {review.customerEmail && (
-                      <p className="text-xs text-black/45">{review.customerEmail}</p>
+                      <p className="text-[13px] text-black/58">{review.customerEmail}</p>
                     )}
                   </td>
-                  <td className="max-w-[220px] px-4 py-3 text-black/65">
+                  <td className="max-w-[220px] px-4 py-3 text-black/72">
                     <p className="truncate">{review.productTitle}</p>
                     {review.reviewTitle && (
-                      <p className="mt-1 max-w-[220px] truncate text-xs font-medium italic text-black/58">
+                      <p className="mt-1 max-w-[220px] truncate text-[13px] font-medium italic text-black/68">
                         {review.reviewTitle}
                       </p>
                     )}
-                    <p className="mt-1 max-w-[220px] truncate text-xs text-black/45">{review.body}</p>
+                    <p className="mt-1 max-w-[220px] truncate text-[13px] text-black/58">{review.body}</p>
                   </td>
                   <td className="px-4 py-3 text-yellow-400 whitespace-nowrap">
                     {/* Rounded: String.repeat truncates, so a 4.5 would draw
@@ -218,7 +218,7 @@ export function ReviewsTable({
                   </td>
                   <td className="px-4 py-3">
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs ${
+                      className={`rounded-full px-2 py-0.5 text-[13px] ${
                         review.approved
                           ? "bg-emerald-50 text-emerald-700"
                           : "bg-amber-50 text-amber-800"
@@ -227,21 +227,21 @@ export function ReviewsTable({
                       {review.approved ? "Published" : "Pending"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-black/45 whitespace-nowrap">
+                  <td className="px-4 py-3 text-black/58 whitespace-nowrap">
                     {review.createdAt.toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <button
                       onClick={() => toggleApproved(review)}
                       disabled={busyId === review.id}
-                      className="mr-3 text-xs font-medium text-emerald-700 hover:underline disabled:opacity-50"
+                      className="mr-3 text-[13px] font-medium text-emerald-700 hover:underline disabled:opacity-50"
                     >
                       {review.approved ? "Unpublish" : "Publish"}
                     </button>
                     {review.approved && (
                       <button
                         onClick={() => toggleUgc(review.id)}
-                        className="mr-3 text-xs font-medium text-blue-400 hover:underline"
+                        className="mr-3 text-[13px] font-medium text-blue-400 hover:underline"
                       >
                         {ugcOpen ? "Hide graphic" : "Create graphic"}
                       </button>
@@ -250,21 +250,21 @@ export function ReviewsTable({
                       <button
                         onClick={() => togglePin(review)}
                         disabled={busyId === review.id}
-                        className="mr-3 text-xs font-medium text-amber-700 hover:underline disabled:opacity-50"
+                        className="mr-3 text-[13px] font-medium text-amber-700 hover:underline disabled:opacity-50"
                       >
                         {review.pinnedAt ? "Unpin" : "Pin to top"}
                       </button>
                     )}
                     <button
                       onClick={() => toggleReply(review)}
-                      className="mr-3 text-xs font-medium text-black/58 hover:underline"
+                      className="mr-3 text-[13px] font-medium text-black/68 hover:underline"
                     >
                       {review.ownerReply ? "Edit reply" : "Reply"}
                     </button>
                     <button
                       onClick={() => deleteReview(review)}
                       disabled={busyId === review.id}
-                      className="text-xs font-medium text-red-600 hover:underline disabled:opacity-50"
+                      className="text-[13px] font-medium text-red-600 hover:underline disabled:opacity-50"
                     >
                       Delete
                     </button>
@@ -273,7 +273,7 @@ export function ReviewsTable({
                 {replyOpenId === review.id && (
                   <tr className="border-t border-black/[0.06] bg-black/[0.015]">
                     <td colSpan={6} className="px-4 py-4">
-                      <label className="mb-1.5 block text-xs font-medium text-black/50">
+                      <label className="mb-1.5 block text-[13px] font-medium text-black/62">
                         Your public reply — shown under this review on your storefront
                       </label>
                       <textarea
@@ -282,19 +282,19 @@ export function ReviewsTable({
                         rows={3}
                         maxLength={2000}
                         placeholder="Thanks for the feedback — we've passed this on to our team."
-                        className="w-full rounded-md border border-black/[0.14] bg-black/[0.055] px-3 py-2 text-sm text-[#111418]"
+                        className="w-full rounded-md border border-black/[0.14] bg-black/[0.055] px-3 py-2 text-[15px] text-[#111418]"
                       />
                       <div className="mt-2 flex items-center gap-3">
                         <button
                           onClick={() => saveReply(review, replyDraft)}
                           disabled={busyId === review.id}
-                          className="rounded-md bg-[#111418] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#2a2f35] disabled:opacity-60"
+                          className="rounded-md bg-[#111418] px-3.5 py-1.5 text-[13px] font-bold text-white hover:bg-[#2a2f35] disabled:opacity-60"
                         >
                           {busyId === review.id ? "Saving…" : "Save reply"}
                         </button>
                         <button
                           onClick={() => setReplyOpenId(null)}
-                          className="text-xs font-medium text-black/48 hover:text-black/65"
+                          className="text-[13px] font-medium text-black/60 hover:text-black/72"
                         >
                           Cancel
                         </button>
@@ -305,7 +305,7 @@ export function ReviewsTable({
                               saveReply(review, "");
                             }}
                             disabled={busyId === review.id}
-                            className="ml-auto text-xs font-medium text-red-600/80 hover:underline disabled:opacity-50"
+                            className="ml-auto text-[13px] font-medium text-red-600/80 hover:underline disabled:opacity-50"
                           >
                             Remove reply
                           </button>
@@ -322,7 +322,7 @@ export function ReviewsTable({
                           <select
                             value={template}
                             onChange={(e) => setTemplate(e.target.value)}
-                            className="rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-xs text-[#111418]"
+                            className="rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-[13px] text-[#111418]"
                           >
                             {TEMPLATES.map((t, i) => {
                               const locked = i >= allowedTemplateCount;
@@ -341,7 +341,7 @@ export function ReviewsTable({
                           <select
                             value={format}
                             onChange={(e) => setFormat(e.target.value)}
-                            className="ml-2 rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-xs text-[#111418]"
+                            className="ml-2 rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-[13px] text-[#111418]"
                           >
                             {FORMATS.map((f) => (
                               <option key={f.value} value={f.value} style={{ color: "#000" }}>
@@ -350,7 +350,7 @@ export function ReviewsTable({
                             ))}
                           </select>
                           {allowedTemplateCount < TEMPLATES.length && (
-                            <p className="text-[11px] text-amber-700/80">
+                            <p className="text-[12px] text-amber-700/80">
                               {TEMPLATES.length - allowedTemplateCount} more template
                               {TEMPLATES.length - allowedTemplateCount === 1 ? "" : "s"} available on
                               a higher plan.{" "}
@@ -363,7 +363,7 @@ export function ReviewsTable({
                             <a
                               href={imageUrl}
                               download={`review-${review.id}.png`}
-                              className="inline-block rounded-md bg-black/[0.07] px-3 py-1.5 text-xs font-medium text-[#111418] hover:bg-black/[0.12]"
+                              className="inline-block rounded-md bg-black/[0.07] px-3 py-1.5 text-[13px] font-medium text-[#111418] hover:bg-black/[0.12]"
                             >
                               Download image
                             </a>

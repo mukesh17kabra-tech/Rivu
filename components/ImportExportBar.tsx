@@ -47,17 +47,17 @@ export function ImportExportBar({ shop }: { shop: string }) {
         type="button"
         onClick={handleExport}
         disabled={exporting}
-        className="rounded-md bg-black/[0.07] px-3 py-1.5 text-xs font-medium text-[#111418] hover:bg-black/[0.12] disabled:opacity-50"
+        className="rounded-md bg-black/[0.07] px-3 py-1.5 text-[13px] font-medium text-[#111418] hover:bg-black/[0.12] disabled:opacity-50"
       >
         {exporting ? "Exporting…" : "Export all reviews (CSV)"}
       </button>
 
-      <span className="text-xs text-black/45">
+      <span className="text-[13px] text-black/58">
         Your reviews are yours — export them at any time, in a format any other
         review app can read.
       </span>
 
-      {error && <span className="text-xs text-red-600">{error}</span>}
+      {error && <span className="text-[13px] text-red-600">{error}</span>}
     </div>
   );
 }

@@ -73,7 +73,7 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
   return (
     <div className="max-w-3xl space-y-5 rounded-lg border border-black/[0.10] bg-black/[0.02] p-6">
       <div>
-        <label className="mb-2 block text-sm font-medium text-black/65">
+        <label className="mb-2 block text-[15px] font-medium text-black/72">
           Your email (customer replies go here)
         </label>
         <input
@@ -84,9 +84,9 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
             setSaved(false);
           }}
           placeholder="support@yourstore.com"
-          className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
+          className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-[15px] text-[#111418]"
         />
-        <p className="mt-2 text-xs text-black/45">
+        <p className="mt-2 text-[13px] text-black/58">
           Reminder emails are sent from Rivu&apos;s address (for reliable delivery), but if a
           customer hits reply, it'll come straight to this inbox. Leave blank if you don't need
           replies routed anywhere in particular.
@@ -103,12 +103,12 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
           }}
           className="h-4 w-4 accent-[#111418]"
         />
-        <span className="text-sm text-[#111418]">Automatically email customers to leave a review</span>
+        <span className="text-[15px] text-[#111418]">Automatically email customers to leave a review</span>
       </label>
 
       {settings.reminderEnabled && (
         <div>
-          <label className="mb-2 block text-sm font-medium text-black/65">
+          <label className="mb-2 block text-[15px] font-medium text-black/72">
             Send reminder this many days after purchase:
           </label>
           <input
@@ -120,9 +120,9 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
               setSettings((s) => ({ ...s, reminderDelayDays: Number(e.target.value) }));
               setSaved(false);
             }}
-            className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
+            className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-[15px] text-[#111418]"
           />
-          <p className="mt-2 text-xs text-black/45">
+          <p className="mt-2 text-[13px] text-black/58">
             Only sent if the customer hasn't already reviewed that product. Once someone leaves
             a review (using the same email they ordered with), they won't be reminded again for
             that product.
@@ -133,7 +133,7 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
       {settings.reminderEnabled && (
         <>
           <div>
-            <label className="mb-2 block text-sm font-medium text-black/65">Email subject</label>
+            <label className="mb-2 block text-[15px] font-medium text-black/72">Email subject</label>
             <input
               type="text"
               value={settings.emailSubject}
@@ -141,21 +141,21 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
                 setSettings((s) => ({ ...s, emailSubject: e.target.value }));
                 setSaved(false);
               }}
-              className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
+              className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-[15px] text-[#111418]"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-black/65">Email body template</label>
+            <label className="mb-2 block text-[15px] font-medium text-black/72">Email body template</label>
             <textarea
               value={settings.emailBodyTemplate}
               onChange={(e) => {
                 setSettings((s) => ({ ...s, emailBodyTemplate: e.target.value }));
                 setSaved(false);
               }}
-              className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418] min-h-[280px] font-mono"
+              className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-[15px] text-[#111418] min-h-[280px] font-mono"
             />
-            <p className="mt-2 text-xs text-black/45">
+            <p className="mt-2 text-[13px] text-black/58">
               Available variables:{" "}
               <code className="text-emerald-700">{"{{first_name}}"}</code>,{" "}
               <code className="text-emerald-700">{"{{shop_name}}"}</code>,{" "}
@@ -169,13 +169,13 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
+        className="rounded-md bg-[#111418] px-4 py-2 text-[15px] font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>
 
       <div className="border-t border-black/[0.10] pt-5">
-        <label className="mb-2 block text-sm font-medium text-black/65">
+        <label className="mb-2 block text-[15px] font-medium text-black/72">
           Send yourself a test email
         </label>
         <div className="flex flex-wrap gap-2">
@@ -187,32 +187,32 @@ export function ReminderForm({ shop, initial }: { shop: string; initial: Reminde
               setTestResult(null);
             }}
             placeholder="you@yourstore.com"
-            className="min-w-0 flex-1 rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418] placeholder:text-black/38"
+            className="min-w-0 flex-1 rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-[15px] text-[#111418] placeholder:text-black/52"
           />
           <button
             type="button"
             onClick={handleSendTest}
             disabled={sendingTest || !testTo.trim()}
-            className="rounded-md border border-black/[0.14] px-4 py-2 text-sm font-medium text-[#111418] hover:border-black/[0.25] disabled:opacity-50"
+            className="rounded-md border border-black/[0.14] px-4 py-2 text-[15px] font-medium text-[#111418] hover:border-black/[0.25] disabled:opacity-50"
           >
             {sendingTest ? "Sending…" : "Send test email"}
           </button>
         </div>
 
-        <p className="mt-2 text-xs text-black/45">
+        <p className="mt-2 text-[13px] text-black/58">
           Sends the exact email a customer would get, using the subject and body
           above — including any changes you haven&apos;t saved yet. Your first
           product is used as the example.
         </p>
 
         {testResult?.ok && (
-          <p className="mt-3 rounded-md border border-emerald-600/22 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+          <p className="mt-3 rounded-md border border-emerald-600/22 bg-emerald-50 px-3 py-2 text-[13px] text-emerald-700">
             Test email sent to {testResult.to}. If it doesn&apos;t arrive within a
             minute or two, check your spam folder.
           </p>
         )}
         {testResult && !testResult.ok && (
-          <p className="mt-3 rounded-md border border-red-600/25 bg-red-400/[0.08] px-3 py-2 text-xs text-red-600">
+          <p className="mt-3 rounded-md border border-red-600/25 bg-red-400/[0.08] px-3 py-2 text-[13px] text-red-600">
             {testResult.message}
           </p>
         )}

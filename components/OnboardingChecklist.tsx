@@ -46,8 +46,8 @@ export function OnboardingChecklist({ shop, host }: { shop: string; host?: strin
   return (
     <section className="mb-8 rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm font-medium text-[#111418]">🚀 Finish setting up Rivu</p>
-        <button onClick={() => setDismissed(true)} className="text-xs text-black/45 hover:text-black/65">
+        <p className="text-[15px] font-medium text-[#111418]">🚀 Finish setting up Rivu</p>
+        <button onClick={() => setDismissed(true)} className="text-[13px] text-black/58 hover:text-black/72">
           Dismiss
         </button>
       </div>
@@ -60,20 +60,20 @@ export function OnboardingChecklist({ shop, host }: { shop: string; host?: strin
             }`}
           >
             <div>
-              <p className="text-sm font-medium text-[#111418]">{step.title}</p>
-              <p className="mt-0.5 text-xs text-black/50">{step.body}</p>
+              <p className="text-[15px] font-medium text-[#111418]">{step.title}</p>
+              <p className="mt-0.5 text-[13px] text-black/62">{step.body}</p>
             </div>
             <div className="flex items-center gap-3">
               <a
                 href={step.href}
                 target="_top"
-                className="whitespace-nowrap rounded-md bg-[#111418] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#2a2f35]"
+                className="whitespace-nowrap rounded-md bg-[#111418] px-3 py-1.5 text-[13px] font-medium text-white hover:bg-[#2a2f35]"
               >
                 {step.cta} →
               </a>
               <button
                 onClick={() => markDone(step.key)}
-                className="whitespace-nowrap text-xs text-emerald-700 hover:underline"
+                className="whitespace-nowrap text-[13px] text-emerald-700 hover:underline"
               >
                 Mark done
               </button>

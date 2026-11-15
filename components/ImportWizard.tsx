@@ -90,10 +90,10 @@ export function ImportWizard({ shop }: { shop: string }) {
 
   return (
     <div className="mb-8 rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-      <p className="text-sm font-bold text-[#111418]">
+      <p className="text-[15px] font-bold text-[#111418]">
         Moving from Judge.me, Loox, Stamped or Yotpo?
       </p>
-      <p className="mt-1 text-[13px] leading-relaxed text-black/50">
+      <p className="mt-1 text-sm leading-relaxed text-black/62">
         Export your reviews as CSV from your current app and upload the file
         as-is. Column names are detected automatically, original review dates
         are kept, and you&apos;ll see exactly what will happen before anything
@@ -101,7 +101,7 @@ export function ImportWizard({ shop }: { shop: string }) {
       </p>
 
       <div className="mt-3.5 flex flex-wrap items-center gap-3">
-        <label className="cursor-pointer rounded-md bg-[#111418] px-4 py-2 text-xs font-bold text-white hover:bg-[#2a2f35]">
+        <label className="cursor-pointer rounded-md bg-[#111418] px-4 py-2 text-[13px] font-bold text-white hover:bg-[#2a2f35]">
           {busy && !preview ? "Checking file…" : "Choose CSV file"}
           <input
             type="file"
@@ -112,45 +112,45 @@ export function ImportWizard({ shop }: { shop: string }) {
           />
         </label>
         {fileName && !done && (
-          <span className="text-xs text-black/45">{fileName}</span>
+          <span className="text-[13px] text-black/58">{fileName}</span>
         )}
       </div>
 
       {error && (
-        <p className="mt-3 rounded-md border border-red-600/25 bg-red-400/[0.07] p-3 text-xs text-red-700">
+        <p className="mt-3 rounded-md border border-red-600/25 bg-red-400/[0.07] p-3 text-[13px] text-red-700">
           {error}
         </p>
       )}
 
       {done !== null && (
-        <p className="mt-3 rounded-md border border-emerald-600/20 bg-emerald-50 p-3 text-xs text-emerald-700">
+        <p className="mt-3 rounded-md border border-emerald-600/20 bg-emerald-50 p-3 text-[13px] text-emerald-700">
           Imported {done} review{done === 1 ? "" : "s"}. Refreshing…
         </p>
       )}
 
       {preview && (
         <div className="mt-4 rounded-md border border-black/[0.10] bg-black/[0.035] p-4">
-          <p className="text-xs font-bold uppercase tracking-wide text-black/45">
+          <p className="text-[13px] font-bold uppercase tracking-wide text-black/58">
             Before importing
           </p>
 
-          <div className="mt-2.5 flex flex-wrap gap-5 text-[13px]">
+          <div className="mt-2.5 flex flex-wrap gap-5 text-sm">
             <span className="text-[#111418]">
               <strong className="text-emerald-700">{preview.willImport}</strong>{" "}
               to import
             </span>
             {preview.alreadyPresent > 0 && (
-              <span className="text-black/58">
+              <span className="text-black/68">
                 {preview.alreadyPresent} already in Rivu (skipped)
               </span>
             )}
-            <span className="text-black/45">{preview.totalRows} rows in file</span>
+            <span className="text-black/58">{preview.totalRows} rows in file</span>
           </div>
 
           {/* Warnings are things that will import but won't behave as expected —
               worth reading before, not discovering afterwards. */}
           {preview.warnings.length > 0 && (
-            <ul className="mt-3 space-y-1.5 text-xs text-amber-800/90">
+            <ul className="mt-3 space-y-1.5 text-[13px] text-amber-800/90">
               {preview.warnings.map((w) => (
                 <li key={w} className="rounded border border-amber-400/20 bg-amber-400/[0.06] p-2.5">
                   {w}
@@ -161,13 +161,13 @@ export function ImportWizard({ shop }: { shop: string }) {
 
           {preview.skipped.length > 0 && (
             <div className="mt-3">
-              <p className="text-xs font-semibold text-black/58">
+              <p className="text-[13px] font-semibold text-black/68">
                 Rows that can&apos;t be imported
               </p>
-              <ul className="mt-1.5 space-y-1 text-xs text-black/48">
+              <ul className="mt-1.5 space-y-1 text-[13px] text-black/60">
                 {preview.skipped.map((s) => (
                   <li key={s.reason}>
-                    <span className="text-black/65">{s.count}</span> — {s.reason}
+                    <span className="text-black/72">{s.count}</span> — {s.reason}
                   </li>
                 ))}
               </ul>
@@ -176,11 +176,11 @@ export function ImportWizard({ shop }: { shop: string }) {
 
           {preview.sample.length > 0 && (
             <div className="mt-3.5 overflow-x-auto">
-              <p className="mb-1.5 text-xs font-semibold text-black/58">
+              <p className="mb-1.5 text-[13px] font-semibold text-black/68">
                 First few, as they&apos;ll be imported
               </p>
-              <table className="w-full min-w-[520px] text-left text-xs">
-                <thead className="text-black/42">
+              <table className="w-full min-w-[520px] text-left text-[13px]">
+                <thead className="text-black/55">
                   <tr>
                     <th className="py-1 pr-3 font-medium">Product</th>
                     <th className="py-1 pr-3 font-medium">Reviewer</th>
@@ -189,7 +189,7 @@ export function ImportWizard({ shop }: { shop: string }) {
                     <th className="py-1 font-medium">Review</th>
                   </tr>
                 </thead>
-                <tbody className="text-black/65">
+                <tbody className="text-black/72">
                   {preview.sample.map((s, i) => (
                     <tr key={i} className="border-t border-black/[0.06]">
                       <td className="py-1.5 pr-3">{s.productTitle}</td>
@@ -198,7 +198,7 @@ export function ImportWizard({ shop }: { shop: string }) {
                       <td className="py-1.5 pr-3">
                         {s.date ?? <span className="text-amber-700/70">today</span>}
                       </td>
-                      <td className="py-1.5 text-black/50">{s.body}</td>
+                      <td className="py-1.5 text-black/62">{s.body}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -211,7 +211,7 @@ export function ImportWizard({ shop }: { shop: string }) {
               type="button"
               onClick={handleConfirm}
               disabled={busy || preview.willImport === 0}
-              className="rounded-md bg-[#111418] px-4 py-2 text-xs font-bold text-white hover:bg-[#2a2f35] disabled:opacity-50"
+              className="rounded-md bg-[#111418] px-4 py-2 text-[13px] font-bold text-white hover:bg-[#2a2f35] disabled:opacity-50"
             >
               {busy
                 ? "Importing…"
@@ -225,7 +225,7 @@ export function ImportWizard({ shop }: { shop: string }) {
                 setFileName("");
               }}
               disabled={busy}
-              className="text-xs font-medium text-black/48 hover:text-black/65"
+              className="text-[13px] font-medium text-black/60 hover:text-black/72"
             >
               Cancel
             </button>

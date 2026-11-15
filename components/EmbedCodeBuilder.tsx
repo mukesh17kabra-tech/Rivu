@@ -142,10 +142,10 @@ export function EmbedCodeBuilder({ shop, origin }: { shop: string; origin: strin
                   : "border-black/[0.10] bg-black/[0.02] hover:border-black/[0.18]"
               }`}
             >
-              <p className={`text-[13px] font-bold ${on ? "text-[#111418]" : "text-black/68"}`}>
+              <p className={`text-sm font-bold ${on ? "text-[#111418]" : "text-black/75"}`}>
                 {s.label}
               </p>
-              <p className="mt-1 text-[11.5px] leading-relaxed text-black/45">{s.blurb}</p>
+              <p className="mt-1 text-[11.5px] leading-relaxed text-black/58">{s.blurb}</p>
             </button>
           );
         })}
@@ -154,7 +154,7 @@ export function EmbedCodeBuilder({ shop, origin }: { shop: string; origin: strin
       <div>
         <label
           htmlFor="rivu-embed-text"
-          className="mb-1.5 block text-[12.5px] font-semibold text-black/65"
+          className="mb-1.5 block text-[12.5px] font-semibold text-black/72"
         >
           {active.key === "spotlight" ? "Heading" : "Your wording"}
         </label>
@@ -165,11 +165,11 @@ export function EmbedCodeBuilder({ shop, origin }: { shop: string; origin: strin
             setText(e.target.value);
             setCopied(false);
           }}
-          className="w-full rounded-lg border border-black/[0.13] bg-black/[0.05] px-3.5 py-2.5 text-[13px] text-[#111418] outline-none focus:border-[#111418]/60"
+          className="w-full rounded-lg border border-black/[0.13] bg-black/[0.05] px-3.5 py-2.5 text-sm text-[#111418] outline-none focus:border-[#111418]/60"
           placeholder="Write anything you like"
         />
         {active.key !== "spotlight" && (
-          <p className="mt-2 text-[11.5px] leading-relaxed text-black/42">
+          <p className="mt-2 text-[11.5px] leading-relaxed text-black/55">
             Write whatever you want. These three fill themselves in with your real numbers:{" "}
             <code className="rounded bg-black/[0.055] px-1 py-0.5 text-emerald-700">{"{count}"}</code>{" "}
             becomes &ldquo;128 reviews&rdquo;,{" "}
@@ -185,7 +185,7 @@ export function EmbedCodeBuilder({ shop, origin }: { shop: string; origin: strin
 
       <div>
         <div className="mb-1.5 flex items-center justify-between gap-3">
-          <p className="text-[12.5px] font-semibold text-black/65">Your code</p>
+          <p className="text-[12.5px] font-semibold text-black/72">Your code</p>
           <button
             type="button"
             onClick={copy}
@@ -194,30 +194,30 @@ export function EmbedCodeBuilder({ shop, origin }: { shop: string; origin: strin
             {copied ? "Copied ✓" : "Copy code"}
           </button>
         </div>
-        <pre className="overflow-x-auto rounded-lg border border-black/[0.09] bg-black/[0.055] p-4 text-[11.5px] leading-relaxed text-black/68">
+        <pre className="overflow-x-auto rounded-lg border border-black/[0.09] bg-black/[0.055] p-4 text-[11.5px] leading-relaxed text-black/75">
           {code}
         </pre>
       </div>
 
       <div className="rounded-lg border border-black/[0.09] bg-black/[0.02] p-4">
-        <p className="text-[13px] font-bold text-[#111418]">Where to paste it</p>
-        <p className="mt-1 text-[12.5px] text-black/48">{active.goes}</p>
-        <ol className="mt-3 space-y-2 text-[12.5px] leading-relaxed text-black/55">
+        <p className="text-sm font-bold text-[#111418]">Where to paste it</p>
+        <p className="mt-1 text-[12.5px] text-black/60">{active.goes}</p>
+        <ol className="mt-3 space-y-2 text-[12.5px] leading-relaxed text-black/65">
           <li>
-            <span className="font-semibold text-black/72">1.</span> In Shopify admin, open{" "}
-            <span className="text-black/72">Online Store → Themes → Customize</span>.
+            <span className="font-semibold text-black/78">1.</span> In Shopify admin, open{" "}
+            <span className="text-black/78">Online Store → Themes → Customize</span>.
           </li>
           <li>
-            <span className="font-semibold text-black/72">2.</span> Go to the page you want it on,
-            then <span className="text-black/72">Add section → Custom Liquid</span> (some themes
+            <span className="font-semibold text-black/78">2.</span> Go to the page you want it on,
+            then <span className="text-black/78">Add section → Custom Liquid</span> (some themes
             call it Custom HTML or Custom code).
           </li>
           <li>
-            <span className="font-semibold text-black/72">3.</span> Paste the code into the box and
-            press <span className="text-black/72">Save</span>.
+            <span className="font-semibold text-black/78">3.</span> Paste the code into the box and
+            press <span className="text-black/78">Save</span>.
           </li>
         </ol>
-        <p className="mt-3 border-t border-black/[0.08] pt-3 text-[11.5px] leading-relaxed text-black/42">
+        <p className="mt-3 border-t border-black/[0.08] pt-3 text-[11.5px] leading-relaxed text-black/55">
           It can also go straight into a theme file, a page built in a page builder, or anywhere
           else that accepts HTML. It does not need the App Embed — the code loads what it needs on
           its own. If you have no published reviews yet it shows nothing at all, rather than an

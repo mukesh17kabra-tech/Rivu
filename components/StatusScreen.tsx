@@ -27,18 +27,18 @@ export function StatusScreen({
   return (
     <main className="flex min-h-screen items-center justify-center bg-white px-6 text-[#1a1d21]">
       <div className="w-full max-w-md text-center">
-        <p className={`mb-2 text-xs uppercase tracking-[0.2em] ${accent}`}>
+        <p className={`mb-2 text-[13px] uppercase tracking-[0.2em] ${accent}`}>
           {eyebrow}
         </p>
         <h1 className="mb-3 text-2xl font-semibold tracking-tight">{title}</h1>
-        <div className="text-sm leading-relaxed text-black/58">{body}</div>
+        <div className="text-[15px] leading-relaxed text-black/68">{body}</div>
 
         {(primaryAction || secondaryAction) && (
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             {primaryAction && (
               <Link
                 href={primaryAction.href}
-                className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2a2f35]"
+                className="rounded-md bg-[#111418] px-4 py-2 text-[15px] font-medium text-white transition-colors hover:bg-[#2a2f35]"
               >
                 {primaryAction.label}
               </Link>
@@ -46,7 +46,7 @@ export function StatusScreen({
             {secondaryAction && (
               <Link
                 href={secondaryAction.href}
-                className="rounded-md border border-black/[0.14] px-4 py-2 text-sm font-medium text-black/72 transition-colors hover:border-black/[0.25] hover:text-[#111418]"
+                className="rounded-md border border-black/[0.14] px-4 py-2 text-[15px] font-medium text-black/78 transition-colors hover:border-black/[0.25] hover:text-[#111418]"
               >
                 {secondaryAction.label}
               </Link>

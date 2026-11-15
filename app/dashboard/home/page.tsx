@@ -67,15 +67,15 @@ export default async function DashboardHome({
           dashboard, so it should carry some weight. */}
       {total === 0 && (
         <Card className="mb-5 !border-[#111418]/30 !bg-[#111418]/[0.07]">
-          <p className="text-sm font-bold text-[#111418]">
+          <p className="text-[15px] font-bold text-[#111418]">
             👋 New here? Add the widget to your storefront
           </p>
-          <p className="mt-1 text-[13px] text-black/58">
+          <p className="mt-1 text-sm text-black/68">
             Reviews start appearing here once the widget is live on your product pages.
           </p>
           <Link
             href={`/dashboard/installation?${query}`}
-            className="mt-3 inline-block rounded-lg bg-[#111418] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#2a2f35]"
+            className="mt-3 inline-block rounded-lg bg-[#111418] px-4 py-2 text-[15px] font-bold text-white transition-colors hover:bg-[#2a2f35]"
           >
             Open the installation guide →
           </Link>
@@ -84,10 +84,10 @@ export default async function DashboardHome({
 
       {quotaWarning && (
         <Card className="mb-5 !border-amber-600/25 !bg-amber-400/[0.07]">
-          <p className="text-sm font-bold text-amber-800">{quotaWarning}</p>
+          <p className="text-[15px] font-bold text-amber-800">{quotaWarning}</p>
           <Link
             href={`/dashboard/plans?${query}`}
-            className="mt-2.5 inline-block rounded-md bg-[#111418] px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#2a2f35]"
+            className="mt-2.5 inline-block rounded-md bg-[#111418] px-3.5 py-1.5 text-[13px] font-bold text-white transition-colors hover:bg-[#2a2f35]"
           >
             See plans
           </Link>
@@ -112,19 +112,19 @@ export default async function DashboardHome({
           <h2 className="text-[15px] font-bold text-[#111418]">Recent reviews</h2>
           <Link
             href={`/dashboard/reviews?${query}`}
-            className="text-[13px] font-medium text-black/48 transition-colors hover:text-[#111418]"
+            className="text-sm font-medium text-black/60 transition-colors hover:text-[#111418]"
           >
             View all →
           </Link>
         </div>
 
         {recentReviews.length === 0 ? (
-          <p className="px-5 py-10 text-center text-sm text-black/42">No reviews yet.</p>
+          <p className="px-5 py-10 text-center text-[15px] text-black/55">No reviews yet.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-[15px]">
               <thead>
-                <tr className="text-[11px] font-bold uppercase tracking-[0.08em] text-black/42">
+                <tr className="text-[12px] font-bold uppercase tracking-[0.08em] text-black/55">
                   <th className="px-5 py-2.5 font-semibold">Reviewer</th>
                   <th className="px-5 py-2.5 font-semibold">Rating</th>
                   <th className="px-5 py-2.5 font-semibold">Product</th>
@@ -145,10 +145,10 @@ export default async function DashboardHome({
                       <td className="whitespace-nowrap px-5 py-3 text-amber-500">
                         {/* Rounded — String.repeat truncates a fraction. */}
                         {"★".repeat(Math.round(r.rating))}
-                        <span className="text-black/25">{"★".repeat(5 - Math.round(r.rating))}</span>
+                        <span className="text-black/45">{"★".repeat(5 - Math.round(r.rating))}</span>
                       </td>
-                      <td className="px-5 py-3 text-black/55">{r.productTitle}</td>
-                      <td className="whitespace-nowrap px-5 py-3 text-black/42">
+                      <td className="px-5 py-3 text-black/65">{r.productTitle}</td>
+                      <td className="whitespace-nowrap px-5 py-3 text-black/55">
                         {r.createdAt.toLocaleDateString()}
                       </td>
                     </tr>
@@ -172,10 +172,10 @@ function MilestoneBar({ total }: { total: number }) {
   return (
     <Card className="mb-5">
       <div className="mb-2.5 flex items-center justify-between">
-        <p className="text-sm font-bold text-[#111418]">
+        <p className="text-[15px] font-bold text-[#111418]">
           {total} review{total === 1 ? "" : "s"} collected
         </p>
-        <p className="text-[13px] text-black/45">
+        <p className="text-sm text-black/58">
           {next - total} more to reach {next}
         </p>
       </div>

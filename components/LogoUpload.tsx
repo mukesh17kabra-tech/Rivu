@@ -65,8 +65,8 @@ export function LogoUpload({
 
   return (
     <div className="max-w-md rounded-lg border border-black/[0.10] bg-black/[0.02] p-6">
-      <p className="mb-1 text-sm font-medium text-[#111418]">Logo on shareable graphics</p>
-      <p className="mb-4 text-xs text-black/50">
+      <p className="mb-1 text-[15px] font-medium text-[#111418]">Logo on shareable graphics</p>
+      <p className="mb-4 text-[13px] text-black/62">
         Shown as a watermark in the corner of every UGC card generated from your reviews —
         helps with brand recall when customers share them.
       </p>
@@ -81,12 +81,12 @@ export function LogoUpload({
       )}
 
       <div className="mb-4 flex items-center gap-3">
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-black/[0.14] px-3 py-1.5 text-xs text-[#111418] hover:border-black/[0.25]">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-black/[0.14] px-3 py-1.5 text-[13px] text-[#111418] hover:border-black/[0.25]">
           {logoUrl ? "Change logo" : "Upload logo"}
           <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
         </label>
         {logoUrl && (
-          <button onClick={handleRemove} className="text-xs text-red-600 hover:underline">
+          <button onClick={handleRemove} className="text-[13px] text-red-600 hover:underline">
             Remove
           </button>
         )}
@@ -94,7 +94,7 @@ export function LogoUpload({
 
       {logoUrl && (
         <div className="mb-4">
-          <label className="mb-2 block text-xs font-medium text-black/50">
+          <label className="mb-2 block text-[13px] font-medium text-black/62">
             Watermark size: {logoSize}px
           </label>
           <input
@@ -115,7 +115,7 @@ export function LogoUpload({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
+        className="rounded-md bg-[#111418] px-4 py-2 text-[15px] font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>

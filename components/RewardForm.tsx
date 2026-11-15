@@ -40,13 +40,13 @@ export function RewardForm({ shop, initial }: { shop: string; initial: RewardSet
           }}
           className="h-4 w-4 accent-[#111418]"
         />
-        <span className="text-sm text-[#111418]">Give a discount for every review</span>
+        <span className="text-[15px] text-[#111418]">Give a discount for every review</span>
       </label>
 
       {settings.rewardEnabled && (
         <>
           <div>
-            <label className="mb-2 block text-sm font-medium text-black/65">Discount type</label>
+            <label className="mb-2 block text-[15px] font-medium text-black/72">Discount type</label>
             <div className="flex gap-2">
               {(["percentage", "fixed_amount"] as const).map((type) => (
                 <button
@@ -55,10 +55,10 @@ export function RewardForm({ shop, initial }: { shop: string; initial: RewardSet
                     setSettings((s) => ({ ...s, rewardType: type }));
                     setSaved(false);
                   }}
-                  className={`flex-1 rounded-md border px-3 py-2 text-sm transition-colors ${
+                  className={`flex-1 rounded-md border px-3 py-2 text-[15px] transition-colors ${
                     settings.rewardType === type
                       ? "border-[#111418] bg-black/[0.04] text-[#111418]"
-                      : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
+                      : "border-black/[0.10] text-black/62 hover:border-black/[0.25]"
                   }`}
                 >
                   {type === "percentage" ? "Percentage off" : "Fixed amount off"}
@@ -68,7 +68,7 @@ export function RewardForm({ shop, initial }: { shop: string; initial: RewardSet
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-black/65">
+            <label className="mb-2 block text-[15px] font-medium text-black/72">
               {settings.rewardType === "percentage" ? "Percentage (%)" : "Amount (in store currency)"}
             </label>
             <input
@@ -80,11 +80,11 @@ export function RewardForm({ shop, initial }: { shop: string; initial: RewardSet
                 setSettings((s) => ({ ...s, rewardValue: Number(e.target.value) }));
                 setSaved(false);
               }}
-              className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
+              className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-[15px] text-[#111418]"
             />
           </div>
 
-          <p className="text-xs text-black/45">
+          <p className="text-[13px] text-black/58">
             Every review generates a unique, one-time-use code — shown to the customer right
             after they submit their review.
           </p>
@@ -94,7 +94,7 @@ export function RewardForm({ shop, initial }: { shop: string; initial: RewardSet
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
+        className="rounded-md bg-[#111418] px-4 py-2 text-[15px] font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>

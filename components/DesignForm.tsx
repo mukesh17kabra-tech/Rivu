@@ -247,7 +247,7 @@ export function DesignForm({
             return !a;
           });
         }}
-        className="block text-[12px] font-medium text-black/45 underline underline-offset-4 hover:text-black/65"
+        className="block text-[13px] font-medium text-black/58 underline underline-offset-4 hover:text-black/72"
       >
         {advanced
           ? "← Back to the simple view"
@@ -260,10 +260,10 @@ export function DesignForm({
             key={title}
             type="button"
             onClick={() => setTab(i)}
-            className={`-mb-px rounded-t-md border-b-2 px-3 py-2 text-[12px] font-medium transition-colors ${
+            className={`-mb-px rounded-t-md border-b-2 px-3 py-2 text-[13px] font-medium transition-colors ${
               tab === i
                 ? "border-[#111418] text-[#111418]"
-                : "border-transparent text-black/48 hover:text-black/65"
+                : "border-transparent text-black/60 hover:text-black/72"
             }`}
           >
             {title}
@@ -277,7 +277,7 @@ export function DesignForm({
         description="The overall shape of the widget. The preview updates as you change anything on this page."
       >
         <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-          <label className="mb-2 block text-sm font-medium text-black/65">Layout</label>
+          <label className="mb-2 block text-[15px] font-medium text-black/72">Layout</label>
           {/* Read from lib/design-options.ts rather than restated here. The
               previous hardcoded list of four had its own copy of the locking
               rules, so a new layout appeared in the widget but never in this
@@ -295,13 +295,13 @@ export function DesignForm({
                   title={allowed ? option.description : "Available on Pro"}
                   className={`rounded-md border px-2 py-2 text-left transition-colors ${
                     !allowed
-                      ? "cursor-not-allowed border-black/[0.06] text-black/35"
+                      ? "cursor-not-allowed border-black/[0.06] text-black/50"
                       : selected
                         ? "border-[#111418] bg-black/[0.04] text-[#111418]"
-                        : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
+                        : "border-black/[0.10] text-black/62 hover:border-black/[0.25]"
                   }`}
                 >
-                  <span className="flex items-center gap-1 text-xs font-semibold">
+                  <span className="flex items-center gap-1 text-[13px] font-semibold">
                     {!allowed && "🔒"}
                     {option.label}
                     {option.minPlan !== "free" && (
@@ -310,7 +310,7 @@ export function DesignForm({
                       </span>
                     )}
                   </span>
-                  <span className="mt-0.5 block text-[10px] leading-tight text-black/42">
+                  <span className="mt-0.5 block text-[11px] leading-tight text-black/55">
                     {option.description}
                   </span>
                 </button>
@@ -321,7 +321,7 @@ export function DesignForm({
           {/* Design is a separate question from layout: "grid" says where the
               cards go, "boxed" says what a card looks like. Combining them
               into one list forced a merchant to give up one to get the other. */}
-          <label className="mb-2 mt-4 block text-sm font-medium text-black/65">
+          <label className="mb-2 mt-4 block text-[15px] font-medium text-black/72">
             Card design
           </label>
           <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -336,13 +336,13 @@ export function DesignForm({
                   title={allowed ? option.description : "Available on Pro"}
                   className={`rounded-md border px-2 py-2 text-left transition-colors ${
                     !allowed
-                      ? "cursor-not-allowed border-black/[0.06] text-black/35"
+                      ? "cursor-not-allowed border-black/[0.06] text-black/50"
                       : selected
                         ? "border-[#111418] bg-black/[0.04] text-[#111418]"
-                        : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
+                        : "border-black/[0.10] text-black/62 hover:border-black/[0.25]"
                   }`}
                 >
-                  <span className="flex items-center gap-1 text-xs font-semibold">
+                  <span className="flex items-center gap-1 text-[13px] font-semibold">
                     {!allowed && "🔒"}
                     {option.label}
                     {option.minPlan !== "free" && (
@@ -351,7 +351,7 @@ export function DesignForm({
                       </span>
                     )}
                   </span>
-                  <span className="mt-0.5 block text-[10px] leading-tight text-black/42">
+                  <span className="mt-0.5 block text-[11px] leading-tight text-black/55">
                     {option.description}
                   </span>
                 </button>
@@ -363,7 +363,7 @@ export function DesignForm({
             settings.displayStyle === "masonry" ||
             settings.cardDesign === "gallery") && (
             <div className="mb-2">
-              <label className="mb-1 block text-xs text-black/50">
+              <label className="mb-1 block text-[13px] text-black/62">
                 Columns: {settings.gridColumns}
               </label>
               <input
@@ -379,7 +379,7 @@ export function DesignForm({
 
           {settings.displayStyle === "carousel" && (
             <div className="mb-2">
-              <label className="mb-1 block text-xs text-black/50">
+              <label className="mb-1 block text-[13px] text-black/62">
                 Cards visible: {settings.carouselVisible}
               </label>
               <input
@@ -404,7 +404,7 @@ export function DesignForm({
       >
       {/* Colors — 4 in a row */}
       <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-        <p className="mb-3 text-sm font-medium text-black/65">Colors</p>
+        <p className="mb-3 text-[15px] font-medium text-black/72">Colors</p>
         <div className="grid grid-cols-5 gap-4">
           <GradientBackgroundField
             label="Primary"
@@ -431,11 +431,11 @@ export function DesignForm({
 
       {/* Typography + shape */}
         <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-          <label className="mb-2 block text-sm font-medium text-black/65">Font</label>
+          <label className="mb-2 block text-[15px] font-medium text-black/72">Font</label>
           <select
             value={settings.fontFamily}
             onChange={(e) => { update("fontFamily", e.target.value); loadGoogleFont(e.target.value); }}
-            className="mb-4 w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
+            className="mb-4 w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-[15px] text-[#111418]"
           >
             {FONT_OPTIONS.map((f) => (
               <option key={f.value} value={f.value} style={{ color: "#000" }}>
@@ -443,7 +443,7 @@ export function DesignForm({
               </option>
             ))}
           </select>
-          <label className="mb-1 block text-xs text-black/50">
+          <label className="mb-1 block text-[13px] text-black/62">
             Corner roundness: {settings.borderRadius}px
           </label>
           <input
@@ -463,17 +463,17 @@ export function DesignForm({
         description="The heading above the reviews, how big the review text is, and how much room the widget takes on the page."
       >
         <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-          <label className="mb-2 block text-sm font-medium text-black/65">Widget heading</label>
+          <label className="mb-2 block text-[15px] font-medium text-black/72">Widget heading</label>
           <input
             type="text"
             value={settings.widgetTitle}
             onChange={(e) => update("widgetTitle", e.target.value)}
-            className="mb-3 w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
+            className="mb-3 w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-[15px] text-[#111418]"
             maxLength={100}
           />
           <div className={`mb-3 grid grid-cols-3 gap-3 ${isFree ? "pointer-events-none opacity-40" : ""}`}>
             <div>
-              <label className="mb-1 block text-xs text-black/50">
+              <label className="mb-1 block text-[13px] text-black/62">
                 {isFree ? "🔒 " : ""}Size: {settings.headingFontSize}px
               </label>
               <input
@@ -486,24 +486,24 @@ export function DesignForm({
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-black/50">Weight</label>
+              <label className="mb-1 block text-[13px] text-black/62">Weight</label>
               <button
                 onClick={() => update("headingBold", !settings.headingBold)}
-                className={`w-full rounded-md border px-2 py-1.5 text-xs transition-colors ${
+                className={`w-full rounded-md border px-2 py-1.5 text-[13px] transition-colors ${
                   settings.headingBold
                     ? "border-[#111418] bg-black/[0.04] text-[#111418] font-bold"
-                    : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
+                    : "border-black/[0.10] text-black/62 hover:border-black/[0.25]"
                 }`}
               >
                 {settings.headingBold ? "Bold" : "Regular"}
               </button>
             </div>
             <div>
-              <label className="mb-1 block text-xs text-black/50">Position</label>
+              <label className="mb-1 block text-[13px] text-black/62">Position</label>
               <select
                 value={settings.headingAlign}
                 onChange={(e) => update("headingAlign", e.target.value as "left" | "center" | "right")}
-                className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1.5 text-xs text-[#111418]"
+                className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1.5 text-[13px] text-[#111418]"
               >
                 <option value="left" style={{ color: "#000" }}>Left</option>
                 <option value="center" style={{ color: "#000" }}>Center</option>
@@ -512,11 +512,11 @@ export function DesignForm({
             </div>
           </div>
           {isFree && (
-            <p className="mb-3 text-xs text-amber-700/70">
+            <p className="mb-3 text-[13px] text-amber-700/70">
               Heading size/weight/position customization needs Pro.
             </p>
           )}
-          <label className="mb-1 block text-xs text-black/50">
+          <label className="mb-1 block text-[13px] text-black/62">
             Top spacing: {settings.topSpacing}px
           </label>
           <input
@@ -528,7 +528,7 @@ export function DesignForm({
             onChange={(e) => update("topSpacing", Number(e.target.value))}
             className="w-full"
           />
-          <label className="mb-1 block text-xs text-black/50">
+          <label className="mb-1 block text-[13px] text-black/62">
             Bottom spacing: {settings.bottomSpacing}px
           </label>
           <input
@@ -540,7 +540,7 @@ export function DesignForm({
             onChange={(e) => update("bottomSpacing", Number(e.target.value))}
             className="w-full"
           />
-          <p className="mb-1 text-xs text-black/45">
+          <p className="mb-1 text-[13px] text-black/58">
             Too much empty space under the reviews is usually your theme
             section&apos;s own padding, which the app cannot see. Drag this
             below 0 to pull whatever follows the reviews up into that padding
@@ -553,7 +553,7 @@ export function DesignForm({
               onChange={(e) => update("showBorder", e.target.checked)}
               className="h-4 w-4 accent-[#111418]"
             />
-            <span className="text-sm text-black/72">Show border around widget</span>
+            <span className="text-[15px] text-black/78">Show border around widget</span>
           </label>
           {settings.showBorder && (
             <div className="mt-3 grid grid-cols-3 gap-3">
@@ -563,7 +563,7 @@ export function DesignForm({
                 onChange={(v) => update("borderColor", v)}
               />
               <div>
-                <label className="mb-1 block text-xs text-black/50">
+                <label className="mb-1 block text-[13px] text-black/62">
                   Width: {settings.borderWidth}px
                 </label>
                 <input
@@ -576,13 +576,13 @@ export function DesignForm({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-black/50">Style</label>
+                <label className="mb-1 block text-[13px] text-black/62">Style</label>
                 <select
                   value={settings.borderStyle}
                   onChange={(e) =>
                     update("borderStyle", e.target.value as "solid" | "dashed" | "dotted" | "double")
                   }
-                  className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1.5 text-xs text-[#111418]"
+                  className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1.5 text-[13px] text-[#111418]"
                 >
                   <option value="solid" style={{ color: "#000" }}>Solid</option>
                   <option value="dashed" style={{ color: "#000" }}>Dashed</option>
@@ -592,7 +592,7 @@ export function DesignForm({
               </div>
             </div>
           )}
-          <p className="mt-2 text-xs text-black/45">
+          <p className="mt-2 text-[13px] text-black/58">
             Helps the widget stand out against a plain background — recommended if your
             theme's page background is also white.
           </p>
@@ -602,7 +602,7 @@ export function DesignForm({
       <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
         <div className={`grid grid-cols-2 gap-6 ${isFree ? "pointer-events-none opacity-40" : ""}`}>
           <div>
-            <label className="mb-1 block text-xs text-black/50">
+            <label className="mb-1 block text-[13px] text-black/62">
               {isFree ? "🔒 " : ""}Review text size: {settings.reviewTextSize}px
             </label>
             <input
@@ -615,16 +615,16 @@ export function DesignForm({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-black/50">Review text position</label>
+            <label className="mb-1 block text-[13px] text-black/62">Review text position</label>
             <div className="flex gap-1">
               {(["left", "center", "right"] as const).map((align) => (
                 <button
                   key={align}
                   onClick={() => update("reviewTextAlign", align)}
-                  className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
+                  className={`flex-1 rounded-md border px-2 py-1.5 text-[13px] capitalize transition-colors ${
                     settings.reviewTextAlign === align
                       ? "border-[#111418] bg-black/[0.04] text-[#111418]"
-                      : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
+                      : "border-black/[0.10] text-black/62 hover:border-black/[0.25]"
                   }`}
                 >
                   {align}
@@ -634,7 +634,7 @@ export function DesignForm({
           </div>
         </div>
         {isFree && (
-          <p className="mt-3 text-xs text-amber-700/70">
+          <p className="mt-3 text-[13px] text-amber-700/70">
             Review text size/position customization needs Pro.
           </p>
         )}
@@ -643,7 +643,7 @@ export function DesignForm({
       {/* Sizing */}
       <div className="grid grid-cols-3 gap-6 rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
         <div>
-          <label className="mb-1 block text-xs text-black/50">
+          <label className="mb-1 block text-[13px] text-black/62">
             Container width: {settings.widgetMaxWidth}px
           </label>
           <input
@@ -657,7 +657,7 @@ export function DesignForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-black/50">
+          <label className="mb-1 block text-[13px] text-black/62">
             Form width: {settings.formMaxWidth}px
           </label>
           <input
@@ -671,16 +671,16 @@ export function DesignForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-black/50">Form alignment</label>
+          <label className="mb-1 block text-[13px] text-black/62">Form alignment</label>
           <div className="flex gap-1">
             {(["left", "center", "right"] as const).map((align) => (
               <button
                 key={align}
                 onClick={() => update("formAlign", align)}
-                className={`flex-1 rounded-md border px-2 py-1.5 text-xs capitalize transition-colors ${
+                className={`flex-1 rounded-md border px-2 py-1.5 text-[13px] capitalize transition-colors ${
                   settings.formAlign === align
                     ? "border-[#111418] bg-black/[0.04] text-[#111418]"
-                    : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
+                    : "border-black/[0.10] text-black/62 hover:border-black/[0.25]"
                 }`}
               >
                 {align}
@@ -700,13 +700,13 @@ export function DesignForm({
       {/* Suggestions */}
       <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-medium text-black/65">Review suggestions</p>
+          <p className="text-[15px] font-medium text-black/72">Review suggestions</p>
           {aiSuggestionsAllowed(plan) ? (
-            <span className="rounded-full bg-[#111418] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white ring-1 ring-[#111418]">
+            <span className="rounded-full bg-[#111418] px-2.5 py-1 text-[12px] font-bold uppercase tracking-wide text-white ring-1 ring-[#111418]">
               ✨ AI-written
             </span>
           ) : (
-            <span className="rounded-full bg-black/[0.05] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-black/50 ring-1 ring-black/[0.10]">
+            <span className="rounded-full bg-black/[0.05] px-2.5 py-1 text-[12px] font-bold uppercase tracking-wide text-black/62 ring-1 ring-black/[0.10]">
               Ready-made
             </span>
           )}
@@ -716,10 +716,10 @@ export function DesignForm({
             what they already have and exactly what upgrading changes. */}
         {!aiSuggestionsAllowed(plan) && (
           <div className="mb-4 rounded-lg border border-amber-600/25 bg-amber-400/[0.07] p-3.5">
-            <p className="text-[13px] font-semibold text-amber-800">
+            <p className="text-sm font-semibold text-amber-800">
               Your shoppers see ready-made suggestions
             </p>
-            <p className="mt-1 text-xs leading-relaxed text-amber-800/70">
+            <p className="mt-1 text-[13px] leading-relaxed text-amber-800/70">
               About five hand-written lines per star rating. Upgrade to Pro for
               AI-written suggestions: around 120 per rating, tailored to each
               product, and each line offered to only one shopper — so no two
@@ -728,7 +728,7 @@ export function DesignForm({
             <a
               href={`/dashboard/plans?shop=${encodeURIComponent(shop)}`}
               target="_top"
-              className="mt-3 inline-block rounded-md bg-[#111418] px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#2a2f35]"
+              className="mt-3 inline-block rounded-md bg-[#111418] px-3.5 py-1.5 text-[13px] font-bold text-white transition-colors hover:bg-[#2a2f35]"
             >
               Upgrade to Pro
             </a>
@@ -742,7 +742,7 @@ export function DesignForm({
               onChange={(e) => update("showSuggestionsOnWebsite", e.target.checked)}
               className="h-4 w-4 accent-[#111418]"
             />
-            <span className="text-sm text-black/72">On website widget</span>
+            <span className="text-[15px] text-black/78">On website widget</span>
           </label>
           <label className="flex items-center gap-2">
             <input
@@ -751,7 +751,7 @@ export function DesignForm({
               onChange={(e) => update("showSuggestionsOnQr", e.target.checked)}
               className="h-4 w-4 accent-[#111418]"
             />
-            <span className="text-sm text-black/72">On QR-scan page</span>
+            <span className="text-[15px] text-black/78">On QR-scan page</span>
           </label>
         </div>
         <label className="mb-4 flex items-center gap-2">
@@ -762,17 +762,17 @@ export function DesignForm({
             onChange={(e) => update("letCustomerPickLanguage", e.target.checked)}
             className="h-4 w-4 accent-[#111418] disabled:opacity-40"
           />
-          <span className={`text-sm ${isFree ? "text-black/38" : "text-black/72"}`}>
+          <span className={`text-[15px] ${isFree ? "text-black/52" : "text-black/78"}`}>
             {isFree ? "🔒 " : ""}Let customers choose their own language (shows a dropdown on the
             review form)
           </span>
         </label>
         {isFree && (
-          <p className="mb-3 -mt-2 text-xs text-amber-700/70">
+          <p className="mb-3 -mt-2 text-[13px] text-amber-700/70">
             Also needs Pro — Free plan is English-only.
           </p>
         )}
-        <label className="mb-2 block text-xs text-black/50">
+        <label className="mb-2 block text-[13px] text-black/62">
           Enabled languages ({settings.enabledLanguages.length}/{languageCap})
         </label>
         <div className="grid grid-cols-5 gap-2">
@@ -783,12 +783,12 @@ export function DesignForm({
             return (
               <label
                 key={lang.code}
-                className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1.5 text-xs transition-colors ${
+                className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1.5 text-[13px] transition-colors ${
                   checked
                     ? "border-[#111418] bg-black/[0.04] text-[#111418]"
                     : disabled
-                    ? "cursor-not-allowed border-black/[0.06] text-black/35"
-                    : "border-black/[0.10] text-black/50 hover:border-black/[0.25]"
+                    ? "cursor-not-allowed border-black/[0.06] text-black/50"
+                    : "border-black/[0.10] text-black/62 hover:border-black/[0.25]"
                 }`}
               >
                 <input
@@ -812,7 +812,7 @@ export function DesignForm({
             );
           })}
         </div>
-        <p className="mt-2 text-xs text-black/45">
+        <p className="mt-2 text-[13px] text-black/58">
           {plan === "free"
             ? "Free plan is English-only."
             : `Pick up to ${languageCap} languages your customers can write reviews in.`}
@@ -827,7 +827,7 @@ export function DesignForm({
         description="The rating summary at the top, the filter bar, and the review cards themselves."
       >
       <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-        <p className="mb-4 text-sm font-medium text-black/65">Widget summary style</p>
+        <p className="mb-4 text-[15px] font-medium text-black/72">Widget summary style</p>
         <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
           {([
             { key: "modern", label: "Modern Card", plan: "", desc: "Rating box, bars, button" },
@@ -1023,25 +1023,25 @@ export function DesignForm({
                   )}
                 </div>
                 <div className="flex items-center justify-between px-3 py-2 bg-black/[0.035]">
-                  <span className="text-xs font-medium text-[#111418]">
+                  <span className="text-[13px] font-medium text-[#111418]">
                     {locked ? "🔒 " : isSelected ? "✓ " : ""}{item.label}
                   </span>
                   {item.plan && (
-                    <span className="rounded-full bg-black/[0.07] px-1.5 py-0.5 text-[9px] text-black/50">{item.plan}</span>
+                    <span className="rounded-full bg-black/[0.07] px-1.5 py-0.5 text-[9px] text-black/62">{item.plan}</span>
                   )}
                 </div>
               </button>
             );
           })}
         </div>
-        <p className="mt-3 text-xs text-black/45">
+        <p className="mt-3 text-[13px] text-black/58">
           Free: Modern Card & Minimal · Pro: all 8 summary styles
         </p>
 
         {/* Summary block customization — locked for Free */}
         {isFree ? (
           <div className="mt-4 rounded-md border border-black/[0.10] bg-black/[0.03] px-4 py-3">
-            <p className="text-xs text-black/45">🔒 Summary colors, width and position are available on Pro.</p>
+            <p className="text-[13px] text-black/58">🔒 Summary colors, width and position are available on Pro.</p>
           </div>
         ) : (
           <div className="mt-4 border-t border-black/[0.10] pt-4">
@@ -1049,11 +1049,11 @@ export function DesignForm({
               <ColorField label="Summary background" value={settings.summaryBgColor} onChange={(v) => update("summaryBgColor", v)} />
               <ColorField label="Summary text color" value={settings.summaryTextColor} onChange={(v) => update("summaryTextColor", v)} />
               <div>
-                <label className="mb-1 block text-xs text-black/50">Position</label>
+                <label className="mb-1 block text-[13px] text-black/62">Position</label>
                 <div className="flex gap-1">
                   {(["left","center","right"] as const).map((pos) => (
                     <button key={pos} onClick={() => update("summaryPosition", pos)}
-                      className={`flex-1 rounded py-1.5 text-xs capitalize transition-colors ${settings.summaryPosition === pos ? "bg-[#111418] text-white border border-[#111418]/40" : "border border-black/[0.10] text-black/45 hover:border-black/[0.25]"}`}>
+                      className={`flex-1 rounded py-1.5 text-[13px] capitalize transition-colors ${settings.summaryPosition === pos ? "bg-[#111418] text-white border border-[#111418]/40" : "border border-black/[0.10] text-black/58 hover:border-black/[0.25]"}`}>
                       {pos}
                     </button>
                   ))}
@@ -1061,12 +1061,12 @@ export function DesignForm({
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-xs text-black/50">
+              <label className="mb-1 block text-[13px] text-black/62">
                 Summary width: {settings.summaryWidth >= 320 ? `${settings.summaryWidth}px` : "Full width"}
               </label>
               <input type="range" min={300} max={1220} step={20} value={Math.max(settings.summaryWidth, 300)}
                 onChange={(e) => update("summaryWidth", Number(e.target.value))} className="w-full" />
-              <p className="mt-1 text-[10px] text-black/38">300 = full width · higher values shrink the summary block. For Left Sidebar this sets the sidebar column width.</p>
+              <p className="mt-1 text-[11px] text-black/52">300 = full width · higher values shrink the summary block. For Left Sidebar this sets the sidebar column width.</p>
             </div>
           </div>
         )}
@@ -1074,16 +1074,16 @@ export function DesignForm({
 
       {/* Review list bar */}
       <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-        <p className="mb-2 text-sm font-medium text-black/65">Review list bar</p>
+        <p className="mb-2 text-[15px] font-medium text-black/72">Review list bar</p>
         {isFree ? (
-          <p className="text-xs text-black/45">🔒 Filter bar and sort button colors are available on Pro.</p>
+          <p className="text-[13px] text-black/58">🔒 Filter bar and sort button colors are available on Pro.</p>
         ) : (
           <>
-            <p className="mb-4 text-xs text-black/45">Controls the "3 Reviews" count label and "Most Recent" sort dropdown above the review cards.</p>
+            <p className="mb-4 text-[13px] text-black/58">Controls the "3 Reviews" count label and "Most Recent" sort dropdown above the review cards.</p>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <ColorField label='Count text color ("3 Reviews")' value={settings.filterTextColor} onChange={(v) => update("filterTextColor", v)} />
               <div>
-                <label className="mb-1 block text-xs text-black/50">Count font size: {settings.reviewCountFontSize}px</label>
+                <label className="mb-1 block text-[13px] text-black/62">Count font size: {settings.reviewCountFontSize}px</label>
                 <input type="range" min={10} max={20} value={settings.reviewCountFontSize}
                   onChange={(e) => update("reviewCountFontSize", Number(e.target.value))} className="w-full" />
               </div>
@@ -1099,9 +1099,9 @@ export function DesignForm({
 
       {/* Review card text colors */}
       <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-        <p className="mb-2 text-sm font-medium text-black/65">Review card text colors</p>
+        <p className="mb-2 text-[15px] font-medium text-black/72">Review card text colors</p>
         {isFree ? (
-          <p className="text-xs text-black/45">🔒 Review card text colors are available on Pro.</p>
+          <p className="text-[13px] text-black/58">🔒 Review card text colors are available on Pro.</p>
         ) : (
           <div className="grid grid-cols-3 gap-4">
             <ColorField label="Review title color" value={settings.reviewTitleColor} onChange={(v) => update("reviewTitleColor", v)} />
@@ -1119,12 +1119,12 @@ export function DesignForm({
         description="The box a customer actually types their review into."
       >
       <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-        <p className="mb-4 text-sm font-medium text-black/65">Review form style</p>
+        <p className="mb-4 text-[15px] font-medium text-black/72">Review form style</p>
 
         {/* Form color controls */}
         {isFree ? (
           <div className="mb-4 rounded-md border border-black/[0.10] bg-black/[0.03] px-4 py-3">
-            <p className="text-xs text-black/45">🔒 Form background, text, and close button colors are available on Pro.</p>
+            <p className="text-[13px] text-black/58">🔒 Form background, text, and close button colors are available on Pro.</p>
           </div>
         ) : (
           <div className="mb-4 grid grid-cols-3 gap-4">
@@ -1234,11 +1234,11 @@ export function DesignForm({
 
                 {/* Name + plan label */}
                 <div className={`flex items-center justify-between px-3 py-2 ${t === "dark" ? "bg-[#1a1a2e]/80" : "bg-black/[0.035]"}`}>
-                  <span className="text-xs font-medium text-[#111418]">
+                  <span className="text-[13px] font-medium text-[#111418]">
                     {locked ? "🔒 " : isSelected ? "✓ " : ""}{labels[t]}
                   </span>
                   {planLabels[t] && (
-                    <span className="rounded-full bg-black/[0.07] px-1.5 py-0.5 text-[9px] text-black/50">
+                    <span className="rounded-full bg-black/[0.07] px-1.5 py-0.5 text-[9px] text-black/62">
                       {planLabels[t]}
                     </span>
                   )}
@@ -1248,7 +1248,7 @@ export function DesignForm({
           })}
         </div>
 
-        <p className="mt-3 text-xs text-black/45">
+        <p className="mt-3 text-[13px] text-black/58">
           Free: Basic only · Pro: all 4 form templates
         </p>
       </div>
@@ -1258,15 +1258,15 @@ export function DesignForm({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
+        className="rounded-md bg-[#111418] px-4 py-2 text-[15px] font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>
       {saveError && (
-        <p className="mt-2 text-xs text-red-600">{saveError}</p>
+        <p className="mt-2 text-[13px] text-red-600">{saveError}</p>
       )}
       {lockedMsg.length > 0 && (
-        <p className="mt-2 text-xs text-amber-700/80">
+        <p className="mt-2 text-[13px] text-amber-700/80">
           Some choices need a higher plan and were kept at their default: {lockedMsg.join(", ")}.{" "}
           <a href={`/dashboard/plans?shop=${shop}`} className="underline">
             View plans
@@ -1302,11 +1302,11 @@ function Group({
     // DOM state, and a half-typed heading survives a trip to another tab.
     <section className={hidden ? "hidden" : "space-y-6"} aria-hidden={hidden}>
       <div className="border-b border-black/[0.08] pb-2.5">
-        <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-black/48">
+        <h3 className="text-[12px] font-bold uppercase tracking-[0.1em] text-black/60">
           {title}
         </h3>
         {description && (
-          <p className="mt-1 text-[12px] leading-relaxed text-black/42">
+          <p className="mt-1 text-[13px] leading-relaxed text-black/55">
             {description}
           </p>
         )}
@@ -1345,20 +1345,20 @@ function GradientBackgroundField({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <label className="block text-xs text-black/50">{label}</label>
+        <label className="block text-[13px] text-black/62">{label}</label>
         <div className="flex gap-1">
           <button
             onClick={() => onGradientChange(null)}
-            className={`rounded px-1.5 py-0.5 text-[10px] ${
-              !isGradient ? "bg-[#111418] text-white" : "text-black/45"
+            className={`rounded px-1.5 py-0.5 text-[11px] ${
+              !isGradient ? "bg-[#111418] text-white" : "text-black/58"
             }`}
           >
             Solid
           </button>
           <button
             onClick={() => onGradientChange(buildGradient(colorA, colorB))}
-            className={`rounded px-1.5 py-0.5 text-[10px] ${
-              isGradient ? "bg-[#111418] text-white" : "text-black/45"
+            className={`rounded px-1.5 py-0.5 text-[11px] ${
+              isGradient ? "bg-[#111418] text-white" : "text-black/58"
             }`}
           >
             Gradient
@@ -1396,7 +1396,7 @@ function GradientBackgroundField({
             type="text"
             value={solidValue}
             onChange={(e) => onSolidChange(e.target.value)}
-            className="w-full min-w-0 rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-xs text-[#111418]"
+            className="w-full min-w-0 rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-[13px] text-[#111418]"
           />
         </div>
       )}
@@ -1417,7 +1417,7 @@ function ColorField({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-black/50">
+      <label className="mb-1 block text-[13px] text-black/62">
         {locked ? "🔒 " : ""}
         {label}
       </label>
@@ -1434,7 +1434,7 @@ function ColorField({
           value={value}
           disabled={locked}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full min-w-0 rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-xs text-[#111418] disabled:opacity-40"
+          className="w-full min-w-0 rounded-md border border-black/[0.14] bg-black/[0.03] px-2 py-1 text-[13px] text-[#111418] disabled:opacity-40"
         />
       </div>
     </div>
@@ -1465,10 +1465,10 @@ function SimplePanel({
   return (
     <div className="space-y-5">
       <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-        <label className="mb-1 block text-sm font-medium text-black/65">
+        <label className="mb-1 block text-[15px] font-medium text-black/72">
           Pick a look
         </label>
-        <p className="mb-3 text-xs text-black/42">
+        <p className="mb-3 text-[13px] text-black/55">
           Sets the colours, corners and card style together. You can change any
           of it afterwards.
         </p>
@@ -1494,24 +1494,24 @@ function SimplePanel({
                   />
                 ))}
               </div>
-              <div className="text-xs font-semibold text-black/75">
+              <div className="text-[13px] font-semibold text-black/80">
                 {theme.label}
               </div>
-              <div className="mt-0.5 text-[10px] leading-snug text-black/42">
+              <div className="mt-0.5 text-[11px] leading-snug text-black/55">
                 {theme.description}
               </div>
             </button>
           ))}
         </div>
         {active === null && (
-          <p className="mt-3 text-[11px] text-black/38">
+          <p className="mt-3 text-[12px] text-black/52">
             Your own colours — no theme selected. Picking one replaces them.
           </p>
         )}
       </div>
 
       <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-        <label className="mb-2 block text-sm font-medium text-black/65">
+        <label className="mb-2 block text-[15px] font-medium text-black/72">
           How the reviews are arranged
         </label>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -1532,7 +1532,7 @@ function SimplePanel({
                 } ${allowed ? "" : "cursor-not-allowed opacity-40"}`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-black/75">
+                  <span className="text-[13px] font-semibold text-black/80">
                     {option.label}
                   </span>
                   {!allowed && (
@@ -1541,7 +1541,7 @@ function SimplePanel({
                     </span>
                   )}
                 </div>
-                <div className="mt-0.5 text-[10px] text-black/42">
+                <div className="mt-0.5 text-[11px] text-black/55">
                   {option.description}
                 </div>
               </button>
@@ -1552,7 +1552,7 @@ function SimplePanel({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-          <label className="mb-2 block text-sm font-medium text-black/65">
+          <label className="mb-2 block text-[15px] font-medium text-black/72">
             Heading above the reviews
           </label>
           <input
@@ -1560,12 +1560,12 @@ function SimplePanel({
             value={settings.widgetTitle}
             onChange={(e) => update("widgetTitle", e.target.value)}
             placeholder="Customer Reviews"
-            className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
+            className="w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-[15px] text-[#111418]"
           />
         </div>
 
         <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-          <label className="mb-2 block text-sm font-medium text-black/65">
+          <label className="mb-2 block text-[15px] font-medium text-black/72">
             Corner roundness: {settings.borderRadius}px
           </label>
           <input
@@ -1576,17 +1576,17 @@ function SimplePanel({
             onChange={(e) => update("borderRadius", Number(e.target.value))}
             className="w-full"
           />
-          <p className="mt-1 text-[11px] text-black/38">
+          <p className="mt-1 text-[12px] text-black/52">
             0 = sharp corners, 24 = fully rounded cards.
           </p>
         </div>
       </div>
 
       <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-5">
-        <label className="mb-1 block text-sm font-medium text-black/65">
+        <label className="mb-1 block text-[15px] font-medium text-black/72">
           Your two colours
         </label>
-        <p className="mb-3 text-xs text-black/42">
+        <p className="mb-3 text-[13px] text-black/55">
           The button colour and the star colour — the two a shopper notices.
         </p>
         <div className="grid grid-cols-2 gap-4">
@@ -1609,7 +1609,7 @@ function SimplePanel({
 function LivePreview({ settings }: { settings: DesignSettings }) {
   return (
     <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-4">
-      <p className="mb-2 text-xs font-medium text-black/50">Live preview — updates as you change settings</p>
+      <p className="mb-2 text-[13px] font-medium text-black/62">Live preview — updates as you change settings</p>
       <div
         className="overflow-hidden rounded-lg"
         style={{

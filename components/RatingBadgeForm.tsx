@@ -45,29 +45,29 @@ export function RatingBadgeForm({
 
   return (
     <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-6">
-      <p className="mb-1 text-sm font-medium text-[#111418]">Rating Badge</p>
-      <p className="mb-4 text-xs text-black/50">
+      <p className="mb-1 text-[15px] font-medium text-[#111418]">Rating Badge</p>
+      <p className="mb-4 text-[13px] text-black/62">
         Compact star widget shown near the product title and on collection cards
         (via the &quot;Rivu Rating Badge&quot; Shopify block). Clicking the badge
         on a product page scrolls the customer down to the full review section automatically.
       </p>
 
-      <label className="mb-1 block text-xs text-black/50">Badge text template</label>
+      <label className="mb-1 block text-[13px] text-black/62">Badge text template</label>
       <input
         type="text"
         value={template}
         onChange={(e) => setTemplate(e.target.value)}
         maxLength={150}
-        className="mb-2 w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-sm text-[#111418]"
+        className="mb-2 w-full rounded-md border border-black/[0.14] bg-black/[0.03] px-3 py-2 text-[15px] text-[#111418]"
       />
-      <p className="mb-4 text-xs text-black/45">
+      <p className="mb-4 text-[13px] text-black/58">
         <code className="rounded bg-black/[0.05] px-1 text-emerald-700">{"{rating}"}</code> becomes the stars,{" "}
         <code className="rounded bg-black/[0.05] px-1 text-emerald-700">{"{average}"}</code> the score (e.g. 4.5), and{" "}
         <code className="rounded bg-black/[0.05] px-1 text-emerald-700">{"{count}"}</code> the review count.
         Example: <code className="rounded bg-black/[0.05] px-1 text-emerald-700">{"{rating} {average} · {count}"}</code>.
         Your wording is kept as typed — only the first letter is capitalised.
       </p>
-      <p className="mb-4 text-xs text-black/45">
+      <p className="mb-4 text-[13px] text-black/58">
         Preview: <span className="text-amber-700">{preview}</span>
         {previewBroken && (
           <span className="ml-2 text-amber-700">
@@ -76,7 +76,7 @@ export function RatingBadgeForm({
         )}
       </p>
 
-      <label className="mb-1 block text-xs text-black/50">
+      <label className="mb-1 block text-[13px] text-black/62">
         Star size: {starSize}px
       </label>
       <input
@@ -97,7 +97,7 @@ export function RatingBadgeForm({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="rounded-md bg-[#111418] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
+        className="rounded-md bg-[#111418] px-4 py-2 text-[15px] font-medium text-white hover:bg-[#2a2f35] disabled:opacity-60"
       >
         {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
       </button>

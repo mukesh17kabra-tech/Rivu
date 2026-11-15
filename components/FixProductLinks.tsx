@@ -59,7 +59,7 @@ export function FixProductLinks({ shop, missing }: { shop: string; missing: numb
           </p>
 
           {state === "done" && result ? (
-            <p className="mt-1 text-[12.5px] leading-relaxed text-black/55">
+            <p className="mt-1 text-[12.5px] leading-relaxed text-black/65">
               {result.updated} now link to their product.
               {result.unresolved > 0 && (
                 <>
@@ -74,7 +74,7 @@ export function FixProductLinks({ shop, missing }: { shop: string; missing: numb
               )}
             </p>
           ) : (
-            <p className="mt-1 text-[12.5px] leading-relaxed text-black/55">
+            <p className="mt-1 text-[12.5px] leading-relaxed text-black/65">
               Reviews left through a QR code or a review request, and imported reviews,
               never recorded which page the product lives on. They show the product name,
               but a shopper can&apos;t click through to buy it. This looks each one up in
@@ -94,7 +94,7 @@ export function FixProductLinks({ shop, missing }: { shop: string; missing: numb
             type="button"
             onClick={run}
             disabled={state === "working"}
-            className="shrink-0 rounded-md bg-amber-400 px-4 py-2 text-[13px] font-semibold text-black transition-colors hover:bg-amber-300 disabled:opacity-60"
+            className="shrink-0 rounded-md bg-amber-400 px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-amber-300 disabled:opacity-60"
           >
             {state === "working" ? "Fixing…" : "Fix product links"}
           </button>

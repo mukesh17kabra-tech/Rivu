@@ -179,13 +179,13 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
             <PreviewAppEmbed />
           </div>
           <div className="min-w-[220px] flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-700">
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-emerald-700">
               Turn this on first
             </p>
             <h3 className="mt-1 text-[17px] font-bold tracking-[-0.01em] text-[#111418]">
               Rivu App Embed
             </h3>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-black/55">
+            <p className="mt-1.5 text-sm leading-relaxed text-black/65">
               Loads the Rivu script on your storefront. Every widget below stays
               blank until this is enabled — it only has to be done once, and it
               adds nothing visible on its own.
@@ -193,7 +193,7 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
             <a
               href={editorUrl(shop, "embed")}
               target="_top"
-              className="mt-3.5 inline-block rounded-md bg-[#111418] px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#2a2f35]"
+              className="mt-3.5 inline-block rounded-md bg-[#111418] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2a2f35]"
             >
               Open App Embeds →
             </a>
@@ -206,7 +206,7 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
           <h3 className="text-[15px] font-bold tracking-[-0.01em] text-[#111418]">
             {WIDGETS.length} widgets you can add
           </h3>
-          <p className="text-xs text-black/42">
+          <p className="text-[13px] text-black/55">
             Add from the theme editor, style them here in Rivu.
           </p>
         </div>
@@ -230,18 +230,18 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
                       {w.blockName}
                     </h4>
                     {pro && (
-                      <span className="shrink-0 rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-amber-700">
+                      <span className="shrink-0 rounded-full bg-amber-400/15 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.06em] text-amber-700">
                         Pro
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-[12px] font-medium text-emerald-700/80">
+                  <p className="mt-0.5 text-[13px] font-medium text-emerald-700/80">
                     {w.tagline}
                   </p>
-                  <p className="mt-2 text-[12.5px] leading-relaxed text-black/50">{w.detail}</p>
+                  <p className="mt-2 text-[12.5px] leading-relaxed text-black/62">{w.detail}</p>
 
-                  <p className="mt-3 text-[11px] text-black/38">
-                    <span className="font-semibold text-black/48">Goes on:</span> {w.where}
+                  <p className="mt-3 text-[12px] text-black/52">
+                    <span className="font-semibold text-black/60">Goes on:</span> {w.where}
                   </p>
 
                   <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
@@ -263,15 +263,15 @@ export function WidgetGallery({ shop, plan }: { shop: string; plan: string }) {
                     )}
                     <a
                       href={designHref}
-                      className="rounded-md border border-black/[0.14] px-3 py-1.5 text-[12.5px] font-semibold text-black/68 transition-colors hover:border-black/[0.25] hover:text-[#111418]"
+                      className="rounded-md border border-black/[0.14] px-3 py-1.5 text-[12.5px] font-semibold text-black/75 transition-colors hover:border-black/[0.25] hover:text-[#111418]"
                     >
                       Customize
                     </a>
                   </div>
 
-                  <p className="mt-2.5 text-[11px] leading-relaxed text-black/35">
+                  <p className="mt-2.5 text-[12px] leading-relaxed text-black/50">
                     Opens {TEMPLATE_LABEL[w.template]} — choose{" "}
-                    <span className="text-black/45">Add block → Apps → {w.blockName}</span>
+                    <span className="text-black/58">Add block → Apps → {w.blockName}</span>
                   </p>
                 </div>
               </article>

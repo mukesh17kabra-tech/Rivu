@@ -28,7 +28,7 @@ export function PageHeader({
           {title}
         </h1>
         {description && (
-          <p className="mt-1.5 text-[13px] text-black/48">{description}</p>
+          <p className="mt-1.5 text-sm text-black/60">{description}</p>
         )}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
@@ -86,14 +86,14 @@ export function Section({
   const heading = (
     <div className="flex items-start gap-3">
       {step !== undefined && (
-        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#111418] text-[11px] font-extrabold text-white">
+        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#111418] text-[12px] font-extrabold text-white">
           {step}
         </span>
       )}
       <div>
         <h2 className="text-[17px] font-bold tracking-[-0.01em] text-[#111418]">{title}</h2>
         {description && (
-          <p className="mt-1 text-[13px] leading-relaxed text-black/48">{description}</p>
+          <p className="mt-1 text-sm leading-relaxed text-black/60">{description}</p>
         )}
       </div>
     </div>
@@ -107,10 +107,10 @@ export function Section({
         <details className="group" open={defaultOpen}>
           <summary className="flex cursor-pointer list-none items-start justify-between gap-4 [&::-webkit-details-marker]:hidden">
             {heading}
-            <span className="mt-1 shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-black/42 group-open:hidden">
+            <span className="mt-1 shrink-0 text-[12px] font-bold uppercase tracking-[0.06em] text-black/55 group-open:hidden">
               Open
             </span>
-            <span className="mt-1 hidden shrink-0 text-[11px] font-bold uppercase tracking-[0.06em] text-black/42 group-open:inline">
+            <span className="mt-1 hidden shrink-0 text-[12px] font-bold uppercase tracking-[0.06em] text-black/55 group-open:inline">
               Close
             </span>
           </summary>
@@ -144,14 +144,14 @@ export function Stat({
 }) {
   return (
     <Card>
-      <p className="text-[11px] font-bold uppercase tracking-[0.09em] text-black/42">
+      <p className="text-[12px] font-bold uppercase tracking-[0.09em] text-black/55">
         {label}
       </p>
       <p className="mt-2.5 text-[32px] font-extrabold leading-none tracking-[-0.03em] text-[#111418] tabular-nums">
         {value}
         {suffix}
       </p>
-      {hint && <p className="mt-2 text-xs text-black/42">{hint}</p>}
+      {hint && <p className="mt-2 text-[13px] text-black/55">{hint}</p>}
     </Card>
   );
 }
@@ -164,13 +164,13 @@ export function Badge({
   tone?: "neutral" | "success" | "warning";
 }) {
   const tones = {
-    neutral: "bg-black/[0.05] text-black/58 ring-black/[0.10]",
+    neutral: "bg-black/[0.05] text-black/68 ring-black/[0.10]",
     success: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
     warning: "bg-amber-50 text-amber-800 ring-amber-600/20",
   };
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.06em] ring-1 ${tones[tone]}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-bold uppercase tracking-[0.06em] ring-1 ${tones[tone]}`}
     >
       {children}
     </span>

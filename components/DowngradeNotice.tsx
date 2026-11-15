@@ -74,12 +74,12 @@ export function DowngradeNotice({ currentPlan, shop }: { currentPlan: string; sh
         </div>
 
         <h2 className="mb-2 text-xl font-bold text-[#111418]">Downgraded to Free plan</h2>
-        <p className="mb-4 text-sm leading-relaxed text-black/58">
+        <p className="mb-4 text-[15px] leading-relaxed text-black/68">
           Your widget has been <strong className="text-[#111418]">automatically reset</strong> to the
           basic free design. The following paid customizations have been removed:
         </p>
 
-        <ul className="mb-4 space-y-2 text-sm text-black/50">
+        <ul className="mb-4 space-y-2 text-[15px] text-black/62">
           {[
             "All custom colors (summary, cards, filter bar, form)",
             "Custom fonts and font sizes",
@@ -96,18 +96,18 @@ export function DowngradeNotice({ currentPlan, shop }: { currentPlan: string; sh
           ))}
         </ul>
 
-        <div className="mb-5 rounded-lg border border-emerald-600/18 bg-emerald-50 px-4 py-3 text-xs text-emerald-700">
+        <div className="mb-5 rounded-lg border border-emerald-600/18 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-700">
           ✓ All your reviews, photos, and customer data are completely safe.
           Only the visual design has been reset.
         </div>
 
         {resetting && (
-          <p className="mb-3 text-center text-xs text-black/45">
+          <p className="mb-3 text-center text-[13px] text-black/58">
             Resetting design to free defaults…
           </p>
         )}
         {done && (
-          <p className="mb-3 text-center text-xs text-emerald-700">
+          <p className="mb-3 text-center text-[13px] text-emerald-700">
             ✓ Design reset complete.
           </p>
         )}
@@ -116,13 +116,13 @@ export function DowngradeNotice({ currentPlan, shop }: { currentPlan: string; sh
           <a
             href={`/dashboard/plans?shop=${shop}`}
             target="_top"
-            className="flex-1 rounded-lg bg-[#111418] px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-[#2a2f35]"
+            className="flex-1 rounded-lg bg-[#111418] px-4 py-2.5 text-center text-[15px] font-bold text-white hover:bg-[#2a2f35]"
           >
             Upgrade to restore
           </a>
           <button
             onClick={() => setShow(false)}
-            className="rounded-lg border border-black/[0.14] px-4 py-2.5 text-sm text-black/50 hover:border-black/[0.25] hover:text-black/65"
+            className="rounded-lg border border-black/[0.14] px-4 py-2.5 text-[15px] text-black/62 hover:border-black/[0.25] hover:text-black/72"
           >
             Continue on Free
           </button>

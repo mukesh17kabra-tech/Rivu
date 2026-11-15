@@ -90,8 +90,8 @@ function PlanCard({
   return (
     <div className={`rounded-lg border p-6 flex flex-col ${highlight ? "border-[#111418]/40 bg-[#111418]/[0.06]" : "border-black/[0.10] bg-black/[0.02]"}`}>
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-black/50 uppercase tracking-wide">{name}</p>
-        {current && <span className="rounded-full bg-black/[0.07] px-2 py-0.5 text-[10px] uppercase tracking-wide text-black/58">Current</span>}
+        <p className="text-[15px] font-medium text-black/62 uppercase tracking-wide">{name}</p>
+        {current && <span className="rounded-full bg-black/[0.07] px-2 py-0.5 text-[11px] uppercase tracking-wide text-black/68">Current</span>}
       </div>
       <p className="mt-1 text-2xl font-semibold">{price}</p>
 
@@ -99,7 +99,7 @@ function PlanCard({
       {brandingShown && (
         <div className="mt-3 flex items-center gap-2 rounded-md border border-orange-400/30 bg-orange-400/10 px-3 py-2">
           <span className="text-orange-400">⚠</span>
-          <span className="text-xs text-orange-300">
+          <span className="text-[13px] text-orange-300">
             <strong>&quot;Powered by Rivu&quot;</strong> shown on your widget
           </span>
         </div>
@@ -107,13 +107,13 @@ function PlanCard({
       {brandingRemoved && (
         <div className="mt-3 flex items-center gap-2 rounded-md border border-emerald-600/22 bg-emerald-50 px-3 py-2">
           <span className="text-emerald-700">✓</span>
-          <span className="text-xs text-emerald-700">
+          <span className="text-[13px] text-emerald-700">
             <strong>&quot;Powered by Rivu&quot;</strong> branding removed
           </span>
         </div>
       )}
 
-      <ul className="mt-4 space-y-2 text-sm text-black/65 flex-1">
+      <ul className="mt-4 space-y-2 text-[15px] text-black/72 flex-1">
         {perks.map((perk) => (
           <li key={perk} className="flex gap-2">
             <span className="text-emerald-700 flex-shrink-0">·</span>
@@ -126,7 +126,7 @@ function PlanCard({
         <a
           href={href}
           target="_top"
-          className={`mt-5 inline-block rounded-md px-4 py-2 text-center text-sm font-medium transition-colors ${
+          className={`mt-5 inline-block rounded-md px-4 py-2 text-center text-[15px] font-medium transition-colors ${
             highlight
               ? "bg-[#111418] text-white hover:bg-[#2a2f35]"
               : "bg-black/[0.07] text-[#111418] hover:bg-black/[0.12]"
@@ -136,7 +136,7 @@ function PlanCard({
         </a>
       )}
       {current && (
-        <div className="mt-5 rounded-md border border-black/[0.10] px-4 py-2 text-center text-sm text-black/45">
+        <div className="mt-5 rounded-md border border-black/[0.10] px-4 py-2 text-center text-[15px] text-black/58">
           Your current plan
         </div>
       )}
