@@ -20,10 +20,16 @@
          what a shopper sees, and the preview card around the frame already
          supplies the inset. Padding here would double it, and only at the top. */
       html, body { margin: 0; padding: 0; background: #fff; }
-      /* flow-root so the widget's own top/bottom spacing margins stay inside
+      /* An equal inset on all four sides.
+         A real storefront gives the widget its page gutter, so without one
+         here the cards ran flush into the left and right edges of the frame.
+         It lives on this element rather than on body so that flow-root below
+         still contains the widget's own margins.
+
+         flow-root so the widget's own top/bottom spacing margins stay inside
          this element's box instead of collapsing out of it. Without it the
          measured height misses them and the frame comes out short. */
-      #review-widget { display: flow-root; }
+      #review-widget { display: flow-root; padding: 16px; box-sizing: border-box; }
     </style>
   </head>
   <body>
