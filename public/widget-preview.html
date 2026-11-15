@@ -1,0 +1,137 @@
+<!doctype html>
+<!--
+  Host page for the design page's live preview.
+
+  Deliberately a static file in /public rather than a Next route: no auth, no
+  App Bridge, no session token — it just needs to be an isolated document that
+  can load /widget.js, the same script a real storefront loads. The design page
+  embeds it in an iframe and posts settings into it on every change.
+
+  Nothing here is reachable from a storefront, and the widget's preview branch
+  only runs when data-preview is present, which only this file sets.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rivu widget preview</title>
+    <style>
+      html, body { margin: 0; padding: 0; background: #fff; }
+      body { padding: 14px; }
+    </style>
+  </head>
+  <body>
+    <div id="review-widget" data-preview="1"></div>
+
+    <script>
+      // Sample content, so the preview shows a populated widget rather than the
+      // empty state. The shape matches /api/reviews/list.
+      var SAMPLE = {
+        reviews: [
+          {
+            id: "p1", rating: 5, reviewTitle: "Great product!", customerName: "Priya Sharma",
+            body: "Exactly what I was hoping for. The quality is lovely and it arrived two days early.",
+            createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+            isTopReviewer: true, recommends: true,
+            helpfulCount: 4, unhelpfulCount: 0,
+            photoUrl: null, videoUrl: null, pinnedAt: null,
+            ownerReply: "Thank you so much, Priya — so glad it reached you early!",
+          },
+          {
+            id: "p2", rating: 4, reviewTitle: "Good value", customerName: "Arjun Mehta",
+            body: "Works well for the price. Took a little getting used to, but I would buy again.",
+            createdAt: new Date(Date.now() - 9 * 86400000).toISOString(),
+            isTopReviewer: true, recommends: true,
+            helpfulCount: 1, unhelpfulCount: 0,
+            photoUrl: null, videoUrl: null, pinnedAt: null, ownerReply: null,
+          },
+          {
+            id: "p3", rating: 5, reviewTitle: "Lovely", customerName: "Meera Kapoor",
+            body: "Second one I have ordered. Gifted the first to my sister and she loved it too.",
+            createdAt: new Date(Date.now() - 23 * 86400000).toISOString(),
+            isTopReviewer: false, recommends: null,
+            helpfulCount: 0, unhelpfulCount: 0,
+            photoUrl: null, videoUrl: null, pinnedAt: null, ownerReply: null,
+          },
+        ],
+        summary: {
+          total: 13,
+          average: 4.7,
+          breakdown: [
+            { star: 5, percentage: 69 },
+            { star: 4, percentage: 23 },
+            { star: 3, percentage: 8 },
+            { star: 2, percentage: 0 },
+            { star: 1, percentage: 0 },
+          ],
+          recommend: { answered: 12, count: 11, percent: 92 },
+        },
+        plan: "pro",
+      };
+
+      window.__RIVU_PREVIEW__ = {
+        design: {},
+        reviews: SAMPLE.reviews,
+        summary: SAMPLE.summary,
+        plan: SAMPLE.plan,
+      };
+
+      var el = document.getElementById("review-widget");
+      var lastHeight = 0;
+
+      // The parent sizes the iframe to the content, so the page scrolls as one
+      // document instead of the preview getting its own scrollbar.
+      function postHeight() {
+        var h = Math.ceil(document.documentElement.scrollHeight);
+        if (h !== lastHeight) {
+          lastHeight = h;
+          parent.postMessage({ type: "rivu-preview-height", height: h }, "*");
+        }
+      }
+
+      function paint(design) {
+        window.__RIVU_PREVIEW__.design = design || {};
+        if (typeof window.__rivuRenderPreview === "function") {
+          window.__rivuRenderPreview(el);
+        }
+        // Force a post even if the height is unchanged: the parent may have
+        // mounted its listener after the first one went out.
+        lastHeight = 0;
+        // Images and fonts settle after render, so measure again shortly after.
+        postHeight();
+        setTimeout(postHeight, 120);
+        setTimeout(postHeight, 500);
+      }
+
+      window.addEventListener("message", function (e) {
+        // Same-origin only: the parent is the admin page served from this host.
+        if (e.origin !== window.location.origin) return;
+        var d = e.data;
+        if (!d || d.type !== "rivu-preview-design") return;
+        gotDesign = true;
+        paint(d.design);
+      });
+
+      // The frame usually finishes loading before the parent component has
+      // mounted its listener, so a single "ready" can be missed entirely and
+      // the preview would then sit on the defaults forever. Re-announce until
+      // the parent answers with a design.
+      var gotDesign = false;
+      function announce() {
+        if (gotDesign) return;
+        parent.postMessage({ type: "rivu-preview-ready" }, "*");
+        setTimeout(announce, 250);
+      }
+
+      window.addEventListener("resize", postHeight);
+
+      var script = document.createElement("script");
+      script.src = "/widget.js";
+      script.onload = function () {
+        paint(window.__RIVU_PREVIEW__.design);
+        announce();
+      };
+      document.head.appendChild(script);
+    </script>
+  </body>
+</html>

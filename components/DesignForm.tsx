@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { DESIGN_THEMES, matchTheme } from "@/lib/design-themes";
 import {
   aiSuggestionsAllowed,
@@ -1607,88 +1607,58 @@ function SimplePanel({
 }
 
 function LivePreview({ settings }: { settings: DesignSettings }) {
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
+  const [ready, setReady] = useState(false);
+  const [height, setHeight] = useState(360);
+
+  // The preview runs the real storefront widget (/widget.js) inside an iframe
+  // rather than a second, hand-written mock of it. The mock only honoured the
+  // settings someone remembered to wire into it — about half — so most changes
+  // a merchant made appeared to do nothing. Now every setting reflects, and the
+  // preview cannot drift from what a shopper actually sees.
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      if (e.origin !== window.location.origin) return;
+      const d = e.data;
+      if (!d || typeof d !== "object") return;
+      if (d.type === "rivu-preview-ready") setReady(true);
+      if (d.type === "rivu-preview-height" && typeof d.height === "number") {
+        setHeight(d.height);
+      }
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+
+  // Posts on every settings change, and once more as soon as the frame says it
+  // is ready (in case it finished loading after the first change).
+  useEffect(() => {
+    const win = frameRef.current?.contentWindow;
+    if (!win || !ready) return;
+    win.postMessage(
+      { type: "rivu-preview-design", design: settings },
+      window.location.origin,
+    );
+  }, [settings, ready]);
+
   return (
     <div className="rounded-lg border border-black/[0.10] bg-black/[0.02] p-4">
-      <p className="mb-2 text-[13px] font-medium text-black/62">Live preview — updates as you change settings</p>
-      <div
-        className="overflow-hidden rounded-lg"
-        style={{
-          // Clipped, not scrollable. A scrollbar inside the preview invited
-          // scrolling it instead of the page, and the mock below the fold adds
-          // nothing — the colours, corners and type are all visible up here.
-          maxHeight: "240px",
-          fontFamily: settings.fontFamily,
-          border: settings.showBorder ? `${settings.borderWidth}px ${settings.borderStyle} ${settings.borderColor}` : "none",
-          borderRadius: `${settings.borderRadius}px`,
-          padding: "14px",
-          backgroundColor: "transparent",
-        }}
-      >
-        {/* Summary block */}
-        <div style={{
-          display: "flex", alignItems: "center", gap: "14px",
-          padding: "12px 14px", marginBottom: "10px",
-          background: settings.summaryBgColor,
-          color: settings.summaryTextColor,
-          borderRadius: `${settings.borderRadius}px`,
-          flexWrap: "wrap",
-        }}>
-          <div style={{ textAlign: "center", flexShrink: 0 }}>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: settings.summaryTextColor, lineHeight: 1 }}>4.8</div>
-            <div style={{ color: settings.starColor, fontSize: "12px", margin: "3px 0 2px" }}>{"★".repeat(5)}</div>
-            <div style={{ fontSize: "9px", color: settings.summaryTextColor, opacity: 0.6 }}>Based on 13 reviews</div>
-          </div>
-          <div style={{ flex: 1, minWidth: "100px" }}>
-            {([["\u2605 5", 77], ["\u2605 4", 23], ["\u2605 3", 0], ["\u2605 2", 0], ["\u2605 1", 0]] as [string, number][]).map(([label, pct]) => (
-              <div key={label} style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px" }}>
-                <span style={{ width: "38px", fontSize: "8px", color: settings.summaryTextColor, opacity: 0.65, flexShrink: 0 }}>{label}</span>
-                <div style={{ flex: 1, height: "5px", backgroundColor: "#e0e0e0", borderRadius: "3px", overflow: "hidden" }}>
-                  <div style={{ width: `${pct}%`, height: "100%", backgroundColor: settings.rangeColor, borderRadius: "3px" }} />
-                </div>
-              </div>
-            ))}
-          </div>
-          <button style={{ background: settings.primaryGradient || settings.primaryColor, color: "#fff", border: "none", borderRadius: `${settings.borderRadius}px`, padding: "7px 12px", fontSize: "9px", fontWeight: 700, cursor: "default", flexShrink: 0 }}>
-            ✏ Write a Review
-          </button>
-        </div>
-
-        {/* Filter bar */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", paddingBottom: "8px", borderBottom: `1px solid ${settings.borderColor || "#eee"}` }}>
-          <span style={{ fontSize: `${Math.max(settings.reviewCountFontSize - 2, 9)}px`, color: settings.filterTextColor, fontWeight: 500 }}>3 Reviews</span>
-          <span style={{ fontSize: "9px", color: settings.sortTextColor, border: `1px solid ${settings.sortBorderColor}`, background: settings.sortBgColor, padding: "3px 7px", borderRadius: "5px" }}>Most Recent ▾</span>
-        </div>
-
-        {/* Review cards */}
-        <div style={
-          settings.displayStyle === "grid"
-            ? { display: "grid", gridTemplateColumns: `repeat(${Math.min(settings.gridColumns, 2)}, 1fr)`, gap: "7px" }
-            : { display: "flex", flexDirection: "column", gap: "7px" }
-        }>
-          {SAMPLE_REVIEWS.map((rev, i) => (
-            <div key={i} style={{
-              background: settings.backgroundGradient || settings.backgroundColor,
-              borderRadius: `${settings.borderRadius}px`,
-              padding: "9px 11px",
-              border: "1px solid rgba(0,0,0,.06)",
-              fontFamily: settings.fontFamily,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "5px" }}>
-                <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: ["#7c3aed","#0891b2"][i % 2], color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "8px", fontWeight: 700, flexShrink: 0 }}>
-                  {rev.customerName.slice(0,2).toUpperCase()}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: "9px", fontWeight: 700, color: settings.textColor }}>{rev.customerName}</div>
-                  <div style={{ fontSize: "8px", color: settings.reviewMetaColor }}>6 days ago</div>
-                </div>
-              </div>
-              <div style={{ color: settings.starColor, fontSize: "10px", marginBottom: "4px" }}>{"★".repeat(rev.rating)}{"☆".repeat(5-rev.rating)}</div>
-              {i === 0 && <p style={{ margin: "0 0 3px", fontSize: `${Math.max(settings.reviewTextSize - 3, 8)}px`, fontWeight: 700, fontStyle: "italic", color: settings.reviewTitleColor }}>Great product!</p>}
-              <p style={{ margin: 0, fontSize: `${Math.max(settings.reviewTextSize - 3, 8)}px`, color: settings.reviewBodyColor, lineHeight: 1.5 }}>{rev.body.slice(0, 60)}…</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <p className="mb-2 text-[13px] font-medium text-black/62">
+        Live preview — this is the real widget, exactly as shoppers see it
+      </p>
+      <iframe
+        ref={frameRef}
+        src="/widget-preview.html"
+        title="Widget preview"
+        // The frame also posts "ready", but that can land before this
+        // component mounts its listener. onLoad cannot be missed.
+        onLoad={() => setReady(true)}
+        // No fixed height and no inner scrollbar: the frame grows to its
+        // content and the settings page scrolls as one document.
+        style={{ width: "100%", height: `${height}px`, border: "none", display: "block" }}
+        scrolling="no"
+        className="rounded-lg bg-white"
+      />
     </div>
   );
 }

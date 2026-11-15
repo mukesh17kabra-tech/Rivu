@@ -267,7 +267,21 @@
      * The theme editor gets an explanation, because that is where it can be
      * corrected. A live storefront gets nothing.
      */
-    if (!shop || !productId) {
+    /**
+     * Admin preview.
+     *
+     * The design page used to draw its own mock of the widget. It could only
+     * ever honour the settings someone remembered to wire into it — about
+     * half of them — so most changes a merchant made appeared to do nothing.
+     * A second renderer also drifts from this one by definition.
+     *
+     * So the preview runs this file instead, with the design and a few sample
+     * reviews handed in rather than fetched. A storefront never sets
+     * data-preview, so this branch is unreachable there.
+     */
+    const preview = el.dataset.preview ? (window.__RIVU_PREVIEW__ || {}) : null;
+
+    if (!preview && (!shop || !productId)) {
       if (window.Shopify && window.Shopify.designMode) {
         el.innerHTML =
           '<p style="font-size:13px;line-height:1.5;padding:14px;border:1px dashed #c9c9d2;' +
@@ -324,23 +338,37 @@
     let plan = "free";
     let availableLanguages = [{ code:"en", label:"English" }];
 
-    try {
-      const res = await fetch(`${API_BASE}/api/reviews/list?shop=${encodeURIComponent(shop)}&productId=${encodeURIComponent(productId)}`);
-      if (res.ok) {
-        const data = await res.json();
-        reviews = data.reviews || [];
-        summary = data.summary || summary;
-        plan = data.plan || "free";
-        availableLanguages = data.availableLanguages || availableLanguages;
-        const f = data.design || {};
-        for (const k in D) {
-          const v = f[k];
-          design[k] = (v === undefined || v === null || v === "") ? D[k] : v;
-        }
+    if (preview) {
+      // Same merge as the fetched path, so the preview and the storefront
+      // fall back to identical defaults for anything left unset.
+      const f = preview.design || {};
+      for (const k in D) {
+        const v = f[k];
+        design[k] = (v === undefined || v === null || v === "") ? D[k] : v;
       }
-    } catch(err) {
-      el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:12px 0;">Rivu: failed to load reviews. Error: ' + String(err) + '</p>';
-      return;
+      reviews = preview.reviews || [];
+      summary = preview.summary || summary;
+      plan = preview.plan || "free";
+      availableLanguages = preview.availableLanguages || availableLanguages;
+    } else {
+      try {
+        const res = await fetch(`${API_BASE}/api/reviews/list?shop=${encodeURIComponent(shop)}&productId=${encodeURIComponent(productId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          reviews = data.reviews || [];
+          summary = data.summary || summary;
+          plan = data.plan || "free";
+          availableLanguages = data.availableLanguages || availableLanguages;
+          const f = data.design || {};
+          for (const k in D) {
+            const v = f[k];
+            design[k] = (v === undefined || v === null || v === "") ? D[k] : v;
+          }
+        }
+      } catch(err) {
+        el.innerHTML = '<p style="color:#c0392b;font-size:13px;padding:12px 0;">Rivu: failed to load reviews. Error: ' + String(err) + '</p>';
+        return;
+      }
     }
 
     // ── SEO: schema.org Product + AggregateRating ──────────────────────
@@ -1894,6 +1922,13 @@
       render(el);
     });
   }
+
+  // Only the admin preview page uses this, to re-render on every keystroke.
+  window.__rivuRenderPreview = function (el) {
+    delete el.dataset.rvRendered;
+    el.innerHTML = "";
+    render(el);
+  };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", renderAll);
