@@ -82,7 +82,13 @@
       // The parent sizes the iframe to the content, so the page scrolls as one
       // document instead of the preview getting its own scrollbar.
       function postHeight() {
-        var h = Math.ceil(document.documentElement.scrollHeight);
+        // Measure the widget itself, not the document.
+        //
+        // documentElement.scrollHeight is never smaller than the iframe's own
+        // height, so once the frame has been sized up it can never report a
+        // smaller number — switching to a shorter layout left a tall band of
+        // empty space below the widget. The element's own box can shrink.
+        var h = Math.ceil(el.getBoundingClientRect().height) + 28; // body padding
         if (h !== lastHeight) {
           lastHeight = h;
           parent.postMessage({ type: "rivu-preview-height", height: h }, "*");
@@ -124,6 +130,12 @@
       }
 
       window.addEventListener("resize", postHeight);
+
+      // Catches anything that reflows after the render returns — images and
+      // fonts settling, a card expanding, a layout switch.
+      if (window.ResizeObserver) {
+        new ResizeObserver(postHeight).observe(el);
+      }
 
       var script = document.createElement("script");
       script.src = "/widget.js";
