@@ -16,8 +16,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Rivu widget preview</title>
     <style>
+      /* No padding of its own: the widget's own top/bottom spacing settings are
+         what a shopper sees, and the preview card around the frame already
+         supplies the inset. Padding here would double it, and only at the top. */
       html, body { margin: 0; padding: 0; background: #fff; }
-      body { padding: 14px; }
+      /* flow-root so the widget's own top/bottom spacing margins stay inside
+         this element's box instead of collapsing out of it. Without it the
+         measured height misses them and the frame comes out short. */
+      #review-widget { display: flow-root; }
     </style>
   </head>
   <body>
@@ -82,13 +88,23 @@
       // The parent sizes the iframe to the content, so the page scrolls as one
       // document instead of the preview getting its own scrollbar.
       function postHeight() {
-        // Measure the widget itself, not the document.
+        // Measure the widget's bottom edge in document coordinates, not the
+        // document's own scrollHeight and not the element's bare height.
         //
         // documentElement.scrollHeight is never smaller than the iframe's own
         // height, so once the frame has been sized up it can never report a
         // smaller number — switching to a shorter layout left a tall band of
-        // empty space below the widget. The element's own box can shrink.
-        var h = Math.ceil(el.getBoundingClientRect().height) + 28; // body padding
+        // empty space below the widget.
+        //
+        // The element's height used to come out short: the widget's root
+        // carries margin-top (the topSpacing setting) and margin-bottom
+        // (bottomSpacing), and those collapsed out of this element's box. The
+        // margin still pushed the content down, so the frame was short by
+        // exactly the top spacing — a gap above the widget and the last card
+        // flush against the bottom edge. display:flow-root on the element (see
+        // the stylesheet) keeps both margins inside the box it measures, and
+        // the box still shrinks when the content does.
+        var h = Math.ceil(el.getBoundingClientRect().height);
         if (h !== lastHeight) {
           lastHeight = h;
           parent.postMessage({ type: "rivu-preview-height", height: h }, "*");
