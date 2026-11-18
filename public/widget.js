@@ -1422,7 +1422,12 @@
       (design.customTemplateEnabled && design.customTemplateHtml
         ? ''
         : '<p style="font-size:' + design.headingFontSize + 'px;font-weight:' + (design.headingBold ? 700 : 400) +
-          ';letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin:0 0 20px;text-align:' +
+          // Full opacity, not .85. At 11px, uppercase, with letter-spacing and
+          // weight 400, the heading was already the faintest thing on the page;
+          // dimming it on top of that made it read as missing against a light
+          // textColor. The merchant's own textColor is the only thing that
+          // should decide how dark this is.
+          ';letter-spacing:.06em;text-transform:uppercase;margin:0 0 20px;text-align:' +
           design.headingAlign + ';">' + escapeHtml(design.widgetTitle) + '</p>') +
       '<div class="rv-main-content">' + buildMain() + '</div>';
 
